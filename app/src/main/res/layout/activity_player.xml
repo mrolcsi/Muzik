@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  tools:context=".player.PlayerActivity">
+
+  <ImageView
+    android:id="@+id/imgCoverArt"
+    android:layout_width="0dp"
+    android:layout_height="0dp"
+    app:layout_constraintDimensionRatio="w,1:1"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent"
+    tools:src="@tools:sample/avatars"/>
+
+  <TextView
+    android:id="@+id/tvTitle"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="24dp"
+    android:layout_marginStart="8dp"
+    android:layout_marginEnd="8dp"
+    android:textAppearance="?android:attr/textAppearanceLarge"
+    app:layout_constraintVertical_chainStyle="packed"
+    app:layout_constraintBottom_toTopOf="@+id/tvArtist"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintHorizontal_bias="0.5"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/imgCoverArt"
+    tools:text="Title"/>
+
+  <TextView
+    android:id="@+id/tvArtist"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="8dp"
+    android:layout_marginStart="8dp"
+    android:layout_marginEnd="8dp"
+    android:textAppearance="?android:attr/textAppearanceMedium"
+    app:layout_constraintBottom_toTopOf="@+id/tvAlbum"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintHorizontal_bias="0.5"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/tvTitle"
+    tools:text="Artist"/>
+
+  <TextView
+    android:id="@+id/tvAlbum"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="8dp"
+    android:layout_marginStart="8dp"
+    android:layout_marginEnd="8dp"
+    app:layout_constraintBottom_toTopOf="@+id/sbSongProgress"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintHorizontal_bias="0.5"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/tvArtist"
+    tools:text="Album"/>
+  <SeekBar
+    android:id="@+id/sbSongProgress"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="16dp"
+    android:layout_marginStart="8dp"
+    android:layout_marginEnd="8dp"
+    app:layout_constraintBottom_toTopOf="@+id/btnPlayPause"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintHorizontal_bias="0.5"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/tvAlbum"/>
+
+  <TextView
+    android:id="@+id/tvElapsedTime"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="8dp"
+    android:layout_marginStart="8dp"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/sbSongProgress"
+    tools:text="01:23"/>
+  <TextView
+    android:id="@+id/tvRemainingTime"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="8dp"
+    android:layout_marginEnd="8dp"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/sbSongProgress"
+    tools:text="-02:11"/>
+
+  <ImageButton
+    android:id="@+id/btnPrevious"
+    android:layout_width="wrap_content"
+    android:layout_height="48dp"
+    android:layout_marginStart="8dp"
+    android:layout_marginEnd="8dp"
+    app:layout_constraintBottom_toBottomOf="@+id/btnPlayPause"
+    app:layout_constraintEnd_toStartOf="@+id/btnPlayPause"
+    app:layout_constraintHorizontal_chainStyle="packed"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="@+id/btnPlayPause"
+    app:srcCompat="@android:drawable/ic_media_previous"/>
+
+  <ImageButton
+    android:id="@+id/btnPlayPause"
+    android:layout_width="wrap_content"
+    android:layout_height="64dp"
+    android:layout_marginTop="32dp"
+    android:layout_marginBottom="32dp"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toStartOf="@+id/btnNext"
+    app:layout_constraintHorizontal_bias="0.5"
+    app:layout_constraintStart_toEndOf="@+id/btnPrevious"
+    app:layout_constraintTop_toBottomOf="@+id/sbSongProgress"
+    app:srcCompat="@android:drawable/ic_media_play"/>
+
+  <ImageButton
+    android:id="@+id/btnNext"
+    android:layout_width="wrap_content"
+    android:layout_height="48dp"
+    android:layout_marginStart="8dp"
+    android:layout_marginEnd="8dp"
+    app:layout_constraintBottom_toBottomOf="@+id/btnPlayPause"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintHorizontal_bias="0.5"
+    app:layout_constraintStart_toEndOf="@+id/btnPlayPause"
+    app:layout_constraintTop_toTopOf="@+id/btnPlayPause"
+    app:srcCompat="@android:drawable/ic_media_next"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
