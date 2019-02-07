@@ -19,10 +19,8 @@
     </service>
 
     <activity
-      android:label="@string/app_name"
-      android:name=".library.LibraryActivity"
-      android:theme="@style/AppTheme">
-
+      android:label="@string/title_activity_library"
+      android:name=".library.LibraryActivity">
       <intent-filter>
         <action android:name="android.intent.action.MAIN"/>
 

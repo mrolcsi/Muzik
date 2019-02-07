@@ -11,6 +11,7 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables.useSupportLibrary = true
     }
     buildTypes {
         release {
@@ -21,6 +22,7 @@ android {
 }
 
 dependencies {
+    implementation 'androidx.vectordrawable:vectordrawable:1.0.0-beta01'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.2-alpha01'
     androidTestImplementation 'androidx.test:runner:1.1.2-alpha01'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
