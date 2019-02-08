@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  android:id="@+id/navigation_library"
+  app:startDestination="@id/nav_artistsBrowser">
+
+  <action
+    android:id="@+id/action_global_to_artists"
+    app:destination="@id/nav_artistsBrowser"
+    app:enterAnim="@android:anim/fade_in"
+    app:exitAnim="@android:anim/fade_out"/>
+
+  <action
+    android:id="@+id/action_global_to_albums"
+    app:destination="@id/nav_albumsBrowser"
+    app:enterAnim="@android:anim/fade_in"
+    app:exitAnim="@android:anim/fade_out"/>
+
+  <action
+    android:id="@+id/action_global_to_songs"
+    app:destination="@id/nav_songsBrowser"
+    app:enterAnim="@android:anim/fade_in"
+    app:exitAnim="@android:anim/fade_out"/>
+
+  <fragment android:id="@+id/nav_artistsBrowser"
+    android:label="Artists"
+    android:name="hu.mrolcsi.android.lyricsplayer.library.ArtistsBrowserFragment">
+
+    <action android:id="@+id/action_artists_to_albums"
+      app:destination="@id/nav_albumsBrowser"
+      app:enterAnim="@android:anim/slide_in_left"
+      app:exitAnim="@android:anim/slide_out_right"/>
+
+  </fragment>
+
+  <fragment android:id="@+id/nav_albumsBrowser"
+    android:label="Albums"
+    android:name="hu.mrolcsi.android.lyricsplayer.library.AlbumsBrowserFragment">
+
+    <action android:id="@+id/action_albums_to_songs"
+      app:destination="@id/nav_songsBrowser"
+      app:enterAnim="@android:anim/slide_in_left"
+      app:exitAnim="@android:anim/slide_out_right"/>
+
+    <argument android:name="argArtist"
+      app:argType="string"
+      app:nullable="true"/>
+
+  </fragment>
+
+  <fragment android:id="@+id/nav_songsBrowser"
+    android:label="Songs"
+    android:name="hu.mrolcsi.android.lyricsplayer.library.SongsBrowserFragment">
+
+    <argument android:name="argAlbum"
+      app:argType="string"
+      app:nullable="true"/>
+
+  </fragment>
+
+</navigation>

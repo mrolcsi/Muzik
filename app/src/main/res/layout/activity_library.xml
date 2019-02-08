@@ -8,8 +8,19 @@
   android:layout_height="match_parent"
   tools:context=".library.LibraryActivity">
 
+  <fragment
+    android:id="@+id/library_host"
+    android:layout_width="0dp"
+    android:layout_height="0dp"
+    android:name="androidx.navigation.fragment.NavHostFragment"
+    app:layout_constraintBottom_toTopOf="@+id/navigation_bar"
+    app:layout_constraintLeft_toLeftOf="parent"
+    app:layout_constraintRight_toRightOf="parent"
+    app:layout_constraintTop_toTopOf="parent"
+    tools:layout="@layout/fragment_browser"/>
+
   <com.google.android.material.bottomnavigation.BottomNavigationView
-    android:id="@+id/navigation"
+    android:id="@+id/navigation_bar"
     android:layout_width="0dp"
     android:layout_height="wrap_content"
     android:layout_marginStart="0dp"
