@@ -1,6 +1,7 @@
 package hu.mrolcsi.android.lyricsplayer.service
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.support.v4.media.MediaBrowserCompat
@@ -149,57 +150,162 @@ class LPBrowserService : MediaBrowserServiceCompat() {
       return
     }
 
-    // Assume for example that the music catalog is already loaded/cached.
+    // Let it load in the background.
+    result.detach()
 
     val mediaItems = emptyList<MediaBrowserCompat.MediaItem>().toMutableList()
 
     when (parentId) {
       MEDIA_ARTISTS_ID -> {
-        val cursorWithArtists = ContentResolverCompat.query(
-          contentResolver,
-          MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI,
-          arrayOf(
-            MediaStore.Audio.ArtistColumns.ARTIST_KEY,
-            MediaStore.Audio.ArtistColumns.ARTIST
-          ),
-          null,
-          null,
-          MediaStore.Audio.ArtistColumns.ARTIST_KEY,
-          null
-        )
+        mediaItems.addAll(gatherArtists(MediaStore.Audio.Artists.INTERNAL_CONTENT_URI))
+        mediaItems.addAll(gatherArtists(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI))
 
-        // finish in the background
-        result.detach()
+        mediaItems.sortBy { it.mediaId }
+      }
+      MEDIA_ALBUMS_ID -> {
+        mediaItems.addAll(gatherAlbums(MediaStore.Audio.Albums.INTERNAL_CONTENT_URI))
+        mediaItems.addAll(gatherAlbums(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI))
 
-        cursorWithArtists.use {
-          while (it.moveToNext()) {
+        mediaItems.sortBy { it.mediaId }
+      }
+      MEDIA_SONGS_ID -> {
+        mediaItems.addAll(gatherSongs(MediaStore.Audio.Media.INTERNAL_CONTENT_URI))
+        mediaItems.addAll(gatherSongs(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI))
 
-            val description = MediaDescriptionCompat.Builder()
-              .setMediaId(it.getString(0))
-              .setTitle(it.getString(1))
-              .build()
-
-            mediaItems.add(
-              MediaBrowserCompat.MediaItem(
-                description,
-                MediaBrowserCompat.MediaItem.FLAG_BROWSABLE
-              )
-            )
-          }
-        }
+        mediaItems.sortBy { it.mediaId }
       }
     }
 
-//    // Check if this is the root menu:
-//    if (parentId == MEDIA_ARTISTS_ID) {
-//      // Build the MediaItem objects for the top level,
-//      // and put them in the mediaItems list...
-//    } else {
-//      // Examine the passed parentMediaId to see which submenu we're at,
-//      // and put the children of that menu in the mediaItems list...
-//    }
-
     result.sendResult(mediaItems)
+  }
+
+  private fun gatherArtists(uri: Uri): List<MediaBrowserCompat.MediaItem> {
+    val cursorWithArtists = ContentResolverCompat.query(
+      contentResolver,
+      uri,
+      arrayOf(
+        MediaStore.Audio.ArtistColumns.ARTIST_KEY,
+        MediaStore.Audio.ArtistColumns.ARTIST,
+        MediaStore.Audio.ArtistColumns.NUMBER_OF_ALBUMS,
+        MediaStore.Audio.ArtistColumns.NUMBER_OF_TRACKS
+      ),
+      null,
+      null,
+      MediaStore.Audio.ArtistColumns.ARTIST_KEY,
+      null
+    )
+
+    val mediaItems = emptyList<MediaBrowserCompat.MediaItem>().toMutableList()
+
+    cursorWithArtists.use {
+      while (it.moveToNext()) {
+        val description = MediaDescriptionCompat.Builder()
+          .setMediaId(it.getString(0))
+          .setTitle(it.getString(1))
+          .setExtras(Bundle().apply {
+            putInt(MediaStore.Audio.ArtistColumns.NUMBER_OF_ALBUMS, it.getInt(2))
+            putInt(MediaStore.Audio.ArtistColumns.NUMBER_OF_TRACKS, it.getInt(3))
+          })
+          .build()
+
+        mediaItems.add(
+          MediaBrowserCompat.MediaItem(
+            description,
+            MediaBrowserCompat.MediaItem.FLAG_BROWSABLE
+          )
+        )
+      }
+    }
+
+    return mediaItems
+  }
+
+  private fun gatherAlbums(uri: Uri): List<MediaBrowserCompat.MediaItem> {
+    val cursorWithAlbums = ContentResolverCompat.query(
+      contentResolver,
+      uri,
+      arrayOf(
+        MediaStore.Audio.AlbumColumns.ALBUM_KEY,
+        MediaStore.Audio.AlbumColumns.ALBUM,
+        MediaStore.Audio.AlbumColumns.ARTIST,
+        MediaStore.Audio.AlbumColumns.NUMBER_OF_SONGS,
+        MediaStore.Audio.AlbumColumns.ALBUM_ART
+      ),
+      null,
+      null,
+      MediaStore.Audio.AlbumColumns.ALBUM_KEY,
+      null
+    )
+
+    val mediaItems = emptyList<MediaBrowserCompat.MediaItem>().toMutableList()
+
+    cursorWithAlbums.use {
+      while (it.moveToNext()) {
+
+        val description = MediaDescriptionCompat.Builder()
+          .setMediaId(it.getString(0))
+          .setTitle(it.getString(1))
+          .setExtras(Bundle().apply {
+            putString(MediaStore.Audio.AlbumColumns.ARTIST, it.getString(2))
+            putInt(MediaStore.Audio.AlbumColumns.NUMBER_OF_SONGS, it.getInt(3))
+            putString(MediaStore.Audio.AlbumColumns.ALBUM_ART, it.getString(4))
+          })
+          .build()
+
+        mediaItems.add(
+          MediaBrowserCompat.MediaItem(
+            description,
+            MediaBrowserCompat.MediaItem.FLAG_BROWSABLE
+          )
+        )
+      }
+    }
+
+    return mediaItems
+  }
+
+  private fun gatherSongs(uri: Uri): List<MediaBrowserCompat.MediaItem> {
+    val cursorWithSongs = ContentResolverCompat.query(
+      contentResolver,
+      uri,
+      arrayOf(
+        MediaStore.Audio.Media.DATA,
+        MediaStore.Audio.Media.TITLE,
+        MediaStore.Audio.Media.ARTIST,
+        MediaStore.Audio.Media.ALBUM,
+        MediaStore.Audio.Media.ALBUM_KEY
+      ),
+      "${MediaStore.Audio.Media.IS_MUSIC} = ?",
+      arrayOf("1"),
+      MediaStore.Audio.Media.TITLE_KEY,
+      null
+    )
+
+    val mediaItems = emptyList<MediaBrowserCompat.MediaItem>().toMutableList()
+
+    cursorWithSongs.use {
+      while (it.moveToNext()) {
+
+        val description = MediaDescriptionCompat.Builder()
+          .setMediaId(it.getString(0))
+          .setTitle(it.getString(1))
+          .setExtras(Bundle().apply {
+            putString(MediaStore.Audio.Media.ARTIST, it.getString(2))
+            putString(MediaStore.Audio.Media.ALBUM, it.getString(3))
+            putString(MediaStore.Audio.Media.ALBUM_KEY, it.getString(4))
+          })
+          .build()
+
+        mediaItems.add(
+          MediaBrowserCompat.MediaItem(
+            description,
+            MediaBrowserCompat.MediaItem.FLAG_PLAYABLE
+          )
+        )
+      }
+    }
+
+    return mediaItems
   }
 
   // --------

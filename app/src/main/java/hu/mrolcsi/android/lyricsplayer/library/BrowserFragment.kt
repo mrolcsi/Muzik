@@ -36,22 +36,18 @@ abstract class BrowserFragment : Fragment() {
         null // optional Bundle
       )
     }
-  }
-
-  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-    return inflater.inflate(R.layout.fragment_browser, container, false)
-  }
-
-  override fun onStart() {
-    super.onStart()
 
     mMediaBrowser.subscribe(getParentId(), getSubscriptionCallback())
 
     mMediaBrowser.connect()
   }
 
-  override fun onStop() {
-    super.onStop()
+  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    return inflater.inflate(R.layout.fragment_browser, container, false)
+  }
+
+  override fun onDestroy() {
+    super.onDestroy()
 
     mMediaBrowser.unsubscribe(getParentId())
 

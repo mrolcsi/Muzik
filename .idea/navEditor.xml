@@ -8,7 +8,22 @@
             <LayoutPositions>
               <option name="myPositions">
                 <map>
-                  <entry key="nav_albums">
+                  <entry key="action_global_to_albums">
+                    <value>
+                      <LayoutPositions />
+                    </value>
+                  </entry>
+                  <entry key="action_global_to_artists">
+                    <value>
+                      <LayoutPositions />
+                    </value>
+                  </entry>
+                  <entry key="action_global_to_songs">
+                    <value>
+                      <LayoutPositions />
+                    </value>
+                  </entry>
+                  <entry key="nav_albumsBrowser">
                     <value>
                       <LayoutPositions>
                         <option name="myPosition">
@@ -19,7 +34,7 @@
                         </option>
                         <option name="myPositions">
                           <map>
-                            <entry key="action_nav_albums_to_nav_songs">
+                            <entry key="action_albums_to_songs">
                               <value>
                                 <LayoutPositions />
                               </value>
@@ -29,7 +44,7 @@
                       </LayoutPositions>
                     </value>
                   </entry>
-                  <entry key="nav_artists">
+                  <entry key="nav_artistsBrowser">
                     <value>
                       <LayoutPositions>
                         <option name="myPosition">
@@ -40,7 +55,7 @@
                         </option>
                         <option name="myPositions">
                           <map>
-                            <entry key="action_nav_artists_to_nav_albums">
+                            <entry key="action_artists_to_albums">
                               <value>
                                 <LayoutPositions />
                               </value>
@@ -50,7 +65,7 @@
                       </LayoutPositions>
                     </value>
                   </entry>
-                  <entry key="nav_songs">
+                  <entry key="nav_songsBrowser">
                     <value>
                       <LayoutPositions>
                         <option name="myPosition">

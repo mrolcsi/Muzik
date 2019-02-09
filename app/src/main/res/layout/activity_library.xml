@@ -9,7 +9,7 @@
   tools:context=".library.LibraryActivity">
 
   <fragment
-    android:id="@+id/library_host"
+    android:id="@+id/library_nav_host"
     android:layout_width="0dp"
     android:layout_height="0dp"
     android:name="androidx.navigation.fragment.NavHostFragment"

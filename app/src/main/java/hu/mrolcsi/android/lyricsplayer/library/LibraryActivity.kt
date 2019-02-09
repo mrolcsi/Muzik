@@ -8,7 +8,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.navigation.Navigation
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.NavigationUI
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import hu.mrolcsi.android.lyricsplayer.R
 import kotlinx.android.synthetic.main.activity_library.*
@@ -16,20 +18,24 @@ import kotlinx.android.synthetic.main.activity_library.*
 class LibraryActivity : AppCompatActivity() {
 
   private val mOnNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
+    val navController = Navigation.findNavController(this@LibraryActivity, R.id.library_nav_host)
     when (item.itemId) {
       R.id.navigation_artists -> {
-        Navigation.findNavController(this@LibraryActivity, R.id.library_host)
-          .navigate(R.id.action_global_to_artists)
+        if (navController.currentDestination?.id != R.id.nav_artistsBrowser) {
+          navController.navigate(R.id.action_global_to_artists)
+        }
         return@OnNavigationItemSelectedListener true
       }
       R.id.navigation_albums -> {
-        Navigation.findNavController(this@LibraryActivity, R.id.library_host)
-          .navigate(R.id.action_global_to_albums)
+        if (navController.currentDestination?.id != R.id.nav_albumsBrowser) {
+          navController.navigate(R.id.action_global_to_albums)
+        }
         return@OnNavigationItemSelectedListener true
       }
       R.id.navigation_songs -> {
-        Navigation.findNavController(this@LibraryActivity, R.id.library_host)
-          .navigate(R.id.action_global_to_songs)
+        if (navController.currentDestination?.id != R.id.nav_songsBrowser) {
+          navController.navigate(R.id.action_global_to_songs)
+        }
         return@OnNavigationItemSelectedListener true
       }
     }
@@ -87,10 +93,35 @@ class LibraryActivity : AppCompatActivity() {
       // enable navigation
       val finalHost = NavHostFragment.create(R.navigation.navigation_library)
       supportFragmentManager.beginTransaction()
-        .replace(R.id.library_host, finalHost)
+        .replace(R.id.library_nav_host, finalHost)
         .setPrimaryNavigationFragment(finalHost)
+        .runOnCommit {
+          val navController = findNavController(R.id.library_nav_host)
+
+          NavigationUI.setupActionBarWithNavController(this, navController)
+          //NavigationUI.setupWithNavController(navigation_bar, navController)
+
+          navController.addOnDestinationChangedListener { controller, destination, arguments ->
+            when (destination.id) {
+              R.id.nav_artistsBrowser -> {
+                navigation_bar.selectedItemId = R.id.navigation_artists
+              }
+              R.id.nav_albumsBrowser -> {
+                navigation_bar.selectedItemId = R.id.navigation_albums
+              }
+              R.id.nav_songsBrowser -> {
+                navigation_bar.selectedItemId = R.id.navigation_songs
+              }
+            }
+          }
+        }
         .commit()
     }
+  }
+
+
+  override fun onSupportNavigateUp(): Boolean {
+    return findNavController(R.id.library_nav_host).navigateUp()
   }
 
   override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
