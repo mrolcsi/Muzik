@@ -45,7 +45,7 @@ class ArtistAdapter : ListAdapter<MediaBrowserCompat.MediaItem, ArtistAdapter.Ar
     holder.tvNumOfSongs?.text = "$numberOfAlbums albums, $numberOfTracks tracks"
 
     holder.itemView.setOnClickListener {
-      val direction = ArtistsBrowserFragmentDirections.actionArtistsToAlbums(item.description.title.toString())
+      val direction = ArtistsFragmentDirections.actionArtistsToAlbums(item.description.title.toString())
       it.findNavController().navigate(direction)
     }
   }

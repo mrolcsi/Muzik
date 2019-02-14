@@ -42,7 +42,7 @@ class AlbumsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, AlbumsAdapter.Al
     holder.tvArtist?.text = item.description.extras?.getString(MediaStore.Audio.Albums.ARTIST)
 
     holder.itemView.setOnClickListener {
-      val direction = AlbumsBrowserFragmentDirections.actionAlbumsToSongs(item.mediaId)
+      val direction = AlbumsFragmentDirections.actionAlbumsToSongs(item.mediaId)
       it.findNavController().navigate(direction)
     }
   }
