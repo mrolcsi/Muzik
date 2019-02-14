@@ -3,17 +3,17 @@
 
   <item
     android:id="@+id/navigation_artists"
-    android:icon="@drawable/ic_home_black_24dp"
+    android:icon="@mipmap/ic_artist"
     android:title="@string/title_artists"/>
 
   <item
     android:id="@+id/navigation_albums"
-    android:icon="@drawable/ic_dashboard_black_24dp"
+    android:icon="@mipmap/ic_album"
     android:title="@string/title_albums"/>
 
   <item
     android:id="@+id/navigation_songs"
-    android:icon="@drawable/ic_notifications_black_24dp"
+    android:icon="@mipmap/ic_song"
     android:title="@string/title_songs"/>
 
 </menu>

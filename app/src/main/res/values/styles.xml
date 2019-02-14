@@ -5,8 +5,12 @@
     parent="Theme.AppCompat">
     <!-- Customize your theme here. -->
     <item name="colorPrimary">@color/primaryColor</item>
-    <item name="colorPrimaryDark">@color/primaryDarkColor</item>
+    <item name="colorPrimaryDark">@color/primaryLightColor</item>
     <item name="colorAccent">@color/secondaryColor</item>
+    <item name="android:windowBackground">@color/primaryDarkColor</item>
+    <item name="android:statusBarColor">@android:color/transparent</item>
+    <item name="android:navigationBarColor">@android:color/transparent</item>
+    <item name="actionBarStyle">@style/ActionBarStyle</item>
   </style>
 
   <style name="FullscreenTheme"
@@ -22,6 +26,15 @@
   <style name="FullscreenActionBarStyle"
     parent="Widget.AppCompat.ActionBar">
     <item name="android:background">@null</item>
+  </style>
+
+  <!-- Visible ActionBar -->
+  <style name="ActionBarStyle"
+    parent="Widget.AppCompat.ActionBar">
+    <item name="android:background">@color/primaryColor</item>
+    <item name="background">@color/primaryColor</item>
+    <item name="android:elevation">@dimen/action_bar_elevation</item>
+    <item name="elevation">@dimen/action_bar_elevation</item>
   </style>
 
 </resources>

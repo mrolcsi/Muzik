@@ -3,11 +3,8 @@
   <color name="primaryColor">#263238</color>
   <color name="primaryLightColor">#4f5b62</color>
   <color name="primaryDarkColor">#000a12</color>
-  <color name="secondaryColor">#546e7a</color>
-  <color name="secondaryLightColor">#819ca9</color>
-  <color name="secondaryDarkColor">#29434e</color>
-  <color name="primaryTextColor">#ffffff</color>
-  <color name="secondaryTextColor">#ffffff</color>
 
-  <color name="black_overlay">#66000000</color>
+  <color name="secondaryColor">#eceff1</color>
+  <color name="secondaryLightColor">#ffffff</color>
+  <color name="secondaryDarkColor">#babdbe</color>
 </resources>
