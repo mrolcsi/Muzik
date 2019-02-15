@@ -1,7 +1,6 @@
 package hu.mrolcsi.android.lyricsplayer.library.songs
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -28,7 +27,6 @@ class SongsFragment : Fragment() {
     activity?.let {
       mSongsModel = ViewModelProviders.of(requireActivity()).get(SongsViewModel::class.java)
       mSongsModel.getSongs().observe(this, Observer { songs ->
-        Log.d(this.toString(), "Got items from LiveData: $songs")
         mSongsAdapter.submitList(songs)
       })
     }
@@ -51,21 +49,21 @@ class SongsFragment : Fragment() {
         args.albumKey != null -> {
           // List songs from an album
           mSongsAdapter.showTrackNumber = true
-          mSongsModel.filterByAlbum(args.albumKey)
+          mSongsModel.songFilter.value = SongsViewModel.SongFilter(null, args.albumKey)
         }
         args.artistKey != null -> {
           // List all songs by an artist
           mSongsAdapter.showTrackNumber = false
-          mSongsModel.filterByArtist(args.artistKey)
+          mSongsModel.songFilter.value = SongsViewModel.SongFilter(args.artistKey, null)
         }
         else -> {
           mSongsAdapter.showTrackNumber = false
-          mSongsModel.clearFilter()
+          mSongsModel.songFilter.value = null
         }
       }
     } else {
       mSongsAdapter.showTrackNumber = false
-      mSongsModel.clearFilter()
+      mSongsModel.songFilter.value = null
     }
   }
 }

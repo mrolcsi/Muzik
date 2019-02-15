@@ -2,11 +2,11 @@ package hu.mrolcsi.android.lyricsplayer.library.albums
 
 import android.app.Application
 import android.os.AsyncTask
-import android.os.Bundle
 import android.provider.MediaStore
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaDescriptionCompat
 import android.util.Log
+import androidx.core.os.bundleOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import hu.mrolcsi.android.lyricsplayer.R
@@ -36,24 +36,23 @@ class AlbumsViewModel(app: Application) : LibraryViewModel(app) {
     mMediaBrowser.connect()
   }
 
-  val albums: LiveData<List<MediaBrowserCompat.MediaItem>>
-    // When "artistFilter" changes, replace the contents of "albums" with the contents of "result".
-    get() = artistFilter.switchMap { info ->
-      val result = when (info) {
+  fun getAlbums(): LiveData<List<MediaBrowserCompat.MediaItem>> {
+    // When "songFilter" changes, replace the contents of "albums" with the contents of "result".
+    return artistFilter.switchMap { artist ->
+      when (artist) {
         null -> mAllAlbums
         else -> {
           mAllAlbums.switchMap { allAlbums ->
             val filteredAlbums = MutableLiveData<List<MediaBrowserCompat.MediaItem>>()
             AsyncTask.execute {
-              val albumsByArtist = filterByArtist(allAlbums, info)
-              filteredAlbums.postValue(albumsByArtist)
+              filteredAlbums.postValue(filterByArtist(allAlbums, artist))
             }
             filteredAlbums
           }
         }
       }
-      result
     }
+  }
 
   val artistFilter = MutableLiveData<ArtistInfo>()
 
@@ -76,10 +75,12 @@ class AlbumsViewModel(app: Application) : LibraryViewModel(app) {
             info.numberOfTracks
           )
         )
-        .setExtras(Bundle().apply {
-          putString(MediaStore.Audio.ArtistColumns.ARTIST_KEY, info.artistKey)
-          putString(MediaStore.Audio.ArtistColumns.ARTIST, info.artistName)
-        })
+        .setExtras(
+          bundleOf(
+            MediaStore.Audio.ArtistColumns.ARTIST_KEY to info.artistKey,
+            MediaStore.Audio.ArtistColumns.ARTIST to info.artistName
+          )
+        )
         .build(),
       MediaBrowserCompat.MediaItem.FLAG_BROWSABLE
     )

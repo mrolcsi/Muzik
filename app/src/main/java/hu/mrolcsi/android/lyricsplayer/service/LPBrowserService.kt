@@ -13,6 +13,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContentResolverCompat
 import androidx.core.content.ContextCompat
+import androidx.core.os.bundleOf
 import androidx.media.MediaBrowserServiceCompat
 import androidx.media.session.MediaButtonReceiver
 import hu.mrolcsi.android.lyricsplayer.BuildConfig
@@ -206,10 +207,12 @@ class LPBrowserService : MediaBrowserServiceCompat() {
         val description = MediaDescriptionCompat.Builder()
           .setMediaId(it.getString(0))
           .setTitle(it.getString(1))
-          .setExtras(Bundle().apply {
-            putInt(MediaStore.Audio.ArtistColumns.NUMBER_OF_ALBUMS, it.getInt(2))
-            putInt(MediaStore.Audio.ArtistColumns.NUMBER_OF_TRACKS, it.getInt(3))
-          })
+          .setExtras(
+            bundleOf(
+              MediaStore.Audio.ArtistColumns.NUMBER_OF_ALBUMS to it.getInt(2),
+              MediaStore.Audio.ArtistColumns.NUMBER_OF_TRACKS to it.getInt(3)
+            )
+          )
           .build()
 
         mediaItems.add(
@@ -250,11 +253,13 @@ class LPBrowserService : MediaBrowserServiceCompat() {
           .setMediaId(it.getString(0))    // Album key
           .setTitle(it.getString(1))      // Album title
           .setSubtitle(it.getString(2))   // Album artist
-          .setExtras(Bundle().apply {
-            putString(MediaStore.Audio.AlbumColumns.ARTIST, it.getString(2))
-            putInt(MediaStore.Audio.AlbumColumns.NUMBER_OF_SONGS, it.getInt(3))
-            putString(MediaStore.Audio.AlbumColumns.ALBUM_ART, it.getString(4))
-          })
+          .setExtras(
+            bundleOf(
+              MediaStore.Audio.AlbumColumns.ARTIST to it.getString(2),
+              MediaStore.Audio.AlbumColumns.NUMBER_OF_SONGS to it.getInt(3),
+              MediaStore.Audio.AlbumColumns.ALBUM_ART to it.getString(4)
+            )
+          )
           .build()
 
         mediaItems.add(
@@ -297,13 +302,15 @@ class LPBrowserService : MediaBrowserServiceCompat() {
           .setMediaId(it.getString(0))    // Song URI
           .setTitle(it.getString(1))      // Song title
           .setSubtitle(it.getString(2))   // Song artist
-          .setExtras(Bundle().apply {
-            putString(MediaStore.Audio.Media.ARTIST, it.getString(2))
-            putString(MediaStore.Audio.Media.ARTIST_KEY, it.getString(3))
-            putString(MediaStore.Audio.Media.ALBUM, it.getString(4))
-            putString(MediaStore.Audio.Media.ALBUM_KEY, it.getString(5))
-            putInt(MediaStore.Audio.Media.TRACK, it.getInt(6).rem(1000))
-          })
+          .setExtras(
+            bundleOf(
+              MediaStore.Audio.Media.ARTIST to it.getString(2),
+              MediaStore.Audio.Media.ARTIST_KEY to it.getString(3),
+              MediaStore.Audio.Media.ALBUM to it.getString(4),
+              MediaStore.Audio.Media.ALBUM_KEY to it.getString(5),
+              MediaStore.Audio.Media.TRACK to it.getInt(6).rem(1000)
+            )
+          )
           .build()
 
         mediaItems.add(

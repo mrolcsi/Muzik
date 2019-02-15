@@ -29,7 +29,7 @@ class AlbumsFragment : Fragment() {
 
     activity?.let {
       mAlbumsModel = ViewModelProviders.of(requireActivity()).get(AlbumsViewModel::class.java)
-      mAlbumsModel.albums.observe(this, Observer { albums ->
+      mAlbumsModel.getAlbums().observe(this, Observer { albums ->
         Log.d(this.toString(), "Got items from LiveData: $albums")
         mAlbumsAdapter.submitList(albums)
       })
