@@ -10,6 +10,7 @@ import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import hu.mrolcsi.android.lyricsplayer.BuildConfig
 import hu.mrolcsi.android.lyricsplayer.R
 
 class AlbumsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, AlbumsAdapter.AlbumHolder>(
@@ -31,7 +32,7 @@ class AlbumsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, AlbumsAdapter.Al
 ) {
 
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AlbumHolder {
-    val itemView = LayoutInflater.from(parent.context).inflate(R.layout.simple_list_item_2, parent, false)
+    val itemView = LayoutInflater.from(parent.context).inflate(R.layout.list_item_artist, parent, false)
     return AlbumHolder(itemView)
   }
 
@@ -39,16 +40,37 @@ class AlbumsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, AlbumsAdapter.Al
     val item = getItem(position)
 
     holder.tvAlbum?.text = item.description.title
-    holder.tvArtist?.text = item.description.extras?.getString(MediaStore.Audio.Albums.ARTIST)
+    holder.tvArtist?.text = item.description.subtitle
 
-    holder.itemView.setOnClickListener {
-      val direction = AlbumsFragmentDirections.actionAlbumsToSongs(item.mediaId, item.description.title.toString())
-      it.findNavController().navigate(direction)
+    if (item.mediaId == MEDIA_ID_ALL_SONGS) {
+      holder.itemView.setOnClickListener {
+        val direction = AlbumsFragmentDirections.actionAlbumsToSongs(
+          item.description.extras?.getString(MediaStore.Audio.ArtistColumns.ARTIST_KEY),
+          item.description.extras?.getString(MediaStore.Audio.ArtistColumns.ARTIST),
+          null,
+          null
+        )
+        it.findNavController().navigate(direction)
+      }
+    } else {
+      holder.itemView.setOnClickListener {
+        val direction = AlbumsFragmentDirections.actionAlbumsToSongs(
+          null,
+          null,
+          item.mediaId,
+          item.description.title.toString()
+        )
+        it.findNavController().navigate(direction)
+      }
     }
   }
 
   class AlbumHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-    val tvAlbum: TextView? = itemView.findViewById(android.R.id.text1)
-    val tvArtist: TextView? = itemView.findViewById(android.R.id.text2)
+    val tvAlbum: TextView? = itemView.findViewById(R.id.tvTitle)
+    val tvArtist: TextView? = itemView.findViewById(R.id.tvSubtitle)
+  }
+
+  companion object {
+    const val MEDIA_ID_ALL_SONGS = BuildConfig.APPLICATION_ID + ".ALL_SONGS"
   }
 }

@@ -4,6 +4,7 @@ import android.os.AsyncTask
 import android.os.Bundle
 import android.provider.MediaStore
 import android.support.v4.media.MediaBrowserCompat
+import android.support.v4.media.MediaDescriptionCompat
 import android.view.View
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.Observer
@@ -15,7 +16,7 @@ import kotlinx.android.synthetic.main.fragment_browser.*
 
 class AlbumsFragment : BrowserFragment() {
 
-  private val mAlbumsAdapter = AlbumsAdapter()
+  private var mAlbumsAdapter: AlbumsAdapter = AlbumsAdapter()
   private val mLiveAlbums = MediatorLiveData<List<MediaBrowserCompat.MediaItem>>()
 
   private val mAlbumsSubscription = object : MediaBrowserCompat.SubscriptionCallback() {
@@ -23,11 +24,27 @@ class AlbumsFragment : BrowserFragment() {
 
       if (arguments != null) {
         val args = AlbumsFragmentArgs.fromBundle(requireArguments())
-        if (args.artist != null) {
+        if (args.artistName != null) {
           AsyncTask.execute {
+            // Filter albums by artist
             val filteredAlbums = children.filter { item ->
-              item.description.extras?.getString(MediaStore.Audio.Albums.ARTIST)?.contains(args.artist) ?: false
-            }
+              item.description.extras?.getString(MediaStore.Audio.Albums.ARTIST) == args.artistName
+            }.toMutableList()
+            // Add "All songs" as first item
+            val allSongsItem = MediaBrowserCompat.MediaItem(
+              MediaDescriptionCompat.Builder()
+                .setMediaId(AlbumsAdapter.MEDIA_ID_ALL_SONGS)
+                .setTitle("Show all songs")  // TODO: i18n
+                .setSubtitle("${args.numberOfTracks} songs")
+                .setExtras(Bundle().apply {
+                  putString(MediaStore.Audio.ArtistColumns.ARTIST_KEY, args.artistKey)
+                  putString(MediaStore.Audio.ArtistColumns.ARTIST, args.artistName)
+                })
+                .build(),
+              MediaBrowserCompat.MediaItem.FLAG_BROWSABLE
+            )
+            filteredAlbums.add(0, allSongsItem)
+            // Post list to UI
             mLiveAlbums.postValue(filteredAlbums)
           }
         } else {

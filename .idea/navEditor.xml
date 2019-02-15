@@ -60,6 +60,11 @@
                                 <LayoutPositions />
                               </value>
                             </entry>
+                            <entry key="action_navigation_albumsByArtist_to_navigationsongsByArtist">
+                              <value>
+                                <LayoutPositions />
+                              </value>
+                            </entry>
                           </map>
                         </option>
                       </LayoutPositions>
@@ -91,8 +96,8 @@
                       <LayoutPositions>
                         <option name="myPosition">
                           <Point>
-                            <option name="x" value="388" />
-                            <option name="y" value="504" />
+                            <option name="x" value="382" />
+                            <option name="y" value="479" />
                           </Point>
                         </option>
                       </LayoutPositions>
@@ -105,6 +110,18 @@
                           <Point>
                             <option name="x" value="383" />
                             <option name="y" value="170" />
+                          </Point>
+                        </option>
+                      </LayoutPositions>
+                    </value>
+                  </entry>
+                  <entry key="navigationsongsByArtist">
+                    <value>
+                      <LayoutPositions>
+                        <option name="myPosition">
+                          <Point>
+                            <option name="x" value="383" />
+                            <option name="y" value="-139" />
                           </Point>
                         </option>
                       </LayoutPositions>

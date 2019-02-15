@@ -23,15 +23,30 @@ class SongsFragment : BrowserFragment() {
 
       if (arguments != null) {
         val args = SongsFragmentArgs.fromBundle(requireArguments())
-        if (args.albumKey != null) {
-          AsyncTask.execute {
-            val filteredSongs = children.filter { item ->
-              item.description.extras?.getString(MediaStore.Audio.Media.ALBUM_KEY) == args.albumKey
+        when {
+          args.albumKey != null -> {
+            // List songs from an album
+            mSongsAdapter.showTrackNumber = true
+            AsyncTask.execute {
+              val filteredSongs = children.filter { item ->
+                item.description.extras?.getString(MediaStore.Audio.Media.ALBUM_KEY) == args.albumKey
+              }.sortedBy { item ->
+                item.description.extras?.getInt(MediaStore.Audio.Media.TRACK)
+              }
+              mLiveSongs.postValue(filteredSongs)
             }
-            mLiveSongs.postValue(filteredSongs)
           }
-        } else {
-          mLiveSongs.postValue(children)
+          args.artistKey != null -> {
+            // List all songs by an artist
+            mSongsAdapter.showTrackNumber = false
+            AsyncTask.execute {
+              val filteredSongs = children.filter { item ->
+                item.description.extras?.getString(MediaStore.Audio.Media.ARTIST_KEY) == args.artistKey
+              }
+              mLiveSongs.postValue(filteredSongs)
+            }
+          }
+          else -> mLiveSongs.postValue(children)
         }
       } else {
         mLiveSongs.postValue(children)

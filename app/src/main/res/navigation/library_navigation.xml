@@ -61,7 +61,10 @@
     android:label="@string/title_albums"
     android:name="hu.mrolcsi.android.lyricsplayer.library.albums.AlbumsFragment">
 
-    <argument android:name="artist"
+    <argument android:name="artistKey"
+      app:argType="string"
+      app:nullable="true"/>
+    <argument android:name="artistName"
       app:argType="string"
       app:nullable="true"/>
 
@@ -72,6 +75,8 @@
       app:popEnterAnim="@anim/slide_in_right"
       app:popExitAnim="@anim/slide_out_right"
       app:popUpTo="@id/navigation_albumsByArtist"/>
+    <argument android:name="numberOfTracks"
+      app:argType="integer"/>
 
   </fragment>
 
@@ -85,6 +90,12 @@
     android:label="@string/title_songs"
     android:name="hu.mrolcsi.android.lyricsplayer.library.songs.SongsFragment">
 
+    <argument android:name="artistKey"
+      app:argType="string"
+      app:nullable="true"/>
+    <argument android:name="artistName"
+      app:argType="string"
+      app:nullable="true"/>
     <argument android:name="albumKey"
       app:argType="string"
       app:nullable="true"/>

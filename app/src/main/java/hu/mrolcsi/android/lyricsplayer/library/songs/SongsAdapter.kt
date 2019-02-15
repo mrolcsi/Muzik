@@ -30,16 +30,21 @@ class SongsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, SongsAdapter.Song
   }
 ) {
 
+  var showTrackNumber: Boolean = false
+
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SongHolder {
-    val itemView = LayoutInflater.from(parent.context).inflate(R.layout.simple_list_item_2, parent, false)
+    val itemView = LayoutInflater.from(parent.context).inflate(R.layout.list_item_song, parent, false)
     return SongHolder(itemView)
   }
 
   override fun onBindViewHolder(holder: SongHolder, position: Int) {
     val item = getItem(position)
 
+    val trackNumber = item.description.extras?.getInt(MediaStore.Audio.Media.TRACK) ?: 0
+    holder.tvTrackNumber?.visibility = if (showTrackNumber and (trackNumber > 0)) View.VISIBLE else View.GONE
+    holder.tvTrackNumber?.text = trackNumber.toString()
     holder.tvTitle?.text = item.description.title
-    holder.tvArtist?.text = item.description.extras?.getString(MediaStore.Audio.Media.ARTIST)
+    holder.tvArtist?.text = item.description.subtitle
 
     holder.itemView.setOnClickListener {
       // TODO: Navigate to PlayerActivity passing the song id (path?)
@@ -53,7 +58,8 @@ class SongsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, SongsAdapter.Song
   }
 
   class SongHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-    val tvTitle: TextView? = itemView.findViewById(android.R.id.text1)
-    val tvArtist: TextView? = itemView.findViewById(android.R.id.text2)
+    val tvTrackNumber: TextView? = itemView.findViewById(R.id.tvTrackNumber)
+    val tvTitle: TextView? = itemView.findViewById(R.id.tvTitle)
+    val tvArtist: TextView? = itemView.findViewById(R.id.tvSubtitle)
   }
 }

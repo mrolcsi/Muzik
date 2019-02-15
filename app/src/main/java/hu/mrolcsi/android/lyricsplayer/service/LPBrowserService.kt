@@ -247,8 +247,9 @@ class LPBrowserService : MediaBrowserServiceCompat() {
       while (it.moveToNext()) {
 
         val description = MediaDescriptionCompat.Builder()
-          .setMediaId(it.getString(0))
-          .setTitle(it.getString(1))
+          .setMediaId(it.getString(0))    // Album key
+          .setTitle(it.getString(1))      // Album title
+          .setSubtitle(it.getString(2))   // Album artist
           .setExtras(Bundle().apply {
             putString(MediaStore.Audio.AlbumColumns.ARTIST, it.getString(2))
             putInt(MediaStore.Audio.AlbumColumns.NUMBER_OF_SONGS, it.getInt(3))
@@ -276,8 +277,10 @@ class LPBrowserService : MediaBrowserServiceCompat() {
         MediaStore.Audio.Media.DATA,
         MediaStore.Audio.Media.TITLE,
         MediaStore.Audio.Media.ARTIST,
+        MediaStore.Audio.Media.ARTIST_KEY,
         MediaStore.Audio.Media.ALBUM,
-        MediaStore.Audio.Media.ALBUM_KEY
+        MediaStore.Audio.Media.ALBUM_KEY,
+        MediaStore.Audio.Media.TRACK
       ),
       "${MediaStore.Audio.Media.IS_MUSIC} = ?",
       arrayOf("1"),
@@ -291,12 +294,15 @@ class LPBrowserService : MediaBrowserServiceCompat() {
       while (it.moveToNext()) {
 
         val description = MediaDescriptionCompat.Builder()
-          .setMediaId(it.getString(0))
-          .setTitle(it.getString(1))
+          .setMediaId(it.getString(0))    // Song URI
+          .setTitle(it.getString(1))      // Song title
+          .setSubtitle(it.getString(2))   // Song artist
           .setExtras(Bundle().apply {
             putString(MediaStore.Audio.Media.ARTIST, it.getString(2))
-            putString(MediaStore.Audio.Media.ALBUM, it.getString(3))
-            putString(MediaStore.Audio.Media.ALBUM_KEY, it.getString(4))
+            putString(MediaStore.Audio.Media.ARTIST_KEY, it.getString(3))
+            putString(MediaStore.Audio.Media.ALBUM, it.getString(4))
+            putString(MediaStore.Audio.Media.ALBUM_KEY, it.getString(5))
+            putInt(MediaStore.Audio.Media.TRACK, it.getInt(6).rem(1000))
           })
           .build()
 

@@ -31,7 +31,7 @@ class ArtistAdapter : ListAdapter<MediaBrowserCompat.MediaItem, ArtistAdapter.Ar
 ) {
 
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ArtistHolder {
-    val view = LayoutInflater.from(parent.context).inflate(R.layout.simple_list_item_2, parent, false)
+    val view = LayoutInflater.from(parent.context).inflate(R.layout.list_item_artist, parent, false)
     return ArtistHolder(view)
   }
 
@@ -42,16 +42,20 @@ class ArtistAdapter : ListAdapter<MediaBrowserCompat.MediaItem, ArtistAdapter.Ar
     val numberOfAlbums = item.description.extras?.getInt(MediaStore.Audio.Artists.NUMBER_OF_ALBUMS) ?: 0
     val numberOfTracks = item.description.extras?.getInt(MediaStore.Audio.Artists.NUMBER_OF_TRACKS) ?: 0
     // TODO: quantity string -> "5 albums, 24 tracks"
-    holder.tvNumOfSongs?.text = "$numberOfAlbums albums, $numberOfTracks tracks"
+    holder.tvNumOfSongs?.text = "$numberOfAlbums albums, $numberOfTracks songs total"
 
     holder.itemView.setOnClickListener {
-      val direction = ArtistsFragmentDirections.actionArtistsToAlbums(item.description.title.toString())
+      val direction = ArtistsFragmentDirections.actionArtistsToAlbums(
+        item.mediaId,
+        item.description.title.toString(),
+        numberOfTracks
+      )
       it.findNavController().navigate(direction)
     }
   }
 
   class ArtistHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-    val tvArtist: TextView? = itemView.findViewById(android.R.id.text1)
-    val tvNumOfSongs: TextView? = itemView.findViewById(android.R.id.text2)
+    val tvArtist: TextView? = itemView.findViewById(R.id.tvTitle)
+    val tvNumOfSongs: TextView? = itemView.findViewById(R.id.tvSubtitle)
   }
 }

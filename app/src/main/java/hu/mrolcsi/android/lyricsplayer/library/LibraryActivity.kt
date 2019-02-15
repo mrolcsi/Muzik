@@ -85,20 +85,26 @@ class LibraryActivity : AppCompatActivity() {
               R.id.navigation_artists -> {
                 supportActionBar?.subtitle = null
               }
+              R.id.navigation_albums -> {
+                supportActionBar?.subtitle = null
+              }
               R.id.navigation_albumsByArtist -> {
                 if (arguments != null) {
                   val args = AlbumsFragmentArgs.fromBundle(arguments)
-                  supportActionBar?.subtitle = "by ${args.artist}"  // TODO: i18n
-                } else {
-                  supportActionBar?.subtitle = null
+                  supportActionBar?.subtitle = "by ${args.artistName}"  // TODO: i18n
                 }
+              }
+              R.id.navigation_songs -> {
+                supportActionBar?.subtitle = null
               }
               R.id.navigation_songsFromAlbum -> {
                 if (arguments != null) {
                   val args = SongsFragmentArgs.fromBundle(arguments)
-                  supportActionBar?.subtitle = "from ${args.albumTitle}"  // TODO: i18n
-                } else {
-                  supportActionBar?.subtitle = null
+                  if (args.albumKey != null) {
+                    supportActionBar?.subtitle = "from ${args.albumTitle}"  // TODO: i18n
+                  } else if (args.artistKey != null) {
+                    supportActionBar?.subtitle = "by ${args.artistName}"  // TODO: i18n
+                  }
                 }
               }
             }
