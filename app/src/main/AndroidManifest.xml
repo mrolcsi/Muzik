@@ -19,7 +19,7 @@
     </service>
 
     <activity
-      android:label="@string/title_activity_library"
+      android:label="@string/library_title"
       android:name=".library.LibraryActivity">
       <intent-filter>
         <action android:name="android.intent.action.MAIN"/>

@@ -38,19 +38,25 @@ class ArtistAdapter : ListAdapter<MediaBrowserCompat.MediaItem, ArtistAdapter.Ar
   override fun onBindViewHolder(holder: ArtistHolder, position: Int) {
     val item = getItem(position)
 
-    holder.tvArtist?.text = item.description.title
-    val numberOfAlbums = item.description.extras?.getInt(MediaStore.Audio.Artists.NUMBER_OF_ALBUMS) ?: 0
-    val numberOfTracks = item.description.extras?.getInt(MediaStore.Audio.Artists.NUMBER_OF_TRACKS) ?: 0
-    // TODO: quantity string -> "5 albums, 24 tracks"
-    holder.tvNumOfSongs?.text = "$numberOfAlbums albums, $numberOfTracks songs total"
+    with(holder) {
+      tvArtist?.text = item.description.title
+      val numberOfAlbums = item.description.extras?.getInt(MediaStore.Audio.Artists.NUMBER_OF_ALBUMS) ?: 0
+      val numberOfSongs = item.description.extras?.getInt(MediaStore.Audio.Artists.NUMBER_OF_TRACKS) ?: 0
+      val numberOfAlbumsString =
+        itemView.context.resources.getQuantityString(R.plurals.artists_numberOfAlbums, numberOfAlbums, numberOfAlbums)
+      val numberOfSongsString =
+        itemView.context.resources.getQuantityString(R.plurals.artists_numberOfSongs, numberOfSongs, numberOfSongs)
+      tvNumOfSongs?.text =
+        itemView.context.getString(R.string.artists_item_subtitle, numberOfAlbumsString, numberOfSongsString)
 
-    holder.itemView.setOnClickListener {
-      val direction = ArtistsFragmentDirections.actionArtistsToAlbums(
-        item.mediaId,
-        item.description.title.toString(),
-        numberOfTracks
-      )
-      it.findNavController().navigate(direction)
+      itemView.setOnClickListener {
+        val direction = ArtistsFragmentDirections.actionArtistsToAlbums(
+          item.mediaId,
+          item.description.title.toString(),
+          numberOfSongs
+        )
+        it.findNavController().navigate(direction)
+      }
     }
   }
 

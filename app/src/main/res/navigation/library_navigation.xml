@@ -30,7 +30,7 @@
     app:popUpToInclusive="true"/>
 
   <fragment android:id="@+id/navigation_artists"
-    android:label="@string/title_artists"
+    android:label="@string/artists_title"
     android:name="hu.mrolcsi.android.lyricsplayer.library.artists.ArtistsFragment">
 
     <action android:id="@+id/action_artists_to_albums"
@@ -44,7 +44,7 @@
   </fragment>
 
   <fragment android:id="@+id/navigation_albums"
-    android:label="@string/title_albums"
+    android:label="@string/albums_title"
     android:name="hu.mrolcsi.android.lyricsplayer.library.albums.AlbumsFragment">
 
     <action android:id="@+id/action_albums_to_songs"
@@ -58,7 +58,7 @@
   </fragment>
 
   <fragment android:id="@+id/navigation_albumsByArtist"
-    android:label="@string/title_albums"
+    android:label="@string/albums_title"
     android:name="hu.mrolcsi.android.lyricsplayer.library.albums.AlbumsFragment">
 
     <argument android:name="artistKey"
@@ -81,13 +81,13 @@
   </fragment>
 
   <fragment android:id="@+id/navigation_songs"
-    android:label="@string/title_songs"
+    android:label="@string/songs_title"
     android:name="hu.mrolcsi.android.lyricsplayer.library.songs.SongsFragment">
 
   </fragment>
 
   <fragment android:id="@+id/navigation_songsFromAlbum"
-    android:label="@string/title_songs"
+    android:label="@string/songs_title"
     android:name="hu.mrolcsi.android.lyricsplayer.library.songs.SongsFragment">
 
     <argument android:name="artistKey"

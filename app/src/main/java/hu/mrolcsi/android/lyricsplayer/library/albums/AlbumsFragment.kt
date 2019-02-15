@@ -10,6 +10,7 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import hu.mrolcsi.android.lyricsplayer.R
 import hu.mrolcsi.android.lyricsplayer.library.BrowserFragment
 import hu.mrolcsi.android.lyricsplayer.service.LPBrowserService
 import kotlinx.android.synthetic.main.fragment_browser.*
@@ -34,7 +35,7 @@ class AlbumsFragment : BrowserFragment() {
             val allSongsItem = MediaBrowserCompat.MediaItem(
               MediaDescriptionCompat.Builder()
                 .setMediaId(AlbumsAdapter.MEDIA_ID_ALL_SONGS)
-                .setTitle("Show all songs")  // TODO: i18n
+                .setTitle(getString(R.string.albums_showAllSongs))
                 .setSubtitle("${args.numberOfTracks} songs")
                 .setExtras(Bundle().apply {
                   putString(MediaStore.Audio.ArtistColumns.ARTIST_KEY, args.artistKey)

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <plurals name="artists_numberOfAlbums">
+    <item quantity="one">@string/artists_numberOfAlbums_one</item>
+    <item quantity="other">@string/artists_numberOfAlbums_other</item>
+  </plurals>
+  <plurals name="artists_numberOfSongs">
+    <item quantity="one">@string/artists_numberOfSongs_one</item>
+    <item quantity="other">@string/artists_numberOfSongs_other</item>
+  </plurals>
+</resources>

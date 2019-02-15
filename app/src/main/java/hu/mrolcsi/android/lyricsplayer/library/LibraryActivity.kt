@@ -91,7 +91,7 @@ class LibraryActivity : AppCompatActivity() {
               R.id.navigation_albumsByArtist -> {
                 if (arguments != null) {
                   val args = AlbumsFragmentArgs.fromBundle(arguments)
-                  supportActionBar?.subtitle = "by ${args.artistName}"  // TODO: i18n
+                  supportActionBar?.subtitle = getString(R.string.albums_byArtist_subtitle, args.artistName)
                 }
               }
               R.id.navigation_songs -> {
@@ -101,9 +101,9 @@ class LibraryActivity : AppCompatActivity() {
                 if (arguments != null) {
                   val args = SongsFragmentArgs.fromBundle(arguments)
                   if (args.albumKey != null) {
-                    supportActionBar?.subtitle = "from ${args.albumTitle}"  // TODO: i18n
+                    supportActionBar?.subtitle = getString(R.string.songs_fromAlbum_subtitle, args.albumTitle)
                   } else if (args.artistKey != null) {
-                    supportActionBar?.subtitle = "by ${args.artistName}"  // TODO: i18n
+                    supportActionBar?.subtitle = getString(R.string.albums_byArtist_subtitle, args.artistName)
                   }
                 }
               }
