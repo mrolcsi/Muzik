@@ -14,6 +14,8 @@ import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.android.lyricsplayer.R
 import kotlinx.android.synthetic.main.fragment_browser.*
 
+// see: https://stackoverflow.com/a/53999441
+
 class AlbumsFragment : Fragment() {
 
   private val args: AlbumsFragmentArgs by navArgs()
@@ -27,7 +29,7 @@ class AlbumsFragment : Fragment() {
 
     activity?.let {
       mAlbumsModel = ViewModelProviders.of(requireActivity()).get(AlbumsViewModel::class.java)
-      mAlbumsModel.getAlbums().observe(this, Observer { albums ->
+      mAlbumsModel.albums.observe(this, Observer { albums ->
         Log.d(this.toString(), "Got items from LiveData: $albums")
         mAlbumsAdapter.submitList(albums)
       })
@@ -48,12 +50,13 @@ class AlbumsFragment : Fragment() {
 
     if (arguments != null) {
       if (args.artistName != null) {
-        mAlbumsModel.filterByArtist(args.artistKey, args.artistName, args.numberOfTracks)
+        mAlbumsModel.artistFilter.value =
+          AlbumsViewModel.ArtistInfo(args.artistKey, args.artistName, args.numberOfTracks)
       } else {
-        mAlbumsModel.clearFilter()
+        mAlbumsModel.artistFilter.value = null
       }
     } else {
-      mAlbumsModel.clearFilter()
+      mAlbumsModel.artistFilter.value = null
     }
   }
 }
