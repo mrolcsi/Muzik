@@ -54,7 +54,7 @@ class SongsViewModel(app: Application) : LibraryViewModel(app) {
     }
   }
 
-  val songFilter = MutableLiveData<SongFilter>()
+  val songFilter = MutableLiveData<SongFilter>().apply { value = SongFilter() }
 
   private fun filterByAlbum(
     allSongs: List<MediaBrowserCompat.MediaItem>,
@@ -77,7 +77,12 @@ class SongsViewModel(app: Application) : LibraryViewModel(app) {
   }
 
   data class SongFilter(
-    val artistKey: String?,
-    val albumKey: String?
-  )
+    val artistKey: String? = null,
+    val albumKey: String? = null
+  ) {
+
+    companion object {
+      val NO_FILTER = SongFilter()
+    }
+  }
 }

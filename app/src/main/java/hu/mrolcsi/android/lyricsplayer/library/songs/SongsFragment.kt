@@ -49,21 +49,21 @@ class SongsFragment : Fragment() {
         args.albumKey != null -> {
           // List songs from an album
           mSongsAdapter.showTrackNumber = true
-          mSongsModel.songFilter.value = SongsViewModel.SongFilter(null, args.albumKey)
+          mSongsModel.songFilter.value = SongsViewModel.SongFilter(albumKey = args.albumKey)
         }
         args.artistKey != null -> {
           // List all songs by an artist
           mSongsAdapter.showTrackNumber = false
-          mSongsModel.songFilter.value = SongsViewModel.SongFilter(args.artistKey, null)
+          mSongsModel.songFilter.value = SongsViewModel.SongFilter(artistKey = args.artistKey)
         }
         else -> {
           mSongsAdapter.showTrackNumber = false
-          mSongsModel.songFilter.value = null
+          mSongsModel.songFilter.value = SongsViewModel.SongFilter.NO_FILTER
         }
       }
     } else {
       mSongsAdapter.showTrackNumber = false
-      mSongsModel.songFilter.value = null
+      mSongsModel.songFilter.value = SongsViewModel.SongFilter.NO_FILTER
     }
   }
 }
