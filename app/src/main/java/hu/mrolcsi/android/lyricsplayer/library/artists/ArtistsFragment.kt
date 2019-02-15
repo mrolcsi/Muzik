@@ -1,34 +1,38 @@
 package hu.mrolcsi.android.lyricsplayer.library.artists
 
 import android.os.Bundle
-import android.support.v4.media.MediaBrowserCompat
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import hu.mrolcsi.android.lyricsplayer.library.BrowserFragment
-import hu.mrolcsi.android.lyricsplayer.service.LPBrowserService
+import hu.mrolcsi.android.lyricsplayer.R
 import kotlinx.android.synthetic.main.fragment_browser.*
 
-class ArtistsFragment : BrowserFragment() {
+class ArtistsFragment : Fragment() {
 
   private val mArtistAdapter = ArtistAdapter()
 
-  private val mArtistsSubscription = object : MediaBrowserCompat.SubscriptionCallback() {
-    override fun onChildrenLoaded(parentId: String, children: MutableList<MediaBrowserCompat.MediaItem>) {
-      mArtistAdapter.submitList(children)
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+
+    activity?.let {
+      val model = ViewModelProviders.of(this).get(ArtistsViewModel::class.java)
+      model.getArtists().observe(this, Observer { artists ->
+        mArtistAdapter.submitList(artists)
+      })
     }
+  }
+
+  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    return inflater.inflate(R.layout.fragment_browser, container, false)
   }
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     rvBrowser.layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
     rvBrowser.adapter = mArtistAdapter
-  }
-
-  override fun getParentId(): String {
-    return LPBrowserService.MEDIA_ARTISTS_ID
-  }
-
-  override fun getSubscriptionCallback(): MediaBrowserCompat.SubscriptionCallback {
-    return mArtistsSubscription
   }
 }

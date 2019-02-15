@@ -1,73 +1,71 @@
 package hu.mrolcsi.android.lyricsplayer.library.songs
 
-import android.os.AsyncTask
 import android.os.Bundle
-import android.provider.MediaStore
-import android.support.v4.media.MediaBrowserCompat
+import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
-import androidx.lifecycle.MediatorLiveData
+import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import hu.mrolcsi.android.lyricsplayer.library.BrowserFragment
-import hu.mrolcsi.android.lyricsplayer.service.LPBrowserService
+import hu.mrolcsi.android.lyricsplayer.R
 import kotlinx.android.synthetic.main.fragment_browser.*
 
-class SongsFragment : BrowserFragment() {
+class SongsFragment : Fragment() {
+
+  private val args: SongsFragmentArgs by navArgs()
+
+  private lateinit var mSongsModel: SongsViewModel
 
   private val mSongsAdapter = SongsAdapter()
-  private val mLiveSongs = MediatorLiveData<List<MediaBrowserCompat.MediaItem>>()
 
-  private val mSongsSubscription = object : MediaBrowserCompat.SubscriptionCallback() {
-    override fun onChildrenLoaded(parentId: String, children: MutableList<MediaBrowserCompat.MediaItem>) {
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
 
-      if (arguments != null) {
-        val args = SongsFragmentArgs.fromBundle(requireArguments())
-        when {
-          args.albumKey != null -> {
-            // List songs from an album
-            mSongsAdapter.showTrackNumber = true
-            AsyncTask.execute {
-              val filteredSongs = children.filter { item ->
-                item.description.extras?.getString(MediaStore.Audio.Media.ALBUM_KEY) == args.albumKey
-              }.sortedBy { item ->
-                item.description.extras?.getInt(MediaStore.Audio.Media.TRACK)
-              }
-              mLiveSongs.postValue(filteredSongs)
-            }
-          }
-          args.artistKey != null -> {
-            // List all songs by an artist
-            mSongsAdapter.showTrackNumber = false
-            AsyncTask.execute {
-              val filteredSongs = children.filter { item ->
-                item.description.extras?.getString(MediaStore.Audio.Media.ARTIST_KEY) == args.artistKey
-              }
-              mLiveSongs.postValue(filteredSongs)
-            }
-          }
-          else -> mLiveSongs.postValue(children)
-        }
-      } else {
-        mLiveSongs.postValue(children)
-      }
+    activity?.let {
+      mSongsModel = ViewModelProviders.of(requireActivity()).get(SongsViewModel::class.java)
+      mSongsModel.getSongs().observe(this, Observer { songs ->
+        Log.d(this.toString(), "Got items from LiveData: $songs")
+        mSongsAdapter.submitList(songs)
+      })
     }
+  }
+
+  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    return inflater.inflate(R.layout.fragment_browser, container, false)
   }
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     rvBrowser.layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
     rvBrowser.adapter = mSongsAdapter
-
-    mLiveSongs.observe(this, Observer {
-      mSongsAdapter.submitList(it)
-    })
   }
 
-  override fun getParentId(): String {
-    return LPBrowserService.MEDIA_SONGS_ID
-  }
+  override fun onResume() {
+    super.onResume()
 
-  override fun getSubscriptionCallback(): MediaBrowserCompat.SubscriptionCallback {
-    return mSongsSubscription
+    if (arguments != null) {
+      when {
+        args.albumKey != null -> {
+          // List songs from an album
+          mSongsAdapter.showTrackNumber = true
+          mSongsModel.filterByAlbum(args.albumKey)
+        }
+        args.artistKey != null -> {
+          // List all songs by an artist
+          mSongsAdapter.showTrackNumber = false
+          mSongsModel.filterByArtist(args.artistKey)
+        }
+        else -> {
+          mSongsAdapter.showTrackNumber = false
+          mSongsModel.clearFilter()
+        }
+      }
+    } else {
+      mSongsAdapter.showTrackNumber = false
+      mSongsModel.clearFilter()
+    }
   }
 }
