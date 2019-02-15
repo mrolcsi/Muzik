@@ -7,46 +7,20 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.navigation.Navigation
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import hu.mrolcsi.android.lyricsplayer.R
+import hu.mrolcsi.android.lyricsplayer.library.albums.AlbumsFragmentArgs
+import hu.mrolcsi.android.lyricsplayer.library.songs.SongsFragmentArgs
 import kotlinx.android.synthetic.main.activity_library.*
 
 class LibraryActivity : AppCompatActivity() {
 
-  private val mOnNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
-    val navController = Navigation.findNavController(this@LibraryActivity, R.id.library_nav_host)
-    when (item.itemId) {
-      R.id.navigation_artists -> {
-        if (navController.currentDestination?.id != R.id.nav_artistsBrowser) {
-          navController.navigate(R.id.action_global_to_artists)
-        }
-        return@OnNavigationItemSelectedListener true
-      }
-      R.id.navigation_albums -> {
-        if (navController.currentDestination?.id != R.id.nav_albumsBrowser) {
-          navController.navigate(R.id.action_global_to_albums)
-        }
-        return@OnNavigationItemSelectedListener true
-      }
-      R.id.navigation_songs -> {
-        if (navController.currentDestination?.id != R.id.nav_songsBrowser) {
-          navController.navigate(R.id.action_global_to_songs)
-        }
-        return@OnNavigationItemSelectedListener true
-      }
-    }
-    false
-  }
-
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_library)
-
-    navigation_bar.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
   }
 
   override fun onStart() {
@@ -91,26 +65,41 @@ class LibraryActivity : AppCompatActivity() {
       }
     } else {
       // enable navigation
-      val finalHost = NavHostFragment.create(R.navigation.navigation_library)
+      val finalHost = NavHostFragment.create(R.navigation.library_navigation)
       supportFragmentManager.beginTransaction()
         .replace(R.id.library_nav_host, finalHost)
         .setPrimaryNavigationFragment(finalHost)
         .runOnCommit {
           val navController = findNavController(R.id.library_nav_host)
 
-          NavigationUI.setupActionBarWithNavController(this, navController)
-          //NavigationUI.setupWithNavController(navigation_bar, navController)
+          val appBarConfig = AppBarConfiguration.Builder(
+            R.id.navigation_artists,
+            R.id.navigation_albums,
+            R.id.navigation_songs
+          ).build()
+          NavigationUI.setupActionBarWithNavController(this, navController, appBarConfig)
+          NavigationUI.setupWithNavController(navigation_bar, navController)
 
-          navController.addOnDestinationChangedListener { controller, destination, arguments ->
+          navController.addOnDestinationChangedListener { _, destination, arguments ->
             when (destination.id) {
-              R.id.nav_artistsBrowser -> {
-                navigation_bar.selectedItemId = R.id.navigation_artists
+              R.id.navigation_artists -> {
+                supportActionBar?.subtitle = null
               }
-              R.id.nav_albumsBrowser -> {
-                navigation_bar.selectedItemId = R.id.navigation_albums
+              R.id.navigation_albumsByArtist -> {
+                if (arguments != null) {
+                  val args = AlbumsFragmentArgs.fromBundle(arguments)
+                  supportActionBar?.subtitle = "by ${args.artist}"  // TODO: i18n
+                } else {
+                  supportActionBar?.subtitle = null
+                }
               }
-              R.id.nav_songsBrowser -> {
-                navigation_bar.selectedItemId = R.id.navigation_songs
+              R.id.navigation_songsFromAlbum -> {
+                if (arguments != null) {
+                  val args = SongsFragmentArgs.fromBundle(arguments)
+                  supportActionBar?.subtitle = "from ${args.albumTitle}"  // TODO: i18n
+                } else {
+                  supportActionBar?.subtitle = null
+                }
               }
             }
           }

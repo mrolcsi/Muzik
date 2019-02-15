@@ -2,6 +2,7 @@ package hu.mrolcsi.android.lyricsplayer.service
 
 import android.content.Intent
 import android.net.Uri
+import android.os.AsyncTask
 import android.os.Bundle
 import android.provider.MediaStore
 import android.support.v4.media.MediaBrowserCompat
@@ -150,33 +151,36 @@ class LPBrowserService : MediaBrowserServiceCompat() {
       return
     }
 
-    // Let it load in the background.
-    result.detach()
+    // do loading in the background
+    AsyncTask.execute {
+      val mediaItems = emptyList<MediaBrowserCompat.MediaItem>().toMutableList()
 
-    val mediaItems = emptyList<MediaBrowserCompat.MediaItem>().toMutableList()
+      when (parentId) {
+        MEDIA_ARTISTS_ID -> {
+          mediaItems.addAll(gatherArtists(MediaStore.Audio.Artists.INTERNAL_CONTENT_URI))
+          mediaItems.addAll(gatherArtists(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI))
 
-    when (parentId) {
-      MEDIA_ARTISTS_ID -> {
-        mediaItems.addAll(gatherArtists(MediaStore.Audio.Artists.INTERNAL_CONTENT_URI))
-        mediaItems.addAll(gatherArtists(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI))
+          mediaItems.sortBy { it.mediaId }
+        }
+        MEDIA_ALBUMS_ID -> {
+          mediaItems.addAll(gatherAlbums(MediaStore.Audio.Albums.INTERNAL_CONTENT_URI))
+          mediaItems.addAll(gatherAlbums(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI))
 
-        mediaItems.sortBy { it.mediaId }
+          mediaItems.sortBy { it.mediaId }
+        }
+        MEDIA_SONGS_ID -> {
+          mediaItems.addAll(gatherSongs(MediaStore.Audio.Media.INTERNAL_CONTENT_URI))
+          mediaItems.addAll(gatherSongs(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI))
+
+          mediaItems.sortBy { it.mediaId }
+        }
       }
-      MEDIA_ALBUMS_ID -> {
-        mediaItems.addAll(gatherAlbums(MediaStore.Audio.Albums.INTERNAL_CONTENT_URI))
-        mediaItems.addAll(gatherAlbums(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI))
 
-        mediaItems.sortBy { it.mediaId }
-      }
-      MEDIA_SONGS_ID -> {
-        mediaItems.addAll(gatherSongs(MediaStore.Audio.Media.INTERNAL_CONTENT_URI))
-        mediaItems.addAll(gatherSongs(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI))
-
-        mediaItems.sortBy { it.mediaId }
-      }
+      result.sendResult(mediaItems)
     }
 
-    result.sendResult(mediaItems)
+    // Let it load in the background.
+    result.detach()
   }
 
   private fun gatherArtists(uri: Uri): List<MediaBrowserCompat.MediaItem> {

@@ -3,11 +3,11 @@
   xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:app="http://schemas.android.com/apk/res-auto"
   android:id="@+id/navigation_library"
-  app:startDestination="@id/nav_artistsBrowser">
+  app:startDestination="@id/navigation_artists">
 
   <action
     android:id="@+id/action_global_to_artists"
-    app:destination="@id/nav_artistsBrowser"
+    app:destination="@id/navigation_artists"
     app:enterAnim="@android:anim/fade_in"
     app:exitAnim="@android:anim/fade_out"
     app:popUpTo="@+id/navigation_library"
@@ -15,7 +15,7 @@
 
   <action
     android:id="@+id/action_global_to_albums"
-    app:destination="@id/nav_albumsBrowser"
+    app:destination="@id/navigation_albums"
     app:enterAnim="@android:anim/fade_in"
     app:exitAnim="@android:anim/fade_out"
     app:popUpTo="@+id/navigation_library"
@@ -23,49 +23,72 @@
 
   <action
     android:id="@+id/action_global_to_songs"
-    app:destination="@id/nav_songsBrowser"
+    app:destination="@id/navigation_songs"
     app:enterAnim="@android:anim/fade_in"
     app:exitAnim="@android:anim/fade_out"
     app:popUpTo="@+id/navigation_library"
     app:popUpToInclusive="true"/>
 
-  <fragment android:id="@+id/nav_artistsBrowser"
-    android:label="Artists"
+  <fragment android:id="@+id/navigation_artists"
+    android:label="@string/title_artists"
     android:name="hu.mrolcsi.android.lyricsplayer.library.artists.ArtistsFragment">
 
     <action android:id="@+id/action_artists_to_albums"
-      app:destination="@id/nav_albumsBrowser"
+      app:destination="@id/navigation_albumsByArtist"
       app:enterAnim="@anim/slide_in_left"
       app:exitAnim="@anim/slide_out_left"
       app:popEnterAnim="@anim/slide_in_right"
       app:popExitAnim="@anim/slide_out_right"
-      app:popUpTo="@+id/nav_artistsBrowser"/>
+      app:popUpTo="@+id/navigation_artists"/>
 
   </fragment>
 
-  <fragment android:id="@+id/nav_albumsBrowser"
-    android:label="Albums"
+  <fragment android:id="@+id/navigation_albums"
+    android:label="@string/title_albums"
     android:name="hu.mrolcsi.android.lyricsplayer.library.albums.AlbumsFragment">
 
     <action android:id="@+id/action_albums_to_songs"
-      app:destination="@id/nav_songsBrowser"
+      app:destination="@id/navigation_songsFromAlbum"
       app:enterAnim="@anim/slide_in_left"
       app:exitAnim="@anim/slide_out_left"
       app:popEnterAnim="@anim/slide_in_right"
       app:popExitAnim="@anim/slide_out_right"
-      app:popUpTo="@+id/nav_albumsBrowser"/>
-
-    <argument android:name="argArtist"
-      app:argType="string"
-      app:nullable="true"/>
+      app:popUpTo="@+id/navigation_albums"/>
 
   </fragment>
 
-  <fragment android:id="@+id/nav_songsBrowser"
-    android:label="Songs"
+  <fragment android:id="@+id/navigation_albumsByArtist"
+    android:label="@string/title_albums"
+    android:name="hu.mrolcsi.android.lyricsplayer.library.albums.AlbumsFragment">
+
+    <argument android:name="artist"
+      app:argType="string"
+      app:nullable="true"/>
+
+    <action android:id="@+id/action_albums_to_songs"
+      app:destination="@id/navigation_songsFromAlbum"
+      app:enterAnim="@anim/slide_in_left"
+      app:exitAnim="@anim/slide_out_left"
+      app:popEnterAnim="@anim/slide_in_right"
+      app:popExitAnim="@anim/slide_out_right"
+      app:popUpTo="@id/navigation_albumsByArtist"/>
+
+  </fragment>
+
+  <fragment android:id="@+id/navigation_songs"
+    android:label="@string/title_songs"
     android:name="hu.mrolcsi.android.lyricsplayer.library.songs.SongsFragment">
 
-    <argument android:name="argAlbum"
+  </fragment>
+
+  <fragment android:id="@+id/navigation_songsFromAlbum"
+    android:label="@string/title_songs"
+    android:name="hu.mrolcsi.android.lyricsplayer.library.songs.SongsFragment">
+
+    <argument android:name="albumKey"
+      app:argType="string"
+      app:nullable="true"/>
+    <argument android:name="albumTitle"
       app:argType="string"
       app:nullable="true"/>
 
