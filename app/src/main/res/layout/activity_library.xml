@@ -20,12 +20,12 @@
     tools:layout="@layout/fragment_browser"/>
 
   <com.google.android.material.bottomnavigation.BottomNavigationView
-    android:background="?attr/colorPrimary"
     android:id="@+id/navigation_bar"
     android:layout_width="0dp"
     android:layout_height="wrap_content"
     android:layout_marginStart="0dp"
     android:layout_marginEnd="0dp"
+    android:background="?attr/colorPrimaryDark"
     android:elevation="@dimen/bottom_navigation_elevation"
     app:elevation="@dimen/bottom_navigation_elevation"
     app:itemIconTint="@drawable/bnv_selector"

@@ -10,7 +10,7 @@
     android:label="@string/app_name"
     android:roundIcon="@mipmap/ic_launcher_round"
     android:supportsRtl="true"
-    android:theme="@style/AppTheme">
+    android:theme="@style/FluxTheme">
 
     <service android:name=".service.LPBrowserService">
       <intent-filter>
@@ -32,7 +32,7 @@
       android:configChanges="orientation|keyboardHidden|screenSize"
       android:label="@string/app_name"
       android:name=".player.PlayerActivity"
-      android:theme="@style/FullscreenTheme">
+      android:theme="@style/FluxTheme.FullscreenTheme">
     </activity>
 
   </application>
