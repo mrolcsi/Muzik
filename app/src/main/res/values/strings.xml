@@ -1,15 +1,19 @@
 <resources>
+  <string name="app_name">Lyrics Player v2</string>
+  <!-- @formatter:off -->
   <string name="albums_byArtist_subtitle">by %s</string>
   <string name="albums_showAllSongs">Show all songs</string>
   <string name="albums_title">Albums</string>
-  <string name="app_name">LyricsPlayer-v2</string>
   <string name="artists_item_subtitle">%1$s, %2$s</string>
   <string name="artists_numberOfAlbums_one">%d album</string>
   <string name="artists_numberOfAlbums_other">%d albums</string>
   <string name="artists_numberOfSongs_one">%d song</string>
   <string name="artists_numberOfSongs_other">%d songs</string>
   <string name="artists_title">Artists</string>
+  <string name="library_grantAccessToSdCard">Grant Access to SD Card</string>
+  <string name="library_readExternalStorage_rationale">The app needs your permission to access your music collection. Please grant access by clicking on the button below, then answering \'Grant\'.</string>
   <string name="library_title">Library</string>
   <string name="songs_fromAlbum_subtitle">from %s</string>
   <string name="songs_title">Songs</string>
+  <!-- @formatter:on -->
 </resources>

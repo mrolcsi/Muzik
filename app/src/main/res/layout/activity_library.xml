@@ -8,6 +8,62 @@
   android:layout_height="match_parent"
   tools:context=".library.LibraryActivity">
 
+  <androidx.constraintlayout.widget.Group
+    android:id="@+id/groupPermissionHint"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:visibility="gone"
+    app:constraint_referenced_ids="imgSdCard,lblPermissionHint,btnRequestPermission"/>
+
+  <ImageView
+    android:id="@+id/imgSdCard"
+    android:layout_width="@android:dimen/notification_large_icon_width"
+    android:layout_height="@android:dimen/notification_large_icon_height"
+    android:layout_marginTop="8dp"
+    android:layout_marginStart="8dp"
+    android:layout_marginEnd="8dp"
+    android:tint="@android:color/white"
+    app:layout_constraintBottom_toTopOf="@+id/lblPermissionHint"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintHorizontal_bias="0.5"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent"
+    app:layout_constraintVertical_chainStyle="packed"
+    app:srcCompat="@drawable/ic_sd_card"/>
+
+  <TextView
+    android:id="@+id/lblPermissionHint"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="8dp"
+    android:layout_marginStart="8dp"
+    android:layout_marginEnd="8dp"
+    android:maxWidth="320dp"
+    android:text="@string/library_readExternalStorage_rationale"
+    android:textAlignment="center"
+    android:textAppearance="?android:attr/textAppearanceMedium"
+    app:layout_constraintBottom_toTopOf="@+id/btnRequestPermission"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintHorizontal_bias="0.5"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/imgSdCard"/>
+
+  <Button
+    android:id="@+id/btnRequestPermission"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="8dp"
+    android:layout_marginBottom="8dp"
+    android:layout_marginStart="8dp"
+    android:layout_marginEnd="8dp"
+    android:onClick="requestStoragePermission"
+    android:text="@string/library_grantAccessToSdCard"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintHorizontal_bias="0.5"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/lblPermissionHint"/>
+
   <fragment
     android:id="@+id/library_nav_host"
     android:layout_width="0dp"
@@ -23,8 +79,6 @@
     android:id="@+id/navigation_bar"
     android:layout_width="0dp"
     android:layout_height="wrap_content"
-    android:layout_marginStart="0dp"
-    android:layout_marginEnd="0dp"
     android:background="?attr/colorPrimaryDark"
     android:elevation="@dimen/bottom_navigation_elevation"
     app:elevation="@dimen/bottom_navigation_elevation"
