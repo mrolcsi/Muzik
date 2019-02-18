@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
@@ -32,15 +33,28 @@ class LibraryActivity : AppCompatActivity() {
         requestStoragePermission()
       } else {
         Log.d(TAG, "Permission already granted. Loading Library.")
-        loadNavHost()
+        createNavHost()
       }
+    }
+  }
+
+  override fun onResumeFragments() {
+    super.onResumeFragments()
+
+    try {// Recreate navigation bar listeners
+      setupNavBar(findNavController(R.id.library_nav_host))
+    } catch (e: IllegalStateException) {
+      // NavHost has not yet been initialized.
     }
   }
 
   fun requestStoragePermission(view: View? = null) {
     if (shouldShowPermissionRationale(Manifest.permission.READ_EXTERNAL_STORAGE)) {
       Log.d(TAG, "Showing rationale for permission.")
+
       groupPermissionHint.visibility = View.VISIBLE
+      navigation_bar.visibility = View.GONE
+
       requestPermission(Manifest.permission.READ_EXTERNAL_STORAGE, PERMISSION_REQUEST_CODE_EXTERNAL_STORAGE)
     } else {
       Log.d(TAG, "No need to show rationale. Request permission.")
@@ -48,58 +62,56 @@ class LibraryActivity : AppCompatActivity() {
     }
   }
 
-  private fun loadNavHost() {
+  private fun createNavHost() {
     // hide hints, show navigation
     groupPermissionHint.visibility = View.GONE
-    navigation_bar.visibility = View.VISIBLE
 
     // enable navigation
     val finalHost = NavHostFragment.create(R.navigation.library_navigation)
     supportFragmentManager.beginTransaction()
       .replace(R.id.library_nav_host, finalHost)
       .setPrimaryNavigationFragment(finalHost)
-      .runOnCommit {
-        val navController = findNavController(R.id.library_nav_host)
+      .commit()
+  }
 
-        val appBarConfig = AppBarConfiguration.Builder(
-          R.id.navigation_artists,
-          R.id.navigation_albums,
-          R.id.navigation_songs
-        ).build()
-        NavigationUI.setupActionBarWithNavController(this, navController, appBarConfig)
-        NavigationUI.setupWithNavController(navigation_bar, navController)
+  private fun setupNavBar(navController: NavController) {
+    val appBarConfig = AppBarConfiguration.Builder(
+      R.id.navigation_artists,
+      R.id.navigation_albums,
+      R.id.navigation_songs
+    ).build()
+    NavigationUI.setupActionBarWithNavController(this, navController, appBarConfig)
+    NavigationUI.setupWithNavController(navigation_bar, navController)
 
-        navController.addOnDestinationChangedListener { _, destination, arguments ->
-          when (destination.id) {
-            R.id.navigation_artists -> {
-              supportActionBar?.subtitle = null
-            }
-            R.id.navigation_albums -> {
-              supportActionBar?.subtitle = null
-            }
-            R.id.navigation_albumsByArtist -> {
-              if (arguments != null) {
-                val args = AlbumsFragmentArgs.fromBundle(arguments)
-                supportActionBar?.subtitle = getString(R.string.albums_byArtist_subtitle, args.artistName)
-              }
-            }
-            R.id.navigation_songs -> {
-              supportActionBar?.subtitle = null
-            }
-            R.id.navigation_songsFromAlbum -> {
-              if (arguments != null) {
-                val args = SongsFragmentArgs.fromBundle(arguments)
-                if (args.albumKey != null) {
-                  supportActionBar?.subtitle = getString(R.string.songs_fromAlbum_subtitle, args.albumTitle)
-                } else if (args.artistKey != null) {
-                  supportActionBar?.subtitle = getString(R.string.albums_byArtist_subtitle, args.artistName)
-                }
-              }
+    navController.addOnDestinationChangedListener { _, destination, arguments ->
+      when (destination.id) {
+        R.id.navigation_artists -> {
+          supportActionBar?.subtitle = null
+        }
+        R.id.navigation_albums -> {
+          supportActionBar?.subtitle = null
+        }
+        R.id.navigation_albumsByArtist -> {
+          if (arguments != null) {
+            val args = AlbumsFragmentArgs.fromBundle(arguments)
+            supportActionBar?.subtitle = getString(R.string.albums_byArtist_subtitle, args.artistName)
+          }
+        }
+        R.id.navigation_songs -> {
+          supportActionBar?.subtitle = null
+        }
+        R.id.navigation_songsFromAlbum -> {
+          if (arguments != null) {
+            val args = SongsFragmentArgs.fromBundle(arguments)
+            if (args.albumKey != null) {
+              supportActionBar?.subtitle = getString(R.string.songs_fromAlbum_subtitle, args.albumTitle)
+            } else if (args.artistKey != null) {
+              supportActionBar?.subtitle = getString(R.string.albums_byArtist_subtitle, args.artistName)
             }
           }
         }
       }
-      .commit()
+    }
   }
 
   override fun onSupportNavigateUp(): Boolean {
@@ -114,7 +126,7 @@ class LibraryActivity : AppCompatActivity() {
           // permission was granted, yay! Do the
           // contacts-related task you need to do.
           Log.d(TAG, "Permission granted. Loading Library.")
-          loadNavHost()
+          createNavHost()
         } else {
           // permission denied, boo! Disable the
           // functionality that depends on this permission.

@@ -41,7 +41,8 @@
     android:maxWidth="320dp"
     android:text="@string/library_readExternalStorage_rationale"
     android:textAlignment="center"
-    android:textAppearance="?android:attr/textAppearanceMedium"
+    android:textSize="18sp"
+    android:textAppearance="?android:attr/textAppearance"
     app:layout_constraintBottom_toTopOf="@+id/btnRequestPermission"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintHorizontal_bias="0.5"
@@ -58,22 +59,20 @@
     android:layout_marginEnd="8dp"
     android:onClick="requestStoragePermission"
     android:text="@string/library_grantAccessToSdCard"
-    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintBottom_toTopOf="@+id/navigation_bar"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintHorizontal_bias="0.5"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toBottomOf="@+id/lblPermissionHint"/>
 
-  <fragment
+  <FrameLayout
     android:id="@+id/library_nav_host"
     android:layout_width="0dp"
     android:layout_height="0dp"
-    android:name="androidx.navigation.fragment.NavHostFragment"
     app:layout_constraintBottom_toTopOf="@+id/navigation_bar"
     app:layout_constraintLeft_toLeftOf="parent"
     app:layout_constraintRight_toRightOf="parent"
-    app:layout_constraintTop_toTopOf="parent"
-    tools:layout="@layout/fragment_browser"/>
+    app:layout_constraintTop_toTopOf="parent"/>
 
   <com.google.android.material.bottomnavigation.BottomNavigationView
     android:id="@+id/navigation_bar"
