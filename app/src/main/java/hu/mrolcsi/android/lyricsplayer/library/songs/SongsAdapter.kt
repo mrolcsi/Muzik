@@ -6,7 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.appcompat.app.AlertDialog
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -47,13 +47,9 @@ class SongsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, SongsAdapter.Song
     holder.tvArtist?.text = item.description.subtitle
 
     holder.itemView.setOnClickListener {
-      // TODO: Navigate to PlayerActivity passing the song id (path?)
-      with(AlertDialog.Builder(holder.itemView.context)) {
-        setTitle("Song Info")
-        setMessage(item.toString())
-        setPositiveButton(android.R.string.ok, null)
-        show()
-      }
+      it.findNavController().navigate(
+        SongsFragmentDirections.actionSongsToPlayer(item.mediaId)
+      )
     }
   }
 

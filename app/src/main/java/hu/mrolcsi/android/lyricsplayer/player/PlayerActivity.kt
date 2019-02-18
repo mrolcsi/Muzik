@@ -7,17 +7,23 @@ import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import androidx.navigation.navArgs
 import hu.mrolcsi.android.lyricsplayer.R
-import hu.mrolcsi.android.lyricsplayer.service.LPBrowserService
+import hu.mrolcsi.android.lyricsplayer.service.LPPlayerService
 import kotlinx.android.synthetic.main.activity_player.*
 
 class PlayerActivity : AppCompatActivity() {
+
+  private val args: PlayerActivityArgs by navArgs()
 
   private lateinit var mMediaBrowser: MediaBrowserCompat
 
   private val mConnectionCallbacks = object : MediaBrowserCompat.ConnectionCallback() {
     override fun onConnected() {
+
+      Log.d(LOG_TAG, "Connected to MediaService.")
 
       // Get the token for the MediaSession
       mMediaBrowser.sessionToken.also { token ->
@@ -30,6 +36,10 @@ class PlayerActivity : AppCompatActivity() {
 
         // Save the controller
         MediaControllerCompat.setMediaController(this@PlayerActivity, mediaController)
+      }
+
+      args.mediaPath?.let {
+        mediaController.transportControls.playFromMediaId(it, null)
       }
 
       // Finish building the UI
@@ -46,6 +56,10 @@ class PlayerActivity : AppCompatActivity() {
 
     override fun onConnectionFailed() {
       // The Service has refused our connection
+      sbSongProgress.isEnabled = false
+      btnPrevious.isEnabled = false
+      btnPlayPause.isEnabled = false
+      btnNext.isEnabled = false
     }
   }
 
@@ -71,7 +85,7 @@ class PlayerActivity : AppCompatActivity() {
     // Create MediaBrowserServiceCompat
     mMediaBrowser = MediaBrowserCompat(
       this,
-      ComponentName(this, LPBrowserService::class.java),
+      ComponentName(this, LPPlayerService::class.java),
       mConnectionCallbacks,
       null // optional Bundle
     )
@@ -105,15 +119,17 @@ class PlayerActivity : AppCompatActivity() {
     btnPlayPause.isEnabled = true
     btnNext.isEnabled = true
 
-    // Display the initial state
-    val metadata = mediaController.metadata
-    val pbState = mediaController.playbackState
-
     // update music controls
-    updateControls(pbState)
+    val pbState = mediaController.playbackState
+    if (pbState != null) {
+      updateControls(pbState)
+    }
 
     // update song metadata
-    updateSongData(metadata)
+    val metadata = mediaController.metadata
+    if (metadata != null) {
+      updateSongData(metadata)
+    }
 
     // Register a Callback to stay in sync
     mediaController.registerCallback(controllerCallback)
@@ -141,5 +157,9 @@ class PlayerActivity : AppCompatActivity() {
     tvAlbum.text = metadata.getText(MediaMetadataCompat.METADATA_KEY_ALBUM)
     tvArtist.text = metadata.getText(MediaMetadataCompat.METADATA_KEY_ARTIST)
     tvTitle.text = metadata.getText(MediaMetadataCompat.METADATA_KEY_TITLE)
+  }
+
+  companion object {
+    const val LOG_TAG = "PlayerActivity"
   }
 }

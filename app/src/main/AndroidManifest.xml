@@ -12,7 +12,7 @@
     android:supportsRtl="true"
     android:theme="@style/FluxTheme">
 
-    <service android:name=".service.LPBrowserService">
+    <service android:name=".service.LPPlayerService">
       <intent-filter>
         <action android:name="android.media.browse.MediaBrowserService"/>
       </intent-filter>
@@ -30,7 +30,6 @@
 
     <activity
       android:configChanges="orientation|keyboardHidden|screenSize"
-      android:label="@string/app_name"
       android:name=".player.PlayerActivity"
       android:theme="@style/FluxTheme.FullscreenTheme">
     </activity>
