@@ -204,9 +204,12 @@ class LPBrowserService : MediaBrowserServiceCompat() {
 
     cursorWithArtists.use {
       while (it.moveToNext()) {
+        // Skip Unknown artists (system sounds and such).
+        if (cursorWithArtists.getString(1) == MediaStore.UNKNOWN_STRING) continue
+
         val description = MediaDescriptionCompat.Builder()
-          .setMediaId(it.getString(0))
-          .setTitle(it.getString(1))
+          .setMediaId(it.getString(0))      // Artist Key
+          .setTitle(it.getString(1))        // Artist Name
           .setExtras(
             bundleOf(
               MediaStore.Audio.ArtistColumns.NUMBER_OF_ALBUMS to it.getInt(2),
