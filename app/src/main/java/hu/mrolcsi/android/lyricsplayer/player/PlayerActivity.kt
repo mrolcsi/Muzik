@@ -10,6 +10,11 @@ import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.navArgs
+import com.example.android.uamp.media.extensions.album
+import com.example.android.uamp.media.extensions.albumArt
+import com.example.android.uamp.media.extensions.artist
+import com.example.android.uamp.media.extensions.duration
+import com.example.android.uamp.media.extensions.title
 import hu.mrolcsi.android.lyricsplayer.R
 import hu.mrolcsi.android.lyricsplayer.service.LPPlayerService
 import kotlinx.android.synthetic.main.activity_player.*
@@ -19,6 +24,7 @@ class PlayerActivity : AppCompatActivity() {
   private val args: PlayerActivityArgs by navArgs()
 
   private lateinit var mMediaBrowser: MediaBrowserCompat
+  private var mMediaController: MediaControllerCompat? = null
 
   private val mConnectionCallbacks = object : MediaBrowserCompat.ConnectionCallback() {
     override fun onConnected() {
@@ -28,18 +34,29 @@ class PlayerActivity : AppCompatActivity() {
       // Get the token for the MediaSession
       mMediaBrowser.sessionToken.also { token ->
 
-        // Create a MediaControllerCompat
-        val mediaController = MediaControllerCompat(
-          this@PlayerActivity, // Context
-          token
-        )
+        // try to retrieve previous controller
+        mMediaController = MediaControllerCompat.getMediaController(this@PlayerActivity)
+        if (mMediaController == null) {
+          // Create a new MediaControllerCompat
+          val mediaController = MediaControllerCompat(this@PlayerActivity, token)
 
-        // Save the controller
-        MediaControllerCompat.setMediaController(this@PlayerActivity, mediaController)
+          // Save the controller
+          MediaControllerCompat.setMediaController(this@PlayerActivity, mediaController)
+        }
       }
 
-      args.mediaPath?.let {
-        mediaController.transportControls.playFromMediaId(it, null)
+      val args = intent?.extras?.let {
+        PlayerActivityArgs.fromBundle(it)
+      }
+      if (args != null) {
+        // load song from args
+        args.mediaPath?.let {
+          val currentMediaId = mediaController.metadata?.description?.mediaId
+          Log.d(LOG_TAG, "Current media: $currentMediaId")
+          if (it != currentMediaId) {
+            mediaController.transportControls.playFromMediaId(it, null)
+          }
+        }
       }
 
       // Finish building the UI
@@ -136,27 +153,41 @@ class PlayerActivity : AppCompatActivity() {
   }
 
   private fun updateControls(playbackState: PlaybackStateCompat) {
+    // Update progress
+    val elapsedTime = playbackState.position / 1000
+    val remainingTime = sbSongProgress.max - elapsedTime
+
+    tvElapsedTime.text = elapsedTime.toString()
+    tvRemainingTime.text = "-$remainingTime"
+
+    sbSongProgress.progress = elapsedTime.toInt()
+
+    // Update controls
     val mediaController = MediaControllerCompat.getMediaController(this)
 
-    // Grab the view for the play/pause button
     btnPlayPause.apply {
-      setOnClickListener {
-        // Since this is a play/pause button, you'll need to test the current state
-        // and choose the action accordingly
-
-        if (playbackState.state == PlaybackStateCompat.STATE_PLAYING) {
+      if (playbackState.state == PlaybackStateCompat.STATE_PLAYING) {
+        setOnClickListener {
           mediaController.transportControls.pause()
-        } else {
+        }
+        setImageResource(android.R.drawable.ic_media_pause)
+      } else {
+        setOnClickListener {
           mediaController.transportControls.play()
         }
+        setImageResource(android.R.drawable.ic_media_play)
       }
     }
   }
 
   private fun updateSongData(metadata: MediaMetadataCompat) {
-    tvAlbum.text = metadata.getText(MediaMetadataCompat.METADATA_KEY_ALBUM)
-    tvArtist.text = metadata.getText(MediaMetadataCompat.METADATA_KEY_ARTIST)
-    tvTitle.text = metadata.getText(MediaMetadataCompat.METADATA_KEY_TITLE)
+    tvAlbum.text = metadata.album
+    tvArtist.text = metadata.artist
+    tvTitle.text = metadata.title
+
+    imgCoverArt.setImageBitmap(metadata.albumArt)
+
+    sbSongProgress.max = (metadata.duration / 1000).toInt()
   }
 
   companion object {

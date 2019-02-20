@@ -3,6 +3,7 @@
   package="hu.mrolcsi.android.lyricsplayer">
 
   <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
 
   <application
     android:allowBackup="true"
@@ -16,19 +17,28 @@
       <intent-filter>
         <action android:name="android.media.browse.MediaBrowserService"/>
       </intent-filter>
+      <intent-filter>
+        <action android:name="android.intent.action.MEDIA_BUTTON"/>
+      </intent-filter>
     </service>
+
+    <receiver android:name="androidx.media.session.MediaButtonReceiver">
+      <intent-filter>
+        <action android:name="android.intent.action.MEDIA_BUTTON"/>
+      </intent-filter>
+    </receiver>
 
     <activity
       android:label="@string/library_title"
       android:name=".library.LibraryActivity">
       <intent-filter>
         <action android:name="android.intent.action.MAIN"/>
-
         <category android:name="android.intent.category.LAUNCHER"/>
       </intent-filter>
     </activity>
 
     <activity
+      android:launchMode="singleInstance"
       android:configChanges="orientation|keyboardHidden|screenSize"
       android:name=".player.PlayerActivity"
       android:theme="@style/FluxTheme.FullscreenTheme">

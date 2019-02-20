@@ -1,25 +1,44 @@
 package hu.mrolcsi.android.lyricsplayer.service
 
+import android.app.PendingIntent
 import android.content.Intent
+import android.support.v4.media.MediaMetadataCompat
+import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
-import androidx.core.app.NotificationCompat
+import android.util.Log
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat
 import androidx.media.session.MediaButtonReceiver
-import hu.mrolcsi.android.lyricsplayer.R
+import hu.mrolcsi.android.lyricsplayer.player.PlayerActivity
+
 
 class LPPlayerService : LPBrowserService() {
 
+  private var isForegroundService = false
+
   private lateinit var mMediaSession: MediaSessionCompat
 
-  private lateinit var mStateBuilder: PlaybackStateCompat.Builder
+  private lateinit var mNotificationBuilder: LPNotificationBuilder
 
   override fun onCreate() {
     super.onCreate()
 
+    Log.d(LOG_TAG, "onCreate()")
+
+    // Build a PendingIntent that can be used to launch the PlayerActivity.
+    val playerActivityPendingIntent = PendingIntent.getActivity(
+      this,
+      0,
+      Intent(this, PlayerActivity::class.java),
+      0
+    )
+
     // Create a MediaSessionCompat
-    mMediaSession = MediaSessionCompat(baseContext, LOG_TAG).apply {
+    mMediaSession = MediaSessionCompat(this, LOG_TAG).apply {
+      setSessionActivity(playerActivityPendingIntent)
+
+      // Enable session.
+      isActive = true
 
       // Enable callbacks from MediaButtons and TransportControls
       setFlags(
@@ -27,104 +46,86 @@ class LPPlayerService : LPBrowserService() {
             or MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS
       )
 
-      // Set an initial PlaybackState with ACTION_PLAY, so media buttons can start the player
-      mStateBuilder = PlaybackStateCompat.Builder()
-        .setActions(
-          PlaybackStateCompat.ACTION_PLAY
-              or PlaybackStateCompat.ACTION_PLAY_PAUSE
-        )
-      setPlaybackState(mStateBuilder.build())
-
       // MySessionCallback() has methods that handle callbacks from a media controller
-      setCallback(LPSessionCallback())
+      setCallback(LPSessionCallback(this))
 
       // Set the session's token so that client activities can communicate with it.
       setSessionToken(sessionToken)
+
+      controller.registerCallback(object : MediaControllerCompat.Callback() {
+        override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
+          controller.playbackState?.let { updateNotification(it) }
+        }
+
+        override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
+          state?.let { updateNotification(it) }
+        }
+
+        private fun updateNotification(playbackState: PlaybackStateCompat) {
+          // Skip building a notification when state is "none".
+          val notification = if (playbackState.state != PlaybackStateCompat.STATE_NONE) {
+            mNotificationBuilder.buildNotification(sessionToken)
+          } else {
+            null
+          }
+
+          when (playbackState.state) {
+            PlaybackStateCompat.STATE_PLAYING -> {
+              if (!isForegroundService) {
+                startService(Intent(applicationContext, this@LPPlayerService.javaClass))
+                startForeground(LPNotificationBuilder.NOTIFICATION_ID, notification)
+                isForegroundService = true
+              } else if (notification != null) {
+                NotificationManagerCompat.from(applicationContext)
+                  .notify(LPNotificationBuilder.NOTIFICATION_ID, notification)
+              }
+            }
+            else -> {
+              if (isForegroundService) {
+                stopForeground(false)
+                isForegroundService = false
+
+                // If playback has ended, also stop the service.
+                if (playbackState.state == PlaybackStateCompat.STATE_NONE) {
+                  stopSelf()
+                }
+
+                if (notification != null) {
+                  NotificationManagerCompat.from(applicationContext)
+                    .notify(LPNotificationBuilder.NOTIFICATION_ID, notification)
+                } else {
+                  stopForeground(true)
+                }
+              }
+            }
+          }
+        }
+      })
     }
+
+    // prepare notification
+    mNotificationBuilder = LPNotificationBuilder(this)
   }
 
-  override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-
-    // Given a media session and its context (usually the component containing the session)
-    // Create a NotificationCompat.Builder
-
-    // Get the session's metadata
-    val controller = mMediaSession.controller
-    val mediaMetadata = controller.metadata
-    val description = mediaMetadata.description
-
-    val builder = NotificationCompat.Builder(applicationContext, NOTIFICATION_CHANNEL).apply {
-      // Add the metadata for the currently playing track
-      setContentTitle(description.title)
-      setContentText(description.subtitle)
-      setSubText(description.description)
-      setLargeIcon(description.iconBitmap)
-
-      // Enable launching the player by clicking the notification
-      setContentIntent(controller.sessionActivity)
-
-      // Stop the service when the notification is swiped away
-      setDeleteIntent(
-        MediaButtonReceiver.buildMediaButtonPendingIntent(
-          applicationContext,
-          PlaybackStateCompat.ACTION_STOP
-        )
-      )
-
-      // Make the transport controls visible on the lockscreen
-      setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-
-      // Add an app icon and set its accent color
-      // Be careful about the color
-      setSmallIcon(android.R.drawable.ic_media_play)
-      color = ContextCompat.getColor(applicationContext, R.color.primaryDarkColor)
-
-      // Add a pause button
-      addAction(
-        NotificationCompat.Action(
-          android.R.drawable.ic_media_pause,
-          "Pause",
-          MediaButtonReceiver.buildMediaButtonPendingIntent(
-            applicationContext,
-            PlaybackStateCompat.ACTION_PLAY_PAUSE
-          )
-        )
-      )
-
-      // Take advantage of MediaStyle features
-      setStyle(
-        androidx.media.app.NotificationCompat.MediaStyle()
-          .setMediaSession(mMediaSession.sessionToken)
-          .setShowActionsInCompactView(0)
-
-          // Add a cancel button
-          .setShowCancelButton(true)
-          .setCancelButtonIntent(
-            MediaButtonReceiver.buildMediaButtonPendingIntent(
-              applicationContext,
-              PlaybackStateCompat.ACTION_STOP
-            )
-          )
-      )
-    }
-
-    // Display the notification and place the service in the foreground
-    startForeground(NOTIFICATION_ID, builder.build())
-
+  override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+    Log.d(LOG_TAG, "Intent received: $intent")
+    MediaButtonReceiver.handleIntent(mMediaSession, intent)
     return super.onStartCommand(intent, flags, startId)
   }
 
   override fun onDestroy() {
     super.onDestroy()
 
+    mMediaSession.run {
+      isActive = false
+      release()
+    }
+
     // Remove notification
-    NotificationManagerCompat.from(applicationContext).cancel(NOTIFICATION_ID)
+    NotificationManagerCompat.from(this).cancel(LPNotificationBuilder.NOTIFICATION_ID)
   }
 
   companion object {
-    private const val LOG_TAG = "LPPlayerService"
-
-    private const val NOTIFICATION_ID = 6854
-    private const val NOTIFICATION_CHANNEL = "LPChannel"
+    const val LOG_TAG = "LPPlayerService"
   }
 }

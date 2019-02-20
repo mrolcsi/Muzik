@@ -86,6 +86,18 @@
                       </LayoutPositions>
                     </value>
                   </entry>
+                  <entry key="navigation_player">
+                    <value>
+                      <LayoutPositions>
+                        <option name="myPosition">
+                          <Point>
+                            <option name="x" value="645" />
+                            <option name="y" value="313" />
+                          </Point>
+                        </option>
+                      </LayoutPositions>
+                    </value>
+                  </entry>
                   <entry key="navigation_songs">
                     <value>
                       <LayoutPositions>
@@ -94,6 +106,15 @@
                             <option name="x" value="382" />
                             <option name="y" value="479" />
                           </Point>
+                        </option>
+                        <option name="myPositions">
+                          <map>
+                            <entry key="action_songs_to_player">
+                              <value>
+                                <LayoutPositions />
+                              </value>
+                            </entry>
+                          </map>
                         </option>
                       </LayoutPositions>
                     </value>
@@ -107,17 +128,14 @@
                             <option name="y" value="170" />
                           </Point>
                         </option>
-                      </LayoutPositions>
-                    </value>
-                  </entry>
-                  <entry key="playerActivity">
-                    <value>
-                      <LayoutPositions>
-                        <option name="myPosition">
-                          <Point>
-                            <option name="x" value="648" />
-                            <option name="y" value="264" />
-                          </Point>
+                        <option name="myPositions">
+                          <map>
+                            <entry key="action_songs_to_player">
+                              <value>
+                                <LayoutPositions />
+                              </value>
+                            </entry>
+                          </map>
                         </option>
                       </LayoutPositions>
                     </value>
