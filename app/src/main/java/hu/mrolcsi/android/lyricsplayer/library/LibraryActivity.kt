@@ -4,22 +4,34 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
+import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
+import hu.mrolcsi.android.lyricsplayer.NavigationLibraryDirections
 import hu.mrolcsi.android.lyricsplayer.R
 import hu.mrolcsi.android.lyricsplayer.extensions.isPermissionGranted
 import hu.mrolcsi.android.lyricsplayer.extensions.requestPermission
 import hu.mrolcsi.android.lyricsplayer.extensions.shouldShowPermissionRationale
 import hu.mrolcsi.android.lyricsplayer.library.albums.AlbumsFragmentArgs
 import hu.mrolcsi.android.lyricsplayer.library.songs.SongsFragmentArgs
+import hu.mrolcsi.android.lyricsplayer.player.PlayerViewModel
 import kotlinx.android.synthetic.main.activity_library.*
 
 class LibraryActivity : AppCompatActivity() {
+
+  private lateinit var mPlayerModel: PlayerViewModel
+
+  private var mNowPlayingMenuItem: MenuItem? = null
+  private var mNowPlayingCoverArt: ImageView? = null
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -36,6 +48,29 @@ class LibraryActivity : AppCompatActivity() {
         createNavHost()
       }
     }
+
+    mPlayerModel = ViewModelProviders.of(this).get(PlayerViewModel::class.java).apply {
+      currentPlaybackState.observe(this@LibraryActivity, Observer { playbackState ->
+        // Show/hide Now Playing in ActionBar
+        Log.v(TAG, "Playback State Observed")
+        mNowPlayingMenuItem?.isVisible = playbackState != null
+      })
+      currentMediaMetadata.observe(this@LibraryActivity, Observer { metadata ->
+        // Update cover art in ActionBar
+        Log.v(TAG, "Metadata Observed")
+        mNowPlayingCoverArt?.setImageBitmap(metadata?.description?.iconBitmap)
+      })
+      mediaController.observe(this@LibraryActivity, Observer {
+        // Update everything
+        mNowPlayingMenuItem?.isVisible = it?.playbackState != null
+        mNowPlayingCoverArt?.setImageBitmap(it?.metadata?.description?.iconBitmap)
+      })
+    }
+  }
+
+  override fun onStart() {
+    super.onStart()
+    mPlayerModel.connect()
   }
 
   override fun onResumeFragments() {
@@ -45,6 +80,39 @@ class LibraryActivity : AppCompatActivity() {
       setupNavBar(findNavController(R.id.library_nav_host))
     } catch (e: IllegalStateException) {
       // NavHost has not yet been initialized.
+    }
+  }
+
+  override fun onStop() {
+    super.onStop()
+    mPlayerModel.disconnect()
+  }
+
+  override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+    menuInflater.inflate(R.menu.menu_library, menu)
+    return super.onCreateOptionsMenu(menu)
+  }
+
+  override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
+    menu?.let {
+      mNowPlayingMenuItem = menu.findItem(R.id.menuNowPlaying).also { item ->
+        with(item.actionView) {
+          setOnClickListener { onOptionsItemSelected(item) }
+          mNowPlayingCoverArt = findViewById(R.id.imgCoverArt)
+        }
+      }
+    }
+
+    return super.onPrepareOptionsMenu(menu)
+  }
+
+  override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+    return when (item?.itemId) {
+      R.id.menuNowPlaying -> {
+        findNavController(R.id.library_nav_host).navigate(NavigationLibraryDirections.actionGlobalToPlayer())
+        true
+      }
+      else -> super.onOptionsItemSelected(item)
     }
   }
 

@@ -5,32 +5,47 @@
   xmlns:tools="http://schemas.android.com/tools"
   android:layout_width="match_parent"
   android:layout_height="match_parent"
+  android:fitsSystemWindows="false"
   tools:context=".player.PlayerActivity">
 
   <ImageView
     android:id="@+id/imgCoverArt"
     android:layout_width="0dp"
     android:layout_height="0dp"
-    app:layout_constraintDimensionRatio="w,1:1"
+    android:scaleType="fitXY"
+    android:transitionName="coverArt"
+    app:layout_constraintDimensionRatio="1:1"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent"
     tools:src="@tools:sample/avatars"/>
 
+  <!-- Make sure Toolbar is above the Cover Art -->
+  <androidx.appcompat.widget.Toolbar
+    android:id="@+id/playerToolbar"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="?attr/actionBarSize"
+    android:theme="?attr/actionBarTheme"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent"/>
+
   <TextView
     android:id="@+id/tvTitle"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_marginTop="24dp"
+    android:layout_marginTop="32dp"
     android:layout_marginStart="8dp"
     android:layout_marginEnd="8dp"
+    android:textAlignment="center"
     android:textAppearance="?android:attr/textAppearanceLarge"
-    app:layout_constraintVertical_chainStyle="packed"
     app:layout_constraintBottom_toTopOf="@+id/tvArtist"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintHorizontal_bias="0.5"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toBottomOf="@+id/imgCoverArt"
+    app:layout_constraintVertical_chainStyle="spread"
     tools:text="Title"/>
 
   <TextView
@@ -40,6 +55,7 @@
     android:layout_marginTop="8dp"
     android:layout_marginStart="8dp"
     android:layout_marginEnd="8dp"
+    android:textAlignment="center"
     android:textAppearance="?android:attr/textAppearanceMedium"
     app:layout_constraintBottom_toTopOf="@+id/tvAlbum"
     app:layout_constraintEnd_toEndOf="parent"
@@ -55,12 +71,14 @@
     android:layout_marginTop="8dp"
     android:layout_marginStart="8dp"
     android:layout_marginEnd="8dp"
+    android:textAlignment="center"
     app:layout_constraintBottom_toTopOf="@+id/sbSongProgress"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintHorizontal_bias="0.5"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toBottomOf="@+id/tvArtist"
     tools:text="Album"/>
+
   <SeekBar
     android:id="@+id/sbSongProgress"
     android:layout_width="0dp"
@@ -79,7 +97,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_marginTop="8dp"
-    android:layout_marginStart="8dp"
+    android:layout_marginStart="16dp"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toBottomOf="@+id/sbSongProgress"
     tools:text="01:23"/>
@@ -88,7 +106,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_marginTop="8dp"
-    android:layout_marginEnd="8dp"
+    android:layout_marginEnd="16dp"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintTop_toBottomOf="@+id/sbSongProgress"
     tools:text="-02:11"/>

@@ -18,6 +18,11 @@
                       <LayoutPositions />
                     </value>
                   </entry>
+                  <entry key="action_global_to_player">
+                    <value>
+                      <LayoutPositions />
+                    </value>
+                  </entry>
                   <entry key="action_global_to_songs">
                     <value>
                       <LayoutPositions />
@@ -91,8 +96,20 @@
                       <LayoutPositions>
                         <option name="myPosition">
                           <Point>
-                            <option name="x" value="645" />
-                            <option name="y" value="313" />
+                            <option name="x" value="668" />
+                            <option name="y" value="-34" />
+                          </Point>
+                        </option>
+                      </LayoutPositions>
+                    </value>
+                  </entry>
+                  <entry key="navigation_playerFromSongs">
+                    <value>
+                      <LayoutPositions>
+                        <option name="myPosition">
+                          <Point>
+                            <option name="x" value="671" />
+                            <option name="y" value="304" />
                           </Point>
                         </option>
                       </LayoutPositions>

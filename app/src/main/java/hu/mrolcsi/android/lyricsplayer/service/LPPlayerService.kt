@@ -8,6 +8,7 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.app.TaskStackBuilder
 import androidx.media.session.MediaButtonReceiver
 import hu.mrolcsi.android.lyricsplayer.player.PlayerActivity
 
@@ -26,12 +27,11 @@ class LPPlayerService : LPBrowserService() {
     Log.d(LOG_TAG, "onCreate()")
 
     // Build a PendingIntent that can be used to launch the PlayerActivity.
-    val playerActivityPendingIntent = PendingIntent.getActivity(
-      this,
-      0,
-      Intent(this, PlayerActivity::class.java),
-      0
-    )
+    val playerActivityPendingIntent = TaskStackBuilder.create(this)
+      // add all of DetailsActivity's parents to the stack,
+      // followed by DetailsActivity itself
+      .addNextIntentWithParentStack(Intent(this, PlayerActivity::class.java))
+      .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)
 
     // Create a MediaSessionCompat
     mMediaSession = MediaSessionCompat(this, LOG_TAG).apply {
@@ -46,7 +46,7 @@ class LPPlayerService : LPBrowserService() {
             or MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS
       )
 
-      // MySessionCallback() has methods that handle callbacks from a media controller
+      // MySessionCallback() has methods that handle callbacks from a media mediaController
       setCallback(LPSessionCallback(this))
 
       // Set the session's token so that client activities can communicate with it.
@@ -107,7 +107,7 @@ class LPPlayerService : LPBrowserService() {
     mNotificationBuilder = LPNotificationBuilder(this)
   }
 
-  override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+  override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
     Log.d(LOG_TAG, "Intent received: $intent")
     MediaButtonReceiver.handleIntent(mMediaSession, intent)
     return super.onStartCommand(intent, flags, startId)

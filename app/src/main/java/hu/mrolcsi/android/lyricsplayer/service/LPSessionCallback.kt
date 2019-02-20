@@ -58,7 +58,7 @@ class LPSessionCallback(
       album = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM)
       title = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE)
       duration = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION).toLong()
-      albumArt = BitmapFactory.decodeByteArray(retriever.embeddedPicture, 0, retriever.embeddedPicture.size)
+      retriever.embeddedPicture?.let { albumArt = BitmapFactory.decodeByteArray(it, 0, it.size) }
       // TODO: other metadata
     }
     session.setMetadata(metadataBuilder.build())

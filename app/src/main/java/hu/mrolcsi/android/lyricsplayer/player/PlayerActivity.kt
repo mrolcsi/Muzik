@@ -1,95 +1,25 @@
 package hu.mrolcsi.android.lyricsplayer.player
 
-import android.content.ComponentName
 import android.media.AudioManager
 import android.os.Bundle
-import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import androidx.navigation.navArgs
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import com.example.android.uamp.media.extensions.album
 import com.example.android.uamp.media.extensions.albumArt
 import com.example.android.uamp.media.extensions.artist
 import com.example.android.uamp.media.extensions.duration
 import com.example.android.uamp.media.extensions.title
 import hu.mrolcsi.android.lyricsplayer.R
-import hu.mrolcsi.android.lyricsplayer.service.LPPlayerService
 import kotlinx.android.synthetic.main.activity_player.*
 
 class PlayerActivity : AppCompatActivity() {
 
-  private val args: PlayerActivityArgs by navArgs()
-
-  private lateinit var mMediaBrowser: MediaBrowserCompat
-  private var mMediaController: MediaControllerCompat? = null
-
-  private val mConnectionCallbacks = object : MediaBrowserCompat.ConnectionCallback() {
-    override fun onConnected() {
-
-      Log.d(LOG_TAG, "Connected to MediaService.")
-
-      // Get the token for the MediaSession
-      mMediaBrowser.sessionToken.also { token ->
-
-        // try to retrieve previous controller
-        mMediaController = MediaControllerCompat.getMediaController(this@PlayerActivity)
-        if (mMediaController == null) {
-          // Create a new MediaControllerCompat
-          val mediaController = MediaControllerCompat(this@PlayerActivity, token)
-
-          // Save the controller
-          MediaControllerCompat.setMediaController(this@PlayerActivity, mediaController)
-        }
-      }
-
-      val args = intent?.extras?.let {
-        PlayerActivityArgs.fromBundle(it)
-      }
-      if (args != null) {
-        // load song from args
-        args.mediaPath?.let {
-          val currentMediaId = mediaController.metadata?.description?.mediaId
-          Log.d(LOG_TAG, "Current media: $currentMediaId")
-          if (it != currentMediaId) {
-            mediaController.transportControls.playFromMediaId(it, null)
-          }
-        }
-      }
-
-      // Finish building the UI
-      buildTransportControls()
-    }
-
-    override fun onConnectionSuspended() {
-      // The Service has crashed. Disable transport controls until it automatically reconnects
-      sbSongProgress.isEnabled = false
-      btnPrevious.isEnabled = false
-      btnPlayPause.isEnabled = false
-      btnNext.isEnabled = false
-    }
-
-    override fun onConnectionFailed() {
-      // The Service has refused our connection
-      sbSongProgress.isEnabled = false
-      btnPrevious.isEnabled = false
-      btnPlayPause.isEnabled = false
-      btnNext.isEnabled = false
-    }
-  }
-
-  private var controllerCallback = object : MediaControllerCompat.Callback() {
-
-    override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
-      metadata?.let { updateSongData(metadata) }
-    }
-
-    override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
-      state?.let { updateControls(state) }
-    }
-  }
+  private lateinit var mPlayerModel: PlayerViewModel
 
   //region LIFECYCLE
 
@@ -97,20 +27,44 @@ class PlayerActivity : AppCompatActivity() {
     super.onCreate(savedInstanceState)
 
     setContentView(R.layout.activity_player)
-    supportActionBar?.setDisplayHomeAsUpEnabled(true)
+    setupToolbar()
 
-    // Create MediaBrowserServiceCompat
-    mMediaBrowser = MediaBrowserCompat(
-      this,
-      ComponentName(this, LPPlayerService::class.java),
-      mConnectionCallbacks,
-      null // optional Bundle
-    )
+    // Observe changes through ViewModel
+    mPlayerModel = ViewModelProviders.of(this).get(PlayerViewModel::class.java).apply {
+      currentMediaMetadata.observe(this@PlayerActivity, Observer { metadata ->
+        metadata?.let { updateSongData(metadata) }
+      })
+      currentPlaybackState.observe(this@PlayerActivity, Observer { state ->
+        state?.let { updateControls(state) }
+      })
+      mediaController.observe(this@PlayerActivity, Observer { controller ->
+        controller?.let {
+          MediaControllerCompat.setMediaController(this@PlayerActivity, controller)
+
+          val args = intent?.extras?.let {
+            PlayerActivityArgs.fromBundle(it)
+          }
+          if (args != null) {
+            // load song from args
+            args.mediaPath?.let {
+              val currentMediaId = controller.metadata?.description?.mediaId
+              Log.d(LOG_TAG, "Current media: $currentMediaId")
+              if (it != currentMediaId) {
+                controller.transportControls.playFromMediaId(it, null)
+              }
+            }
+          }
+
+          // Finish building the UI
+          setupTransportControls()
+        }
+      })
+    }
   }
 
-  public override fun onStart() {
+  override fun onStart() {
     super.onStart()
-    mMediaBrowser.connect()
+    mPlayerModel.connect()
   }
 
   public override fun onResume() {
@@ -118,16 +72,22 @@ class PlayerActivity : AppCompatActivity() {
     volumeControlStream = AudioManager.STREAM_MUSIC
   }
 
-  public override fun onStop() {
+  override fun onStop() {
     super.onStop()
-    // (see "stay in sync with the MediaSession")
-    MediaControllerCompat.getMediaController(this)?.unregisterCallback(controllerCallback)
-    mMediaBrowser.disconnect()
+    mPlayerModel.disconnect()
   }
 
   //endregion
 
-  fun buildTransportControls() {
+  private fun setupToolbar() {
+    setSupportActionBar(playerToolbar)
+    // show home button
+    supportActionBar?.setDisplayHomeAsUpEnabled(true)
+    // hide title
+    supportActionBar?.setDisplayShowTitleEnabled(false)
+  }
+
+  private fun setupTransportControls() {
     val mediaController = MediaControllerCompat.getMediaController(this@PlayerActivity)
 
     // Enable controls
@@ -147,9 +107,6 @@ class PlayerActivity : AppCompatActivity() {
     if (metadata != null) {
       updateSongData(metadata)
     }
-
-    // Register a Callback to stay in sync
-    mediaController.registerCallback(controllerCallback)
   }
 
   private fun updateControls(playbackState: PlaybackStateCompat) {
