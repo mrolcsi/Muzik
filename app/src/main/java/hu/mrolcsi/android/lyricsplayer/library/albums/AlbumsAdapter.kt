@@ -54,13 +54,19 @@ class AlbumsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, AlbumsAdapter.Al
       }
     } else {
       holder.itemView.setOnClickListener {
-        val direction = AlbumsFragmentDirections.actionAlbumsToSongs(
-          null,
-          null,
-          item.mediaId,
-          item.description.title.toString()
-        )
-        it.findNavController().navigate(direction)
+        with(it.findNavController()) {
+          when (currentDestination?.id) {
+            R.id.navigation_albums, R.id.navigation_albumsByArtist -> {
+              val direction = AlbumsFragmentDirections.actionAlbumsToSongs(
+                null,
+                null,
+                item.mediaId,
+                item.description.title.toString()
+              )
+              navigate(direction)
+            }
+          }
+        }
       }
     }
   }

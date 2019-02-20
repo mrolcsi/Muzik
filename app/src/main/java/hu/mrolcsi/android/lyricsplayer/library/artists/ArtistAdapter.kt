@@ -50,12 +50,18 @@ class ArtistAdapter : ListAdapter<MediaBrowserCompat.MediaItem, ArtistAdapter.Ar
         itemView.context.getString(R.string.artists_item_subtitle, numberOfAlbumsString, numberOfSongsString)
 
       itemView.setOnClickListener {
-        val direction = ArtistsFragmentDirections.actionArtistsToAlbums(
-          item.mediaId,
-          item.description.title.toString(),
-          numberOfSongs
-        )
-        it.findNavController().navigate(direction)
+        with(it.findNavController()) {
+          when (currentDestination?.id) {
+            R.id.navigation_artists -> {
+              val direction = ArtistsFragmentDirections.actionArtistsToAlbums(
+                item.mediaId,
+                item.description.title.toString(),
+                numberOfSongs
+              )
+              navigate(direction)
+            }
+          }
+        }
       }
     }
   }

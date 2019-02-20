@@ -47,9 +47,13 @@ class SongsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, SongsAdapter.Song
     holder.tvArtist?.text = item.description.subtitle
 
     holder.itemView.setOnClickListener {
-      it.findNavController().navigate(
-        SongsFragmentDirections.actionSongsToPlayer(item.mediaId)
-      )
+      with(it.findNavController()) {
+        when (currentDestination?.id) {
+          R.id.navigation_songs, R.id.navigation_songsFromAlbum -> {
+            navigate(SongsFragmentDirections.actionSongsToPlayer(item.mediaId))
+          }
+        }
+      }
     }
   }
 
