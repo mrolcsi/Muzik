@@ -29,6 +29,12 @@ class PlayerActivity : AppCompatActivity() {
     setContentView(R.layout.activity_player)
     setupToolbar()
 
+    // Disable controls
+    sbSongProgress.isEnabled = false
+    btnPrevious.isEnabled = false
+    btnPlayPause.isEnabled = false
+    btnNext.isEnabled = false
+
     // Observe changes through ViewModel
     mPlayerModel = ViewModelProviders.of(this).get(PlayerViewModel::class.java).apply {
       currentMediaMetadata.observe(this@PlayerActivity, Observer { metadata ->
@@ -91,10 +97,10 @@ class PlayerActivity : AppCompatActivity() {
     val mediaController = MediaControllerCompat.getMediaController(this@PlayerActivity)
 
     // Enable controls
-    sbSongProgress.isEnabled = true
-    btnPrevious.isEnabled = true
+    //sbSongProgress.isEnabled = true
+    //btnPrevious.isEnabled = true
     btnPlayPause.isEnabled = true
-    btnNext.isEnabled = true
+    //btnNext.isEnabled = true
 
     // update music controls
     val pbState = mediaController.playbackState
