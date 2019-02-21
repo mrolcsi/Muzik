@@ -5,6 +5,7 @@
   xmlns:tools="http://schemas.android.com/tools"
   android:layout_width="match_parent"
   android:layout_height="match_parent"
+  android:animateLayoutChanges="true"
   android:fitsSystemWindows="false"
   tools:context=".player.PlayerActivity">
 
@@ -82,11 +83,11 @@
   <SeekBar
     android:id="@+id/sbSongProgress"
     android:layout_width="0dp"
-    android:enabled="false"
     android:layout_height="wrap_content"
     android:layout_marginTop="16dp"
     android:layout_marginStart="8dp"
     android:layout_marginEnd="8dp"
+    android:enabled="false"
     app:layout_constraintBottom_toTopOf="@+id/btnPlayPause"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintHorizontal_bias="0.5"
@@ -113,12 +114,31 @@
     app:layout_constraintTop_toBottomOf="@+id/sbSongProgress"
     tools:text="-02:11"/>
 
+  <TextView
+    android:id="@+id/tvSeekProgress"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:padding="8dp"
+    android:background="#990e0e0e"
+    android:minWidth="120dp"
+    android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+    android:textColor="?android:attr/textColorPrimary"
+    android:typeface="monospace"
+    android:visibility="gone"
+    app:layout_constraintBottom_toBottomOf="@+id/imgCoverArt"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent"
+    tools:text="01:24"
+    tools:visibility="visible"/>
+
   <ImageButton
     android:id="@+id/btnPrevious"
     android:layout_width="48dp"
     android:layout_height="48dp"
     android:layout_marginStart="8dp"
     android:layout_marginEnd="8dp"
+    android:contentDescription="@string/mediaControl_previous"
     android:enabled="false"
     android:visibility="gone"
     app:layout_constraintBottom_toBottomOf="@+id/btnPlayPause"
@@ -126,14 +146,16 @@
     app:layout_constraintHorizontal_chainStyle="packed"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="@+id/btnPlayPause"
-    app:srcCompat="@android:drawable/ic_media_previous"/>
+    app:srcCompat="@android:drawable/ic_media_previous"
+    tools:visibility="visible"/>
 
   <ImageButton
     android:id="@+id/btnPlayPause"
-    android:layout_width="64dp"
-    android:layout_height="64dp"
+    android:layout_width="72dp"
+    android:layout_height="72dp"
     android:layout_marginTop="32dp"
     android:layout_marginBottom="32dp"
+    android:contentDescription="@string/mediaControl_playPause"
     android:enabled="false"
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toStartOf="@+id/btnNext"
@@ -148,6 +170,7 @@
     android:layout_height="48dp"
     android:layout_marginStart="8dp"
     android:layout_marginEnd="8dp"
+    android:contentDescription="@string/mediaControl_next"
     android:enabled="false"
     android:visibility="gone"
     app:layout_constraintBottom_toBottomOf="@+id/btnPlayPause"
@@ -155,6 +178,7 @@
     app:layout_constraintHorizontal_bias="0.5"
     app:layout_constraintStart_toEndOf="@+id/btnPlayPause"
     app:layout_constraintTop_toTopOf="@+id/btnPlayPause"
-    app:srcCompat="@android:drawable/ic_media_next"/>
+    app:srcCompat="@android:drawable/ic_media_next"
+    tools:visibility="visible"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

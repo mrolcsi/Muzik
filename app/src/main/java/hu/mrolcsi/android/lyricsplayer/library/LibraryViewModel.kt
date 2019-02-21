@@ -36,12 +36,10 @@ abstract class LibraryViewModel(app: Application) : AndroidViewModel(app) {
           MediaControllerCompat(getApplication(), token).apply {
             registerCallback(object : MediaControllerCompat.Callback() {
               override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
-                Log.v(this.toString(), "onMetadataChanged()")
                 currentMediaMetadata.postValue(metadata)
               }
 
               override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
-                Log.v(this.toString(), "onPlaybackStateChanged()")
                 currentPlaybackState.postValue(state)
               }
             })

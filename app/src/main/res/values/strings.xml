@@ -16,6 +16,7 @@
   <string name="mediaControl_next">Next</string>
   <string name="mediaControl_pause">Pause</string>
   <string name="mediaControl_play">Play</string>
+  <string name="mediaControl_playPause">Play/Pause</string>
   <string name="mediaControl_previous">Previous</string>
   <string name="notification_nowPlaying">Now Playing</string>
   <string name="notification_nowPlaying_description">Shows the currently playing song in Lyrics Player</string>
