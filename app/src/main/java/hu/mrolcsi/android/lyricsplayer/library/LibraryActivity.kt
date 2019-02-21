@@ -16,7 +16,7 @@ import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
-import hu.mrolcsi.android.lyricsplayer.NavigationLibraryDirections
+import hu.mrolcsi.android.lyricsplayer.LibraryNavigationDirections
 import hu.mrolcsi.android.lyricsplayer.R
 import hu.mrolcsi.android.lyricsplayer.extensions.isPermissionGranted
 import hu.mrolcsi.android.lyricsplayer.extensions.requestPermission
@@ -109,7 +109,17 @@ class LibraryActivity : AppCompatActivity() {
   override fun onOptionsItemSelected(item: MenuItem?): Boolean {
     return when (item?.itemId) {
       R.id.menuNowPlaying -> {
-        findNavController(R.id.library_nav_host).navigate(NavigationLibraryDirections.actionGlobalToPlayer())
+        // TODO: Shared Element Transition
+//        val options = ActivityOptionsCompat.makeSceneTransitionAnimation(
+//          this,
+//          Pair.create(mNowPlayingCoverArt, ViewCompat.getTransitionName(mNowPlayingCoverArt!!))
+//        )
+//        val extras = ActivityNavigatorExtras(options)
+//        findNavController(R.id.library_nav_host).navigate(
+//          NavigationLibraryDirections.actionGlobalToPlayer(),
+//          extras
+//        )
+        findNavController(R.id.library_nav_host).navigate(LibraryNavigationDirections.actionGlobalToPlayer())
         true
       }
       else -> super.onOptionsItemSelected(item)
