@@ -47,7 +47,7 @@ class LPPlayerService : LPBrowserService() {
       )
 
       // MySessionCallback() has methods that handle callbacks from a media mediaController
-      setCallback(LPSessionCallback(this))
+      setCallback(LPSessionCallback(applicationContext, this))
 
       // Set the session's token so that client activities can communicate with it.
       setSessionToken(sessionToken)
@@ -102,6 +102,15 @@ class LPPlayerService : LPBrowserService() {
           }
         }
       })
+
+      // Load last played MediaItem
+      with(LastPlayedSetting(applicationContext)) {
+        lastPlayedMedia?.let {
+          Log.d(LOG_TAG, "Loading last played: $it")
+          controller.transportControls.prepareFromMediaId(it, null)
+          controller.transportControls.seekTo(lastPlayedPosition)
+        }
+      }
     }
 
     // prepare notification

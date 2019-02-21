@@ -5,16 +5,15 @@ import android.os.Bundle
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import com.example.android.uamp.media.extensions.album
-import com.example.android.uamp.media.extensions.albumArt
-import com.example.android.uamp.media.extensions.artist
-import com.example.android.uamp.media.extensions.duration
-import com.example.android.uamp.media.extensions.title
 import hu.mrolcsi.android.lyricsplayer.R
+import hu.mrolcsi.android.lyricsplayer.extensions.album
+import hu.mrolcsi.android.lyricsplayer.extensions.albumArt
+import hu.mrolcsi.android.lyricsplayer.extensions.artist
+import hu.mrolcsi.android.lyricsplayer.extensions.duration
+import hu.mrolcsi.android.lyricsplayer.extensions.title
 import kotlinx.android.synthetic.main.activity_player.*
 
 class PlayerActivity : AppCompatActivity() {
@@ -47,19 +46,19 @@ class PlayerActivity : AppCompatActivity() {
         controller?.let {
           MediaControllerCompat.setMediaController(this@PlayerActivity, controller)
 
-          val args = intent?.extras?.let {
-            PlayerActivityArgs.fromBundle(it)
-          }
-          if (args != null) {
-            // load song from args
-            args.mediaPath?.let {
-              val currentMediaId = controller.metadata?.description?.mediaId
-              Log.d(LOG_TAG, "Current media: $currentMediaId")
-              if (it != currentMediaId) {
-                controller.transportControls.playFromMediaId(it, null)
-              }
-            }
-          }
+//          val args = intent?.extras?.let {
+//            PlayerActivityArgs.fromBundle(it)
+//          }
+//          if (args != null) {
+//            // load song from args
+//            args.mediaPath?.let {
+//              val currentMediaId = controller.metadata?.description?.mediaId
+//              Log.d(LOG_TAG, "Current media: $currentMediaId")
+//              if (it != currentMediaId) {
+//                controller.transportControls.playFromMediaId(it, null)
+//              }
+//            }
+//          }
 
           // Finish building the UI
           setupTransportControls()
@@ -97,21 +96,21 @@ class PlayerActivity : AppCompatActivity() {
     val mediaController = MediaControllerCompat.getMediaController(this@PlayerActivity)
 
     // Enable controls
-    //sbSongProgress.isEnabled = true
-    //btnPrevious.isEnabled = true
+    sbSongProgress.isEnabled = true
+    btnPrevious.isEnabled = true
     btnPlayPause.isEnabled = true
-    //btnNext.isEnabled = true
-
-    // update music controls
-    val pbState = mediaController.playbackState
-    if (pbState != null) {
-      updateControls(pbState)
-    }
+    btnNext.isEnabled = true
 
     // update song metadata
     val metadata = mediaController.metadata
     if (metadata != null) {
       updateSongData(metadata)
+    }
+
+    // update music controls
+    val pbState = mediaController.playbackState
+    if (pbState != null) {
+      updateControls(pbState)
     }
   }
 

@@ -5,7 +5,6 @@
   <item
     android:id="@+id/menuNowPlaying"
     android:title="@string/notification_nowPlaying"
-    android:visible="false"
     app:actionLayout="@layout/ab_now_playing"
     app:showAsAction="always"/>
 

@@ -1,5 +1,6 @@
 package hu.mrolcsi.android.lyricsplayer.service
 
+import android.content.Context
 import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
@@ -8,29 +9,32 @@ import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
-import com.example.android.uamp.media.extensions.album
-import com.example.android.uamp.media.extensions.albumArt
-import com.example.android.uamp.media.extensions.artist
-import com.example.android.uamp.media.extensions.duration
-import com.example.android.uamp.media.extensions.title
+import hu.mrolcsi.android.lyricsplayer.extensions.album
+import hu.mrolcsi.android.lyricsplayer.extensions.albumArt
+import hu.mrolcsi.android.lyricsplayer.extensions.artist
+import hu.mrolcsi.android.lyricsplayer.extensions.duration
+import hu.mrolcsi.android.lyricsplayer.extensions.title
 import kotlin.properties.Delegates
 
 class LPSessionCallback(
+  context: Context,
   private val session: MediaSessionCompat
 ) : MediaSessionCompat.Callback() {
 
   private var mMediaPlayer: MediaPlayer? = null
-  private val mPlaybackStateBuilder = PlaybackStateCompat.Builder().apply {
+  private var mLastState by Delegates.observable(
+    PlaybackStateCompat.Builder().apply {
     setActions(
       PlaybackStateCompat.ACTION_PLAY_PAUSE or
           PlaybackStateCompat.ACTION_PLAY or
           PlaybackStateCompat.ACTION_PAUSE
     )
+    }.build()
+  ) { _, _, new ->
+    session.setPlaybackState(new)
   }
-  private var mLastState: PlaybackStateCompat by Delegates.observable(mPlaybackStateBuilder.build()) { _, _, newState ->
-    // Update session when state changes
-    session.setPlaybackState(newState)
-  }
+
+  private val mLastPlayed = LastPlayedSetting(context)
 
   override fun onPrepareFromMediaId(mediaId: String?, extras: Bundle?) {
     if (mMediaPlayer == null) {
@@ -49,6 +53,9 @@ class LPSessionCallback(
 
     Log.v(LOG_TAG, "Player prepared.")
 
+    // Save as Last Played
+    mLastPlayed.lastPlayedMedia = mediaId
+
     // Load metadata
     val retriever = MediaMetadataRetriever().apply {
       setDataSource(mediaId)
@@ -62,6 +69,15 @@ class LPSessionCallback(
       // TODO: other metadata
     }
     session.setMetadata(metadataBuilder.build())
+
+    // Update playback state (Let's say we're paused)
+    mLastState = PlaybackStateCompat.Builder(mLastState)
+      .setState(
+        PlaybackStateCompat.STATE_PAUSED,
+        0,
+        1f
+      )
+      .build()
   }
 
   override fun onPlayFromMediaId(mediaId: String?, extras: Bundle?) {
@@ -77,33 +93,41 @@ class LPSessionCallback(
     // Start player, and update state
     mMediaPlayer?.start()
 
-    mLastState = mPlaybackStateBuilder.setState(
-      PlaybackStateCompat.STATE_PLAYING,
-      mLastState.position,
-      1f
-    ).build()
+
+    mLastState = PlaybackStateCompat.Builder(mLastState)
+      .setState(
+        PlaybackStateCompat.STATE_PLAYING,
+        mMediaPlayer?.currentPosition?.toLong() ?: 0,
+        1f
+      ).build()
+
   }
 
   override fun onPause() {
     Log.v(LOG_TAG, "onPause(): $mMediaPlayer")
 
     mMediaPlayer?.pause()
-    mLastState = mPlaybackStateBuilder.setState(
-      PlaybackStateCompat.STATE_PAUSED,
-      mLastState.position,
-      1f
-    ).build()
+
+    mLastState = PlaybackStateCompat.Builder(mLastState)
+      .setState(
+        PlaybackStateCompat.STATE_PAUSED,
+        mMediaPlayer?.currentPosition?.toLong() ?: 0,
+        1f
+      ).build()
+
+    mLastPlayed.lastPlayedPosition = mMediaPlayer?.currentPosition?.toLong() ?: 0
   }
 
   override fun onStop() {
     Log.v(LOG_TAG, "onStop(): $mMediaPlayer")
 
     mMediaPlayer?.stop()
-    mLastState = mPlaybackStateBuilder.setState(
-      PlaybackStateCompat.STATE_STOPPED,
-      mLastState.position,
-      1f
-    ).build()
+    mLastState = PlaybackStateCompat.Builder(mLastState)
+      .setState(
+        PlaybackStateCompat.STATE_STOPPED,
+        mMediaPlayer?.currentPosition?.toLong() ?: 0,
+        1f
+      ).build()
 
     mMediaPlayer?.release()
     mMediaPlayer = null
@@ -113,6 +137,12 @@ class LPSessionCallback(
     Log.v(LOG_TAG, "onSeekTo(${pos.toInt()}): $mMediaPlayer")
 
     mMediaPlayer?.seekTo(pos.toInt())
+    mLastState = PlaybackStateCompat.Builder()
+      .setState(
+        mLastState.state,
+        mMediaPlayer?.currentPosition?.toLong() ?: 0,
+        1f
+      ).build()
   }
 
   companion object {

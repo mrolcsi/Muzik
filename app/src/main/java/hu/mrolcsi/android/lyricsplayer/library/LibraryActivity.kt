@@ -50,11 +50,6 @@ class LibraryActivity : AppCompatActivity() {
     }
 
     mPlayerModel = ViewModelProviders.of(this).get(PlayerViewModel::class.java).apply {
-      currentPlaybackState.observe(this@LibraryActivity, Observer { playbackState ->
-        // Show/hide Now Playing in ActionBar
-        Log.v(TAG, "Playback State Observed")
-        mNowPlayingMenuItem?.isVisible = playbackState != null
-      })
       currentMediaMetadata.observe(this@LibraryActivity, Observer { metadata ->
         // Update cover art in ActionBar
         Log.v(TAG, "Metadata Observed")
@@ -62,7 +57,6 @@ class LibraryActivity : AppCompatActivity() {
       })
       mediaController.observe(this@LibraryActivity, Observer {
         // Update everything
-        mNowPlayingMenuItem?.isVisible = it?.playbackState != null
         mNowPlayingCoverArt?.setImageBitmap(it?.metadata?.description?.iconBitmap)
       })
     }
@@ -126,6 +120,7 @@ class LibraryActivity : AppCompatActivity() {
     }
   }
 
+  @Suppress("UNUSED_PARAMETER")
   fun requestStoragePermission(view: View? = null) {
     if (shouldShowPermissionRationale(Manifest.permission.READ_EXTERNAL_STORAGE)) {
       Log.d(TAG, "Showing rationale for permission.")
