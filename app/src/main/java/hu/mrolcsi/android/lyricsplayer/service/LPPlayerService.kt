@@ -86,8 +86,9 @@ class LPPlayerService : LPBrowserService() {
                 isForegroundService = false
 
                 // If playback has ended, also stop the service.
-                if (playbackState.state == PlaybackStateCompat.STATE_NONE) {
-                  stopSelf()
+                when (playbackState.state) {
+                  PlaybackStateCompat.STATE_NONE,
+                  PlaybackStateCompat.STATE_STOPPED -> stopSelf()
                 }
 
                 if (notification != null) {

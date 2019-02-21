@@ -136,6 +136,6 @@ class LPNotificationBuilder(private val context: Context) {
 
   companion object {
     const val NOTIFICATION_ID = 6854
-    private const val NOTIFICATION_CHANNEL = BuildConfig.APPLICATION_ID + "LPChannel"
+    private const val NOTIFICATION_CHANNEL = BuildConfig.APPLICATION_ID + ".LPChannel"
   }
 }
