@@ -1,14 +1,13 @@
 <resources>
 
   <!-- Base application theme. -->
-  <style name="FluxTheme"
-    parent="Base.Theme.AppCompat">
+  <style name="FluxTheme.Library"
+    parent="Theme.AppCompat.NoActionBar">
     <item name="colorPrimary">@color/primaryColor</item>
     <item name="colorPrimaryDark">@color/primaryDarkColor</item>
     <item name="colorAccent">@color/primaryColor</item>
     <item name="android:windowBackground">@color/backgroundColor</item>
     <item name="actionBarStyle">@style/ActionBarStyle</item>
-    <item name="android:dialogTheme">@style/DialogStyle</item>
     <item name="android:statusBarColor">?attr/colorPrimaryDark</item>
     <item name="android:navigationBarColor">?attr/colorPrimaryDark</item>
     <item name="android:colorBackground">@color/backgroundColor</item>
@@ -17,7 +16,7 @@
     <item name="android:windowContentTransitions">true</item>
   </style>
 
-  <style name="FluxTheme.FullscreenTheme"
+  <style name="FluxTheme.Player"
     parent="Theme.AppCompat.NoActionBar">
     <item name="android:windowContentTransitions">true</item>
     <item name="android:statusBarColor">@android:color/transparent</item>
@@ -47,15 +46,6 @@
     <item name="background">@color/primaryColor</item>
     <item name="android:elevation">@dimen/action_bar_elevation</item>
     <item name="elevation">@dimen/action_bar_elevation</item>
-  </style>
-
-  <!-- Dialog Style -->
-  <style name="DialogStyle"
-    parent="Base.Theme.AppCompat.Dialog">
-    <item name="android:background">@color/backgroundColor</item>
-    <item name="colorPrimary">@color/primaryColor</item>
-    <item name="colorPrimaryDark">@color/primaryDarkColor</item>
-    <item name="colorAccent">@color/primaryColor</item>
   </style>
 
 </resources>

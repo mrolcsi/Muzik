@@ -3,6 +3,9 @@ package hu.mrolcsi.android.lyricsplayer.library
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.ColorStateList
+import android.graphics.Color
+import android.graphics.PorterDuff
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
@@ -11,6 +14,7 @@ import android.view.View
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityOptionsCompat
+import androidx.core.graphics.ColorUtils
 import androidx.core.util.Pair
 import androidx.core.view.ViewCompat
 import androidx.lifecycle.Observer
@@ -20,7 +24,9 @@ import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
+import androidx.palette.graphics.Palette
 import hu.mrolcsi.android.lyricsplayer.R
+import hu.mrolcsi.android.lyricsplayer.extensions.albumArt
 import hu.mrolcsi.android.lyricsplayer.extensions.isPermissionGranted
 import hu.mrolcsi.android.lyricsplayer.extensions.requestPermission
 import hu.mrolcsi.android.lyricsplayer.extensions.shouldShowPermissionRationale
@@ -36,16 +42,18 @@ class LibraryActivity : AppCompatActivity() {
 
   private var mNowPlayingMenuItem: MenuItem? = null
   private var mNowPlayingCoverArt: ImageView? = null
+  private var mNowPlayingIcon: ImageView? = null
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_library)
+    setSupportActionBar(libraryToolbar)
 
     if (savedInstanceState == null) {
       // Initial loading
       if (!isPermissionGranted(Manifest.permission.READ_EXTERNAL_STORAGE)) {
         Log.d(LOG_TAG, "No permission yet. Request from user.")
-        navigation_bar.visibility  = View.GONE
+        navigation_bar.visibility = View.GONE
         requestStoragePermission()
       } else {
         Log.d(LOG_TAG, "Permission already granted. Loading Library.")
@@ -56,11 +64,46 @@ class LibraryActivity : AppCompatActivity() {
     mPlayerModel = ViewModelProviders.of(this).get(PlayerViewModel::class.java).apply {
       currentMediaMetadata.observe(this@LibraryActivity, Observer { metadata ->
         // Update cover art in ActionBar
-        mNowPlayingCoverArt?.setImageBitmap(metadata?.description?.iconBitmap)
-      })
-      mediaController.observe(this@LibraryActivity, Observer {
-        // Update everything
-        mNowPlayingCoverArt?.setImageBitmap(it?.metadata?.description?.iconBitmap)
+        metadata?.let {
+          mNowPlayingCoverArt?.setImageBitmap(metadata.description?.iconBitmap)
+          Palette.from(metadata.albumArt).generate { palette ->
+            palette?.dominantSwatch?.let { swatch ->
+              // Window Background, Status Bar and Navigation
+              val darkRgb = ColorUtils.setAlphaComponent(swatch.rgb, 76)
+              window?.apply {
+                statusBarColor = swatch.rgb
+                navigationBarColor = darkRgb
+              }
+              // Fragment Background
+              library_nav_host.setBackgroundColor(palette.getDarkMutedColor(Color.BLACK))
+              // Toolbar Background
+              libraryToolbar.setBackgroundColor(swatch.rgb)
+              // Toolbar Icon
+              libraryToolbar.navigationIcon?.setColorFilter(swatch.bodyTextColor, PorterDuff.Mode.SRC_IN)
+              // Title and Subtitle
+              libraryToolbar.setTitleTextColor(swatch.bodyTextColor)
+              libraryToolbar.setSubtitleTextColor(swatch.titleTextColor)
+              // Toolbar Now Playing Icon
+              mNowPlayingIcon?.imageTintList =
+                ColorStateList.valueOf(swatch.bodyTextColor)
+              // BottomNavigation Background
+              navigation_bar.setBackgroundColor(darkRgb)
+              // BottomNavigation Selected Colors
+              val navigationTintList = ColorStateList(
+                arrayOf(
+                  intArrayOf(android.R.attr.state_checked),
+                  intArrayOf(-android.R.attr.state_checked)
+                ),
+                intArrayOf(
+                  swatch.bodyTextColor,
+                  ColorUtils.setAlphaComponent(swatch.bodyTextColor, 76)
+                )
+              )
+              navigation_bar.itemIconTintList = navigationTintList
+              navigation_bar.itemTextColor = navigationTintList
+            }
+          }
+        }
       })
     }
   }
@@ -68,17 +111,6 @@ class LibraryActivity : AppCompatActivity() {
   override fun onStart() {
     super.onStart()
     mPlayerModel.connect()
-  }
-
-  override fun onResumeFragments() {
-    super.onResumeFragments()
-
-//    try {
-//      // Recreate navigation bar listeners
-//      setupNavBar(findNavController(R.id.library_nav_host))
-//    } catch (e: IllegalStateException) {
-//      // NavHost has not yet been initialized.
-//    }
   }
 
   override fun onStop() {
@@ -97,6 +129,7 @@ class LibraryActivity : AppCompatActivity() {
         with(item.actionView) {
           setOnClickListener { onOptionsItemSelected(item) }
           mNowPlayingCoverArt = this.findViewById(R.id.imgCoverArt)
+          mNowPlayingIcon = this.findViewById(R.id.imgPlay)
         }
       }
     }
@@ -163,33 +196,33 @@ class LibraryActivity : AppCompatActivity() {
       R.id.navigation_songs
     ).build()
 
-    NavigationUI.setupActionBarWithNavController(this, navController, appBarConfig)
+    NavigationUI.setupWithNavController(libraryToolbar, navController, appBarConfig)
     NavigationUI.setupWithNavController(navigation_bar, navController)
 
     navController.addOnDestinationChangedListener { _, destination, arguments ->
       when (destination.id) {
         R.id.navigation_artists -> {
-          supportActionBar?.subtitle = null
+          libraryToolbar.subtitle = null
         }
         R.id.navigation_albums -> {
-          supportActionBar?.subtitle = null
+          libraryToolbar.subtitle = null
         }
         R.id.navigation_albumsByArtist -> {
           if (arguments != null) {
             val args = AlbumsFragmentArgs.fromBundle(arguments)
-            supportActionBar?.subtitle = getString(R.string.albums_byArtist_subtitle, args.artistName)
+            libraryToolbar.subtitle = getString(R.string.albums_byArtist_subtitle, args.artistName)
           }
         }
         R.id.navigation_songs -> {
-          supportActionBar?.subtitle = null
+          libraryToolbar.subtitle = null
         }
         R.id.navigation_songsFromAlbum -> {
           if (arguments != null) {
             val args = SongsFragmentArgs.fromBundle(arguments)
             if (args.albumKey != null) {
-              supportActionBar?.subtitle = getString(R.string.songs_fromAlbum_subtitle, args.albumTitle)
+              libraryToolbar.subtitle = getString(R.string.songs_fromAlbum_subtitle, args.albumTitle)
             } else if (args.artistKey != null) {
-              supportActionBar?.subtitle = getString(R.string.albums_byArtist_subtitle, args.artistName)
+              libraryToolbar.subtitle = getString(R.string.albums_byArtist_subtitle, args.artistName)
             }
           }
         }

@@ -1,7 +1,10 @@
 package hu.mrolcsi.android.lyricsplayer.player
 
+import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.PorterDuff
 import android.media.AudioManager
 import android.os.Bundle
 import android.support.v4.media.MediaMetadataCompat
@@ -15,10 +18,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.app.NavUtils
 import androidx.core.app.TaskStackBuilder
+import androidx.core.content.ContextCompat
 import androidx.core.util.Pair
 import androidx.core.view.ViewCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.palette.graphics.Palette
 import hu.mrolcsi.android.lyricsplayer.R
 import hu.mrolcsi.android.lyricsplayer.extensions.album
 import hu.mrolcsi.android.lyricsplayer.extensions.albumArt
@@ -28,6 +33,7 @@ import hu.mrolcsi.android.lyricsplayer.extensions.secondsToTimeStamp
 import hu.mrolcsi.android.lyricsplayer.extensions.title
 import hu.mrolcsi.android.lyricsplayer.service.LPPlayerService
 import kotlinx.android.synthetic.main.activity_player.*
+import kotlinx.android.synthetic.main.activity_player.view.*
 
 class PlayerActivity : AppCompatActivity() {
 
@@ -254,7 +260,99 @@ class PlayerActivity : AppCompatActivity() {
 
     imgCoverArt.setImageBitmap(metadata.albumArt)
 
+    Palette.from(metadata.albumArt).generate { palette ->
+      applyColors(palette)
+    }
+
     sbSongProgress.max = (metadata.duration / 1000).toInt()
+  }
+
+  private fun applyColors(palette: Palette?) {
+    // Background Color
+    ValueAnimator.ofArgb(
+      playerRoot.backgroundTintList?.defaultColor ?: ContextCompat.getColor(this, R.color.backgroundColor),
+      palette?.dominantSwatch?.rgb ?: ContextCompat.getColor(this, R.color.backgroundColor)
+    ).apply {
+      duration = 300  // milliseconds
+      addUpdateListener {
+        val color = it.animatedValue as Int
+        applyBackgroundColor(color)
+      }
+      start()
+    }
+
+    // Text Color
+    ValueAnimator.ofArgb(
+      tvTitle.backgroundTintList?.defaultColor ?: Color.WHITE,
+      palette?.dominantSwatch?.bodyTextColor ?: Color.WHITE
+    ).apply {
+      duration = 300  // milliseconds
+      addUpdateListener {
+        val color = it.animatedValue as Int
+
+        applyTextColor(color)
+      }
+      start()
+    }
+
+    // TODO: applyControlColors(swatch.titleTextColor)
+
+    // Test out colors
+    view1.setBackgroundColor(palette?.getLightVibrantColor(Color.BLACK) ?: Color.BLACK)
+    view2.setBackgroundColor(palette?.getVibrantColor(Color.BLACK) ?: Color.BLACK)
+    view3.setBackgroundColor(palette?.getDarkVibrantColor(Color.BLACK) ?: Color.BLACK)
+    view4.setBackgroundColor(palette?.getDominantColor(Color.BLACK) ?: Color.BLACK)
+    view5.setBackgroundColor(palette?.getLightMutedColor(Color.BLACK) ?: Color.BLACK)
+    view6.setBackgroundColor(palette?.getMutedColor(Color.BLACK) ?: Color.BLACK)
+    view7.setBackgroundColor(palette?.getDarkMutedColor(Color.BLACK) ?: Color.BLACK)
+  }
+
+  private fun applyTextColor(color: Int) {
+    // Toolbar
+    playerToolbar.navigationIcon?.setColorFilter(color, PorterDuff.Mode.SRC_IN)
+
+    // Texts
+    tvTitle.setTextColor(color)
+    tvArtist.setTextColor(color)
+    tvAlbum.setTextColor(color)
+    tvElapsedTime.setTextColor(color)
+    tvRemainingTime.setTextColor(color)
+    tvSeekProgress.setTextColor(color)
+  }
+
+  private fun applyBackgroundColor(color: Int) {
+    // Window background
+    playerRoot.setBackgroundColor(color)
+
+    // Status bar and navigation bar
+    window.apply {
+      statusBarColor = color
+      navigationBarColor = color
+      //          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      //            // TODO: Also change button colors
+      //            window?.decorView?.apply {
+      //              val systemUiFlags = systemUiVisibility
+      //              systemUiVisibility =
+      //                if (ColorUtils.calculateLuminance(it.animatedValue as Int) < 0.5) {
+      //                  systemUiFlags or
+      //                      -View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR or -View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+      //                } else {
+      //                  systemUiFlags or
+      //                      View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+      //                }
+      //            }
+      //        }
+    }
+
+    // Seek Progress background
+    tvSeekProgress.setBackgroundColor(
+      Color.argb(
+        153,
+        Color.red(color),
+        Color.green(color),
+        Color.blue(color)
+      )
+    )
   }
 
   companion object {
