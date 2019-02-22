@@ -9,8 +9,12 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityOptionsCompat
+import androidx.core.util.Pair
+import androidx.core.view.ViewCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.navigation.ActivityNavigatorExtras
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
@@ -52,7 +56,6 @@ class LibraryActivity : AppCompatActivity() {
     mPlayerModel = ViewModelProviders.of(this).get(PlayerViewModel::class.java).apply {
       currentMediaMetadata.observe(this@LibraryActivity, Observer { metadata ->
         // Update cover art in ActionBar
-        Log.v(TAG, "Metadata Observed")
         mNowPlayingCoverArt?.setImageBitmap(metadata?.description?.iconBitmap)
       })
       mediaController.observe(this@LibraryActivity, Observer {
@@ -70,11 +73,12 @@ class LibraryActivity : AppCompatActivity() {
   override fun onResumeFragments() {
     super.onResumeFragments()
 
-    try {// Recreate navigation bar listeners
-      setupNavBar(findNavController(R.id.library_nav_host))
-    } catch (e: IllegalStateException) {
-      // NavHost has not yet been initialized.
-    }
+//    try {
+//      // Recreate navigation bar listeners
+//      setupNavBar(findNavController(R.id.library_nav_host))
+//    } catch (e: IllegalStateException) {
+//      // NavHost has not yet been initialized.
+//    }
   }
 
   override fun onStop() {
@@ -92,7 +96,7 @@ class LibraryActivity : AppCompatActivity() {
       mNowPlayingMenuItem = menu.findItem(R.id.menuNowPlaying).also { item ->
         with(item.actionView) {
           setOnClickListener { onOptionsItemSelected(item) }
-          mNowPlayingCoverArt = findViewById(R.id.imgCoverArt)
+          mNowPlayingCoverArt = this.findViewById(R.id.imgCoverArt)
         }
       }
     }
@@ -103,17 +107,16 @@ class LibraryActivity : AppCompatActivity() {
   override fun onOptionsItemSelected(item: MenuItem?): Boolean {
     return when (item?.itemId) {
       R.id.menuNowPlaying -> {
-        // TODO: Shared Element Transition
-//        val options = ActivityOptionsCompat.makeSceneTransitionAnimation(
-//          this,
-//          Pair.create(mNowPlayingCoverArt, ViewCompat.getTransitionName(mNowPlayingCoverArt!!))
-//        )
-//        val extras = ActivityNavigatorExtras(options)
-//        findNavController(R.id.library_nav_host).navigate(
-//          NavigationLibraryDirections.actionGlobalToPlayer(),
-//          extras
-//        )
-        findNavController(R.id.library_nav_host).navigate(LibraryNavigationDirections.actionGlobalToPlayer())
+        // Shared Element Transition
+        val options = ActivityOptionsCompat.makeSceneTransitionAnimation(
+          this,
+          Pair.create(mNowPlayingCoverArt, ViewCompat.getTransitionName(mNowPlayingCoverArt!!))
+        )
+        val extras = ActivityNavigatorExtras(options)
+        findNavController(R.id.library_nav_host).navigate(
+          LibraryNavigationDirections.actionGlobalToPlayer(),
+          extras
+        )
         true
       }
       else -> super.onOptionsItemSelected(item)
@@ -144,6 +147,9 @@ class LibraryActivity : AppCompatActivity() {
     supportFragmentManager.beginTransaction()
       .replace(R.id.library_nav_host, finalHost)
       .setPrimaryNavigationFragment(finalHost)
+      .runOnCommit {
+        setupNavBar(findNavController(R.id.library_nav_host))
+      }
       .commit()
   }
 

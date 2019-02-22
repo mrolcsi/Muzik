@@ -2,17 +2,19 @@ package hu.mrolcsi.android.lyricsplayer.library.artists
 
 import android.provider.MediaStore
 import android.support.v4.media.MediaBrowserCompat
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.android.lyricsplayer.R
 
-class ArtistAdapter : ListAdapter<MediaBrowserCompat.MediaItem, ArtistAdapter.ArtistHolder>(
+class ArtistsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, ArtistsAdapter.ArtistHolder>(
   object : DiffUtil.ItemCallback<MediaBrowserCompat.MediaItem>() {
     override fun areItemsTheSame(
       oldItem: MediaBrowserCompat.MediaItem,
@@ -51,16 +53,21 @@ class ArtistAdapter : ListAdapter<MediaBrowserCompat.MediaItem, ArtistAdapter.Ar
 
       itemView.setOnClickListener {
         with(it.findNavController()) {
-          when (currentDestination?.id) {
-            R.id.navigation_artists -> {
-              val direction = ArtistsFragmentDirections.actionArtistsToAlbums(
-                item.mediaId,
-                item.description.title.toString(),
-                numberOfSongs
-              )
-              navigate(direction)
-            }
+          Log.d(LOG_TAG, "Current Destination = $currentDestination")
+//          when (currentDestination?.id) {
+//            R.id.navigation_artists -> {
+          try {
+            val direction = ArtistsFragmentDirections.actionArtistsToAlbums(
+              item.mediaId,
+              item.description.title.toString(),
+              numberOfSongs
+            )
+            navigate(direction)
+          } catch (e: IllegalArgumentException) {
+            Toast.makeText(it.context, "Lost navigation.", Toast.LENGTH_SHORT).show()
           }
+//            }
+//          }
         }
       }
     }
@@ -69,5 +76,9 @@ class ArtistAdapter : ListAdapter<MediaBrowserCompat.MediaItem, ArtistAdapter.Ar
   class ArtistHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     val tvArtist: TextView? = itemView.findViewById(R.id.tvTitle)
     val tvNumOfSongs: TextView? = itemView.findViewById(R.id.tvSubtitle)
+  }
+
+  companion object {
+    private const val LOG_TAG = "ArtistsAdapter"
   }
 }

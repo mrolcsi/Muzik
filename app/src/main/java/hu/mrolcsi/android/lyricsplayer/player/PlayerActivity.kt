@@ -1,15 +1,22 @@
 package hu.mrolcsi.android.lyricsplayer.player
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.media.AudioManager
 import android.os.Bundle
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
+import android.view.MenuItem
 import android.view.View
 import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityOptionsCompat
+import androidx.core.app.NavUtils
+import androidx.core.app.TaskStackBuilder
+import androidx.core.util.Pair
+import androidx.core.view.ViewCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import hu.mrolcsi.android.lyricsplayer.R
@@ -90,6 +97,47 @@ class PlayerActivity : AppCompatActivity() {
   override fun onStop() {
     super.onStop()
     mPlayerModel.disconnect()
+  }
+
+  override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+    return when (item?.itemId) {
+      android.R.id.home -> {
+        onBackPressed()
+        true
+      }
+      else -> super.onOptionsItemSelected(item)
+    }
+  }
+
+  override fun onBackPressed() {
+    // Respond to the action bar's Up/Home button
+    val upIntent: Intent? = NavUtils.getParentActivityIntent(this)
+
+    when {
+      upIntent == null -> throw IllegalStateException("No Parent Activity Intent")
+      NavUtils.shouldUpRecreateTask(this, upIntent) -> {
+        Log.d(LOG_TAG, "Navigate back creating new stack.")
+        // Prepare options for Shared Element Transition
+        val options = ActivityOptionsCompat.makeSceneTransitionAnimation(
+          this,
+          Pair.create(imgCoverArt, ViewCompat.getTransitionName(imgCoverArt))
+        )
+        // This activity is NOT part of this app's task, so create a new task
+        // when navigating up, with a synthesized back stack.
+        TaskStackBuilder.create(this)
+          // Add all of this activity's parents to the back stack
+          .addNextIntentWithParentStack(upIntent)
+          // Navigate up to the closest parent
+          .startActivities(options.toBundle())
+      }
+      else -> {
+        Log.d(LOG_TAG, "Navigate back directly.")
+        // This activity is part of this app's task, so simply
+        // navigate up to the logical parent activity.
+        //NavUtils.navigateUpTo(this, upIntent)
+        finishAfterTransition()
+      }
+    }
   }
 
   //endregion

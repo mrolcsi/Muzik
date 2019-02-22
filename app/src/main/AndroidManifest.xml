@@ -39,7 +39,6 @@
 
     <activity
       android:configChanges="orientation|keyboardHidden|screenSize"
-      android:launchMode="singleInstance"
       android:name=".player.PlayerActivity"
       android:parentActivityName=".library.LibraryActivity"
       android:theme="@style/FluxTheme.FullscreenTheme">

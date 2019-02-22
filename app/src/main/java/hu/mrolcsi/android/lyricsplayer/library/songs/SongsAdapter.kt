@@ -2,10 +2,12 @@ package hu.mrolcsi.android.lyricsplayer.library.songs
 
 import android.provider.MediaStore
 import android.support.v4.media.MediaBrowserCompat
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -48,11 +50,16 @@ class SongsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, SongsAdapter.Song
 
     holder.itemView.setOnClickListener {
       with(it.findNavController()) {
-        when (currentDestination?.id) {
-          R.id.navigation_songs, R.id.navigation_songsFromAlbum -> {
-            navigate(SongsFragmentDirections.actionSongsToPlayer(item.mediaId))
-          }
+        Log.d(LOG_TAG, "Current Destination = $currentDestination")
+//        when (currentDestination?.id) {
+//          R.id.navigation_songs, R.id.navigation_songsFromAlbum -> {
+        try {
+          navigate(SongsFragmentDirections.actionSongsToPlayer(item.mediaId))
+        } catch (e: IllegalArgumentException) {
+          Toast.makeText(it.context, "Lost navigation.", Toast.LENGTH_SHORT).show()
         }
+//          }
+//        }
       }
     }
   }
@@ -61,5 +68,9 @@ class SongsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, SongsAdapter.Song
     val tvTrackNumber: TextView? = itemView.findViewById(R.id.tvTrackNumber)
     val tvTitle: TextView? = itemView.findViewById(R.id.tvTitle)
     val tvArtist: TextView? = itemView.findViewById(R.id.tvSubtitle)
+  }
+
+  companion object {
+    private const val LOG_TAG = "SongsAdapter"
   }
 }

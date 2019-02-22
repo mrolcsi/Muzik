@@ -2,10 +2,12 @@ package hu.mrolcsi.android.lyricsplayer.library.albums
 
 import android.provider.MediaStore
 import android.support.v4.media.MediaBrowserCompat
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -55,17 +57,22 @@ class AlbumsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, AlbumsAdapter.Al
     } else {
       holder.itemView.setOnClickListener {
         with(it.findNavController()) {
-          when (currentDestination?.id) {
-            R.id.navigation_albums, R.id.navigation_albumsByArtist -> {
-              val direction = AlbumsFragmentDirections.actionAlbumsToSongs(
-                null,
-                null,
-                item.mediaId,
-                item.description.title.toString()
-              )
-              navigate(direction)
-            }
+          Log.d(LOG_TAG, "Current Destination = $currentDestination")
+//          when (currentDestination?.id) {
+//            R.id.navigation_albums, R.id.navigation_albumsByArtist -> {
+          try {
+            val direction = AlbumsFragmentDirections.actionAlbumsToSongs(
+              null,
+              null,
+              item.mediaId,
+              item.description.title.toString()
+            )
+            navigate(direction)
+          } catch (e: IllegalArgumentException) {
+            Toast.makeText(it.context, "Lost navigation.", Toast.LENGTH_SHORT).show()
           }
+//            }
+//          }
         }
       }
     }
@@ -77,6 +84,8 @@ class AlbumsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, AlbumsAdapter.Al
   }
 
   companion object {
+    private const val LOG_TAG = "AlbumsAdapter"
+
     const val MEDIA_ID_ALL_SONGS = BuildConfig.APPLICATION_ID + ".ALL_SONGS"
   }
 }

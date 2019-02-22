@@ -14,7 +14,7 @@ import kotlinx.android.synthetic.main.fragment_browser.*
 
 class ArtistsFragment : Fragment() {
 
-  private val mArtistAdapter = ArtistAdapter()
+  private val mArtistAdapter = ArtistsAdapter()
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
