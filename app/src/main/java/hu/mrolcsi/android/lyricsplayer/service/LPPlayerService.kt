@@ -33,12 +33,12 @@ class LPPlayerService : LPBrowserService() {
       .addNextIntentWithParentStack(Intent(this, PlayerActivity::class.java))
       .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)
 
+    // prepare notification
+    mNotificationBuilder = LPNotificationBuilder(this)
+
     // Create a MediaSessionCompat
     mMediaSession = MediaSessionCompat(this, LOG_TAG).apply {
       setSessionActivity(playerActivityPendingIntent)
-
-      // Enable session.
-      isActive = true
 
       // Enable callbacks from MediaButtons and TransportControls
       setFlags(
@@ -47,6 +47,7 @@ class LPPlayerService : LPBrowserService() {
       )
 
       // MySessionCallback() has methods that handle callbacks from a media mediaController
+      // Pass the service as an argument, so the service can be handled from the callbacks.
       setCallback(LPSessionCallback(applicationContext, this))
 
       // Set the session's token so that client activities can communicate with it.
@@ -112,13 +113,9 @@ class LPPlayerService : LPBrowserService() {
         }
       }
     }
-
-    // prepare notification
-    mNotificationBuilder = LPNotificationBuilder(this)
   }
 
   override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-    Log.d(LOG_TAG, "Intent received: $intent")
     MediaButtonReceiver.handleIntent(mMediaSession, intent)
     return super.onStartCommand(intent, flags, startId)
   }

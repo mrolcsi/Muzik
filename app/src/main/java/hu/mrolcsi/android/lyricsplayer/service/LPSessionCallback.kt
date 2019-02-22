@@ -1,15 +1,21 @@
 package hu.mrolcsi.android.lyricsplayer.service
 
+import android.annotation.TargetApi
 import android.content.Context
 import android.graphics.BitmapFactory
+import android.media.AudioAttributes
+import android.media.AudioFocusRequest
+import android.media.AudioManager
 import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
+import androidx.media.AudioAttributesCompat
 import hu.mrolcsi.android.lyricsplayer.extensions.album
 import hu.mrolcsi.android.lyricsplayer.extensions.albumArt
 import hu.mrolcsi.android.lyricsplayer.extensions.artist
@@ -20,12 +26,13 @@ import hu.mrolcsi.android.lyricsplayer.service.LPPlayerService.Companion.ACTION_
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.properties.Delegates
 
-class LPSessionCallback(
-  context: Context,
+open class LPSessionCallback(
+  private val context: Context,
   private val session: MediaSessionCompat
 ) : MediaSessionCompat.Callback() {
 
-  private var mMediaPlayer: MediaPlayer? = null
+  // Player
+  private var mMediaPlayer: MediaPlayer = MediaPlayer().apply { setOnCompletionListener { onStop() } }
   private var mLastState by Delegates.observable(
     PlaybackStateCompat.Builder().apply {
       setActions(
@@ -40,16 +47,16 @@ class LPSessionCallback(
 
   private val mLastPlayed = LastPlayedSetting(context)
 
+  // Player state polling
   private val mUpdaterEnabled = AtomicBoolean(false)
   private val mUpdateHandler = Handler()
   private val mUpdateRunnable = object : Runnable {
     override fun run() {
-      mLastState = PlaybackStateCompat.Builder(mLastState)
-        .setState(
-          mLastState.state,
-          mMediaPlayer?.currentPosition?.toLong() ?: 0,
-          1f
-        ).build()
+      mLastState = PlaybackStateCompat.Builder(mLastState).setState(
+        mLastState.state,
+        mMediaPlayer.currentPosition.toLong(),
+        1f
+      ).build()
 
       if (mUpdaterEnabled.get()) {
         mUpdateHandler.postDelayed(this, UPDATE_FREQUENCY)
@@ -57,20 +64,31 @@ class LPSessionCallback(
     }
   }
 
-  override fun onPrepareFromMediaId(mediaId: String?, extras: Bundle?) {
-    if (mMediaPlayer == null) {
-      mMediaPlayer = MediaPlayer()
+  // Audio focus handling
+  private lateinit var mAudioFocusRequest: AudioFocusRequest
+  private val mAudioFocusChangeListener = AudioManager.OnAudioFocusChangeListener {
+    when (it) {
+      AudioManager.AUDIOFOCUS_LOSS -> onPause()
+      else -> {
+        // TODO: change playback state depending on focus?
+        //    Like, lower volume when a notification sound plays?
+      }
     }
+  }
+  private val mBecomingNoisyReceiver by lazy {
+    BecomingNoisyReceiver(context, session.sessionToken)
+  }
 
+  override fun onPrepareFromMediaId(mediaId: String?, extras: Bundle?) {
     // Reset media player before loading
-    mMediaPlayer?.stop()
-    mMediaPlayer?.reset()
+    mMediaPlayer.stop()
+    mMediaPlayer.reset()
 
     Log.v(LOG_TAG, "Loading media into Player: $mediaId")
 
     // Using mediaId as path
-    mMediaPlayer?.setDataSource(mediaId)
-    mMediaPlayer?.prepare()  // or prepareAsync()?
+    mMediaPlayer.setDataSource(mediaId)
+    mMediaPlayer.prepare()  // or prepareAsync()?
 
     Log.v(LOG_TAG, "Player prepared.")
 
@@ -92,12 +110,11 @@ class LPSessionCallback(
     session.setMetadata(metadataBuilder.build())
 
     // Update playback state (Let's say we're paused)
-    mLastState = PlaybackStateCompat.Builder(mLastState)
-      .setState(
-        PlaybackStateCompat.STATE_PAUSED,
-        0,
-        1f
-      )
+    mLastState = PlaybackStateCompat.Builder(mLastState).setState(
+      PlaybackStateCompat.STATE_PAUSED,
+      0,
+      1f
+    )
       .build()
   }
 
@@ -121,63 +138,132 @@ class LPSessionCallback(
   override fun onPlay() {
     Log.v(LOG_TAG, "onPlay(): $mMediaPlayer")
 
-    // Start player, and update state
-    mMediaPlayer?.start()
+    val result = if (Build.VERSION.SDK_INT >= 26) {
+      requestAudioFocusApi26()
+    } else {
+      requestAudioFocusApi21()
+    }
 
+    if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+      // Set the session active
+      session.isActive = true
 
-    mLastState = PlaybackStateCompat.Builder(mLastState)
-      .setState(
+      // start the player (custom call)
+      mMediaPlayer.start()
+
+      // Register BECOME_NOISY BroadcastReceiver
+      mBecomingNoisyReceiver.register()
+
+      // Update playback state
+      mLastState = PlaybackStateCompat.Builder(mLastState).setState(
         PlaybackStateCompat.STATE_PLAYING,
-        mMediaPlayer?.currentPosition?.toLong() ?: 0,
+        mMediaPlayer.currentPosition.toLong(),
         1f
       ).build()
+    }
+  }
+
+  @Suppress("DEPRECATION")
+  @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+  private fun requestAudioFocusApi21(): Int {
+    val am = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+
+    // Request audio focus for playback, this registers the afChangeListener
+    return am.requestAudioFocus(
+      mAudioFocusChangeListener,
+      AudioAttributesCompat.CONTENT_TYPE_MUSIC,
+      AudioManager.AUDIOFOCUS_GAIN
+    )
+  }
+
+  @TargetApi(Build.VERSION_CODES.O)
+  private fun requestAudioFocusApi26(): Int {
+    val am = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+
+    // Request audio focus for playback, this registers the afChangeListener
+    mAudioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN).run {
+      setOnAudioFocusChangeListener(mAudioFocusChangeListener)
+      setAudioAttributes(AudioAttributes.Builder().run {
+        setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+        build()
+      })
+      build()
+    }
+    return am.requestAudioFocus(mAudioFocusRequest)
   }
 
   override fun onPause() {
     Log.v(LOG_TAG, "onPause(): $mMediaPlayer")
 
-    mMediaPlayer?.pause()
+    // pause the player (custom call)
+    mMediaPlayer.pause()
 
-    mLastState = PlaybackStateCompat.Builder(mLastState)
-      .setState(
-        PlaybackStateCompat.STATE_PAUSED,
-        mMediaPlayer?.currentPosition?.toLong() ?: 0,
-        1f
-      ).build()
+    // unregister BECOME_NOISY BroadcastReceiver
+    mBecomingNoisyReceiver.unregister()
 
-    mLastPlayed.lastPlayedPosition = mMediaPlayer?.currentPosition?.toLong() ?: 0
+    // Update metadata and state
+    mLastState = PlaybackStateCompat.Builder(mLastState).setState(
+      PlaybackStateCompat.STATE_PAUSED,
+      mMediaPlayer.currentPosition.toLong(),
+      1f
+    ).build()
+    mLastPlayed.lastPlayedPosition = mMediaPlayer.currentPosition.toLong()
   }
 
   override fun onStop() {
     Log.v(LOG_TAG, "onStop(): $mMediaPlayer")
 
-    mMediaPlayer?.stop()
-    mLastState = PlaybackStateCompat.Builder(mLastState)
-      .setState(
-        PlaybackStateCompat.STATE_STOPPED,
-        mMediaPlayer?.currentPosition?.toLong() ?: 0,
-        1f
-      ).build()
+    // Abandon audio focus
+    if (Build.VERSION.SDK_INT >= 26) {
+      abandonAudioFocusApi26()
+    } else {
+      abandonAudioFocusApi21()
+    }
+
+    // unregister BECOME_NOISY BroadcastReceiver
+    mBecomingNoisyReceiver.unregister()
+
+    // Set the session inactive  (and update metadata and state)
+    session.isActive = false
+
+    mLastState = PlaybackStateCompat.Builder(mLastState).setState(
+      PlaybackStateCompat.STATE_STOPPED,
+      0,
+      1f
+    ).build()
+    mLastPlayed.lastPlayedPosition = 0
+
+    // stop the player (custom call)
+    if (mMediaPlayer.isPlaying) {
+      mMediaPlayer.stop()
+    }
 
     // Cancel Handler
     mUpdateHandler.removeCallbacks(mUpdateRunnable)
+  }
 
-    mLastPlayed.lastPlayedPosition = mMediaPlayer?.currentPosition?.toLong() ?: 0
+  @Suppress("DEPRECATION")
+  @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+  private fun abandonAudioFocusApi21(): Int {
+    val am = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+    return am.abandonAudioFocus(mAudioFocusChangeListener)
+  }
 
-    mMediaPlayer?.release()
-    mMediaPlayer = null
+  @TargetApi(Build.VERSION_CODES.O)
+  private fun abandonAudioFocusApi26(): Int {
+    val am = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+    return am.abandonAudioFocusRequest(mAudioFocusRequest)
   }
 
   override fun onSeekTo(pos: Long) {
     Log.v(LOG_TAG, "onSeekTo(${pos.toInt()}): $mMediaPlayer")
 
-    mMediaPlayer?.seekTo(pos.toInt())
-    mLastState = PlaybackStateCompat.Builder()
-      .setState(
-        mLastState.state,
-        mMediaPlayer?.currentPosition?.toLong() ?: 0,
-        1f
-      ).build()
+    mMediaPlayer.seekTo(pos.toInt())
+    mLastState = PlaybackStateCompat.Builder(mLastState).setState(
+      mLastState.state,
+      mMediaPlayer.currentPosition.toLong(),
+      1f
+    ).build()
   }
 
   companion object {
