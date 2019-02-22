@@ -1,6 +1,7 @@
 package hu.mrolcsi.android.lyricsplayer.library
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
@@ -14,19 +15,18 @@ import androidx.core.util.Pair
 import androidx.core.view.ViewCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import androidx.navigation.ActivityNavigatorExtras
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
-import hu.mrolcsi.android.lyricsplayer.LibraryNavigationDirections
 import hu.mrolcsi.android.lyricsplayer.R
 import hu.mrolcsi.android.lyricsplayer.extensions.isPermissionGranted
 import hu.mrolcsi.android.lyricsplayer.extensions.requestPermission
 import hu.mrolcsi.android.lyricsplayer.extensions.shouldShowPermissionRationale
 import hu.mrolcsi.android.lyricsplayer.library.albums.AlbumsFragmentArgs
 import hu.mrolcsi.android.lyricsplayer.library.songs.SongsFragmentArgs
+import hu.mrolcsi.android.lyricsplayer.player.PlayerActivity
 import hu.mrolcsi.android.lyricsplayer.player.PlayerViewModel
 import kotlinx.android.synthetic.main.activity_library.*
 
@@ -44,11 +44,11 @@ class LibraryActivity : AppCompatActivity() {
     if (savedInstanceState == null) {
       // Initial loading
       if (!isPermissionGranted(Manifest.permission.READ_EXTERNAL_STORAGE)) {
-        Log.d(TAG, "No permission yet. Request from user.")
+        Log.d(LOG_TAG, "No permission yet. Request from user.")
         navigation_bar.visibility  = View.GONE
         requestStoragePermission()
       } else {
-        Log.d(TAG, "Permission already granted. Loading Library.")
+        Log.d(LOG_TAG, "Permission already granted. Loading Library.")
         createNavHost()
       }
     }
@@ -112,11 +112,12 @@ class LibraryActivity : AppCompatActivity() {
           this,
           Pair.create(mNowPlayingCoverArt, ViewCompat.getTransitionName(mNowPlayingCoverArt!!))
         )
-        val extras = ActivityNavigatorExtras(options)
-        findNavController(R.id.library_nav_host).navigate(
-          LibraryNavigationDirections.actionGlobalToPlayer(),
-          extras
+        startActivity(
+          Intent(this, PlayerActivity::class.java),
+          options.toBundle()
         )
+        // Navigation Controller loses current destination
+        // when opening Activity through NavController.navigate(destination)
         true
       }
       else -> super.onOptionsItemSelected(item)
@@ -126,19 +127,21 @@ class LibraryActivity : AppCompatActivity() {
   @Suppress("UNUSED_PARAMETER")
   fun requestStoragePermission(view: View? = null) {
     if (shouldShowPermissionRationale(Manifest.permission.READ_EXTERNAL_STORAGE)) {
-      Log.d(TAG, "Showing rationale for permission.")
+      Log.d(LOG_TAG, "Showing rationale for permission.")
 
       groupPermissionHint.visibility = View.VISIBLE
       navigation_bar.visibility = View.GONE
 
       requestPermission(Manifest.permission.READ_EXTERNAL_STORAGE, PERMISSION_REQUEST_CODE_EXTERNAL_STORAGE)
     } else {
-      Log.d(TAG, "No need to show rationale. Request permission.")
+      Log.d(LOG_TAG, "No need to show rationale. Request permission.")
       requestPermission(Manifest.permission.READ_EXTERNAL_STORAGE, PERMISSION_REQUEST_CODE_EXTERNAL_STORAGE)
     }
   }
 
   private fun createNavHost() {
+    Log.d(LOG_TAG, "Creating navigation host.")
+
     // hide hints, show navigation
     groupPermissionHint.visibility = View.GONE
 
@@ -159,6 +162,7 @@ class LibraryActivity : AppCompatActivity() {
       R.id.navigation_albums,
       R.id.navigation_songs
     ).build()
+
     NavigationUI.setupActionBarWithNavController(this, navController, appBarConfig)
     NavigationUI.setupWithNavController(navigation_bar, navController)
 
@@ -204,12 +208,12 @@ class LibraryActivity : AppCompatActivity() {
         if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
           // permission was granted, yay! Do the
           // contacts-related task you need to do.
-          Log.d(TAG, "Permission granted. Loading Library.")
+          Log.d(LOG_TAG, "Permission granted. Loading Library.")
           createNavHost()
         } else {
           // permission denied, boo! Disable the
           // functionality that depends on this permission.
-          Log.d(TAG, "Permission denied.")
+          Log.d(LOG_TAG, "Permission denied.")
           groupPermissionHint.visibility = View.VISIBLE
         }
         return
@@ -224,7 +228,7 @@ class LibraryActivity : AppCompatActivity() {
   }
 
   companion object {
-    const val TAG = "LibraryActivity"
+    const val LOG_TAG = "LibraryActivity"
 
     const val PERMISSION_REQUEST_CODE_EXTERNAL_STORAGE = 9514
   }

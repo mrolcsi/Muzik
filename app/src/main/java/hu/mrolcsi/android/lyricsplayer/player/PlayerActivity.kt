@@ -113,15 +113,16 @@ class PlayerActivity : AppCompatActivity() {
     // Respond to the action bar's Up/Home button
     val upIntent: Intent? = NavUtils.getParentActivityIntent(this)
 
+    // Prepare options for Shared Element Transition
+    val options = ActivityOptionsCompat.makeSceneTransitionAnimation(
+      this,
+      Pair.create(imgCoverArt, ViewCompat.getTransitionName(imgCoverArt))
+    )
+
     when {
       upIntent == null -> throw IllegalStateException("No Parent Activity Intent")
       NavUtils.shouldUpRecreateTask(this, upIntent) -> {
         Log.d(LOG_TAG, "Navigate back creating new stack.")
-        // Prepare options for Shared Element Transition
-        val options = ActivityOptionsCompat.makeSceneTransitionAnimation(
-          this,
-          Pair.create(imgCoverArt, ViewCompat.getTransitionName(imgCoverArt))
-        )
         // This activity is NOT part of this app's task, so create a new task
         // when navigating up, with a synthesized back stack.
         TaskStackBuilder.create(this)
@@ -132,6 +133,7 @@ class PlayerActivity : AppCompatActivity() {
       }
       else -> {
         Log.d(LOG_TAG, "Navigate back directly.")
+        // TODO: Create Shared Element Transition
         // This activity is part of this app's task, so simply
         // navigate up to the logical parent activity.
         //NavUtils.navigateUpTo(this, upIntent)
