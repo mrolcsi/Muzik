@@ -96,20 +96,8 @@
                       <LayoutPositions>
                         <option name="myPosition">
                           <Point>
-                            <option name="x" value="668" />
-                            <option name="y" value="-34" />
-                          </Point>
-                        </option>
-                      </LayoutPositions>
-                    </value>
-                  </entry>
-                  <entry key="navigation_playerFromSongs">
-                    <value>
-                      <LayoutPositions>
-                        <option name="myPosition">
-                          <Point>
-                            <option name="x" value="671" />
-                            <option name="y" value="304" />
+                            <option name="x" value="667" />
+                            <option name="y" value="268" />
                           </Point>
                         </option>
                       </LayoutPositions>

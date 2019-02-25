@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
-import android.graphics.Color
 import android.graphics.PorterDuff
 import android.os.Bundle
 import android.util.Log
@@ -24,9 +23,7 @@ import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
-import androidx.palette.graphics.Palette
 import hu.mrolcsi.android.lyricsplayer.R
-import hu.mrolcsi.android.lyricsplayer.extensions.albumArt
 import hu.mrolcsi.android.lyricsplayer.extensions.isPermissionGranted
 import hu.mrolcsi.android.lyricsplayer.extensions.requestPermission
 import hu.mrolcsi.android.lyricsplayer.extensions.shouldShowPermissionRationale
@@ -34,6 +31,8 @@ import hu.mrolcsi.android.lyricsplayer.library.albums.AlbumsFragmentArgs
 import hu.mrolcsi.android.lyricsplayer.library.songs.SongsFragmentArgs
 import hu.mrolcsi.android.lyricsplayer.player.PlayerActivity
 import hu.mrolcsi.android.lyricsplayer.player.PlayerViewModel
+import hu.mrolcsi.android.lyricsplayer.theme.Theme
+import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
 import kotlinx.android.synthetic.main.activity_library.*
 
 class LibraryActivity : AppCompatActivity() {
@@ -43,6 +42,8 @@ class LibraryActivity : AppCompatActivity() {
   private var mNowPlayingMenuItem: MenuItem? = null
   private var mNowPlayingCoverArt: ImageView? = null
   private var mNowPlayingIcon: ImageView? = null
+
+  private var mNavBarReady = false
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -62,55 +63,39 @@ class LibraryActivity : AppCompatActivity() {
     }
 
     mPlayerModel = ViewModelProviders.of(this).get(PlayerViewModel::class.java).apply {
+      mediaController.observe(this@LibraryActivity, Observer {
+        // Update everything
+        mNowPlayingMenuItem?.isVisible = it?.playbackState != null
+        mNowPlayingCoverArt?.setImageBitmap(it?.metadata?.description?.iconBitmap)
+      })
+      currentPlaybackState.observe(this@LibraryActivity, Observer { playbackState ->
+        // Show/hide Now Playing in ActionBar
+        mNowPlayingMenuItem?.isVisible = playbackState != null
+      })
       currentMediaMetadata.observe(this@LibraryActivity, Observer { metadata ->
         // Update cover art in ActionBar
         metadata?.let {
           mNowPlayingCoverArt?.setImageBitmap(metadata.description?.iconBitmap)
-          Palette.from(metadata.albumArt).generate { palette ->
-            palette?.dominantSwatch?.let { swatch ->
-              // Window Background, Status Bar and Navigation
-              val darkRgb = ColorUtils.setAlphaComponent(swatch.rgb, 76)
-              window?.apply {
-                statusBarColor = swatch.rgb
-                navigationBarColor = darkRgb
-              }
-              // Fragment Background
-              library_nav_host.setBackgroundColor(palette.getDarkMutedColor(Color.BLACK))
-              // Toolbar Background
-              libraryToolbar.setBackgroundColor(swatch.rgb)
-              // Toolbar Icon
-              libraryToolbar.navigationIcon?.setColorFilter(swatch.bodyTextColor, PorterDuff.Mode.SRC_IN)
-              // Title and Subtitle
-              libraryToolbar.setTitleTextColor(swatch.bodyTextColor)
-              libraryToolbar.setSubtitleTextColor(swatch.titleTextColor)
-              // Toolbar Now Playing Icon
-              mNowPlayingIcon?.imageTintList =
-                ColorStateList.valueOf(swatch.bodyTextColor)
-              // BottomNavigation Background
-              navigation_bar.setBackgroundColor(darkRgb)
-              // BottomNavigation Selected Colors
-              val navigationTintList = ColorStateList(
-                arrayOf(
-                  intArrayOf(android.R.attr.state_checked),
-                  intArrayOf(-android.R.attr.state_checked)
-                ),
-                intArrayOf(
-                  swatch.bodyTextColor,
-                  ColorUtils.setAlphaComponent(swatch.bodyTextColor, 76)
-                )
-              )
-              navigation_bar.itemIconTintList = navigationTintList
-              navigation_bar.itemTextColor = navigationTintList
-            }
-          }
         }
       })
     }
+
+    ThemeManager.currentTheme.observe(this@LibraryActivity, Observer {
+      applyColors(it)
+    })
   }
 
   override fun onStart() {
     super.onStart()
     mPlayerModel.connect()
+  }
+
+  override fun onResumeFragments() {
+    super.onResumeFragments()
+
+    if (!mNavBarReady) {
+      setupNavBar(findNavController(R.id.library_nav_host))
+    }
   }
 
   override fun onStop() {
@@ -228,6 +213,8 @@ class LibraryActivity : AppCompatActivity() {
         }
       }
     }
+
+    mNavBarReady = true
   }
 
   override fun onSupportNavigateUp(): Boolean {
@@ -257,6 +244,52 @@ class LibraryActivity : AppCompatActivity() {
       else -> {
         // Ignore all other requests.
       }
+    }
+  }
+
+  private fun applyColors(theme: Theme) {
+
+    // TODO: animate changes
+
+    // Window Background, Status Bar and Navigation Bar
+    window?.apply {
+      statusBarColor = theme.backgroundColor
+      navigationBarColor = theme.darkBackgroundColor
+      decorView.setBackgroundColor(theme.darkerBackgroundColor)
+    }
+
+    with(libraryToolbar) {
+      // Toolbar Background
+      setBackgroundColor(theme.backgroundColor)
+      // Toolbar Icon
+      navigationIcon?.setColorFilter(theme.foregroundColor, PorterDuff.Mode.SRC_IN)
+      // Title and Subtitle
+      setTitleTextColor(theme.foregroundColor)
+      setSubtitleTextColor(theme.foregroundColor)
+    }
+    // Toolbar Now Playing Icon
+    mNowPlayingIcon?.imageTintList =
+      ColorStateList.valueOf(theme.foregroundColor)
+
+    // Fragment Background
+    //library_nav_host.setBackgroundColor(theme.darkBackgroundColor)
+
+    with(navigation_bar) {
+      // BottomNavigation Background
+      setBackgroundColor(theme.darkBackgroundColor)
+      // BottomNavigation Selected Colors
+      val navigationTintList = ColorStateList(
+        arrayOf(
+          intArrayOf(android.R.attr.state_checked),
+          intArrayOf(-android.R.attr.state_checked)
+        ),
+        intArrayOf(
+          theme.darkForegroundColor,
+          ColorUtils.setAlphaComponent(theme.darkForegroundColor, (255 * 0.5).toInt())
+        )
+      )
+      itemIconTintList = navigationTintList
+      itemTextColor = navigationTintList
     }
   }
 

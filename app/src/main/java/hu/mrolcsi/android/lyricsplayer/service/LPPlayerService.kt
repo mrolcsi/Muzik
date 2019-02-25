@@ -10,7 +10,9 @@ import android.util.Log
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.TaskStackBuilder
 import androidx.media.session.MediaButtonReceiver
+import hu.mrolcsi.android.lyricsplayer.extensions.albumArt
 import hu.mrolcsi.android.lyricsplayer.player.PlayerActivity
+import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
 
 
 class LPPlayerService : LPBrowserService() {
@@ -55,7 +57,12 @@ class LPPlayerService : LPBrowserService() {
 
       controller.registerCallback(object : MediaControllerCompat.Callback() {
         override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
-          controller.playbackState?.let { updateNotification(it) }
+          controller.playbackState?.let {
+            updateNotification(it)
+            if (metadata?.albumArt != null) {
+              ThemeManager.update(metadata.albumArt)
+            } // TODO: else -> create theme from placeholder
+          }
         }
 
         override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {

@@ -23,7 +23,6 @@ import androidx.core.util.Pair
 import androidx.core.view.ViewCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import androidx.palette.graphics.Palette
 import hu.mrolcsi.android.lyricsplayer.R
 import hu.mrolcsi.android.lyricsplayer.extensions.album
 import hu.mrolcsi.android.lyricsplayer.extensions.albumArt
@@ -32,8 +31,11 @@ import hu.mrolcsi.android.lyricsplayer.extensions.duration
 import hu.mrolcsi.android.lyricsplayer.extensions.secondsToTimeStamp
 import hu.mrolcsi.android.lyricsplayer.extensions.title
 import hu.mrolcsi.android.lyricsplayer.service.LPPlayerService
+import hu.mrolcsi.android.lyricsplayer.theme.Theme
+import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
 import kotlinx.android.synthetic.main.activity_player.*
 import kotlinx.android.synthetic.main.activity_player.view.*
+import kotlin.math.roundToInt
 
 class PlayerActivity : AppCompatActivity() {
 
@@ -88,6 +90,11 @@ class PlayerActivity : AppCompatActivity() {
         }
       })
     }
+
+    // Apply changes in theme on-the-fly
+    ThemeManager.currentTheme.observe(this@PlayerActivity, Observer { theme ->
+      applyTheme(theme)
+    })
   }
 
   override fun onStart() {
@@ -260,20 +267,18 @@ class PlayerActivity : AppCompatActivity() {
 
     imgCoverArt.setImageBitmap(metadata.albumArt)
 
-    Palette.from(metadata.albumArt).generate { palette ->
-      applyColors(palette)
-    }
-
     sbSongProgress.max = (metadata.duration / 1000).toInt()
   }
 
-  private fun applyColors(palette: Palette?) {
+  private fun applyTheme(theme: Theme) {
+    val animationDuration: Long = 500
+
     // Background Color
     ValueAnimator.ofArgb(
-      playerRoot.backgroundTintList?.defaultColor ?: ContextCompat.getColor(this, R.color.backgroundColor),
-      palette?.dominantSwatch?.rgb ?: ContextCompat.getColor(this, R.color.backgroundColor)
+      ThemeManager.previousTheme?.backgroundColor ?: ContextCompat.getColor(this, R.color.backgroundColor),
+      theme.backgroundColor
     ).apply {
-      duration = 300  // milliseconds
+      duration = animationDuration  // milliseconds
       addUpdateListener {
         val color = it.animatedValue as Int
         applyBackgroundColor(color)
@@ -283,10 +288,10 @@ class PlayerActivity : AppCompatActivity() {
 
     // Text Color
     ValueAnimator.ofArgb(
-      tvTitle.backgroundTintList?.defaultColor ?: Color.WHITE,
-      palette?.dominantSwatch?.bodyTextColor ?: Color.WHITE
+      ThemeManager.previousTheme?.foregroundColor ?: Color.WHITE,
+      theme.foregroundColor
     ).apply {
-      duration = 300  // milliseconds
+      duration = animationDuration  // milliseconds
       addUpdateListener {
         val color = it.animatedValue as Int
 
@@ -298,13 +303,13 @@ class PlayerActivity : AppCompatActivity() {
     // TODO: applyControlColors(swatch.titleTextColor)
 
     // Test out colors
-    view1.setBackgroundColor(palette?.getLightVibrantColor(Color.BLACK) ?: Color.BLACK)
-    view2.setBackgroundColor(palette?.getVibrantColor(Color.BLACK) ?: Color.BLACK)
-    view3.setBackgroundColor(palette?.getDarkVibrantColor(Color.BLACK) ?: Color.BLACK)
-    view4.setBackgroundColor(palette?.getDominantColor(Color.BLACK) ?: Color.BLACK)
-    view5.setBackgroundColor(palette?.getLightMutedColor(Color.BLACK) ?: Color.BLACK)
-    view6.setBackgroundColor(palette?.getMutedColor(Color.BLACK) ?: Color.BLACK)
-    view7.setBackgroundColor(palette?.getDarkMutedColor(Color.BLACK) ?: Color.BLACK)
+    view1.setBackgroundColor(theme.palette.getLightVibrantColor(Color.BLACK))
+    view2.setBackgroundColor(theme.palette.getVibrantColor(Color.BLACK))
+    view3.setBackgroundColor(theme.palette.getDarkVibrantColor(Color.BLACK))
+    view4.setBackgroundColor(theme.palette.getDominantColor(Color.BLACK))
+    view5.setBackgroundColor(theme.palette.getLightMutedColor(Color.BLACK))
+    view6.setBackgroundColor(theme.palette.getMutedColor(Color.BLACK))
+    view7.setBackgroundColor(theme.palette.getDarkMutedColor(Color.BLACK))
   }
 
   private fun applyTextColor(color: Int) {
@@ -329,7 +334,6 @@ class PlayerActivity : AppCompatActivity() {
       statusBarColor = color
       navigationBarColor = color
       //          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-      //            // TODO: Also change button colors
       //            window?.decorView?.apply {
       //              val systemUiFlags = systemUiVisibility
       //              systemUiVisibility =
@@ -347,7 +351,7 @@ class PlayerActivity : AppCompatActivity() {
     // Seek Progress background
     tvSeekProgress.setBackgroundColor(
       Color.argb(
-        153,
+        (255 * 0.5).roundToInt(),
         Color.red(color),
         Color.green(color),
         Color.blue(color)
