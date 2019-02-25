@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.android.lyricsplayer.R
+import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
 import kotlinx.android.synthetic.main.fragment_browser.*
 
 class ArtistsFragment : Fragment() {
@@ -25,6 +26,11 @@ class ArtistsFragment : Fragment() {
         mArtistAdapter.submitList(artists)
       })
     }
+
+    ThemeManager.currentTheme.observe(this, Observer {
+      // Tell adapter to reload its views
+      mArtistAdapter.notifyDataSetChanged()
+    })
   }
 
   override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {

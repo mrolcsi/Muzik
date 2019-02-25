@@ -11,6 +11,7 @@ import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.android.lyricsplayer.R
+import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
 import kotlinx.android.synthetic.main.fragment_browser.*
 
 class SongsFragment : Fragment() {
@@ -30,6 +31,11 @@ class SongsFragment : Fragment() {
         mSongsAdapter.submitList(songs)
       })
     }
+
+    ThemeManager.currentTheme.observe(this, Observer {
+      // Tell adapter to reload its views
+      mSongsAdapter.notifyDataSetChanged()
+    })
   }
 
   override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {

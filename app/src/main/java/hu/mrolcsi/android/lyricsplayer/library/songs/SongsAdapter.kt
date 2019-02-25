@@ -2,17 +2,19 @@ package hu.mrolcsi.android.lyricsplayer.library.songs
 
 import android.provider.MediaStore
 import android.support.v4.media.MediaBrowserCompat
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.graphics.ColorUtils
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.android.lyricsplayer.R
+import hu.mrolcsi.android.lyricsplayer.theme.Theme
+import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
 
 class SongsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, SongsAdapter.SongHolder>(
   object : DiffUtil.ItemCallback<MediaBrowserCompat.MediaItem>() {
@@ -42,24 +44,32 @@ class SongsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, SongsAdapter.Song
   override fun onBindViewHolder(holder: SongHolder, position: Int) {
     val item = getItem(position)
 
-    val trackNumber = item.description.extras?.getInt(MediaStore.Audio.Media.TRACK) ?: 0
-    holder.tvTrackNumber?.visibility = if (showTrackNumber and (trackNumber > 0)) View.VISIBLE else View.GONE
-    holder.tvTrackNumber?.text = trackNumber.toString()
-    holder.tvTitle?.text = item.description.title
-    holder.tvArtist?.text = item.description.subtitle
+    with(holder) {
+      // Apply theme
+      ThemeManager.currentTheme.value?.let { theme ->
+        itemView.background = theme.getRippleDrawable(theme.darkForegroundColor, theme.darkerBackgroundColor)
 
-    holder.itemView.setOnClickListener {
-      with(it.findNavController()) {
-        Log.d(LOG_TAG, "Current Destination = $currentDestination")
-//        when (currentDestination?.id) {
-//          R.id.navigation_songs, R.id.navigation_songsFromAlbum -> {
-        try {
-          navigate(SongsFragmentDirections.actionSongsToPlayer(item.mediaId))
-        } catch (e: IllegalArgumentException) {
-          Toast.makeText(it.context, "Lost navigation.", Toast.LENGTH_SHORT).show()
+        tvTitle?.setTextColor(theme.darkerForegroundColor)
+        tvArtist?.setTextColor(ColorUtils.setAlphaComponent(theme.darkerForegroundColor, Theme.INACTIVE_OPACITY))
+        tvTrackNumber?.setTextColor(theme.darkerForegroundColor)
+      }
+
+      // Set texts
+      val trackNumber = item.description.extras?.getInt(MediaStore.Audio.Media.TRACK) ?: 0
+      holder.tvTrackNumber?.visibility = if (showTrackNumber and (trackNumber > 0)) View.VISIBLE else View.GONE
+      holder.tvTrackNumber?.text = trackNumber.toString()
+      holder.tvTitle?.text = item.description.title
+      holder.tvArtist?.text = item.description.subtitle
+
+      // Set onClickListener
+      holder.itemView.setOnClickListener {
+        with(it.findNavController()) {
+          try {
+            navigate(SongsFragmentDirections.actionSongsToPlayer(item.mediaId))
+          } catch (e: IllegalArgumentException) {
+            Toast.makeText(it.context, "Lost navigation.", Toast.LENGTH_SHORT).show()
+          }
         }
-//          }
-//        }
       }
     }
   }

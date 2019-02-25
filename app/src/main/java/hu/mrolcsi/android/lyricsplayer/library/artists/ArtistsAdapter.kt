@@ -1,18 +1,22 @@
 package hu.mrolcsi.android.lyricsplayer.library.artists
 
+import android.content.res.ColorStateList
 import android.provider.MediaStore
 import android.support.v4.media.MediaBrowserCompat
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.graphics.ColorUtils
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.android.lyricsplayer.R
+import hu.mrolcsi.android.lyricsplayer.theme.Theme
+import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
 
 class ArtistsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, ArtistsAdapter.ArtistHolder>(
   object : DiffUtil.ItemCallback<MediaBrowserCompat.MediaItem>() {
@@ -41,6 +45,21 @@ class ArtistsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, ArtistsAdapter.
     val item = getItem(position)
 
     with(holder) {
+      // Apply theme
+      ThemeManager.currentTheme.value?.let { theme ->
+        itemView.background = theme.getRippleDrawable(theme.darkForegroundColor, theme.darkerBackgroundColor)
+
+        tvArtist?.setTextColor(theme.darkerForegroundColor)
+        tvNumOfSongs?.setTextColor(
+          ColorUtils.setAlphaComponent(
+            theme.darkerForegroundColor,
+            Theme.INACTIVE_OPACITY
+          )
+        )
+        imgChevronRight?.imageTintList = ColorStateList.valueOf(theme.darkerForegroundColor)
+      }
+
+      // Set texts
       tvArtist?.text = item.description.title
       val numberOfAlbums = item.description.extras?.getInt(MediaStore.Audio.Artists.NUMBER_OF_ALBUMS) ?: 0
       val numberOfSongs = item.description.extras?.getInt(MediaStore.Audio.Artists.NUMBER_OF_TRACKS) ?: 0
@@ -51,11 +70,9 @@ class ArtistsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, ArtistsAdapter.
       tvNumOfSongs?.text =
         itemView.context.getString(R.string.artists_item_subtitle, numberOfAlbumsString, numberOfSongsString)
 
+      // Set onClickListener
       itemView.setOnClickListener {
         with(it.findNavController()) {
-          Log.d(LOG_TAG, "Current Destination = $currentDestination")
-//          when (currentDestination?.id) {
-//            R.id.navigation_artists -> {
           try {
             val direction = ArtistsFragmentDirections.actionArtistsToAlbums(
               item.mediaId,
@@ -66,8 +83,6 @@ class ArtistsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, ArtistsAdapter.
           } catch (e: IllegalArgumentException) {
             Toast.makeText(it.context, "Lost navigation.", Toast.LENGTH_SHORT).show()
           }
-//            }
-//          }
         }
       }
     }
@@ -76,6 +91,7 @@ class ArtistsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, ArtistsAdapter.
   class ArtistHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     val tvArtist: TextView? = itemView.findViewById(R.id.tvTitle)
     val tvNumOfSongs: TextView? = itemView.findViewById(R.id.tvSubtitle)
+    val imgChevronRight: ImageView? = itemView.findViewById(R.id.imgChevronRight)
   }
 
   companion object {

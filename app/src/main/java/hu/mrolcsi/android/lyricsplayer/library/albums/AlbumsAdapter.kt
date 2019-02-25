@@ -1,19 +1,23 @@
 package hu.mrolcsi.android.lyricsplayer.library.albums
 
+import android.content.res.ColorStateList
 import android.provider.MediaStore
 import android.support.v4.media.MediaBrowserCompat
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.graphics.ColorUtils
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.android.lyricsplayer.BuildConfig
 import hu.mrolcsi.android.lyricsplayer.R
+import hu.mrolcsi.android.lyricsplayer.theme.Theme
+import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
 
 class AlbumsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, AlbumsAdapter.AlbumHolder>(
   object : DiffUtil.ItemCallback<MediaBrowserCompat.MediaItem>() {
@@ -41,46 +45,58 @@ class AlbumsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, AlbumsAdapter.Al
   override fun onBindViewHolder(holder: AlbumHolder, position: Int) {
     val item = getItem(position)
 
-    holder.tvAlbum?.text = item.description.title
-    holder.tvArtist?.text = item.description.subtitle
+    with(holder) {
+      // Apply theme
+      ThemeManager.currentTheme.value?.let { theme ->
+        itemView.background = theme.getRippleDrawable(theme.darkForegroundColor, theme.darkerBackgroundColor)
 
-    if (item.mediaId == MEDIA_ID_ALL_SONGS) {
-      holder.itemView.setOnClickListener {
-        val direction = AlbumsFragmentDirections.actionAlbumsToSongs(
-          item.description.extras?.getString(MediaStore.Audio.ArtistColumns.ARTIST_KEY),
-          item.description.extras?.getString(MediaStore.Audio.ArtistColumns.ARTIST),
-          null,
-          null
-        )
-        it.findNavController().navigate(direction)
+        tvAlbum?.setTextColor(theme.darkerForegroundColor)
+        tvArtist?.setTextColor(ColorUtils.setAlphaComponent(theme.darkerForegroundColor, Theme.INACTIVE_OPACITY))
+
+        imgChevronRight?.imageTintList = ColorStateList.valueOf(theme.darkerForegroundColor)
       }
-    } else {
-      holder.itemView.setOnClickListener {
-        with(it.findNavController()) {
-          Log.d(LOG_TAG, "Current Destination = $currentDestination")
-//          when (currentDestination?.id) {
-//            R.id.navigation_albums, R.id.navigation_albumsByArtist -> {
-          try {
-            val direction = AlbumsFragmentDirections.actionAlbumsToSongs(
-              null,
-              null,
-              item.mediaId,
-              item.description.title.toString()
-            )
-            navigate(direction)
-          } catch (e: IllegalArgumentException) {
-            Toast.makeText(it.context, "Lost navigation.", Toast.LENGTH_SHORT).show()
+
+      // Set texts
+      tvAlbum?.text = item.description.title
+      tvArtist?.text = item.description.subtitle
+
+      // Set onClickListener
+      if (item.mediaId == MEDIA_ID_ALL_SONGS) {
+        itemView.setOnClickListener {
+          val direction = AlbumsFragmentDirections.actionAlbumsToSongs(
+            item.description.extras?.getString(MediaStore.Audio.ArtistColumns.ARTIST_KEY),
+            item.description.extras?.getString(MediaStore.Audio.ArtistColumns.ARTIST),
+            null,
+            null
+          )
+          it.findNavController().navigate(direction)
+        }
+      } else {
+        itemView.setOnClickListener {
+          with(it.findNavController()) {
+            try {
+              val direction = AlbumsFragmentDirections.actionAlbumsToSongs(
+                null,
+                null,
+                item.mediaId,
+                item.description.title.toString()
+              )
+              navigate(direction)
+            } catch (e: IllegalArgumentException) {
+              Toast.makeText(it.context, "Lost navigation.", Toast.LENGTH_SHORT).show()
+            }
           }
-//            }
-//          }
         }
       }
     }
+
+
   }
 
   class AlbumHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     val tvAlbum: TextView? = itemView.findViewById(R.id.tvTitle)
     val tvArtist: TextView? = itemView.findViewById(R.id.tvSubtitle)
+    val imgChevronRight: ImageView? = itemView.findViewById(R.id.imgChevronRight)
   }
 
   companion object {

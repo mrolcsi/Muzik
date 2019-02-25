@@ -1,9 +1,11 @@
 package hu.mrolcsi.android.lyricsplayer.library
 
 import android.Manifest
+import android.animation.ValueAnimator
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
+import android.graphics.Color
 import android.graphics.PorterDuff
 import android.os.Bundle
 import android.util.Log
@@ -249,47 +251,93 @@ class LibraryActivity : AppCompatActivity() {
 
   private fun applyColors(theme: Theme) {
 
-    // TODO: animate changes
+    // Animate changes
+    val animationDuration: Long = 500
 
-    // Window Background, Status Bar and Navigation Bar
-    window?.apply {
-      statusBarColor = theme.backgroundColor
-      navigationBarColor = theme.darkBackgroundColor
-      decorView.setBackgroundColor(theme.darkerBackgroundColor)
+    ValueAnimator.ofArgb(
+      ThemeManager.previousTheme?.backgroundColor ?: Color.BLACK,
+      theme.backgroundColor
+    ).apply {
+      duration = animationDuration
+      addUpdateListener {
+        val color = it.animatedValue as Int
+        // Status Bar
+        window?.statusBarColor = color
+        // Toolbar Background
+        libraryToolbar.setBackgroundColor(color)
+      }
+      start()
     }
 
-    with(libraryToolbar) {
-      // Toolbar Background
-      setBackgroundColor(theme.backgroundColor)
-      // Toolbar Icon
-      navigationIcon?.setColorFilter(theme.foregroundColor, PorterDuff.Mode.SRC_IN)
-      // Title and Subtitle
-      setTitleTextColor(theme.foregroundColor)
-      setSubtitleTextColor(theme.foregroundColor)
+    ValueAnimator.ofArgb(
+      ThemeManager.previousTheme?.darkBackgroundColor ?: Color.BLACK,
+      theme.darkBackgroundColor
+    ).apply {
+      duration = animationDuration
+      addUpdateListener {
+        val color = it.animatedValue as Int
+        // Navigation Bar
+        window?.navigationBarColor = color
+        // BottomNavigation Background
+        navigation_bar.setBackgroundColor(color)
+      }
+      start()
     }
-    // Toolbar Now Playing Icon
-    mNowPlayingIcon?.imageTintList =
-      ColorStateList.valueOf(theme.foregroundColor)
 
-    // Fragment Background
-    //library_nav_host.setBackgroundColor(theme.darkBackgroundColor)
+    ValueAnimator.ofArgb(
+      ThemeManager.previousTheme?.darkerBackgroundColor ?: Color.BLACK,
+      theme.darkerBackgroundColor
+    ).apply {
+      duration = animationDuration
+      addUpdateListener {
+        val color = it.animatedValue as Int
+        // Window background
+        window?.decorView?.setBackgroundColor(color)
+      }
+      start()
+    }
 
-    with(navigation_bar) {
-      // BottomNavigation Background
-      setBackgroundColor(theme.darkBackgroundColor)
-      // BottomNavigation Selected Colors
-      val navigationTintList = ColorStateList(
-        arrayOf(
-          intArrayOf(android.R.attr.state_checked),
-          intArrayOf(-android.R.attr.state_checked)
-        ),
-        intArrayOf(
-          theme.darkForegroundColor,
-          ColorUtils.setAlphaComponent(theme.darkForegroundColor, (255 * 0.5).toInt())
+    ValueAnimator.ofArgb(
+      ThemeManager.previousTheme?.foregroundColor ?: Color.WHITE,
+      theme.foregroundColor
+    ).apply {
+      duration = animationDuration
+      addUpdateListener {
+        val color = it.animatedValue as Int
+        // Toolbar Icon
+        libraryToolbar.navigationIcon?.setColorFilter(color, PorterDuff.Mode.SRC_IN)
+        // Title and Subtitle
+        libraryToolbar.setTitleTextColor(color)
+        libraryToolbar.setSubtitleTextColor(color)
+        // Toolbar Now Playing Icon
+        mNowPlayingIcon?.imageTintList =
+          ColorStateList.valueOf(theme.foregroundColor)
+      }
+      start()
+    }
+
+    ValueAnimator.ofArgb(
+      ThemeManager.previousTheme?.darkForegroundColor ?: Color.WHITE,
+      theme.darkForegroundColor
+    ).apply {
+      duration = animationDuration
+      addUpdateListener {
+        val color = it.animatedValue as Int
+        // BottomNavigation Selected Colors
+        val navigationTintList = ColorStateList(
+          arrayOf(
+            intArrayOf(android.R.attr.state_checked),
+            intArrayOf(-android.R.attr.state_checked)
+          ),
+          intArrayOf(
+            color,
+            ColorUtils.setAlphaComponent(color, (255 * 0.5).toInt())
+          )
         )
-      )
-      itemIconTintList = navigationTintList
-      itemTextColor = navigationTintList
+        navigation_bar.itemIconTintList = navigationTintList
+        navigation_bar.itemTextColor = navigationTintList
+      }
+      start()
     }
   }
 

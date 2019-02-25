@@ -27,7 +27,7 @@ object ThemeManager {
 
       val palette = Palette.from(bitmap)
         .clearFilters()
-        .addFilter(mPaletteFiler)
+        //.addFilter(mPaletteFiler)
         .generate()
 
       val theme = createTheme(palette)
