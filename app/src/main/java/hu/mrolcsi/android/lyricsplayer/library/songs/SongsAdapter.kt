@@ -47,7 +47,7 @@ class SongsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, SongsAdapter.Song
     with(holder) {
       // Apply theme
       ThemeManager.currentTheme.value?.let { theme ->
-        itemView.background = theme.getRippleDrawable(theme.darkForegroundColor, theme.darkerBackgroundColor)
+        itemView.background = Theme.getRippleDrawable(theme.darkForegroundColor, theme.darkerBackgroundColor)
 
         tvTitle?.setTextColor(theme.darkerForegroundColor)
         tvArtist?.setTextColor(ColorUtils.setAlphaComponent(theme.darkerForegroundColor, Theme.INACTIVE_OPACITY))

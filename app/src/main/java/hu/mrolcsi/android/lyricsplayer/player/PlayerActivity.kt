@@ -3,6 +3,7 @@ package hu.mrolcsi.android.lyricsplayer.player
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.media.AudioManager
@@ -19,6 +20,7 @@ import androidx.core.app.ActivityOptionsCompat
 import androidx.core.app.NavUtils
 import androidx.core.app.TaskStackBuilder
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.ColorUtils
 import androidx.core.util.Pair
 import androidx.core.view.ViewCompat
 import androidx.lifecycle.Observer
@@ -286,7 +288,7 @@ class PlayerActivity : AppCompatActivity() {
       start()
     }
 
-    // Text Color
+    // Foreground Color
     ValueAnimator.ofArgb(
       ThemeManager.previousTheme?.foregroundColor ?: Color.WHITE,
       theme.foregroundColor
@@ -295,12 +297,10 @@ class PlayerActivity : AppCompatActivity() {
       addUpdateListener {
         val color = it.animatedValue as Int
 
-        applyTextColor(color)
+        applyForegroundColor(color)
       }
       start()
     }
-
-    // TODO: applyControlColors(swatch.titleTextColor)
 
     // Test out colors
     view1.setBackgroundColor(theme.palette.getLightVibrantColor(Color.BLACK))
@@ -312,7 +312,7 @@ class PlayerActivity : AppCompatActivity() {
     view7.setBackgroundColor(theme.palette.getDarkMutedColor(Color.BLACK))
   }
 
-  private fun applyTextColor(color: Int) {
+  private fun applyForegroundColor(color: Int) {
     // Toolbar
     playerToolbar.navigationIcon?.setColorFilter(color, PorterDuff.Mode.SRC_IN)
 
@@ -323,6 +323,15 @@ class PlayerActivity : AppCompatActivity() {
     tvElapsedTime.setTextColor(color)
     tvRemainingTime.setTextColor(color)
     tvSeekProgress.setTextColor(color)
+
+    // SeekBar
+    sbSongProgress.progressDrawable.setColorFilter(color, PorterDuff.Mode.SRC_ATOP)
+    sbSongProgress.thumb.setColorFilter(color, PorterDuff.Mode.SRC_ATOP)
+
+    // Media Buttons
+    btnPrevious.backgroundTintList = ColorStateList.valueOf(color)
+    btnPlayPause.backgroundTintList = ColorStateList.valueOf(color)
+    btnNext.backgroundTintList = ColorStateList.valueOf(color)
   }
 
   private fun applyBackgroundColor(color: Int) {
@@ -357,6 +366,21 @@ class PlayerActivity : AppCompatActivity() {
         Color.blue(color)
       )
     )
+
+    // Media Buttons
+    val imageTintList = ColorStateList(
+      arrayOf(
+        intArrayOf(android.R.attr.state_pressed),
+        intArrayOf()
+      ),
+      intArrayOf(
+        ColorUtils.setAlphaComponent(color, Theme.INACTIVE_OPACITY),
+        color
+      )
+    )
+    btnPrevious.imageTintList = imageTintList
+    btnPlayPause.imageTintList = imageTintList
+    btnNext.imageTintList = imageTintList
   }
 
   companion object {

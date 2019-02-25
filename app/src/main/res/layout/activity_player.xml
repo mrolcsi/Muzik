@@ -150,15 +150,21 @@
     android:layout_height="48dp"
     android:layout_marginStart="8dp"
     android:layout_marginEnd="8dp"
+    android:background="@drawable/media_button_background"
     android:contentDescription="@string/mediaControl_previous"
+    android:elevation="@dimen/button_elevation"
     android:enabled="false"
+    android:scaleType="fitCenter"
+    android:tint="@color/backgroundColor"
     android:visibility="gone"
+    app:elevation="@dimen/button_elevation"
     app:layout_constraintBottom_toBottomOf="@+id/btnPlayPause"
     app:layout_constraintEnd_toStartOf="@+id/btnPlayPause"
     app:layout_constraintHorizontal_chainStyle="packed"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="@+id/btnPlayPause"
     app:srcCompat="@android:drawable/ic_media_previous"
+    app:tint="@color/backgroundColor"
     tools:visibility="visible"/>
 
   <ImageButton
@@ -167,14 +173,20 @@
     android:layout_height="72dp"
     android:layout_marginTop="32dp"
     android:layout_marginBottom="32dp"
+    android:background="@drawable/media_button_background"
     android:contentDescription="@string/mediaControl_playPause"
+    android:elevation="@dimen/button_elevation"
     android:enabled="false"
+    android:scaleType="fitCenter"
+    android:tint="@color/backgroundColor"
+    app:elevation="@dimen/button_elevation"
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toStartOf="@+id/btnNext"
     app:layout_constraintHorizontal_bias="0.5"
     app:layout_constraintStart_toEndOf="@+id/btnPrevious"
     app:layout_constraintTop_toBottomOf="@+id/sbSongProgress"
-    app:srcCompat="@android:drawable/ic_media_play"/>
+    app:srcCompat="@android:drawable/ic_media_play"
+    app:tint="@color/backgroundColor"/>
 
   <ImageButton
     android:id="@+id/btnNext"
@@ -182,15 +194,21 @@
     android:layout_height="48dp"
     android:layout_marginStart="8dp"
     android:layout_marginEnd="8dp"
+    android:background="@drawable/media_button_background"
     android:contentDescription="@string/mediaControl_next"
+    android:elevation="@dimen/button_elevation"
     android:enabled="false"
+    android:scaleType="fitCenter"
+    android:tint="@color/backgroundColor"
     android:visibility="gone"
+    app:elevation="@dimen/button_elevation"
     app:layout_constraintBottom_toBottomOf="@+id/btnPlayPause"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintHorizontal_bias="0.5"
     app:layout_constraintStart_toEndOf="@+id/btnPlayPause"
     app:layout_constraintTop_toTopOf="@+id/btnPlayPause"
     app:srcCompat="@android:drawable/ic_media_next"
+    app:tint="@color/backgroundColor"
     tools:visibility="visible"/>
 
   <TextView

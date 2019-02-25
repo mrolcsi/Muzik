@@ -11,4 +11,10 @@
    https://material.io/design/environment/elevation.html#default-elevations -->
   <dimen name="bottom_navigation_elevation">8dp</dimen>
   <dimen name="action_bar_elevation">4dp</dimen>
+  <dimen name="button_elevation">2dp</dimen>
+
+  <!-- Button Dimensions -->
+  <dimen name="media_button_inset">8dp</dimen>
+  <dimen name="media_button_padding">4dp</dimen>
+  <dimen name="media_button_corner_radius">4dp</dimen>
 </resources>
