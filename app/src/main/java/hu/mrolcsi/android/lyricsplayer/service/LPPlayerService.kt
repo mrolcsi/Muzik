@@ -46,11 +46,12 @@ class LPPlayerService : LPBrowserService() {
       setFlags(
         MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS
             or MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS
+            or MediaSessionCompat.FLAG_HANDLES_QUEUE_COMMANDS
       )
 
       // MySessionCallback() has methods that handle callbacks from a media mediaController
       // Pass the service as an argument, so the service can be handled from the callbacks.
-      setCallback(LPSessionCallback(applicationContext, this))
+      setCallback(LPPlayerControls(applicationContext, this))
 
       // Set the session's token so that client activities can communicate with it.
       setSessionToken(sessionToken)

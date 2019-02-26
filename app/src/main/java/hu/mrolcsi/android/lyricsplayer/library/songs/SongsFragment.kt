@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -20,7 +21,15 @@ class SongsFragment : Fragment() {
 
   private lateinit var mSongsModel: SongsViewModel
 
-  private val mSongsAdapter = SongsAdapter()
+  private val mSongsAdapter = SongsAdapter { item, holder, position, id ->
+    with(holder.itemView) {
+      try {
+        findNavController().navigate(SongsFragmentDirections.actionSongsToPlayer(item.mediaId))
+      } catch (e: IllegalArgumentException) {
+        android.widget.Toast.makeText(context, "Lost navigation.", android.widget.Toast.LENGTH_SHORT).show()
+      }
+    }
+  }
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)

@@ -6,17 +6,18 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import android.widget.Toast
 import androidx.core.graphics.ColorUtils
-import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.android.lyricsplayer.R
+import hu.mrolcsi.android.lyricsplayer.extensions.OnItemClickListener
 import hu.mrolcsi.android.lyricsplayer.theme.Theme
 import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
 
-class SongsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, SongsAdapter.SongHolder>(
+class SongsAdapter(
+  private val onItemClickListener: OnItemClickListener<MediaBrowserCompat.MediaItem, SongsAdapter.SongHolder>
+) : ListAdapter<MediaBrowserCompat.MediaItem, SongsAdapter.SongHolder>(
   object : DiffUtil.ItemCallback<MediaBrowserCompat.MediaItem>() {
     override fun areItemsTheSame(
       oldItem: MediaBrowserCompat.MediaItem,
@@ -63,13 +64,7 @@ class SongsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, SongsAdapter.Song
 
       // Set onClickListener
       holder.itemView.setOnClickListener {
-        with(it.findNavController()) {
-          try {
-            navigate(SongsFragmentDirections.actionSongsToPlayer(item.mediaId))
-          } catch (e: IllegalArgumentException) {
-            Toast.makeText(it.context, "Lost navigation.", Toast.LENGTH_SHORT).show()
-          }
-        }
+        onItemClickListener.invoke(item, holder, position, RecyclerView.NO_ID)
       }
     }
   }

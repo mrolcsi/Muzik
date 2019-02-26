@@ -11,6 +11,7 @@ import android.media.MediaPlayer
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
@@ -23,10 +24,11 @@ import hu.mrolcsi.android.lyricsplayer.extensions.duration
 import hu.mrolcsi.android.lyricsplayer.extensions.title
 import hu.mrolcsi.android.lyricsplayer.service.LPPlayerService.Companion.ACTION_START_UPDATER
 import hu.mrolcsi.android.lyricsplayer.service.LPPlayerService.Companion.ACTION_STOP_UPDATER
+import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.properties.Delegates
 
-open class LPSessionCallback(
+open class LPPlayerControls(
   private val context: Context,
   private val session: MediaSessionCompat
 ) : MediaSessionCompat.Callback() {
@@ -45,6 +47,10 @@ open class LPSessionCallback(
     session.setPlaybackState(new)
   }
 
+  // Playlist
+  val playlist = LinkedList<MediaBrowserCompat.MediaItem>()
+
+  // Last Played Settings
   private val mLastPlayed = LastPlayedSetting(context)
 
   // Player state polling
@@ -133,7 +139,7 @@ open class LPSessionCallback(
     }
   }
 
-  // -- GENERAL PLAYBACK STATES
+  //region -- TRANSPORT CONTROLS --
 
   override fun onPlay() {
     Log.v(LOG_TAG, "onPlay(): $mMediaPlayer")
@@ -266,8 +272,16 @@ open class LPSessionCallback(
     ).build()
   }
 
+  //endregion
+
+  //region -- QUEUE CONTROLS --
+
+  // TODO
+
+  //endregion
+
   companion object {
-    private const val LOG_TAG = "LPSessionCallback"
+    private const val LOG_TAG = "LPPlayerControls"
 
     private const val UPDATE_FREQUENCY: Long = 500  // in milliseconds
   }
