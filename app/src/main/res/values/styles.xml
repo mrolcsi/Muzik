@@ -1,42 +1,44 @@
 <resources>
 
   <!-- Base application theme. -->
-  <style name="FluxTheme.Library"
+  <style name="FluxTheme"
     parent="Theme.AppCompat.NoActionBar">
-    <item name="colorPrimary">@color/primaryColor</item>
-    <item name="colorPrimaryDark">@color/primaryDarkColor</item>
-    <item name="colorAccent">@color/primaryColor</item>
-    <item name="android:windowBackground">@color/backgroundColor</item>
     <item name="actionBarStyle">@style/ActionBarStyle</item>
-    <item name="android:statusBarColor">?attr/colorPrimaryDark</item>
-    <item name="android:navigationBarColor">?attr/colorPrimaryDark</item>
-    <item name="android:colorBackground">@color/backgroundColor</item>
-    <item name="colorButtonNormal">@color/primaryColor</item>
-    <item name="colorControlHighlight">@android:color/white</item>
-    <item name="android:windowContentTransitions">true</item>
-  </style>
 
-  <style name="FluxTheme.Player"
-    parent="Theme.AppCompat.NoActionBar">
-    <item name="android:windowContentTransitions">true</item>
-    <item name="android:statusBarColor">@android:color/transparent</item>
-    <item name="android:navigationBarColor">@android:color/transparent</item>
-    <item name="android:actionBarStyle">@style/FullscreenActionBarStyle</item>
-    <item name="android:windowActionBarOverlay">true</item>
-    <item name="metaButtonBarStyle">?android:attr/buttonBarStyle</item>
-    <item name="metaButtonBarButtonStyle">?android:attr/buttonBarButtonStyle</item>
-    <item name="android:colorPrimary">@color/primaryColor</item>
-    <item name="android:colorPrimaryDark">@color/primaryDarkColor</item>
     <item name="android:colorAccent">@color/primaryColor</item>
     <item name="android:colorBackground">@color/backgroundColor</item>
+    <item name="android:colorButtonNormal">@color/primaryColor</item>
+    <item name="android:colorControlHighlight">@android:color/white</item>
+    <item name="android:colorPrimary">@color/primaryColor</item>
+    <item name="android:colorPrimaryDark">@color/primaryDarkColor</item>
+
+    <item name="android:navigationBarColor">?attr/colorPrimaryDark</item>
+    <item name="android:statusBarColor">?attr/colorPrimaryDark</item>
+    <item name="android:windowBackground">@color/backgroundColor</item>
+
+    <item name="android:windowContentTransitions">true</item>
+
+    <item name="colorAccent">@color/primaryColor</item>
     <item name="colorButtonNormal">@color/primaryColor</item>
     <item name="colorControlHighlight">@android:color/white</item>
+    <item name="colorPrimary">@color/primaryColor</item>
+    <item name="colorPrimaryDark">@color/primaryDarkColor</item>
   </style>
 
-  <!-- Transparent ActionBar -->
-  <style name="FullscreenActionBarStyle"
-    parent="Widget.AppCompat.ActionBar">
-    <item name="android:background">@null</item>
+  <style name="FluxTheme.Library">
+    <item name="actionBarStyle">@style/ActionBarStyle</item>
+
+    <item name="android:navigationBarColor">?attr/colorPrimaryDark</item>
+    <item name="android:statusBarColor">?attr/colorPrimaryDark</item>
+    <item name="android:windowBackground">@color/backgroundColor</item>
+  </style>
+
+  <style name="FluxTheme.Player">
+    <item name="android:navigationBarColor">@android:color/transparent</item>
+    <item name="android:statusBarColor">@android:color/transparent</item>
+
+    <item name="metaButtonBarButtonStyle">?android:attr/buttonBarButtonStyle</item>
+    <item name="metaButtonBarStyle">?android:attr/buttonBarStyle</item>
   </style>
 
   <!-- Visible ActionBar -->
@@ -44,6 +46,7 @@
     parent="Widget.AppCompat.ActionBar">
     <item name="android:background">@color/primaryColor</item>
     <item name="background">@color/primaryColor</item>
+
     <item name="android:elevation">@dimen/action_bar_elevation</item>
     <item name="elevation">@dimen/action_bar_elevation</item>
   </style>

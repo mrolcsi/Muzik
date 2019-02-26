@@ -12,6 +12,7 @@ import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
+import android.util.TypedValue
 import android.view.MenuItem
 import android.view.View
 import android.widget.SeekBar
@@ -25,9 +26,12 @@ import androidx.core.util.Pair
 import androidx.core.view.ViewCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.palette.graphics.Palette
 import hu.mrolcsi.android.lyricsplayer.R
 import hu.mrolcsi.android.lyricsplayer.extensions.album
 import hu.mrolcsi.android.lyricsplayer.extensions.albumArt
+import hu.mrolcsi.android.lyricsplayer.extensions.applyColorToNavigationBarIcons
+import hu.mrolcsi.android.lyricsplayer.extensions.applyColorToStatusBarIcons
 import hu.mrolcsi.android.lyricsplayer.extensions.artist
 import hu.mrolcsi.android.lyricsplayer.extensions.duration
 import hu.mrolcsi.android.lyricsplayer.extensions.secondsToTimeStamp
@@ -113,6 +117,10 @@ class PlayerActivity : AppCompatActivity() {
   public override fun onResume() {
     super.onResume()
     volumeControlStream = AudioManager.STREAM_MUSIC
+
+    // Apply StatusBar and NavigationBar colors again
+    applyColorToStatusBarIcons(ThemeManager.currentTheme.value?.backgroundColor ?: Color.BLACK)
+    applyColorToNavigationBarIcons(ThemeManager.currentTheme.value?.backgroundColor ?: Color.BLACK)
   }
 
   override fun onStop() {
@@ -279,10 +287,30 @@ class PlayerActivity : AppCompatActivity() {
 
     imgCoverArt.setImageBitmap(metadata.albumArt)
 
+    if (metadata.albumArt != null) {
+      // Upper 10% of Cover Art
+      Palette.from(metadata.albumArt)
+        .clearFilters()
+        .setRegion(
+          0,
+          0,
+          metadata.albumArt.width,
+          TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24F, resources.displayMetrics).toInt()
+        ).generate {
+          val color = it?.dominantSwatch?.rgb ?: Color.BLACK
+          window?.statusBarColor = color
+          applyColorToStatusBarIcons(color)
+        }
+    }
+
     sbSongProgress.max = (metadata.duration / 1000).toInt()
   }
 
   private fun applyTheme(theme: Theme) {
+    Log.d(LOG_TAG, "Applying theme...")
+
+    applyColorToNavigationBarIcons(theme.backgroundColor)
+
     val animationDuration: Long = 500
 
     // Background Color
@@ -355,23 +383,9 @@ class PlayerActivity : AppCompatActivity() {
     // Window background
     playerRoot.setBackgroundColor(color)
 
-    // Status bar and navigation bar
+    // Navigation Bar
     window.apply {
-      statusBarColor = color
       navigationBarColor = color
-      //          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-      //            window?.decorView?.apply {
-      //              val systemUiFlags = systemUiVisibility
-      //              systemUiVisibility =
-      //                if (ColorUtils.calculateLuminance(it.animatedValue as Int) < 0.5) {
-      //                  systemUiFlags or
-      //                      -View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR or -View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-      //                } else {
-      //                  systemUiFlags or
-      //                      View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-      //                }
-      //            }
-      //        }
     }
 
     // Seek Progress background

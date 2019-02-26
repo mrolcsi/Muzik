@@ -26,6 +26,8 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
 import hu.mrolcsi.android.lyricsplayer.R
+import hu.mrolcsi.android.lyricsplayer.extensions.applyColorToNavigationBarIcons
+import hu.mrolcsi.android.lyricsplayer.extensions.applyColorToStatusBarIcons
 import hu.mrolcsi.android.lyricsplayer.extensions.isPermissionGranted
 import hu.mrolcsi.android.lyricsplayer.extensions.requestPermission
 import hu.mrolcsi.android.lyricsplayer.extensions.shouldShowPermissionRationale
@@ -83,7 +85,7 @@ class LibraryActivity : AppCompatActivity() {
     }
 
     ThemeManager.currentTheme.observe(this@LibraryActivity, Observer {
-      applyColors(it)
+      applyTheme(it)
     })
   }
 
@@ -98,6 +100,10 @@ class LibraryActivity : AppCompatActivity() {
     if (!mNavBarReady) {
       setupNavBar(findNavController(R.id.library_nav_host))
     }
+
+    // Apply StatusBar and NavigationBar colors again
+    applyColorToStatusBarIcons(ThemeManager.currentTheme.value?.backgroundColor ?: Color.BLACK)
+    applyColorToNavigationBarIcons(ThemeManager.currentTheme.value?.darkBackgroundColor ?: Color.BLACK)
   }
 
   override fun onStop() {
@@ -249,7 +255,13 @@ class LibraryActivity : AppCompatActivity() {
     }
   }
 
-  private fun applyColors(theme: Theme) {
+  private fun applyTheme(theme: Theme) {
+    Log.d(LOG_TAG, "Applying theme...")
+
+    // Status Bar Icons
+    applyColorToStatusBarIcons(theme.backgroundColor)
+    // Navigation Bar Icons
+    applyColorToNavigationBarIcons(theme.darkBackgroundColor)
 
     // Animate changes
     val animationDuration: Long = 500
