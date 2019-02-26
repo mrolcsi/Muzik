@@ -8,6 +8,7 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.os.Bundle
+import android.support.v4.media.session.MediaControllerCompat
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
@@ -68,6 +69,9 @@ class LibraryActivity : AppCompatActivity() {
 
     mPlayerModel = ViewModelProviders.of(this).get(PlayerViewModel::class.java).apply {
       mediaController.observe(this@LibraryActivity, Observer {
+        // Set mediaController to the Activity
+        MediaControllerCompat.setMediaController(this@LibraryActivity, it)
+
         // Update everything
         mNowPlayingMenuItem?.isVisible = it?.playbackState != null
         mNowPlayingCoverArt?.setImageBitmap(it?.metadata?.description?.iconBitmap)
