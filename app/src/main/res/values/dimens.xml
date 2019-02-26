@@ -14,7 +14,7 @@
   <dimen name="button_elevation">2dp</dimen>
 
   <!-- Button Dimensions -->
-  <dimen name="media_button_inset">8dp</dimen>
+  <dimen name="media_button_inset">4dp</dimen>
   <dimen name="media_button_padding">4dp</dimen>
   <dimen name="media_button_corner_radius">4dp</dimen>
 </resources>

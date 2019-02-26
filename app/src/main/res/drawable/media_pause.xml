@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+  <item android:id="@+id/background"
+    android:drawable="@drawable/media_button_background"
+    android:tint="?attr/colorButtonNormal"/>
+  <item android:id="@+id/icon"
+    android:drawable="@android:drawable/ic_media_pause"
+    android:tint="?android:attr/colorBackground"/>
+</layer-list>

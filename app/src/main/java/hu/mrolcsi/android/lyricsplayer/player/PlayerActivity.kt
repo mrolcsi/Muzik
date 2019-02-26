@@ -3,9 +3,9 @@ package hu.mrolcsi.android.lyricsplayer.player
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.PorterDuff
+import android.graphics.drawable.LayerDrawable
 import android.media.AudioManager
 import android.os.Bundle
 import android.support.v4.media.MediaMetadataCompat
@@ -44,6 +44,12 @@ class PlayerActivity : AppCompatActivity() {
   private lateinit var mPlayerModel: PlayerViewModel
 
   private var mUserIsSeeking = false
+
+  // Prepare drawables
+  private val mPreviousDrawable by lazy { getDrawable(R.drawable.media_previous) as LayerDrawable }
+  private val mPlayDrawable by lazy { getDrawable(R.drawable.media_play) as LayerDrawable }
+  private val mPauseDrawable by lazy { getDrawable(R.drawable.media_pause) as LayerDrawable }
+  private val mNextDrawable by lazy { getDrawable(R.drawable.media_next) as LayerDrawable }
 
   //region LIFECYCLE
 
@@ -170,6 +176,10 @@ class PlayerActivity : AppCompatActivity() {
   private fun setupTransportControls() {
     val mediaController = MediaControllerCompat.getMediaController(this@PlayerActivity)
 
+    // Set icons
+    btnPrevious.setImageDrawable(mPreviousDrawable)
+    btnNext.setImageDrawable(mNextDrawable)
+
     // Enable controls
     sbSongProgress.isEnabled = true
     btnPrevious.isEnabled = true
@@ -197,14 +207,14 @@ class PlayerActivity : AppCompatActivity() {
             // Pause playback, stop updater
             controller.transportControls.pause()
             controller.transportControls.sendCustomAction(LPPlayerService.ACTION_STOP_UPDATER, null)
-            btnPlayPause.setImageResource(android.R.drawable.ic_media_play)
+            btnPlayPause.setImageDrawable(mPlayDrawable)
           }
           PlaybackStateCompat.STATE_PAUSED,
           PlaybackStateCompat.STATE_STOPPED -> {
             // Start playback, start updater
             controller.transportControls.play()
             controller.transportControls.sendCustomAction(LPPlayerService.ACTION_START_UPDATER, null)
-            btnPlayPause.setImageResource(android.R.drawable.ic_media_pause)
+            btnPlayPause.setImageDrawable(mPauseDrawable)
           }
         }
       }
@@ -252,12 +262,12 @@ class PlayerActivity : AppCompatActivity() {
     when (playbackState.state) {
       PlaybackStateCompat.STATE_PLAYING -> {
         controller?.transportControls?.sendCustomAction(LPPlayerService.ACTION_START_UPDATER, null)
-        btnPlayPause.setImageResource(android.R.drawable.ic_media_pause)
+        btnPlayPause.setImageDrawable(mPauseDrawable)
       }
       PlaybackStateCompat.STATE_PAUSED,
       PlaybackStateCompat.STATE_STOPPED -> {
         controller?.transportControls?.sendCustomAction(LPPlayerService.ACTION_STOP_UPDATER, null)
-        btnPlayPause.setImageResource(android.R.drawable.ic_media_play)
+        btnPlayPause.setImageDrawable(mPlayDrawable)
       }
     }
   }
@@ -328,10 +338,17 @@ class PlayerActivity : AppCompatActivity() {
     sbSongProgress.progressDrawable.setColorFilter(color, PorterDuff.Mode.SRC_ATOP)
     sbSongProgress.thumb.setColorFilter(color, PorterDuff.Mode.SRC_ATOP)
 
-    // Media Buttons
-    btnPrevious.backgroundTintList = ColorStateList.valueOf(color)
-    btnPlayPause.backgroundTintList = ColorStateList.valueOf(color)
-    btnNext.backgroundTintList = ColorStateList.valueOf(color)
+    // Media Buttons Background
+    mPreviousDrawable.getDrawable(0).setTint(color)
+    mPlayDrawable.getDrawable(0).setTint(color)
+    mPauseDrawable.getDrawable(0).setTint(color)
+    mNextDrawable.getDrawable(0).setTint(color)
+
+    // Media Buttons Ripple (need to use separate drawables)
+    val rippleColor = ColorUtils.setAlphaComponent(color, (255 * 0.5).roundToInt())
+    btnPrevious.background = Theme.getRippleDrawable(rippleColor)
+    btnPlayPause.background = Theme.getRippleDrawable(rippleColor)
+    btnNext.background = Theme.getRippleDrawable(rippleColor)
   }
 
   private fun applyBackgroundColor(color: Int) {
@@ -358,29 +375,13 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     // Seek Progress background
-    tvSeekProgress.setBackgroundColor(
-      Color.argb(
-        (255 * 0.5).roundToInt(),
-        Color.red(color),
-        Color.green(color),
-        Color.blue(color)
-      )
-    )
+    tvSeekProgress.setBackgroundColor(ColorUtils.setAlphaComponent(color, (255 * 0.5).roundToInt()))
 
-    // Media Buttons
-    val imageTintList = ColorStateList(
-      arrayOf(
-        intArrayOf(android.R.attr.state_pressed),
-        intArrayOf()
-      ),
-      intArrayOf(
-        ColorUtils.setAlphaComponent(color, Theme.INACTIVE_OPACITY),
-        color
-      )
-    )
-    btnPrevious.imageTintList = imageTintList
-    btnPlayPause.imageTintList = imageTintList
-    btnNext.imageTintList = imageTintList
+    // Media Buttons Icon
+    mPreviousDrawable.getDrawable(1).setTint(color)
+    mPlayDrawable.getDrawable(1).setTint(color)
+    mPauseDrawable.getDrawable(1).setTint(color)
+    mNextDrawable.getDrawable(1).setTint(color)
   }
 
   companion object {
