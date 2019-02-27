@@ -1,7 +1,6 @@
 package hu.mrolcsi.android.lyricsplayer.library.albums
 
 import android.content.res.ColorStateList
-import android.provider.MediaStore
 import android.support.v4.media.MediaBrowserCompat
 import android.view.LayoutInflater
 import android.view.View
@@ -16,6 +15,8 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.android.lyricsplayer.BuildConfig
 import hu.mrolcsi.android.lyricsplayer.R
+import hu.mrolcsi.android.lyricsplayer.extensions.artist
+import hu.mrolcsi.android.lyricsplayer.extensions.artistKey
 import hu.mrolcsi.android.lyricsplayer.theme.Theme
 import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
 
@@ -64,8 +65,8 @@ class AlbumsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, AlbumsAdapter.Al
       if (item.mediaId == MEDIA_ID_ALL_SONGS) {
         itemView.setOnClickListener {
           val direction = AlbumsFragmentDirections.actionAlbumsToSongs(
-            item.description.extras?.getString(MediaStore.Audio.ArtistColumns.ARTIST_KEY),
-            item.description.extras?.getString(MediaStore.Audio.ArtistColumns.ARTIST),
+            item.description.extras?.artistKey,
+            item.description.extras?.artist,
             null,
             null
           )

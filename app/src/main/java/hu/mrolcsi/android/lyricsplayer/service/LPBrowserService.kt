@@ -140,6 +140,8 @@ abstract class LPBrowserService : MediaBrowserServiceCompat() {
           .setSubtitle(it.getString(2))   // Album artist
           .setExtras(
             bundleOf(
+              MediaStore.Audio.AlbumColumns.ALBUM_KEY to it.getString(0),
+              MediaStore.Audio.AlbumColumns.ALBUM to it.getString(1),
               MediaStore.Audio.AlbumColumns.ARTIST to it.getString(2),
               MediaStore.Audio.AlbumColumns.NUMBER_OF_SONGS to it.getInt(3),
               MediaStore.Audio.AlbumColumns.ALBUM_ART to it.getString(4)
@@ -164,6 +166,7 @@ abstract class LPBrowserService : MediaBrowserServiceCompat() {
       contentResolver,
       uri,
       arrayOf(
+        MediaStore.Audio.Media._ID,
         MediaStore.Audio.Media.DATA,
         MediaStore.Audio.Media.TITLE,
         MediaStore.Audio.Media.ARTIST,
@@ -184,16 +187,17 @@ abstract class LPBrowserService : MediaBrowserServiceCompat() {
       while (it.moveToNext()) {
 
         val description = MediaDescriptionCompat.Builder()
-          .setMediaId(it.getString(0))    // Song URI
-          .setTitle(it.getString(1))      // Song title
-          .setSubtitle(it.getString(2))   // Song artist
+          .setMediaId(it.getString(1))    // Song path
+          .setTitle(it.getString(2))      // Song title
+          .setSubtitle(it.getString(3))   // Song artist
           .setExtras(
             bundleOf(
-              MediaStore.Audio.Media.ARTIST to it.getString(2),
-              MediaStore.Audio.Media.ARTIST_KEY to it.getString(3),
-              MediaStore.Audio.Media.ALBUM to it.getString(4),
-              MediaStore.Audio.Media.ALBUM_KEY to it.getString(5),
-              MediaStore.Audio.Media.TRACK to it.getInt(6).rem(1000)
+              MediaStore.Audio.Media._ID to it.getString(0),
+              MediaStore.Audio.Media.ARTIST to it.getString(3),
+              MediaStore.Audio.Media.ARTIST_KEY to it.getString(4),
+              MediaStore.Audio.Media.ALBUM to it.getString(5),
+              MediaStore.Audio.Media.ALBUM_KEY to it.getString(6),
+              MediaStore.Audio.Media.TRACK to it.getInt(7).rem(1000)
             )
           )
           .build()

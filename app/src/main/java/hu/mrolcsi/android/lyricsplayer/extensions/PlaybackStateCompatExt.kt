@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.android.uamp.media.extensions
+package hu.mrolcsi.android.lyricsplayer.extensions
 
 import android.support.v4.media.session.PlaybackStateCompat
 

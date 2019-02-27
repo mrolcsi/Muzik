@@ -11,7 +11,7 @@ import android.media.MediaPlayer
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
-import android.support.v4.media.MediaBrowserCompat
+import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
@@ -21,9 +21,8 @@ import hu.mrolcsi.android.lyricsplayer.extensions.album
 import hu.mrolcsi.android.lyricsplayer.extensions.albumArt
 import hu.mrolcsi.android.lyricsplayer.extensions.artist
 import hu.mrolcsi.android.lyricsplayer.extensions.duration
+import hu.mrolcsi.android.lyricsplayer.extensions.rowId
 import hu.mrolcsi.android.lyricsplayer.extensions.title
-import hu.mrolcsi.android.lyricsplayer.service.LPPlayerService.Companion.ACTION_START_UPDATER
-import hu.mrolcsi.android.lyricsplayer.service.LPPlayerService.Companion.ACTION_STOP_UPDATER
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.properties.Delegates
@@ -47,8 +46,9 @@ open class LPPlayerControls(
     session.setPlaybackState(new)
   }
 
-  // Playlist
-  val playlist = LinkedList<MediaBrowserCompat.MediaItem>()
+  // Queue (Playlist)
+  private val mQueue = LinkedList<MediaSessionCompat.QueueItem>().also { session.setQueue(it) }
+  private var mQueueIndex = 0
 
   // Last Played Settings
   private val mLastPlayed = LastPlayedSetting(context)
@@ -85,6 +85,16 @@ open class LPPlayerControls(
     BecomingNoisyReceiver(context, session.sessionToken)
   }
 
+  override fun onCustomAction(action: String?, extras: Bundle?) {
+    when (action) {
+      ACTION_START_UPDATER -> if (!mUpdaterEnabled.getAndSet(true)) mUpdateHandler.post(mUpdateRunnable)
+      ACTION_STOP_UPDATER -> mUpdaterEnabled.set(false)
+      else -> super.onCustomAction(action, extras)
+    }
+  }
+
+  //region -- TRANSPORT CONTROLS --
+
   override fun onPrepareFromMediaId(mediaId: String?, extras: Bundle?) {
     // Reset media player before loading
     mMediaPlayer.stop()
@@ -116,11 +126,8 @@ open class LPPlayerControls(
     session.setMetadata(metadataBuilder.build())
 
     // Update playback state (Let's say we're paused)
-    mLastState = PlaybackStateCompat.Builder(mLastState).setState(
-      PlaybackStateCompat.STATE_PAUSED,
-      0,
-      1f
-    )
+    mLastState = PlaybackStateCompat.Builder(mLastState)
+      .setState(PlaybackStateCompat.STATE_PAUSED, 0, 1f)
       .build()
   }
 
@@ -128,18 +135,6 @@ open class LPPlayerControls(
     onPrepareFromMediaId(mediaId, extras)
     onPlay()
   }
-
-  override fun onCustomAction(action: String?, extras: Bundle?) {
-    when (action) {
-      ACTION_START_UPDATER -> if (!mUpdaterEnabled.getAndSet(true)) {
-        mUpdateHandler.post(mUpdateRunnable)
-      }
-      ACTION_STOP_UPDATER -> mUpdaterEnabled.set(false)
-      else -> super.onCustomAction(action, extras)
-    }
-  }
-
-  //region -- TRANSPORT CONTROLS --
 
   override fun onPlay() {
     Log.v(LOG_TAG, "onPlay(): $mMediaPlayer")
@@ -161,11 +156,9 @@ open class LPPlayerControls(
       mBecomingNoisyReceiver.register()
 
       // Update playback state
-      mLastState = PlaybackStateCompat.Builder(mLastState).setState(
-        PlaybackStateCompat.STATE_PLAYING,
-        mMediaPlayer.currentPosition.toLong(),
-        1f
-      ).build()
+      mLastState = PlaybackStateCompat.Builder(mLastState)
+        .setState(PlaybackStateCompat.STATE_PLAYING, mMediaPlayer.currentPosition.toLong(), 1f)
+        .build()
     }
   }
 
@@ -232,11 +225,9 @@ open class LPPlayerControls(
     // Set the session inactive  (and update metadata and state)
     session.isActive = false
 
-    mLastState = PlaybackStateCompat.Builder(mLastState).setState(
-      PlaybackStateCompat.STATE_STOPPED,
-      0,
-      1f
-    ).build()
+    mLastState = PlaybackStateCompat.Builder(mLastState)
+      .setState(PlaybackStateCompat.STATE_STOPPED, 0, 1f)
+      .build()
     mLastPlayed.lastPlayedPosition = 0
 
     // stop the player (custom call)
@@ -246,6 +237,8 @@ open class LPPlayerControls(
 
     // Cancel Handler
     mUpdateHandler.removeCallbacks(mUpdateRunnable)
+
+    // TODO: start next item in queue
   }
 
   @Suppress("DEPRECATION")
@@ -265,23 +258,85 @@ open class LPPlayerControls(
     Log.v(LOG_TAG, "onSeekTo(${pos.toInt()}): $mMediaPlayer")
 
     mMediaPlayer.seekTo(pos.toInt())
-    mLastState = PlaybackStateCompat.Builder(mLastState).setState(
-      mLastState.state,
-      mMediaPlayer.currentPosition.toLong(),
-      1f
-    ).build()
+    mLastState = PlaybackStateCompat.Builder(mLastState)
+      .setState(mLastState.state, mMediaPlayer.currentPosition.toLong(), 1f)
+      .build()
   }
 
   //endregion
 
   //region -- QUEUE CONTROLS --
 
-  // TODO
+  override fun onAddQueueItem(description: MediaDescriptionCompat?) {
+    onAddQueueItem(description, mQueue.size)
+  }
+
+  override fun onAddQueueItem(description: MediaDescriptionCompat?, index: Int) {
+    // Add item to queue at given index
+    description?.let {
+      mQueue.add(
+        index,
+        MediaSessionCompat.QueueItem(
+          description,
+          description.extras?.rowId ?: MediaSessionCompat.QueueItem.UNKNOWN_ID.toLong()
+        )
+      )
+    }
+  }
+
+  override fun onSkipToQueueItem(id: Long) {
+    // Use id as index
+    mQueueIndex = id.toInt()
+    val queueItem = mQueue[id.toInt()]
+    session.controller.transportControls.playFromMediaId(queueItem.description.mediaId, null)
+
+    // Update PlaybackState
+    mLastState = PlaybackStateCompat.Builder(mLastState).apply {
+      setActiveQueueItemId(queueItem.queueId)
+      var actions = mLastState.actions
+      actions = if (mQueueIndex < mQueue.size) {
+        // Set NEXT flag
+        actions or PlaybackStateCompat.ACTION_SKIP_TO_NEXT
+      } else {
+        // Clear NEXT flag
+        actions and PlaybackStateCompat.ACTION_SKIP_TO_NEXT.inv()
+      }
+      actions = if (mQueueIndex > 0) {
+        // Set PREVIOUS flag
+        actions or PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
+      } else {
+        // Clear PREVIOUS flag
+        actions and PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS.inv()
+      }
+      setActions(actions)
+    }.build()
+  }
+
+  override fun onRemoveQueueItem(description: MediaDescriptionCompat?) {
+    description?.let { desc ->
+      mQueue.remove(
+        mQueue.first { item ->
+          item.description == desc
+        }
+      )
+    }
+  }
+
+  override fun onSkipToPrevious() {
+    onSkipToQueueItem((mQueueIndex + 1).toLong())
+  }
+
+  override fun onSkipToNext() {
+    onSkipToQueueItem((mQueueIndex + 1).toLong())
+  }
 
   //endregion
 
   companion object {
     private const val LOG_TAG = "LPPlayerControls"
+
+    const val ACTION_START_UPDATER = "ACTION_START_UPDATER"
+    const val ACTION_STOP_UPDATER = "ACTION_STOP_UPDATER"
 
     private const val UPDATE_FREQUENCY: Long = 500  // in milliseconds
   }

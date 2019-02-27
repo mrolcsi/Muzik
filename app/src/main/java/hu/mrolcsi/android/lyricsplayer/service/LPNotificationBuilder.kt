@@ -32,12 +32,12 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.media.app.NotificationCompat.MediaStyle
 import androidx.media.session.MediaButtonReceiver
-import com.example.android.uamp.media.extensions.isPlayEnabled
-import com.example.android.uamp.media.extensions.isPlaying
-import com.example.android.uamp.media.extensions.isSkipToNextEnabled
-import com.example.android.uamp.media.extensions.isSkipToPreviousEnabled
 import hu.mrolcsi.android.lyricsplayer.BuildConfig
 import hu.mrolcsi.android.lyricsplayer.R
+import hu.mrolcsi.android.lyricsplayer.extensions.isPlayEnabled
+import hu.mrolcsi.android.lyricsplayer.extensions.isPlaying
+import hu.mrolcsi.android.lyricsplayer.extensions.isSkipToNextEnabled
+import hu.mrolcsi.android.lyricsplayer.extensions.isSkipToPreviousEnabled
 
 /**
  * Helper class to encapsulate code for building notifications.

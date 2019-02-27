@@ -1,6 +1,8 @@
 package hu.mrolcsi.android.lyricsplayer.library.songs
 
+import android.os.AsyncTask
 import android.os.Bundle
+import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.view.LayoutInflater
 import android.view.View
@@ -13,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.android.lyricsplayer.R
 import hu.mrolcsi.android.lyricsplayer.extensions.OnItemClickListener
+import hu.mrolcsi.android.lyricsplayer.extensions.queueAndPlay
 import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
 import kotlinx.android.synthetic.main.fragment_browser.*
 
@@ -21,11 +24,13 @@ class SongsFragment : Fragment() {
   private val args: SongsFragmentArgs by navArgs()
 
   private lateinit var mSongsModel: SongsViewModel
+  private lateinit var mVisibleSongs: List<MediaBrowserCompat.MediaItem>
 
-  private val mSongsAdapter = SongsAdapter(OnItemClickListener { item, holder, position, id ->
-    MediaControllerCompat.getMediaController(requireActivity())
-      .transportControls
-      .playFromMediaId(item.mediaId, null)
+  private val mSongsAdapter = SongsAdapter(OnItemClickListener { _, _, position, _ ->
+    AsyncTask.execute {
+      MediaControllerCompat.getMediaController(requireActivity())
+        .queueAndPlay(mVisibleSongs, position)
+    }
   })
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,6 +39,7 @@ class SongsFragment : Fragment() {
     activity?.let {
       mSongsModel = ViewModelProviders.of(requireActivity()).get(SongsViewModel::class.java)
       mSongsModel.getSongs().observe(this, Observer { songs ->
+        mVisibleSongs = songs
         mSongsAdapter.submitList(songs)
       })
     }

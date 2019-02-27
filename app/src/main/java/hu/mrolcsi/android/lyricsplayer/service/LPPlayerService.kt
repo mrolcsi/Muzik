@@ -142,8 +142,5 @@ class LPPlayerService : LPBrowserService() {
 
   companion object {
     const val LOG_TAG = "LPPlayerService"
-
-    const val ACTION_START_UPDATER = "ACTION_START_UPDATER"
-    const val ACTION_STOP_UPDATER = "ACTION_STOP_UPDATER"
   }
 }

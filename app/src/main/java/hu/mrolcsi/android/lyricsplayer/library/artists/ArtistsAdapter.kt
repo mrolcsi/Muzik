@@ -1,7 +1,6 @@
 package hu.mrolcsi.android.lyricsplayer.library.artists
 
 import android.content.res.ColorStateList
-import android.provider.MediaStore
 import android.support.v4.media.MediaBrowserCompat
 import android.view.LayoutInflater
 import android.view.View
@@ -15,6 +14,8 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.android.lyricsplayer.R
+import hu.mrolcsi.android.lyricsplayer.extensions.numberOfAlbums
+import hu.mrolcsi.android.lyricsplayer.extensions.numberOfTracks
 import hu.mrolcsi.android.lyricsplayer.theme.Theme
 import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
 
@@ -61,8 +62,8 @@ class ArtistsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, ArtistsAdapter.
 
       // Set texts
       tvArtist?.text = item.description.title
-      val numberOfAlbums = item.description.extras?.getInt(MediaStore.Audio.Artists.NUMBER_OF_ALBUMS) ?: 0
-      val numberOfSongs = item.description.extras?.getInt(MediaStore.Audio.Artists.NUMBER_OF_TRACKS) ?: 0
+      val numberOfAlbums = item.description.extras?.numberOfAlbums ?: 0
+      val numberOfSongs = item.description.extras?.numberOfTracks ?: 0
       val numberOfAlbumsString =
         itemView.context.resources.getQuantityString(R.plurals.artists_numberOfAlbums, numberOfAlbums, numberOfAlbums)
       val numberOfSongsString =

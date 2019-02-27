@@ -34,9 +34,13 @@ import hu.mrolcsi.android.lyricsplayer.extensions.applyColorToNavigationBarIcons
 import hu.mrolcsi.android.lyricsplayer.extensions.applyColorToStatusBarIcons
 import hu.mrolcsi.android.lyricsplayer.extensions.artist
 import hu.mrolcsi.android.lyricsplayer.extensions.duration
+import hu.mrolcsi.android.lyricsplayer.extensions.isPlaying
+import hu.mrolcsi.android.lyricsplayer.extensions.isSkipToNextEnabled
+import hu.mrolcsi.android.lyricsplayer.extensions.isSkipToPreviousEnabled
 import hu.mrolcsi.android.lyricsplayer.extensions.secondsToTimeStamp
+import hu.mrolcsi.android.lyricsplayer.extensions.startProgressUpdater
+import hu.mrolcsi.android.lyricsplayer.extensions.stopProgressUpdater
 import hu.mrolcsi.android.lyricsplayer.extensions.title
-import hu.mrolcsi.android.lyricsplayer.service.LPPlayerService
 import hu.mrolcsi.android.lyricsplayer.theme.Theme
 import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
 import kotlinx.android.synthetic.main.activity_player.*
@@ -79,23 +83,8 @@ class PlayerActivity : AppCompatActivity() {
       })
       mediaController.observe(this@PlayerActivity, Observer { controller ->
         controller?.let {
+          // Apply MediaController to this Activity
           MediaControllerCompat.setMediaController(this@PlayerActivity, controller)
-
-          val args = intent?.extras?.let {
-            PlayerActivityArgs.fromBundle(it)
-          }
-          if (args != null) {
-            // load song from args
-            args.mediaPath?.let {
-              val currentMediaId = controller.metadata?.description?.mediaId
-              Log.d(LOG_TAG, "Current media: $currentMediaId")
-              if (it != currentMediaId) {
-                controller.transportControls.playFromMediaId(it, null)
-              }
-            }
-            // clear args
-            intent?.extras?.clear()
-          }
 
           // Finish building the UI
           setupTransportControls()
@@ -194,19 +183,30 @@ class PlayerActivity : AppCompatActivity() {
     btnPlayPause.isEnabled = true
     btnNext.isEnabled = true
 
-    // update song metadata
+    // Update song metadata
     val metadata = mediaController.metadata
     if (metadata != null) {
       updateSongData(metadata)
     }
 
-    // update music controls
+    // Update music controls
     val pbState = mediaController.playbackState
     if (pbState != null) {
       updateControls(pbState)
     }
 
-    // setup listeners
+    // Setup listeners
+
+    btnPrevious.setOnClickListener {
+      val controller = MediaControllerCompat.getMediaController(this@PlayerActivity)
+      controller.transportControls.skipToPrevious()
+    }
+
+    btnNext.setOnClickListener {
+      val controller = MediaControllerCompat.getMediaController(this@PlayerActivity)
+      controller.transportControls.skipToNext()
+    }
+
     btnPlayPause.apply {
       setOnClickListener {
         val controller = MediaControllerCompat.getMediaController(this@PlayerActivity)
@@ -214,14 +214,14 @@ class PlayerActivity : AppCompatActivity() {
           PlaybackStateCompat.STATE_PLAYING -> {
             // Pause playback, stop updater
             controller.transportControls.pause()
-            controller.transportControls.sendCustomAction(LPPlayerService.ACTION_STOP_UPDATER, null)
+            controller.transportControls.startProgressUpdater()
             btnPlayPause.setImageDrawable(mPlayDrawable)
           }
           PlaybackStateCompat.STATE_PAUSED,
           PlaybackStateCompat.STATE_STOPPED -> {
             // Start playback, start updater
             controller.transportControls.play()
-            controller.transportControls.sendCustomAction(LPPlayerService.ACTION_START_UPDATER, null)
+            controller.transportControls.stopProgressUpdater()
             btnPlayPause.setImageDrawable(mPauseDrawable)
           }
         }
@@ -267,14 +267,16 @@ class PlayerActivity : AppCompatActivity() {
 
     val controller = MediaControllerCompat.getMediaController(this) ?: null
 
-    when (playbackState.state) {
-      PlaybackStateCompat.STATE_PLAYING -> {
-        controller?.transportControls?.sendCustomAction(LPPlayerService.ACTION_START_UPDATER, null)
+    btnPrevious.isEnabled = playbackState.isSkipToPreviousEnabled
+    btnNext.isEnabled = playbackState.isSkipToNextEnabled
+
+    when (playbackState.isPlaying) {
+      true -> {
+        controller?.transportControls?.startProgressUpdater()
         btnPlayPause.setImageDrawable(mPauseDrawable)
       }
-      PlaybackStateCompat.STATE_PAUSED,
-      PlaybackStateCompat.STATE_STOPPED -> {
-        controller?.transportControls?.sendCustomAction(LPPlayerService.ACTION_STOP_UPDATER, null)
+      false -> {
+        controller?.transportControls?.stopProgressUpdater()
         btnPlayPause.setImageDrawable(mPlayDrawable)
       }
     }
