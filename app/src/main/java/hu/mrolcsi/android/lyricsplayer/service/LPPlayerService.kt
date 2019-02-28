@@ -2,6 +2,8 @@ package hu.mrolcsi.android.lyricsplayer.service
 
 import android.app.PendingIntent
 import android.content.Intent
+import android.support.v4.media.MediaBrowserCompat
+import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.MediaSessionCompat
@@ -11,6 +13,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.TaskStackBuilder
 import androidx.media.session.MediaButtonReceiver
 import hu.mrolcsi.android.lyricsplayer.extensions.albumArt
+import hu.mrolcsi.android.lyricsplayer.extensions.queueItems
 import hu.mrolcsi.android.lyricsplayer.player.PlayerActivity
 import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
 
@@ -112,11 +115,17 @@ class LPPlayerService : LPBrowserService() {
         }
       })
 
-      // Load last played MediaItem
+      // Load last played queue
       with(LastPlayedSetting(applicationContext)) {
-        lastPlayedMedia?.let {
-          Log.d(LOG_TAG, "Loading last played: $it")
-          controller.transportControls.prepareFromMediaId(it, null)
+        if (lastPlayedQueue.isNotEmpty()) {
+          val queue = lastPlayedQueue.map {
+            MediaBrowserCompat.MediaItem(
+              MediaDescriptionCompat.Builder().setMediaId(it).build(),
+              MediaBrowserCompat.MediaItem.FLAG_PLAYABLE
+            )
+          }.toList()
+          controller.queueItems(queue)
+          controller.transportControls.skipToQueueItem(lastPlayedIndex.toLong())
           controller.transportControls.seekTo(lastPlayedPosition)
         }
       }

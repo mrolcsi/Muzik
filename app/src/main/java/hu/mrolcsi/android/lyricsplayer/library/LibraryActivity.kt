@@ -102,7 +102,11 @@ class LibraryActivity : AppCompatActivity() {
     super.onResumeFragments()
 
     if (!mNavBarReady) {
-      setupNavBar(findNavController(R.id.library_nav_host))
+      try {
+        setupNavBar(findNavController(R.id.library_nav_host))
+      } catch (e: IllegalStateException) {
+        // NavController not ready yet.
+      }
     }
 
     // Apply StatusBar and NavigationBar colors again
@@ -174,6 +178,7 @@ class LibraryActivity : AppCompatActivity() {
 
     // hide hints, show navigation
     groupPermissionHint.visibility = View.GONE
+    navigation_bar.visibility = View.VISIBLE
 
     // enable navigation
     val finalHost = NavHostFragment.create(R.navigation.library_navigation)

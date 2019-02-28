@@ -192,7 +192,7 @@ abstract class LPBrowserService : MediaBrowserServiceCompat() {
           .setSubtitle(it.getString(3))   // Song artist
           .setExtras(
             bundleOf(
-              MediaStore.Audio.Media._ID to it.getString(0),
+              MediaStore.Audio.Media._ID to it.getLong(0),
               MediaStore.Audio.Media.ARTIST to it.getString(3),
               MediaStore.Audio.Media.ARTIST_KEY to it.getString(4),
               MediaStore.Audio.Media.ALBUM to it.getString(5),

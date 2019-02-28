@@ -21,6 +21,7 @@ import hu.mrolcsi.android.lyricsplayer.extensions.album
 import hu.mrolcsi.android.lyricsplayer.extensions.albumArt
 import hu.mrolcsi.android.lyricsplayer.extensions.artist
 import hu.mrolcsi.android.lyricsplayer.extensions.duration
+import hu.mrolcsi.android.lyricsplayer.extensions.isPlaying
 import hu.mrolcsi.android.lyricsplayer.extensions.rowId
 import hu.mrolcsi.android.lyricsplayer.extensions.title
 import java.util.*
@@ -33,13 +34,25 @@ open class LPPlayerControls(
 ) : MediaSessionCompat.Callback() {
 
   // Player
-  private var mMediaPlayer: MediaPlayer = MediaPlayer().apply { setOnCompletionListener { onStop() } }
+  private var mMediaPlayer: MediaPlayer = MediaPlayer().apply {
+    setOnCompletionListener {
+      // Start next song, if available.
+      if (mQueueIndex < mQueue.lastIndex) {
+        onSkipToNext()
+      } else {
+        onStop()
+      }
+    }
+  }
   private var mLastState by Delegates.observable(
     PlaybackStateCompat.Builder().apply {
       setActions(
         PlaybackStateCompat.ACTION_PLAY_PAUSE or
             PlaybackStateCompat.ACTION_PLAY or
-            PlaybackStateCompat.ACTION_PAUSE
+            PlaybackStateCompat.ACTION_PAUSE or
+            PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS or
+            PlaybackStateCompat.ACTION_SKIP_TO_NEXT or
+            PlaybackStateCompat.ACTION_SKIP_TO_QUEUE_ITEM
       )
     }.build()
   ) { _, _, new ->
@@ -48,7 +61,26 @@ open class LPPlayerControls(
 
   // Queue (Playlist)
   private val mQueue = LinkedList<MediaSessionCompat.QueueItem>().also { session.setQueue(it) }
-  private var mQueueIndex = 0
+  private var mQueueIndex: Int by Delegates.observable(0) { _, _, new ->
+    // Update playback state
+    var actions = mLastState.actions
+    actions = actions or PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS or PlaybackStateCompat.ACTION_SKIP_TO_NEXT
+    if (new == 0) {
+      // Remove PREVIOUS action
+      actions = actions and PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS.inv()
+    }
+    if (new == mQueue.lastIndex) {
+      // Remove NEXT action
+      actions = actions and PlaybackStateCompat.ACTION_SKIP_TO_NEXT.inv()
+    }
+    mLastState = PlaybackStateCompat.Builder(mLastState)
+      .setActions(actions)
+      .setActiveQueueItemId(mQueueIndex.toLong())
+      .build()
+
+    // Update last played
+    mLastPlayed.lastPlayedIndex = new
+  }
 
   // Last Played Settings
   private val mLastPlayed = LastPlayedSetting(context)
@@ -89,6 +121,7 @@ open class LPPlayerControls(
     when (action) {
       ACTION_START_UPDATER -> if (!mUpdaterEnabled.getAndSet(true)) mUpdateHandler.post(mUpdateRunnable)
       ACTION_STOP_UPDATER -> mUpdaterEnabled.set(false)
+      ACTION_CLEAR_QUEUE -> mQueue.clear()
       else -> super.onCustomAction(action, extras)
     }
   }
@@ -105,11 +138,6 @@ open class LPPlayerControls(
     // Using mediaId as path
     mMediaPlayer.setDataSource(mediaId)
     mMediaPlayer.prepare()  // or prepareAsync()?
-
-    Log.v(LOG_TAG, "Player prepared.")
-
-    // Save as Last Played
-    mLastPlayed.lastPlayedMedia = mediaId
 
     // Load metadata
     val retriever = MediaMetadataRetriever().apply {
@@ -237,8 +265,6 @@ open class LPPlayerControls(
 
     // Cancel Handler
     mUpdateHandler.removeCallbacks(mUpdateRunnable)
-
-    // TODO: start next item in queue
   }
 
   @Suppress("DEPRECATION")
@@ -272,47 +298,41 @@ open class LPPlayerControls(
   }
 
   override fun onAddQueueItem(description: MediaDescriptionCompat?, index: Int) {
+    Log.v(LOG_TAG, "onAddQueueItem(${description?.mediaId}, $index)")
+
     // Add item to queue at given index
     description?.let {
       mQueue.add(
         index,
         MediaSessionCompat.QueueItem(
           description,
-          description.extras?.rowId ?: MediaSessionCompat.QueueItem.UNKNOWN_ID.toLong()
+          description.extras?.rowId ?: Random().nextLong()
         )
       )
+      // Update last played
+      mLastPlayed.lastPlayedQueue = mQueue.mapNotNull { it.description.mediaId }.toSet()
     }
   }
 
   override fun onSkipToQueueItem(id: Long) {
+    Log.v(LOG_TAG, "onSkipToQueueItem($id)")
+
+    // Check if id is in range
+    if (id > mQueue.lastIndex) return
+
     // Use id as index
     mQueueIndex = id.toInt()
     val queueItem = mQueue[id.toInt()]
-    session.controller.transportControls.playFromMediaId(queueItem.description.mediaId, null)
-
-    // Update PlaybackState
-    mLastState = PlaybackStateCompat.Builder(mLastState).apply {
-      setActiveQueueItemId(queueItem.queueId)
-      var actions = mLastState.actions
-      actions = if (mQueueIndex < mQueue.size) {
-        // Set NEXT flag
-        actions or PlaybackStateCompat.ACTION_SKIP_TO_NEXT
-      } else {
-        // Clear NEXT flag
-        actions and PlaybackStateCompat.ACTION_SKIP_TO_NEXT.inv()
-      }
-      actions = if (mQueueIndex > 0) {
-        // Set PREVIOUS flag
-        actions or PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
-      } else {
-        // Clear PREVIOUS flag
-        actions and PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS.inv()
-      }
-      setActions(actions)
-    }.build()
+    if (mLastState.isPlaying) {
+      onPlayFromMediaId(queueItem.description.mediaId, null)
+    } else {
+      onPrepareFromMediaId(queueItem.description.mediaId, null)
+    }
   }
 
   override fun onRemoveQueueItem(description: MediaDescriptionCompat?) {
+    Log.v(LOG_TAG, "onRemoveQueueItem($description)")
+
     description?.let { desc ->
       mQueue.remove(
         mQueue.first { item ->
@@ -323,7 +343,7 @@ open class LPPlayerControls(
   }
 
   override fun onSkipToPrevious() {
-    onSkipToQueueItem((mQueueIndex + 1).toLong())
+    onSkipToQueueItem((mQueueIndex - 1).toLong())
   }
 
   override fun onSkipToNext() {
@@ -337,6 +357,7 @@ open class LPPlayerControls(
 
     const val ACTION_START_UPDATER = "ACTION_START_UPDATER"
     const val ACTION_STOP_UPDATER = "ACTION_STOP_UPDATER"
+    const val ACTION_CLEAR_QUEUE = "ACTION_CLEAR_QUEUE"
 
     private const val UPDATE_FREQUENCY: Long = 500  // in milliseconds
   }
