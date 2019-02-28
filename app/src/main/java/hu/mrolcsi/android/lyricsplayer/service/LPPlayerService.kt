@@ -2,6 +2,7 @@ package hu.mrolcsi.android.lyricsplayer.service
 
 import android.app.PendingIntent
 import android.content.Intent
+import android.os.AsyncTask
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
@@ -13,7 +14,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.TaskStackBuilder
 import androidx.media.session.MediaButtonReceiver
 import hu.mrolcsi.android.lyricsplayer.extensions.albumArt
-import hu.mrolcsi.android.lyricsplayer.extensions.queueItems
+import hu.mrolcsi.android.lyricsplayer.extensions.queueItemsAndSkip
 import hu.mrolcsi.android.lyricsplayer.player.PlayerActivity
 import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
 
@@ -115,18 +116,19 @@ class LPPlayerService : LPBrowserService() {
         }
       })
 
-      // Load last played queue
-      with(LastPlayedSetting(applicationContext)) {
-        if (lastPlayedQueue.isNotEmpty()) {
-          val queue = lastPlayedQueue.map {
-            MediaBrowserCompat.MediaItem(
-              MediaDescriptionCompat.Builder().setMediaId(it).build(),
-              MediaBrowserCompat.MediaItem.FLAG_PLAYABLE
-            )
-          }.toList()
-          controller.queueItems(queue)
-          controller.transportControls.skipToQueueItem(lastPlayedIndex.toLong())
-          controller.transportControls.seekTo(lastPlayedPosition)
+      // Load last played queue in the background
+      AsyncTask.execute {
+        with(LastPlayedSetting(applicationContext)) {
+          if (lastPlayedQueue.isNotEmpty()) {
+            val queue = lastPlayedQueue.map {
+              MediaBrowserCompat.MediaItem(
+                MediaDescriptionCompat.Builder().setMediaId(it).build(),
+                MediaBrowserCompat.MediaItem.FLAG_PLAYABLE
+              )
+            }.toList()
+            controller.queueItemsAndSkip(queue, lastPlayedIndex)
+            controller.transportControls.seekTo(lastPlayedPosition)
+          }
         }
       }
     }

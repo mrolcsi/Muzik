@@ -24,11 +24,16 @@ fun MediaControllerCompat.queueItems(items: List<MediaBrowserCompat.MediaItem>) 
  */
 fun MediaControllerCompat.queueItemsAndSkip(items: List<MediaBrowserCompat.MediaItem>, position: Int = 0) {
 
-  queueItems(items)
+  // Clear current queue
+  clearQueue()
 
-  // Start media at clicked position.
-  // (Assuming adapter position and queue position is the same.)
-  transportControls.skipToQueueItem(position.toLong())
+  // Add items from adapter to queue
+  items.forEachIndexed { index, item ->
+    addQueueItem(item.description, index)
+    if (index == position) {
+      transportControls.skipToQueueItem(index.toLong())
+    }
+  }
 }
 
 fun MediaControllerCompat.TransportControls.startProgressUpdater() = this.sendCustomAction(ACTION_START_UPDATER, null)

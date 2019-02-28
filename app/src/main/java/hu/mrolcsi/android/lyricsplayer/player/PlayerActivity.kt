@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.PorterDuff
+import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
 import android.media.AudioManager
 import android.os.Bundle
@@ -27,6 +28,12 @@ import androidx.core.view.ViewCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.palette.graphics.Palette
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import hu.mrolcsi.android.lyricsplayer.R
 import hu.mrolcsi.android.lyricsplayer.extensions.album
 import hu.mrolcsi.android.lyricsplayer.extensions.albumArt
@@ -59,10 +66,29 @@ class PlayerActivity : AppCompatActivity() {
   private val mPauseDrawable by lazy { getDrawable(R.drawable.media_pause) as LayerDrawable }
   private val mNextDrawable by lazy { getDrawable(R.drawable.media_next) as LayerDrawable }
 
+  // Glide transition listener
+  private val mGlideListener = object : RequestListener<Drawable> {
+    override fun onLoadFailed(
+      e: GlideException?, model: Any?, target: Target<Drawable>?, isFirstResource: Boolean
+    ): Boolean {
+      supportStartPostponedEnterTransition()
+      return false
+    }
+
+    override fun onResourceReady(
+      resource: Drawable?, model: Any?, target: Target<Drawable>?, dataSource: DataSource?, isFirstResource: Boolean
+    ): Boolean {
+      supportStartPostponedEnterTransition()
+      return false
+    }
+  }
+
   //region LIFECYCLE
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+
+    supportPostponeEnterTransition()
 
     setContentView(R.layout.activity_player)
     setupToolbar()
@@ -199,7 +225,12 @@ class PlayerActivity : AppCompatActivity() {
 
     btnPrevious.setOnClickListener {
       val controller = MediaControllerCompat.getMediaController(this@PlayerActivity)
-      controller.transportControls.skipToPrevious()
+      if (sbSongProgress.progress > 5) {
+        // restart the song
+        controller.transportControls.seekTo(0)
+      } else {
+        controller.transportControls.skipToPrevious()
+      }
     }
 
     btnNext.setOnClickListener {
@@ -287,7 +318,13 @@ class PlayerActivity : AppCompatActivity() {
     tvArtist.text = metadata.artist
     tvTitle.text = metadata.title
 
-    imgCoverArt.setImageBitmap(metadata.albumArt)
+    Glide.with(this)
+      .load(metadata.albumArt)
+      .centerCrop()
+      .dontAnimate()
+      .listener(mGlideListener)
+      .transition(DrawableTransitionOptions.withCrossFade(500))
+      .into(imgCoverArt)
 
     if (metadata.albumArt != null) {
       // Upper 10% of Cover Art

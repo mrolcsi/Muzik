@@ -8,7 +8,9 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.os.Bundle
+import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
+import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
@@ -26,6 +28,9 @@ import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
+import com.bumptech.glide.request.transition.DrawableCrossFadeFactory
 import hu.mrolcsi.android.lyricsplayer.R
 import hu.mrolcsi.android.lyricsplayer.extensions.applyColorToNavigationBarIcons
 import hu.mrolcsi.android.lyricsplayer.extensions.applyColorToStatusBarIcons
@@ -68,23 +73,21 @@ class LibraryActivity : AppCompatActivity() {
     }
 
     mPlayerModel = ViewModelProviders.of(this).get(PlayerViewModel::class.java).apply {
-      mediaController.observe(this@LibraryActivity, Observer {
+      mediaController.observe(this@LibraryActivity, Observer { controller ->
         // Set mediaController to the Activity
-        MediaControllerCompat.setMediaController(this@LibraryActivity, it)
+        MediaControllerCompat.setMediaController(this@LibraryActivity, controller)
 
-        // Update everything
-        mNowPlayingMenuItem?.isVisible = it?.playbackState != null
-        mNowPlayingCoverArt?.setImageBitmap(it?.metadata?.description?.iconBitmap)
+        // Update from state
+        updateControls(controller?.playbackState)
+
+        // Update from metadata
+        updateSongData(controller?.metadata)
       })
       currentPlaybackState.observe(this@LibraryActivity, Observer { playbackState ->
-        // Show/hide Now Playing in ActionBar
-        mNowPlayingMenuItem?.isVisible = playbackState != null
+        updateControls(playbackState)
       })
       currentMediaMetadata.observe(this@LibraryActivity, Observer { metadata ->
-        // Update cover art in ActionBar
-        metadata?.let {
-          mNowPlayingCoverArt?.setImageBitmap(metadata.description?.iconBitmap)
-        }
+        updateSongData(metadata)
       })
     }
 
@@ -262,6 +265,25 @@ class LibraryActivity : AppCompatActivity() {
         // Ignore all other requests.
       }
     }
+  }
+
+  private fun updateSongData(metadata: MediaMetadataCompat?) {
+    // Update cover art in ActionBar
+    metadata?.description?.iconBitmap.let { bitmap ->
+      Glide.with(this)
+        .load(bitmap)
+        .transition(
+          DrawableTransitionOptions.with(
+            DrawableCrossFadeFactory.Builder().setCrossFadeEnabled(true).build()
+          )
+        )
+        .into(mNowPlayingCoverArt!!)
+    }
+  }
+
+  private fun updateControls(playbackState: PlaybackStateCompat?) {
+    // Show/hide Now Playing in ActionBar
+    mNowPlayingMenuItem?.isVisible = playbackState != null
   }
 
   private fun applyTheme(theme: Theme) {

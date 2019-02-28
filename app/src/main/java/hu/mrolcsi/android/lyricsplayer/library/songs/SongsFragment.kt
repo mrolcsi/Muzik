@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.android.lyricsplayer.R
 import hu.mrolcsi.android.lyricsplayer.extensions.OnItemClickListener
-import hu.mrolcsi.android.lyricsplayer.extensions.queueItems
+import hu.mrolcsi.android.lyricsplayer.extensions.queueItemsAndSkip
 import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
 import kotlinx.android.synthetic.main.fragment_browser.*
 
@@ -33,11 +33,10 @@ class SongsFragment : Fragment() {
       val controller = MediaControllerCompat.getMediaController(requireActivity())
       if (!mSongsInQueue) {
         // Add songs to queue
-        controller.queueItems(mVisibleSongs)
+        controller.queueItemsAndSkip(mVisibleSongs, position)
         mSongsInQueue = true
       }
       controller.transportControls.run {
-        skipToQueueItem(position.toLong())
         play()
       }
     }
