@@ -30,19 +30,19 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.palette.graphics.Palette
 import hu.mrolcsi.android.lyricsplayer.R
-import hu.mrolcsi.android.lyricsplayer.extensions.album
-import hu.mrolcsi.android.lyricsplayer.extensions.albumArt
 import hu.mrolcsi.android.lyricsplayer.extensions.applyColorToNavigationBarIcons
 import hu.mrolcsi.android.lyricsplayer.extensions.applyColorToStatusBarIcons
-import hu.mrolcsi.android.lyricsplayer.extensions.artist
-import hu.mrolcsi.android.lyricsplayer.extensions.duration
-import hu.mrolcsi.android.lyricsplayer.extensions.isPlaying
-import hu.mrolcsi.android.lyricsplayer.extensions.isSkipToNextEnabled
-import hu.mrolcsi.android.lyricsplayer.extensions.isSkipToPreviousEnabled
+import hu.mrolcsi.android.lyricsplayer.extensions.media.album
+import hu.mrolcsi.android.lyricsplayer.extensions.media.albumArt
+import hu.mrolcsi.android.lyricsplayer.extensions.media.artist
+import hu.mrolcsi.android.lyricsplayer.extensions.media.duration
+import hu.mrolcsi.android.lyricsplayer.extensions.media.isPlaying
+import hu.mrolcsi.android.lyricsplayer.extensions.media.isSkipToNextEnabled
+import hu.mrolcsi.android.lyricsplayer.extensions.media.isSkipToPreviousEnabled
+import hu.mrolcsi.android.lyricsplayer.extensions.media.startProgressUpdater
+import hu.mrolcsi.android.lyricsplayer.extensions.media.stopProgressUpdater
+import hu.mrolcsi.android.lyricsplayer.extensions.media.title
 import hu.mrolcsi.android.lyricsplayer.extensions.secondsToTimeStamp
-import hu.mrolcsi.android.lyricsplayer.extensions.startProgressUpdater
-import hu.mrolcsi.android.lyricsplayer.extensions.stopProgressUpdater
-import hu.mrolcsi.android.lyricsplayer.extensions.title
 import hu.mrolcsi.android.lyricsplayer.theme.Theme
 import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
 import kotlinx.android.synthetic.main.activity_player.*
@@ -173,7 +173,7 @@ class PlayerActivity : AppCompatActivity() {
   }
 
   private fun setupTransportControls() {
-    val mediaController = MediaControllerCompat.getMediaController(this@PlayerActivity)
+    val mediaController = MediaControllerCompat.getMediaController(this)
 
     // Set icons
     btnPrevious.setImageDrawable(mPreviousDrawable)

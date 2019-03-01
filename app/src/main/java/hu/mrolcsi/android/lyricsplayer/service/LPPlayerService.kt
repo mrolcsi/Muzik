@@ -13,9 +13,10 @@ import android.util.Log
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.TaskStackBuilder
 import androidx.media.session.MediaButtonReceiver
-import hu.mrolcsi.android.lyricsplayer.extensions.albumArt
-import hu.mrolcsi.android.lyricsplayer.extensions.queueItemsAndSkip
+import hu.mrolcsi.android.lyricsplayer.extensions.media.albumArt
+import hu.mrolcsi.android.lyricsplayer.extensions.media.queueItemsAndSkip
 import hu.mrolcsi.android.lyricsplayer.player.PlayerActivity
+import hu.mrolcsi.android.lyricsplayer.service.exoplayer.PlayerHolder
 import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
 
 
@@ -24,6 +25,7 @@ class LPPlayerService : LPBrowserService() {
   private var isForegroundService = false
 
   private lateinit var mMediaSession: MediaSessionCompat
+  private lateinit var mPlayerHolder: PlayerHolder
 
   private lateinit var mNotificationBuilder: LPNotificationBuilder
 
@@ -55,7 +57,10 @@ class LPPlayerService : LPBrowserService() {
 
       // MySessionCallback() has methods that handle callbacks from a media mediaController
       // Pass the service as an argument, so the service can be handled from the callbacks.
-      setCallback(LPPlayerControls(applicationContext, this))
+      //setCallback(LPPlayerControls(applicationContext, this))
+
+      // Connect this session with the PlayerHolder
+      mPlayerHolder = PlayerHolder(applicationContext, this)
 
       // Set the session's token so that client activities can communicate with it.
       setSessionToken(sessionToken)

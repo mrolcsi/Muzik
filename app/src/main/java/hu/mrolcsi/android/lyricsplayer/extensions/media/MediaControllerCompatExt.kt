@@ -1,4 +1,4 @@
-package hu.mrolcsi.android.lyricsplayer.extensions
+package hu.mrolcsi.android.lyricsplayer.extensions.media
 
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.session.MediaControllerCompat

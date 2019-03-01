@@ -34,10 +34,10 @@ import androidx.media.app.NotificationCompat.MediaStyle
 import androidx.media.session.MediaButtonReceiver
 import hu.mrolcsi.android.lyricsplayer.BuildConfig
 import hu.mrolcsi.android.lyricsplayer.R
-import hu.mrolcsi.android.lyricsplayer.extensions.isPlayEnabled
-import hu.mrolcsi.android.lyricsplayer.extensions.isPlaying
-import hu.mrolcsi.android.lyricsplayer.extensions.isSkipToNextEnabled
-import hu.mrolcsi.android.lyricsplayer.extensions.isSkipToPreviousEnabled
+import hu.mrolcsi.android.lyricsplayer.extensions.media.isPlayEnabled
+import hu.mrolcsi.android.lyricsplayer.extensions.media.isPlaying
+import hu.mrolcsi.android.lyricsplayer.extensions.media.isSkipToNextEnabled
+import hu.mrolcsi.android.lyricsplayer.extensions.media.isSkipToPreviousEnabled
 
 /**
  * Helper class to encapsulate code for building notifications.

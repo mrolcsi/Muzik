@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package hu.mrolcsi.android.lyricsplayer.extensions
+package hu.mrolcsi.android.lyricsplayer.extensions.media
 
 import android.support.v4.media.session.PlaybackStateCompat
 

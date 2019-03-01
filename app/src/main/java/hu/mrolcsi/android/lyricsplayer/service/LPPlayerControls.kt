@@ -7,7 +7,7 @@ import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.media.MediaMetadataRetriever
-import android.media.MediaPlayer
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -17,13 +17,22 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import androidx.media.AudioAttributesCompat
-import hu.mrolcsi.android.lyricsplayer.extensions.album
-import hu.mrolcsi.android.lyricsplayer.extensions.albumArt
-import hu.mrolcsi.android.lyricsplayer.extensions.artist
-import hu.mrolcsi.android.lyricsplayer.extensions.duration
-import hu.mrolcsi.android.lyricsplayer.extensions.isPlaying
+import com.google.android.exoplayer2.ExoPlayerFactory
+import com.google.android.exoplayer2.Player
+import com.google.android.exoplayer2.source.ExtractorMediaSource
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
+import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
+import com.google.android.exoplayer2.util.Util
+import hu.mrolcsi.android.lyricsplayer.BuildConfig
+import hu.mrolcsi.android.lyricsplayer.extensions.media.album
+import hu.mrolcsi.android.lyricsplayer.extensions.media.albumArt
+import hu.mrolcsi.android.lyricsplayer.extensions.media.artist
+import hu.mrolcsi.android.lyricsplayer.extensions.media.duration
+import hu.mrolcsi.android.lyricsplayer.extensions.media.isPlaying
+import hu.mrolcsi.android.lyricsplayer.extensions.media.title
 import hu.mrolcsi.android.lyricsplayer.extensions.rowId
-import hu.mrolcsi.android.lyricsplayer.extensions.title
+import hu.mrolcsi.android.lyricsplayer.service.exoplayer.AudioOnlyRenderersFactory
+import java.io.File
 import java.util.*
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
@@ -37,17 +46,17 @@ open class LPPlayerControls(
   // IO Worker
   private val mIoExecutor = Executors.newSingleThreadExecutor()
 
-  // Player
-  private var mMediaPlayer: MediaPlayer = MediaPlayer().apply {
-    setOnCompletionListener {
-      // Start next song, if available.
-      if (mQueueIndex < mQueue.lastIndex) {
-        onSkipToNext()
-      } else {
-        onStop()
-      }
-    }
+  // Player (Audio only)
+  private var mMediaPlayer = ExoPlayerFactory.newSimpleInstance(
+    context,
+    AudioOnlyRenderersFactory(context),
+    DefaultTrackSelector()
+  ).apply {
+    addListener(object : Player.EventListener {
+      // TODO
+    })
   }
+
   private var mLastState by Delegates.observable(
     PlaybackStateCompat.Builder().apply {
       setActions(
@@ -86,7 +95,7 @@ open class LPPlayerControls(
     override fun run() {
       mLastState = PlaybackStateCompat.Builder(mLastState).setState(
         mLastState.state,
-        mMediaPlayer.currentPosition.toLong(),
+        mMediaPlayer.currentPosition,
         1f
       ).build()
 
@@ -125,13 +134,13 @@ open class LPPlayerControls(
   override fun onPrepareFromMediaId(mediaId: String?, extras: Bundle?) {
     // Reset media player before loading
     mMediaPlayer.stop()
-    mMediaPlayer.reset()
 
     Log.v(LOG_TAG, "Loading media into Player: $mediaId")
 
-    // Using mediaId as path
-    mMediaPlayer.setDataSource(mediaId)
-    mMediaPlayer.prepare()  // or prepareAsync()?
+    // Using mediaId as path (uri?)
+    val dataSourceFactory = DefaultDataSourceFactory(context, Util.getUserAgent(context, BuildConfig.APPLICATION_ID))
+    val mediaSource = ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(Uri.fromFile(File(mediaId)))
+    mMediaPlayer.prepare(mediaSource)
 
     // Load metadata
     val retriever = MediaMetadataRetriever().apply {
@@ -172,14 +181,14 @@ open class LPPlayerControls(
       session.isActive = true
 
       // start the player (custom call)
-      mMediaPlayer.start()
+      mMediaPlayer.playWhenReady = true
 
       // Register BECOME_NOISY BroadcastReceiver
       mBecomingNoisyReceiver.register()
 
       // Update playback state
       mLastState = PlaybackStateCompat.Builder(mLastState)
-        .setState(PlaybackStateCompat.STATE_PLAYING, mMediaPlayer.currentPosition.toLong(), 1f)
+        .setState(PlaybackStateCompat.STATE_PLAYING, mMediaPlayer.currentPosition, 1f)
         .build()
     }
   }
@@ -217,7 +226,7 @@ open class LPPlayerControls(
     Log.v(LOG_TAG, "onPause(): $mMediaPlayer")
 
     // pause the player (custom call)
-    mMediaPlayer.pause()
+    mMediaPlayer.playWhenReady = false
 
     // unregister BECOME_NOISY BroadcastReceiver
     mBecomingNoisyReceiver.unregister()
@@ -225,10 +234,10 @@ open class LPPlayerControls(
     // Update metadata and state
     mLastState = PlaybackStateCompat.Builder(mLastState).setState(
       PlaybackStateCompat.STATE_PAUSED,
-      mMediaPlayer.currentPosition.toLong(),
+      mMediaPlayer.currentPosition,
       1f
     ).build()
-    mLastPlayed.lastPlayedPosition = mMediaPlayer.currentPosition.toLong()
+    mLastPlayed.lastPlayedPosition = mMediaPlayer.currentPosition
   }
 
   override fun onStop() {
@@ -253,7 +262,7 @@ open class LPPlayerControls(
     mLastPlayed.lastPlayedPosition = 0
 
     // stop the player (custom call)
-    if (mMediaPlayer.isPlaying) {
+    if (mMediaPlayer.playWhenReady) {
       mMediaPlayer.stop()
     }
 
@@ -277,9 +286,9 @@ open class LPPlayerControls(
   override fun onSeekTo(pos: Long) {
     Log.v(LOG_TAG, "onSeekTo(${pos.toInt()}): $mMediaPlayer")
 
-    mMediaPlayer.seekTo(pos.toInt())
+    mMediaPlayer.seekTo(pos)
     mLastState = PlaybackStateCompat.Builder(mLastState)
-      .setState(mLastState.state, mMediaPlayer.currentPosition.toLong(), 1f)
+      .setState(mLastState.state, mMediaPlayer.currentPosition, 1f)
       .build()
   }
 

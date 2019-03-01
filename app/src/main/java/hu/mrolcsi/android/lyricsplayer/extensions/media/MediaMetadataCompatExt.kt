@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package hu.mrolcsi.android.lyricsplayer.extensions
+package hu.mrolcsi.android.lyricsplayer.extensions.media
 
 import android.graphics.Bitmap
 import android.net.Uri

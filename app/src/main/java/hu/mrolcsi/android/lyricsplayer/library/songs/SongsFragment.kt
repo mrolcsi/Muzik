@@ -15,7 +15,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.android.lyricsplayer.R
 import hu.mrolcsi.android.lyricsplayer.extensions.OnItemClickListener
-import hu.mrolcsi.android.lyricsplayer.extensions.queueItemsAndSkip
 import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
 import kotlinx.android.synthetic.main.fragment_browser.*
 
@@ -28,16 +27,16 @@ class SongsFragment : Fragment() {
   private lateinit var mVisibleSongs: List<MediaBrowserCompat.MediaItem>
   private var mSongsInQueue = false
 
-  private val mSongsAdapter = SongsAdapter(OnItemClickListener { _, _, position, _ ->
+  private val mSongsAdapter = SongsAdapter(OnItemClickListener { item, holder, position, id ->
     AsyncTask.execute {
       val controller = MediaControllerCompat.getMediaController(requireActivity())
-      if (!mSongsInQueue) {
-        // Add songs to queue
-        controller.queueItemsAndSkip(mVisibleSongs, position)
-        mSongsInQueue = true
-      }
+//      if (!mSongsInQueue) {
+//        // Add songs to queue
+//        controller.queueItemsAndSkip(mVisibleSongs, position)
+//        mSongsInQueue = true
+//      }
       controller.transportControls.run {
-        play()
+        playFromMediaId(item.mediaId, null)
       }
     }
   })

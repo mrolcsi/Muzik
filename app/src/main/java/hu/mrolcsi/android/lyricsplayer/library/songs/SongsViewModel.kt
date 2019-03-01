@@ -8,7 +8,6 @@ import androidx.lifecycle.MutableLiveData
 import hu.mrolcsi.android.lyricsplayer.extensions.albumKey
 import hu.mrolcsi.android.lyricsplayer.extensions.artistKey
 import hu.mrolcsi.android.lyricsplayer.extensions.switchMap
-import hu.mrolcsi.android.lyricsplayer.extensions.trackNumber
 import hu.mrolcsi.android.lyricsplayer.library.LibraryViewModel
 import hu.mrolcsi.android.lyricsplayer.service.LPBrowserService
 
