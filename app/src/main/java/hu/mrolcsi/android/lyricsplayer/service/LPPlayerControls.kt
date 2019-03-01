@@ -28,9 +28,9 @@ import hu.mrolcsi.android.lyricsplayer.extensions.media.album
 import hu.mrolcsi.android.lyricsplayer.extensions.media.albumArt
 import hu.mrolcsi.android.lyricsplayer.extensions.media.artist
 import hu.mrolcsi.android.lyricsplayer.extensions.media.duration
+import hu.mrolcsi.android.lyricsplayer.extensions.media.id
 import hu.mrolcsi.android.lyricsplayer.extensions.media.isPlaying
 import hu.mrolcsi.android.lyricsplayer.extensions.media.title
-import hu.mrolcsi.android.lyricsplayer.extensions.rowId
 import hu.mrolcsi.android.lyricsplayer.service.exoplayer.AudioOnlyRenderersFactory
 import java.io.File
 import java.util.*
@@ -309,7 +309,7 @@ open class LPPlayerControls(
         index,
         MediaSessionCompat.QueueItem(
           description,
-          description.extras?.rowId ?: Random().nextLong()
+          description.id ?: Random().nextLong()
         )
       )
 

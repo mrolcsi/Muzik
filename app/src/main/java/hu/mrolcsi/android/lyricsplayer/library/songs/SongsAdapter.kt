@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.android.lyricsplayer.R
 import hu.mrolcsi.android.lyricsplayer.extensions.OnItemClickListener
+import hu.mrolcsi.android.lyricsplayer.extensions.media.trackNumber
 import hu.mrolcsi.android.lyricsplayer.theme.Theme
 import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
 
@@ -55,7 +56,7 @@ class SongsAdapter(
       }
 
       // Set texts
-      val trackNumber = item.description.extras?.trackNumber ?: 0
+      val trackNumber = item.description.trackNumber ?: 0
       holder.tvTrackNumber?.visibility = if (showTrackNumber and (trackNumber > 0)) View.VISIBLE else View.GONE
       holder.tvTrackNumber?.text = trackNumber.toString()
       holder.tvTitle?.text = item.description.title

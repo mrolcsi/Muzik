@@ -15,7 +15,8 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.android.lyricsplayer.BuildConfig
 import hu.mrolcsi.android.lyricsplayer.R
-import hu.mrolcsi.android.lyricsplayer.extensions.artistKey
+import hu.mrolcsi.android.lyricsplayer.extensions.media.artist
+import hu.mrolcsi.android.lyricsplayer.extensions.media.artistKey
 import hu.mrolcsi.android.lyricsplayer.theme.Theme
 import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
 
@@ -64,8 +65,8 @@ class AlbumsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, AlbumsAdapter.Al
       if (item.mediaId == MEDIA_ID_ALL_SONGS) {
         itemView.setOnClickListener {
           val direction = AlbumsFragmentDirections.actionAlbumsToSongs(
-            item.description.extras?.artistKey,
-            item.description.extras?.artist,
+            item.description.artistKey,
+            item.description.artist,
             null,
             null
           )
@@ -89,8 +90,6 @@ class AlbumsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, AlbumsAdapter.Al
         }
       }
     }
-
-
   }
 
   class AlbumHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

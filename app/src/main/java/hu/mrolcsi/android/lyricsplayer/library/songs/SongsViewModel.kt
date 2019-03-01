@@ -5,8 +5,9 @@ import android.os.AsyncTask
 import android.support.v4.media.MediaBrowserCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import hu.mrolcsi.android.lyricsplayer.extensions.albumKey
-import hu.mrolcsi.android.lyricsplayer.extensions.artistKey
+import hu.mrolcsi.android.lyricsplayer.extensions.media.albumKey
+import hu.mrolcsi.android.lyricsplayer.extensions.media.artistKey
+import hu.mrolcsi.android.lyricsplayer.extensions.media.trackNumber
 import hu.mrolcsi.android.lyricsplayer.extensions.switchMap
 import hu.mrolcsi.android.lyricsplayer.library.LibraryViewModel
 import hu.mrolcsi.android.lyricsplayer.service.LPBrowserService
@@ -62,9 +63,9 @@ class SongsViewModel(app: Application) : LibraryViewModel(app) {
     albumKey: String?
   ): List<MediaBrowserCompat.MediaItem> {
     return allSongs.filter { item ->
-      item.description.extras?.albumKey == albumKey
+      item.description.albumKey == albumKey
     }.sortedBy { item ->
-      item.description.extras?.trackNumber
+      item.description.trackNumber
     }
   }
 
@@ -73,7 +74,7 @@ class SongsViewModel(app: Application) : LibraryViewModel(app) {
     artistKey: String?
   ): List<MediaBrowserCompat.MediaItem> {
     return allSongs.filter { item ->
-      item.description.extras?.artistKey == artistKey
+      item.description.artistKey == artistKey
     }
   }
 
