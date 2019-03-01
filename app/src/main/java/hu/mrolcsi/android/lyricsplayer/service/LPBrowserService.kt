@@ -186,6 +186,11 @@ abstract class LPBrowserService : MediaBrowserServiceCompat() {
     cursorWithSongs.use {
       while (it.moveToNext()) {
 
+        // Skip system sounds
+        if (it.getString(1).startsWith("/system")) {
+          continue
+        }
+
         val description = MediaDescriptionCompat.Builder()
           .setMediaId(it.getString(1))    // Song path
           .setTitle(it.getString(2))      // Song title
