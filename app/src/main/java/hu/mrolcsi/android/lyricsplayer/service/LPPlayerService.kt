@@ -67,11 +67,13 @@ class LPPlayerService : LPBrowserService() {
 
       controller.registerCallback(object : MediaControllerCompat.Callback() {
         override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
-          controller.playbackState?.let {
-            updateNotification(it)
-            if (metadata?.albumArt != null) {
-              ThemeManager.update(metadata.albumArt)
-            } // TODO: else -> create theme from placeholder
+          controller.playbackState?.let { state ->
+            updateNotification(state)
+
+            metadata?.albumArt?.let { bitmap ->
+              ThemeManager.updateFromBitmap(bitmap)
+            }
+            // TODO: else -> create theme from placeholder
           }
         }
 
@@ -80,6 +82,11 @@ class LPPlayerService : LPBrowserService() {
         }
 
         private fun updateNotification(playbackState: PlaybackStateCompat) {
+          if (controller.metadata == null) {
+            Log.w(LOG_TAG, "MediaMetadata is null!")
+            return
+          }
+
           // Skip building a notification when state is "none".
           val notification = if (playbackState.state != PlaybackStateCompat.STATE_NONE) {
             mNotificationBuilder.buildNotification(sessionToken)

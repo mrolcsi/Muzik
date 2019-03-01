@@ -46,7 +46,6 @@ import hu.mrolcsi.android.lyricsplayer.extensions.secondsToTimeStamp
 import hu.mrolcsi.android.lyricsplayer.theme.Theme
 import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
 import kotlinx.android.synthetic.main.activity_player.*
-import kotlinx.android.synthetic.main.activity_player.view.*
 import kotlin.math.roundToInt
 
 class PlayerActivity : AppCompatActivity() {
@@ -78,7 +77,9 @@ class PlayerActivity : AppCompatActivity() {
     // Observe changes through ViewModel
     mPlayerModel = ViewModelProviders.of(this).get(PlayerViewModel::class.java).apply {
       currentMediaMetadata.observe(this@PlayerActivity, Observer { metadata ->
-        metadata?.let { updateSongData(metadata) }
+        metadata?.let {
+          updateSongData(metadata)
+        }
       })
       currentPlaybackState.observe(this@PlayerActivity, Observer { state ->
         state?.let { updateControls(state) }
@@ -323,17 +324,17 @@ class PlayerActivity : AppCompatActivity() {
       imgCoverArt[mCovertArtIndex].startAnimation(it)
     }
 
-    if (metadata.albumArt != null) {
+    metadata.albumArt?.let { bitmap ->
       // Upper 10% of Cover Art
-      Palette.from(metadata.albumArt)
+      Palette.from(bitmap)
         .clearFilters()
         .setRegion(
           0,
           0,
-          metadata.albumArt.width,
+          bitmap.width,
           TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24F, resources.displayMetrics).toInt()
-        ).generate {
-          val color = it?.dominantSwatch?.rgb ?: Color.BLACK
+        ).generate { palette ->
+          val color = palette?.dominantSwatch?.rgb ?: Color.BLACK
           window?.statusBarColor = color
           applyColorToStatusBarIcons(color)
         }

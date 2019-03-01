@@ -14,41 +14,61 @@
  * limitations under the License.
  */
 
+@file:Suppress("unused")
+
 package hu.mrolcsi.android.lyricsplayer.extensions.media
 
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.media.MediaMetadataRetriever
 import android.net.Uri
-import android.support.v4.media.MediaBrowserCompat.MediaItem
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
+import android.support.v4.media.RatingCompat
+import android.text.TextUtils
+import com.google.android.exoplayer2.source.ConcatenatingMediaSource
+import com.google.android.exoplayer2.source.ExtractorMediaSource
+import com.google.android.exoplayer2.source.MediaSource
+import com.google.android.exoplayer2.upstream.DataSource
 
 /**
  * Useful extensions for [MediaMetadataCompat].
  */
-inline val MediaMetadataCompat.id get() = getString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID)
+inline val MediaMetadataCompat.id: String?
+  get() = getString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID)
 
-inline val MediaMetadataCompat.title get() = getString(MediaMetadataCompat.METADATA_KEY_TITLE)
+inline val MediaMetadataCompat.title: String?
+  get() = getString(MediaMetadataCompat.METADATA_KEY_TITLE)
 
-inline val MediaMetadataCompat.artist get() = getString(MediaMetadataCompat.METADATA_KEY_ARTIST)
+inline val MediaMetadataCompat.artist: String?
+  get() = getString(MediaMetadataCompat.METADATA_KEY_ARTIST)
 
-inline val MediaMetadataCompat.duration get() = getLong(MediaMetadataCompat.METADATA_KEY_DURATION)
+inline val MediaMetadataCompat.duration
+  get() = getLong(MediaMetadataCompat.METADATA_KEY_DURATION)
 
-inline val MediaMetadataCompat.album get() = getString(MediaMetadataCompat.METADATA_KEY_ALBUM)
+inline val MediaMetadataCompat.album: String?
+  get() = getString(MediaMetadataCompat.METADATA_KEY_ALBUM)
 
-inline val MediaMetadataCompat.author get() = getString(MediaMetadataCompat.METADATA_KEY_AUTHOR)
+inline val MediaMetadataCompat.author: String?
+  get() = getString(MediaMetadataCompat.METADATA_KEY_AUTHOR)
 
-inline val MediaMetadataCompat.writer get() = getString(MediaMetadataCompat.METADATA_KEY_WRITER)
+inline val MediaMetadataCompat.writer: String?
+  get() = getString(MediaMetadataCompat.METADATA_KEY_WRITER)
 
-inline val MediaMetadataCompat.composer get() = getString(MediaMetadataCompat.METADATA_KEY_COMPOSER)
+inline val MediaMetadataCompat.composer: String?
+  get() = getString(MediaMetadataCompat.METADATA_KEY_COMPOSER)
 
-inline val MediaMetadataCompat.compilation
+inline val MediaMetadataCompat.compilation: String?
   get() = getString(MediaMetadataCompat.METADATA_KEY_COMPILATION)
 
-inline val MediaMetadataCompat.date get() = getString(MediaMetadataCompat.METADATA_KEY_DATE)
+inline val MediaMetadataCompat.date: String?
+  get() = getString(MediaMetadataCompat.METADATA_KEY_DATE)
 
-//inline val MediaMetadataCompat.year get() = getString(MediaMetadataCompat.METADATA_KEY_YEAR)
+inline val MediaMetadataCompat.year
+  get() = getLong(MediaMetadataCompat.METADATA_KEY_YEAR)
 
-inline val MediaMetadataCompat.genre get() = getString(MediaMetadataCompat.METADATA_KEY_GENRE)
+inline val MediaMetadataCompat.genre: String?
+  get() = getString(MediaMetadataCompat.METADATA_KEY_GENRE)
 
 inline val MediaMetadataCompat.trackNumber
   get() = getLong(MediaMetadataCompat.METADATA_KEY_TRACK_NUMBER)
@@ -59,53 +79,47 @@ inline val MediaMetadataCompat.trackCount
 inline val MediaMetadataCompat.discNumber
   get() = getLong(MediaMetadataCompat.METADATA_KEY_DISC_NUMBER)
 
-inline val MediaMetadataCompat.albumArtist
+inline val MediaMetadataCompat.albumArtist: String?
   get() = getString(MediaMetadataCompat.METADATA_KEY_ALBUM_ARTIST)
 
-inline val MediaMetadataCompat.art get() = getBitmap(MediaMetadataCompat.METADATA_KEY_ART)
+inline val MediaMetadataCompat.art: Bitmap?
+  get() = getBitmap(MediaMetadataCompat.METADATA_KEY_ART)
 
-inline val MediaMetadataCompat.artUri
+inline val MediaMetadataCompat.artUri: Uri
   get() = Uri.parse(this.getString(MediaMetadataCompat.METADATA_KEY_ART_URI))
 
-inline val MediaMetadataCompat.albumArt
+inline val MediaMetadataCompat.albumArt: Bitmap?
   get() = getBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART)
 
-inline val MediaMetadataCompat.albumArtUri
+inline val MediaMetadataCompat.albumArtUri: Uri
   get() = Uri.parse(this.getString(MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI))
 
-//inline val MediaMetadataCompat.userRating
-//    get() = getLong(MediaMetadataCompat.METADATA_KEY_USER_RATING)
+inline val MediaMetadataCompat.userRating: RatingCompat?
+  get() = getRating(MediaMetadataCompat.METADATA_KEY_USER_RATING)
 
-//inline val MediaMetadataCompat.rating get() = getLong(MediaMetadataCompat.METADATA_KEY_RATING)
+inline val MediaMetadataCompat.rating: RatingCompat?
+  get() = getRating(MediaMetadataCompat.METADATA_KEY_RATING)
 
-inline val MediaMetadataCompat.displayTitle
+inline val MediaMetadataCompat.displayTitle: String?
   get() = getString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE)
 
-inline val MediaMetadataCompat.displaySubtitle
+inline val MediaMetadataCompat.displaySubtitle: String?
   get() = getString(MediaMetadataCompat.METADATA_KEY_DISPLAY_SUBTITLE)
 
-inline val MediaMetadataCompat.displayDescription
+inline val MediaMetadataCompat.displayDescription: String?
   get() = getString(MediaMetadataCompat.METADATA_KEY_DISPLAY_DESCRIPTION)
 
-inline val MediaMetadataCompat.displayIcon
+inline val MediaMetadataCompat.displayIcon: Bitmap?
   get() = getBitmap(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON)
 
-inline val MediaMetadataCompat.displayIconUri
+inline val MediaMetadataCompat.displayIconUri: Uri
   get() = Uri.parse(this.getString(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON_URI))
 
-inline val MediaMetadataCompat.mediaUri
+inline val MediaMetadataCompat.mediaUri: Uri
   get() = Uri.parse(this.getString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI))
 
 inline val MediaMetadataCompat.downloadStatus
   get() = getLong(MediaMetadataCompat.METADATA_KEY_DOWNLOAD_STATUS)
-
-///**
-// * Custom property for storing whether a [MediaMetadataCompat] item represents an
-// * item that is [MediaItem.FLAG_BROWSABLE] or [MediaItem.FLAG_PLAYABLE].
-// */
-//@MediaItem.Flags
-//inline val MediaMetadataCompat.flag
-//    get() = this.getLong(METADATA_KEY_UAMP_FLAGS).toInt()
 
 /**
  * Useful extensions for [MediaMetadataCompat.Builder].
@@ -226,17 +240,42 @@ inline var MediaMetadataCompat.Builder.downloadStatus: Long
     putLong(MediaMetadataCompat.METADATA_KEY_DOWNLOAD_STATUS, value)
   }
 
-///**
-// * Custom property for storing whether a [MediaMetadataCompat] item represents an
-// * item that is [MediaItem.FLAG_BROWSABLE] or [MediaItem.FLAG_PLAYABLE].
-// */
-//@MediaItem.Flags
-//inline var MediaMetadataCompat.Builder.flag: Int
-//    @Deprecated(NO_GET, level = DeprecationLevel.ERROR)
-//    get() = throw IllegalAccessException("Cannot get from MediaMetadataCompat.Builder")
-//    set(value) {
-//        putLong(METADATA_KEY_UAMP_FLAGS, value.toLong())
-//    }
+/**
+ * Extension method for [MediaMetadataCompat.Builder] to set the fields from
+ * a MediaMetadataRetriever constructed object (to make the code a bit easier to see).
+ */
+fun MediaMetadataCompat.Builder.from(retriever: MediaMetadataRetriever): MediaMetadataCompat.Builder {
+  // id = jsonMusic.id
+  title = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE)
+  artist = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)
+  album = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM)
+  duration = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION).toLong()
+  genre = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE)
+  // mediaUri = jsonMusic.source
+  // albumArtUri = jsonMusic.image
+  albumArt = retriever.embeddedPicture?.let { BitmapFactory.decodeByteArray(it, 0, it.size) }
+  val trackString = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_CD_TRACK_NUMBER)
+  trackNumber = when {  // TODO: properly parse track numbers (like 03/12)
+    trackString == null -> -1
+    TextUtils.isDigitsOnly(trackString) -> trackString.toLong()
+    else -> trackString.let { it.substring(0, it.indexOf('/')) }.toLong()
+  }
+  trackCount = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_NUM_TRACKS).toLong()
+
+  // To make things easier for *displaying* these, set the display properties as well.
+  displayTitle = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE)
+  displaySubtitle = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)
+  displayDescription = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM)
+  // displayIconUri = jsonMusic.image
+
+  // Add downloadStatus to force the creation of an "extras" bundle in the resulting
+  // MediaMetadataCompat object. This is needed to send accurate metadata to the
+  // media session during updates.
+  downloadStatus = MediaDescriptionCompat.STATUS_DOWNLOADED
+
+  // Allow it to be used in the typical builder style.
+  return this
+}
 
 /**
  * Custom property for retrieving a [MediaDescriptionCompat] which also includes
@@ -244,39 +283,33 @@ inline var MediaMetadataCompat.Builder.downloadStatus: Long
  *
  * These keys are used by the ExoPlayer MediaSession extension when announcing metadata changes.
  */
-inline val MediaMetadataCompat.fullDescription
+inline val MediaMetadataCompat.fullDescription: MediaDescriptionCompat
   get() =
     description.also {
       it.extras?.putAll(bundle)
     }
 
-///**
-// * Extension method for building an [ExtractorMediaSource] from a [MediaMetadataCompat] object.
-// *
-// * For convenience, place the [MediaDescriptionCompat] into the tag so it can be retrieved later.
-// */
-//fun MediaMetadataCompat.toMediaSource(dataSourceFactory: DataSource.Factory) =
-//        ExtractorMediaSource.Factory(dataSourceFactory)
-//                .setTag(fullDescription)
-//                .createMediaSource(mediaUri)
-
-///**
-// * Extension method for building a [ConcatenatingMediaSource] given a [List]
-// * of [MediaMetadataCompat] objects.
-// */
-//fun List<MediaMetadataCompat>.toMediaSource(
-//        dataSourceFactory: DataSource.Factory
-//): ConcatenatingMediaSource {
-//
-//    val concatenatingMediaSource = ConcatenatingMediaSource()
-//    forEach {
-//        concatenatingMediaSource.addMediaSource(it.toMediaSource(dataSourceFactory))
-//    }
-//    return concatenatingMediaSource
-//}
+/**
+ * Extension method for building an [ExtractorMediaSource] from a [MediaMetadataCompat] object.
+ *
+ * For convenience, place the [MediaDescriptionCompat] into the tag so it can be retrieved later.
+ */
+fun MediaMetadataCompat.toMediaSource(dataSourceFactory: DataSource.Factory): MediaSource =
+  ExtractorMediaSource.Factory(dataSourceFactory)
+    .setTag(fullDescription)
+    .createMediaSource(mediaUri)
 
 /**
- * Custom property that holds whether an item is [MediaItem.FLAG_BROWSABLE] or
- * [MediaItem.FLAG_PLAYABLE].
+ * Extension method for building a [ConcatenatingMediaSource] given a [List]
+ * of [MediaMetadataCompat] objects.
  */
-const val METADATA_KEY_UAMP_FLAGS = "com.example.android.uamp.media.METADATA_KEY_UAMP_FLAGS"
+fun List<MediaMetadataCompat>.toMediaSource(
+  dataSourceFactory: DataSource.Factory
+): ConcatenatingMediaSource {
+
+  val concatenatingMediaSource = ConcatenatingMediaSource()
+  forEach {
+    concatenatingMediaSource.addMediaSource(it.toMediaSource(dataSourceFactory))
+  }
+  return concatenatingMediaSource
+}

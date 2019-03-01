@@ -21,9 +21,9 @@ object ThemeManager {
     hsl[2] > 0.01 && hsl[2] < 0.99
   }
 
-  fun update(bitmap: Bitmap) {
+  fun updateFromBitmap(bitmap: Bitmap) {
     AsyncTask.execute {
-      Log.v(LOG_TAG, "Creating new Theme...")
+      Log.d(LOG_TAG, "Updating Theme...")
 
       val palette = Palette.from(bitmap)
         .clearFilters()
