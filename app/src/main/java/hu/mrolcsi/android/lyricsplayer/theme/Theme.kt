@@ -5,7 +5,6 @@ import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.RippleDrawable
 import androidx.palette.graphics.Palette
-import kotlin.math.roundToInt
 
 data class Theme(
   // Source palette
@@ -23,8 +22,11 @@ data class Theme(
 ) {
 
   companion object {
-    const val DISABLED_ALPHA = 0.8f
-    val DISABLED_OPACITY = (255 * DISABLED_ALPHA).roundToInt()
+    const val SUBTITLE_ALPHA = 0.8f
+    const val SUBTITLE_OPACITY = (255 * SUBTITLE_ALPHA).toInt()
+
+    const val DISABLED_ALPHA = 0.5f
+    const val DISABLED_OPACITY = (255 * DISABLED_ALPHA).toInt()
 
     fun getRippleDrawable(rippleColor: Int, backgroundColor: Int): RippleDrawable = RippleDrawable(
       ColorStateList.valueOf(rippleColor),

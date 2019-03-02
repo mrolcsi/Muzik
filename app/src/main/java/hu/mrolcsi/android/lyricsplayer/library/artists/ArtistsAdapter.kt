@@ -54,7 +54,7 @@ class ArtistsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, ArtistsAdapter.
         tvNumOfSongs?.setTextColor(
           ColorUtils.setAlphaComponent(
             theme.tertiaryForegroundColor,
-            Theme.DISABLED_OPACITY
+            Theme.SUBTITLE_OPACITY
           )
         )
         imgChevronRight?.imageTintList = ColorStateList.valueOf(theme.tertiaryForegroundColor)

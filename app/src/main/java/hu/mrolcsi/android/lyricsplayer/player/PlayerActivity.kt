@@ -439,7 +439,7 @@ class PlayerActivity : AppCompatActivity() {
     mNextDrawable.getDrawable(0).setTint(color)
 
     // Media Buttons Ripple (need to use separate drawables)
-    val rippleColor = ColorUtils.setAlphaComponent(color, (255 * 0.5).toInt())
+    val rippleColor = ColorUtils.setAlphaComponent(color, Theme.DISABLED_OPACITY)
     btnPrevious.background = Theme.getRippleDrawable(rippleColor)
     btnPlayPause.background = Theme.getRippleDrawable(rippleColor)
     btnNext.background = Theme.getRippleDrawable(rippleColor)
@@ -455,7 +455,7 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     // Seek Progress background
-    tvSeekProgress.setBackgroundColor(ColorUtils.setAlphaComponent(color, (255 * 0.5).toInt()))
+    tvSeekProgress.setBackgroundColor(ColorUtils.setAlphaComponent(color, Theme.DISABLED_OPACITY))
 
     // Media Buttons Icon
     mPreviousDrawable.getDrawable(1).setTint(color)

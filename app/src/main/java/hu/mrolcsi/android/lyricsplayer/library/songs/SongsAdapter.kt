@@ -51,7 +51,7 @@ class SongsAdapter(
         itemView.background = Theme.getRippleDrawable(theme.secondaryForegroundColor, theme.tertiaryBackgroundColor)
 
         tvTitle?.setTextColor(theme.tertiaryForegroundColor)
-        tvArtist?.setTextColor(ColorUtils.setAlphaComponent(theme.tertiaryForegroundColor, Theme.DISABLED_OPACITY))
+        tvArtist?.setTextColor(ColorUtils.setAlphaComponent(theme.tertiaryForegroundColor, Theme.SUBTITLE_OPACITY))
         tvTrackNumber?.setTextColor(theme.tertiaryForegroundColor)
       }
 

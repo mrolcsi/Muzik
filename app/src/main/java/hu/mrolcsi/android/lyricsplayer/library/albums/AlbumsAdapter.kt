@@ -52,7 +52,7 @@ class AlbumsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, AlbumsAdapter.Al
         itemView.background = Theme.getRippleDrawable(theme.secondaryForegroundColor, theme.tertiaryBackgroundColor)
 
         tvAlbum?.setTextColor(theme.tertiaryForegroundColor)
-        tvArtist?.setTextColor(ColorUtils.setAlphaComponent(theme.tertiaryForegroundColor, Theme.DISABLED_OPACITY))
+        tvArtist?.setTextColor(ColorUtils.setAlphaComponent(theme.tertiaryForegroundColor, Theme.SUBTITLE_OPACITY))
 
         imgChevronRight?.imageTintList = ColorStateList.valueOf(theme.tertiaryForegroundColor)
       }

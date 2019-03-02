@@ -112,7 +112,7 @@ object ThemeManager {
       val notBlackOrWhite = mPaletteFiler.isAllowed(it.rgb, it.hsl)
 
       // Also ignore swatches that don't have a minimum contrast
-      val hasEnoughContrast = true or (ColorUtils.calculateContrast(it.rgb, backgroundColor) > MINIMUM_CONTRAST_RATIO)
+      val hasEnoughContrast = ColorUtils.calculateContrast(it.rgb, backgroundColor) > MINIMUM_CONTRAST_RATIO
 
       notBlackOrWhite && hasEnoughContrast
     }.maxBy {
