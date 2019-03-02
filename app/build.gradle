@@ -3,14 +3,16 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'androidx.navigation.safeargs.kotlin'
 
+apply from: "https://gist.githubusercontent.com/mrolcsi/588d5dd7a309fab501fc/raw/30b88f5217596c425c43d101dd29708a785b05f1/Version%2520code%2520and%2520name%2520generation%2520using%2520Gradle"
+
 android {
     compileSdkVersion 28
     defaultConfig {
         applicationId "hu.mrolcsi.android.lyricsplayer"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 1
-        versionName "1.0"
+        versionCode makeVersionCode()
+        versionName makeVersionNameDebug()
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
     }
@@ -54,6 +56,9 @@ dependencies {
     // ExoPlayer
     implementation 'com.google.android.exoplayer:exoplayer-core:2.9.5'
     implementation 'com.google.android.exoplayer:extension-mediasession:2.9.5'
+
+    // Custom Activity on Crash
+    implementation 'cat.ereza:customactivityoncrash:2.2.0'
 
     // Testing
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.2-alpha01'
