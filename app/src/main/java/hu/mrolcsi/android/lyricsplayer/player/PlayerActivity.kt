@@ -13,6 +13,7 @@ import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import android.util.TypedValue
+import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.animation.Animation
@@ -25,7 +26,9 @@ import androidx.core.app.TaskStackBuilder
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.util.Pair
+import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
+import androidx.core.view.get
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.palette.graphics.Palette
@@ -46,6 +49,7 @@ import hu.mrolcsi.android.lyricsplayer.extensions.secondsToTimeStamp
 import hu.mrolcsi.android.lyricsplayer.theme.Theme
 import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
 import kotlinx.android.synthetic.main.activity_player.*
+import kotlinx.android.synthetic.main.content_player.*
 import kotlin.math.roundToInt
 
 class PlayerActivity : AppCompatActivity() {
@@ -76,6 +80,8 @@ class PlayerActivity : AppCompatActivity() {
 
     // Observe changes through ViewModel
     mPlayerModel = ViewModelProviders.of(this).get(PlayerViewModel::class.java).apply {
+      Log.d(LOG_TAG, "Got PlayerViewModel: $this")
+
       currentMediaMetadata.observe(this@PlayerActivity, Observer { metadata ->
         metadata?.let {
           updateSongData(metadata)
@@ -120,10 +126,19 @@ class PlayerActivity : AppCompatActivity() {
     mPlayerModel.disconnect()
   }
 
+  override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+    menuInflater.inflate(R.menu.menu_player, menu)
+    return super.onCreateOptionsMenu(menu)
+  }
+
   override fun onOptionsItemSelected(item: MenuItem?): Boolean {
     return when (item?.itemId) {
       android.R.id.home -> {
         onBackPressed()
+        true
+      }
+      R.id.menuPlaylist -> {
+        drawer_layout.openDrawer(GravityCompat.END)
         true
       }
       else -> super.onOptionsItemSelected(item)
@@ -131,6 +146,12 @@ class PlayerActivity : AppCompatActivity() {
   }
 
   override fun onBackPressed() {
+    // If drawer is open, just close it
+    if (drawer_layout.isDrawerOpen(GravityCompat.END)) {
+      drawer_layout.closeDrawer(GravityCompat.END)
+      return
+    }
+
     // Respond to the action bar's Up/Home button
     val upIntent: Intent? = NavUtils.getParentActivityIntent(this)
 
@@ -319,6 +340,7 @@ class PlayerActivity : AppCompatActivity() {
 
         override fun onAnimationStart(animation: Animation?) {
           imgCoverArt[mCovertArtIndex].bringToFront()
+          playerToolbar.bringToFront()
         }
       })
       imgCoverArt[mCovertArtIndex].startAnimation(it)
@@ -388,8 +410,13 @@ class PlayerActivity : AppCompatActivity() {
   }
 
   private fun applyForegroundColor(color: Int) {
-    // Toolbar
-    playerToolbar.navigationIcon?.setColorFilter(color, PorterDuff.Mode.SRC_IN)
+    // Toolbar Icons
+    with(playerToolbar) {
+      navigationIcon?.setColorFilter(color, PorterDuff.Mode.SRC_IN)
+      for (i in 0 until menu.size()) {
+        menu[i].icon.setColorFilter(color, PorterDuff.Mode.SRC_IN)
+      }
+    }
 
     // Texts
     tvTitle.setTextColor(color)
@@ -418,7 +445,7 @@ class PlayerActivity : AppCompatActivity() {
 
   private fun applyBackgroundColor(color: Int) {
     // Window background
-    playerRoot.setBackgroundColor(color)
+    content_player.setBackgroundColor(color)
 
     // Navigation Bar
     window.apply {
@@ -436,6 +463,6 @@ class PlayerActivity : AppCompatActivity() {
   }
 
   companion object {
-    const val LOG_TAG = "PlayerActivity"
+    private const val LOG_TAG = "PlayerActivity"
   }
 }

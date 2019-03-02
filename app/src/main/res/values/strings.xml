@@ -22,5 +22,6 @@
   <string name="notification_nowPlaying_description">Shows the currently playing song in Lyrics Player</string>
   <string name="songs_fromAlbum_subtitle">from %s</string>
   <string name="songs_title">Songs</string>
+  <string name="player_playlist">Playlist</string>
   <!-- @formatter:on -->
 </resources>

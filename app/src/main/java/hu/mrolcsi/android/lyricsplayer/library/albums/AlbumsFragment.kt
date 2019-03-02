@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.android.lyricsplayer.R
 import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
-import kotlinx.android.synthetic.main.fragment_browser.*
+import kotlinx.android.synthetic.main.fragment_albums.*
 
 // see: https://stackoverflow.com/a/53999441
 
@@ -43,7 +43,7 @@ class AlbumsFragment : Fragment() {
   }
 
   override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-    return inflater.inflate(R.layout.fragment_browser, container, false)
+    return inflater.inflate(R.layout.fragment_albums, container, false)
   }
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

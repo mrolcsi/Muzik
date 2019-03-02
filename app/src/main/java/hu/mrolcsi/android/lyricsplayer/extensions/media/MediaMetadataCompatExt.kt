@@ -245,6 +245,8 @@ inline var MediaMetadataCompat.Builder.downloadStatus: Long
  * a MediaMetadataRetriever constructed object (to make the code a bit easier to see).
  */
 fun MediaMetadataCompat.Builder.from(retriever: MediaMetadataRetriever): MediaMetadataCompat.Builder {
+  // TODO: put every MediaMetadataRetriever fields into the bundle
+
   // id = jsonMusic.id
   title = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE)
   artist = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)
@@ -272,6 +274,9 @@ fun MediaMetadataCompat.Builder.from(retriever: MediaMetadataRetriever): MediaMe
   // MediaMetadataCompat object. This is needed to send accurate metadata to the
   // media session during updates.
   downloadStatus = MediaDescriptionCompat.STATUS_DOWNLOADED
+
+  // Release retriever. We don't need it anymore.
+  retriever.release()
 
   // Allow it to be used in the typical builder style.
   return this

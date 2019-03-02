@@ -4,6 +4,10 @@ private const val TIME_FORMAT_SHORT = "%02d:%02d"
 private const val TIME_FORMAT_LONG = "%02d:%02d:%02d"
 
 fun Int.secondsToTimeStamp(): String {
+  if (this < -1) {
+    return "??:??"
+  }
+
   var remaining = this
 
   val hours = remaining / 60 / 60
@@ -24,6 +28,10 @@ fun Int.secondsToTimeStamp(): String {
 }
 
 fun Long.millisecondsToTimeStamp(): String {
+  if (this < -1) {
+    return "??:??"
+  }
+
   var remaining = this
 
   val hours = remaining / 1000 / 60 / 60
@@ -34,10 +42,6 @@ fun Long.millisecondsToTimeStamp(): String {
 
   val seconds = remaining / 1000
   remaining -= seconds * 1000
-
-  if (remaining > Math.abs(0)) {
-    throw ArithmeticException("remaining should be 0!")
-  }
 
   return if (hours > 0) {
     // Use long format

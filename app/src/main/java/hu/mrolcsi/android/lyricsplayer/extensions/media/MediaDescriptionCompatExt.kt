@@ -1,7 +1,11 @@
 package hu.mrolcsi.android.lyricsplayer.extensions.media
 
+import android.graphics.Bitmap
 import android.provider.MediaStore
 import android.support.v4.media.MediaDescriptionCompat
+import android.support.v4.media.MediaMetadataCompat
+
+// Try to get ContentProvider columns first. If null, use MediaMetadata keys.
 
 // Artist related fields
 
@@ -10,6 +14,7 @@ inline val MediaDescriptionCompat.artistKey: String?
 
 inline val MediaDescriptionCompat.artist: String?
   get() = this.extras?.getString(MediaStore.Audio.ArtistColumns.ARTIST)
+    ?: this.extras?.getString(MediaMetadataCompat.METADATA_KEY_ARTIST)
 
 inline val MediaDescriptionCompat.numberOfAlbums: Int
   get() = this.extras?.getString(MediaStore.Audio.Artists.NUMBER_OF_ALBUMS)?.toInt() ?: 0
@@ -24,12 +29,17 @@ inline val MediaDescriptionCompat.albumKey: String?
 
 inline val MediaDescriptionCompat.album: String?
   get() = this.extras?.getString(MediaStore.Audio.AlbumColumns.ALBUM)
+    ?: this.extras?.getString(MediaMetadataCompat.METADATA_KEY_ALBUM)
 
 inline val MediaDescriptionCompat.numberOfSongs: Int
   get() = this.extras?.getString(MediaStore.Audio.AlbumColumns.NUMBER_OF_SONGS)?.toInt() ?: 0
 
-inline val MediaDescriptionCompat.albumArtPath: String?
+inline val MediaDescriptionCompat.albumArtUri: String?
   get() = this.extras?.getString(MediaStore.Audio.AlbumColumns.ALBUM_ART)
+    ?: this.extras?.getString(MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI)
+
+inline val MediaDescriptionCompat.albumArt: Bitmap?
+  get() = this.extras?.getParcelable(MediaMetadataCompat.METADATA_KEY_ALBUM_ART)
 
 // Song related fields
 
@@ -38,9 +48,18 @@ inline val MediaDescriptionCompat.id: Long
 
 inline val MediaDescriptionCompat.mediaPath: String?
   get() = this.extras?.getString(MediaStore.Audio.Media.DATA)
+    ?: this.extras?.getString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID)
 
 inline val MediaDescriptionCompat.songTitle: String?
   get() = this.extras?.getString(MediaStore.Audio.Media.TITLE)
+    ?: this.extras?.getString(MediaMetadataCompat.METADATA_KEY_TITLE)
 
 inline val MediaDescriptionCompat.trackNumber: Int
-  get() = this.extras?.getString(MediaStore.Audio.Media.TRACK)?.toInt() ?: 0
+  get() = this.extras?.getString(MediaStore.Audio.Media.TRACK)?.toInt()
+    ?: this.extras?.getInt(MediaMetadataCompat.METADATA_KEY_TRACK_NUMBER)
+    ?: -1
+
+inline val MediaDescriptionCompat.duration: Long
+  get() = this.extras?.getString(MediaStore.Audio.Media.DURATION)?.toLong()
+    ?: this.extras?.getLong(MediaMetadataCompat.METADATA_KEY_DURATION)
+    ?: -1
