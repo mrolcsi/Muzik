@@ -4,7 +4,6 @@ import android.content.Context
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Bundle
-import android.os.Handler
 import android.os.ResultReceiver
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
@@ -29,8 +28,8 @@ import hu.mrolcsi.android.lyricsplayer.extensions.media.id
 import hu.mrolcsi.android.lyricsplayer.extensions.media.mediaPath
 import hu.mrolcsi.android.lyricsplayer.extensions.media.mediaUri
 import hu.mrolcsi.android.lyricsplayer.extensions.media.toMediaSource
+import hu.mrolcsi.android.lyricsplayer.service.LastPlayedSetting
 import java.io.File
-import java.util.concurrent.atomic.AtomicBoolean
 
 class PlayerHolder(context: Context, session: MediaSessionCompat) {
 
@@ -38,7 +37,18 @@ class PlayerHolder(context: Context, session: MediaSessionCompat) {
     context,
     AudioOnlyRenderersFactory(context),
     DefaultTrackSelector()
-  )
+  ).apply {
+    addListener(object : Player.EventListener {
+      override fun onPositionDiscontinuity(reason: Int) {
+        // Check against saved index if position changed
+        val newIndex = this@apply.currentWindowIndex
+        if (mLastPlayed.lastPlayedIndex != newIndex) {
+          // Save new index to SharedPrefs
+          mLastPlayed.lastPlayedIndex = newIndex
+        }
+      }
+    })
+  }
 
   private val mQueue = ConcatenatingMediaSource()
 
@@ -84,12 +94,16 @@ class PlayerHolder(context: Context, session: MediaSessionCompat) {
 
     override fun onPrepareFromSearch(query: String?, extras: Bundle?) {}
 
-    override fun onPrepare() {}
+    override fun onPrepare() {
+      // Prepare the player with the current queue?
+
+      mPlayer.prepare(mQueue)
+    }
   }
 
   private val mUpdaterActionProvider = object : MediaSessionConnector.CustomActionProvider {
     override fun getCustomAction(): PlaybackStateCompat.CustomAction {
-      return if (mUpdaterEnabled.get()) {
+      return if (mProgressUpdater.isEnabled) {
         PlaybackStateCompat.CustomAction
           .Builder(ACTION_STOP_UPDATER, "Stop progress updater.", -1)
           .build()
@@ -102,8 +116,8 @@ class PlayerHolder(context: Context, session: MediaSessionCompat) {
 
     override fun onCustomAction(action: String?, extras: Bundle?) {
       when (action) {
-        ACTION_START_UPDATER -> if (!mUpdaterEnabled.getAndSet(true)) mUpdateHandler.post(mUpdateRunnable)
-        ACTION_STOP_UPDATER -> mUpdaterEnabled.set(false)
+        ACTION_START_UPDATER -> mProgressUpdater.startUpdater()
+        ACTION_STOP_UPDATER -> mProgressUpdater.stopUpdater()
       }
     }
   }
@@ -115,19 +129,29 @@ class PlayerHolder(context: Context, session: MediaSessionCompat) {
       super.onPlay(player)
 
       // Start updater if it is enabled (Gets cancelled in onStop())
-      if (mUpdaterEnabled.get()) {
-        mUpdateHandler.post(mUpdateRunnable)
+      if (mProgressUpdater.isEnabled) {
+        mProgressUpdater.startUpdater()
       }
     }
 
-    override fun onStop(player: Player?) {
+    override fun onPause(player: Player) {
+      super.onPause(player)
+
+      // Save current position to SharedPrefs
+      mLastPlayed.lastPlayedPosition = player.currentPosition
+    }
+
+    override fun onStop(player: Player) {
       super.onStop(player)
 
       // Rewind track
-      mPlayer.seekTo(0)
+      player.seekTo(0)
 
       // Cancel Handler
-      mUpdateHandler.removeCallbacks(mUpdateRunnable)
+      mProgressUpdater.stopUpdater()
+
+      // Save current position to SharedPrefs
+      mLastPlayed.lastPlayedPosition = player.currentPosition
     }
   }
 
@@ -161,26 +185,20 @@ class PlayerHolder(context: Context, session: MediaSessionCompat) {
   }
 
   // Player state polling
-  private val mUpdaterEnabled = AtomicBoolean(false)
-  private val mUpdateHandler = Handler()
-  private val mUpdateRunnable = object : Runnable {
-    override fun run() {
-      // Update session with the current position
-      val currentState = session.controller.playbackState
-      val newState = PlaybackStateCompat.Builder(currentState)
-        .setState(
-          currentState.state,
-          mPlayer.currentPosition,
-          mPlayer.playbackParameters.speed
-        ).build()
-      session.setPlaybackState(newState)
-
-      // If updater is enabled, schedule next 'tick'
-      if (mUpdaterEnabled.get()) {
-        mUpdateHandler.postDelayed(this, UPDATE_FREQUENCY)
-      }
-    }
+  private val mProgressUpdater = ProgressUpdater {
+    // Update session with the current position
+    val currentState = session.controller.playbackState
+    val newState = PlaybackStateCompat.Builder(currentState)
+      .setState(
+        currentState.state,
+        mPlayer.currentPosition,
+        mPlayer.playbackParameters.speed
+      ).build()
+    session.setPlaybackState(newState)
   }
+
+  // Last Played Settings
+  private val mLastPlayed = LastPlayedSetting(context)
 
   init {
     // Connect this holder to the session
@@ -201,8 +219,6 @@ class PlayerHolder(context: Context, session: MediaSessionCompat) {
   companion object {
     @SuppressWarnings("unused")
     private const val LOG_TAG = "PlayerHolder"
-
-    private const val UPDATE_FREQUENCY: Long = 500  // in milliseconds
 
     const val ACTION_START_UPDATER = "ACTION_START_UPDATER"
     const val ACTION_STOP_UPDATER = "ACTION_STOP_UPDATER"

@@ -1,5 +1,6 @@
 package hu.mrolcsi.android.lyricsplayer.service
 
+import android.database.Cursor
 import android.net.Uri
 import android.os.AsyncTask
 import android.os.Bundle
@@ -7,7 +8,6 @@ import android.provider.MediaStore
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaDescriptionCompat
 import androidx.core.content.ContentResolverCompat
-import androidx.core.os.bundleOf
 import androidx.media.MediaBrowserServiceCompat
 import hu.mrolcsi.android.lyricsplayer.BuildConfig
 
@@ -70,12 +70,7 @@ abstract class LPBrowserService : MediaBrowserServiceCompat() {
     val cursorWithArtists = ContentResolverCompat.query(
       contentResolver,
       uri,
-      arrayOf(
-        MediaStore.Audio.ArtistColumns.ARTIST_KEY,
-        MediaStore.Audio.ArtistColumns.ARTIST,
-        MediaStore.Audio.ArtistColumns.NUMBER_OF_ALBUMS,
-        MediaStore.Audio.ArtistColumns.NUMBER_OF_TRACKS
-      ),
+      null,
       null,
       null,
       MediaStore.Audio.ArtistColumns.ARTIST_KEY,
@@ -84,20 +79,18 @@ abstract class LPBrowserService : MediaBrowserServiceCompat() {
 
     val mediaItems = emptyList<MediaBrowserCompat.MediaItem>().toMutableList()
 
+    val indexArtistKey = cursorWithArtists.getColumnIndex(MediaStore.Audio.ArtistColumns.ARTIST_KEY)
+    val indexArtistName = cursorWithArtists.getColumnIndex(MediaStore.Audio.ArtistColumns.ARTIST)
+
     cursorWithArtists.use {
       while (it.moveToNext()) {
         // Skip Unknown artists (system sounds and such).
-        if (cursorWithArtists.getString(1) == MediaStore.UNKNOWN_STRING) continue
+        if (cursorWithArtists.getString(indexArtistName) == MediaStore.UNKNOWN_STRING) continue
 
         val description = MediaDescriptionCompat.Builder()
-          .setMediaId(it.getString(0))      // Artist Key
-          .setTitle(it.getString(1))        // Artist Name
-          .setExtras(
-            bundleOf(
-              MediaStore.Audio.ArtistColumns.NUMBER_OF_ALBUMS to it.getInt(2),
-              MediaStore.Audio.ArtistColumns.NUMBER_OF_TRACKS to it.getInt(3)
-            )
-          )
+          .setMediaId(it.getString(indexArtistKey))      // Artist Key
+          .setTitle(it.getString(indexArtistName))        // Artist Name
+          .setExtras(createExtras(cursorWithArtists))
           .build()
 
         mediaItems.add(
@@ -116,13 +109,7 @@ abstract class LPBrowserService : MediaBrowserServiceCompat() {
     val cursorWithAlbums = ContentResolverCompat.query(
       contentResolver,
       uri,
-      arrayOf(
-        MediaStore.Audio.AlbumColumns.ALBUM_KEY,
-        MediaStore.Audio.AlbumColumns.ALBUM,
-        MediaStore.Audio.AlbumColumns.ARTIST,
-        MediaStore.Audio.AlbumColumns.NUMBER_OF_SONGS,
-        MediaStore.Audio.AlbumColumns.ALBUM_ART
-      ),
+      null,
       null,
       null,
       MediaStore.Audio.AlbumColumns.ALBUM_KEY,
@@ -131,22 +118,18 @@ abstract class LPBrowserService : MediaBrowserServiceCompat() {
 
     val mediaItems = emptyList<MediaBrowserCompat.MediaItem>().toMutableList()
 
+    val indexAlbumKey = cursorWithAlbums.getColumnIndex(MediaStore.Audio.AlbumColumns.ALBUM_KEY)
+    val indexAlbumTitle = cursorWithAlbums.getColumnIndex(MediaStore.Audio.AlbumColumns.ALBUM)
+    val indexAlbumArtist = cursorWithAlbums.getColumnIndex(MediaStore.Audio.AlbumColumns.ARTIST)
+
     cursorWithAlbums.use {
       while (it.moveToNext()) {
 
         val description = MediaDescriptionCompat.Builder()
-          .setMediaId(it.getString(0))    // Album key
-          .setTitle(it.getString(1))      // Album title
-          .setSubtitle(it.getString(2))   // Album artist
-          .setExtras(
-            bundleOf(
-              MediaStore.Audio.AlbumColumns.ALBUM_KEY to it.getString(0),
-              MediaStore.Audio.AlbumColumns.ALBUM to it.getString(1),
-              MediaStore.Audio.AlbumColumns.ARTIST to it.getString(2),
-              MediaStore.Audio.AlbumColumns.NUMBER_OF_SONGS to it.getInt(3),
-              MediaStore.Audio.AlbumColumns.ALBUM_ART to it.getString(4)
-            )
-          )
+          .setMediaId(it.getString(indexAlbumKey))    // Album key
+          .setTitle(it.getString(indexAlbumTitle))      // Album title
+          .setSubtitle(it.getString(indexAlbumArtist))   // Album artist
+          .setExtras(createExtras(cursorWithAlbums))
           .build()
 
         mediaItems.add(
@@ -165,16 +148,7 @@ abstract class LPBrowserService : MediaBrowserServiceCompat() {
     val cursorWithSongs = ContentResolverCompat.query(
       contentResolver,
       uri,
-      arrayOf(
-        MediaStore.Audio.Media._ID,
-        MediaStore.Audio.Media.DATA,
-        MediaStore.Audio.Media.TITLE,
-        MediaStore.Audio.Media.ARTIST,
-        MediaStore.Audio.Media.ARTIST_KEY,
-        MediaStore.Audio.Media.ALBUM,
-        MediaStore.Audio.Media.ALBUM_KEY,
-        MediaStore.Audio.Media.TRACK
-      ),
+      null,
       "${MediaStore.Audio.Media.IS_MUSIC} = ?",
       arrayOf("1"),
       MediaStore.Audio.Media.TITLE_KEY,
@@ -182,6 +156,11 @@ abstract class LPBrowserService : MediaBrowserServiceCompat() {
     )
 
     val mediaItems = emptyList<MediaBrowserCompat.MediaItem>().toMutableList()
+
+    val indexPath = cursorWithSongs.getColumnIndex(MediaStore.Audio.Media.DATA)
+    val indexTitle = cursorWithSongs.getColumnIndex(MediaStore.Audio.Media.TITLE)
+    val indexArtist = cursorWithSongs.getColumnIndex(MediaStore.Audio.Media.ARTIST)
+    val indexAlbum = cursorWithSongs.getColumnIndex(MediaStore.Audio.Media.ALBUM)
 
     cursorWithSongs.use {
       while (it.moveToNext()) {
@@ -192,19 +171,11 @@ abstract class LPBrowserService : MediaBrowserServiceCompat() {
         }
 
         val description = MediaDescriptionCompat.Builder()
-          .setMediaId(it.getString(1))    // Song path
-          .setTitle(it.getString(2))      // Song title
-          .setSubtitle(it.getString(3))   // Song artist
-          .setExtras(
-            bundleOf(
-              MediaStore.Audio.Media._ID to it.getLong(0),
-              MediaStore.Audio.Media.ARTIST to it.getString(3),
-              MediaStore.Audio.Media.ARTIST_KEY to it.getString(4),
-              MediaStore.Audio.Media.ALBUM to it.getString(5),
-              MediaStore.Audio.Media.ALBUM_KEY to it.getString(6),
-              MediaStore.Audio.Media.TRACK to it.getInt(7).rem(1000)
-            )
-          )
+          .setMediaId(it.getString(indexPath))    // Song path
+          .setTitle(it.getString(indexTitle))      // Song title
+          .setSubtitle(it.getString(indexArtist))   // Song artist
+          .setDescription(it.getString(indexAlbum))   // Song album
+          .setExtras(createExtras(cursorWithSongs))
           .build()
 
         mediaItems.add(
@@ -219,6 +190,20 @@ abstract class LPBrowserService : MediaBrowserServiceCompat() {
     return mediaItems
   }
 
+  /**
+   * Put every column into a bundle.
+   */
+  private fun createExtras(cursor: Cursor): Bundle {
+    val bundle = Bundle()
+    for (i in 0 until cursor.columnCount) {
+      bundle.putString(
+        cursor.columnNames[i],
+        cursor.getString(i)
+      )
+    }
+    return bundle
+  }
+
   // --------
 
   private fun allowBrowsing(clientPackageName: String, clientUid: Int): Boolean {
@@ -226,7 +211,9 @@ abstract class LPBrowserService : MediaBrowserServiceCompat() {
   }
 
   companion object {
+    @Suppress("unused")
     private const val LOG_TAG = "LPBrowserService"
+
     private const val MEDIA_ROOT_ID = LPBrowserService.MEDIA_ARTISTS_ID
     private const val EMPTY_MEDIA_ROOT_ID = "empty_root_id"
 
