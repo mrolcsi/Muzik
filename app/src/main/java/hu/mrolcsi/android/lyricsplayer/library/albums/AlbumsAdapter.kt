@@ -49,12 +49,12 @@ class AlbumsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, AlbumsAdapter.Al
     with(holder) {
       // Apply theme
       ThemeManager.currentTheme.value?.let { theme ->
-        itemView.background = Theme.getRippleDrawable(theme.darkForegroundColor, theme.darkerBackgroundColor)
+        itemView.background = Theme.getRippleDrawable(theme.secondaryForegroundColor, theme.tertiaryBackgroundColor)
 
-        tvAlbum?.setTextColor(theme.darkerForegroundColor)
-        tvArtist?.setTextColor(ColorUtils.setAlphaComponent(theme.darkerForegroundColor, Theme.INACTIVE_OPACITY))
+        tvAlbum?.setTextColor(theme.tertiaryForegroundColor)
+        tvArtist?.setTextColor(ColorUtils.setAlphaComponent(theme.tertiaryForegroundColor, Theme.DISABLED_OPACITY))
 
-        imgChevronRight?.imageTintList = ColorStateList.valueOf(theme.darkerForegroundColor)
+        imgChevronRight?.imageTintList = ColorStateList.valueOf(theme.tertiaryForegroundColor)
       }
 
       // Set texts

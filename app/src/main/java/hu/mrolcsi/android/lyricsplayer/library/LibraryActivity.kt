@@ -113,8 +113,8 @@ class LibraryActivity : AppCompatActivity() {
     }
 
     // Apply StatusBar and NavigationBar colors again
-    applyColorToStatusBarIcons(ThemeManager.currentTheme.value?.backgroundColor ?: Color.BLACK)
-    applyColorToNavigationBarIcons(ThemeManager.currentTheme.value?.darkBackgroundColor ?: Color.BLACK)
+    applyColorToStatusBarIcons(ThemeManager.currentTheme.value?.primaryBackgroundColor ?: Color.BLACK)
+    applyColorToNavigationBarIcons(ThemeManager.currentTheme.value?.secondaryBackgroundColor ?: Color.BLACK)
   }
 
   override fun onStop() {
@@ -269,15 +269,16 @@ class LibraryActivity : AppCompatActivity() {
 
   private fun updateSongData(metadata: MediaMetadataCompat?) {
     // Update cover art in ActionBar
-    metadata?.description?.iconBitmap.let { bitmap ->
-      Glide.with(this)
-        .load(bitmap)
-        .transition(
-          DrawableTransitionOptions.with(
-            DrawableCrossFadeFactory.Builder().setCrossFadeEnabled(true).build()
-          )
-        )
-        .into(mNowPlayingCoverArt!!)
+    mNowPlayingCoverArt?.let { imgView ->
+      metadata?.description?.iconBitmap.let { bitmap ->
+        Glide.with(this)
+          .load(bitmap)
+          .transition(
+            DrawableTransitionOptions.with(
+              DrawableCrossFadeFactory.Builder().setCrossFadeEnabled(true).build()
+            )
+          ).into(imgView)
+      }
     }
   }
 
@@ -290,16 +291,16 @@ class LibraryActivity : AppCompatActivity() {
     Log.d(LOG_TAG, "Applying theme...")
 
     // Status Bar Icons
-    applyColorToStatusBarIcons(theme.backgroundColor)
+    applyColorToStatusBarIcons(theme.primaryBackgroundColor)
     // Navigation Bar Icons
-    applyColorToNavigationBarIcons(theme.darkBackgroundColor)
+    applyColorToNavigationBarIcons(theme.secondaryBackgroundColor)
 
     // Animate changes
     val animationDuration: Long = 500
 
     ValueAnimator.ofArgb(
-      ThemeManager.previousTheme?.backgroundColor ?: Color.BLACK,
-      theme.backgroundColor
+      ThemeManager.previousTheme?.primaryBackgroundColor ?: Color.BLACK,
+      theme.primaryBackgroundColor
     ).apply {
       duration = animationDuration
       addUpdateListener {
@@ -313,8 +314,8 @@ class LibraryActivity : AppCompatActivity() {
     }
 
     ValueAnimator.ofArgb(
-      ThemeManager.previousTheme?.darkBackgroundColor ?: Color.BLACK,
-      theme.darkBackgroundColor
+      ThemeManager.previousTheme?.secondaryBackgroundColor ?: Color.BLACK,
+      theme.secondaryBackgroundColor
     ).apply {
       duration = animationDuration
       addUpdateListener {
@@ -328,8 +329,8 @@ class LibraryActivity : AppCompatActivity() {
     }
 
     ValueAnimator.ofArgb(
-      ThemeManager.previousTheme?.darkerBackgroundColor ?: Color.BLACK,
-      theme.darkerBackgroundColor
+      ThemeManager.previousTheme?.tertiaryBackgroundColor ?: Color.BLACK,
+      theme.tertiaryBackgroundColor
     ).apply {
       duration = animationDuration
       addUpdateListener {
@@ -341,8 +342,8 @@ class LibraryActivity : AppCompatActivity() {
     }
 
     ValueAnimator.ofArgb(
-      ThemeManager.previousTheme?.foregroundColor ?: Color.WHITE,
-      theme.foregroundColor
+      ThemeManager.previousTheme?.primaryForegroundColor ?: Color.WHITE,
+      theme.primaryForegroundColor
     ).apply {
       duration = animationDuration
       addUpdateListener {
@@ -354,14 +355,14 @@ class LibraryActivity : AppCompatActivity() {
         libraryToolbar.setSubtitleTextColor(color)
         // Toolbar Now Playing Icon
         mNowPlayingIcon?.imageTintList =
-          ColorStateList.valueOf(theme.foregroundColor)
+          ColorStateList.valueOf(theme.primaryForegroundColor)
       }
       start()
     }
 
     ValueAnimator.ofArgb(
-      ThemeManager.previousTheme?.darkForegroundColor ?: Color.WHITE,
-      theme.darkForegroundColor
+      ThemeManager.previousTheme?.secondaryForegroundColor ?: Color.WHITE,
+      theme.secondaryForegroundColor
     ).apply {
       duration = animationDuration
       addUpdateListener {
@@ -370,11 +371,11 @@ class LibraryActivity : AppCompatActivity() {
         val navigationTintList = ColorStateList(
           arrayOf(
             intArrayOf(android.R.attr.state_checked),
-            intArrayOf(-android.R.attr.state_checked)
+            intArrayOf()
           ),
           intArrayOf(
             color,
-            ColorUtils.setAlphaComponent(color, (255 * 0.5).toInt())
+            ColorUtils.setAlphaComponent(color, Theme.DISABLED_OPACITY)
           )
         )
         navigation_bar.itemIconTintList = navigationTintList

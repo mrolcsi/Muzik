@@ -14,11 +14,13 @@ object ThemeManager {
 
   private const val LOG_TAG = "ThemeManager"
 
+  private const val MINIMUM_CONTRAST_RATIO = 4.5
+
   var previousTheme: Theme? = null
   val currentTheme = MutableLiveData<Theme>()
 
   private val mPaletteFiler = Palette.Filter { _, hsl ->
-    hsl[2] > 0.01 && hsl[2] < 0.99
+    hsl[2] > 0.10 && hsl[2] < 0.90
   }
 
   fun updateFromBitmap(bitmap: Bitmap) {
@@ -30,6 +32,11 @@ object ThemeManager {
         //.addFilter(mPaletteFiler)
         .generate()
 
+      if (palette == previousTheme?.sourcePalette) {
+        // Skip theme generation from the same(ish) palette.
+        return@execute
+      }
+
       val theme = createTheme(palette)
 
       // Save previous theme
@@ -38,39 +45,91 @@ object ThemeManager {
     }
   }
 
-  private fun createTheme(palette: Palette): Theme {
+  private fun createTheme(sourcePalette: Palette): Theme {
 
-    // Default colors
-    val backgroundColor = palette.dominantSwatch?.rgb ?: Color.BLACK
-    val foregroundColor = palette.swatches.maxBy {
-      ColorUtils.calculateContrast(it.rgb, backgroundColor)
-    }?.rgb ?: Color.WHITE
-    val backgroundHsl = FloatArray(3).apply {
-      ColorUtils.colorToHSL(backgroundColor, this)
+    // Primary colors
+    val primaryBackgroundColor = sourcePalette.dominantSwatch?.rgb ?: Color.BLACK
+    val primaryForegroundColor = findForegroundColor(primaryBackgroundColor, sourcePalette)
+
+    val dominantHsl = sourcePalette.dominantSwatch?.hsl
+      ?: FloatArray(3).apply {
+        ColorUtils.colorToHSL(primaryBackgroundColor, this)
+      }
+
+    /*
+
+     Light
+     |       T       S       P                |
+     |       |       |       |                |
+    -+-------x-------x---+---x----------------+-
+     |                   |                    |
+     0                   0.5                  1
+
+     Dark
+     |       P          S          T          |
+     |       |          |          |          |
+    -+-------x----------x+---------x----------+-
+     |                   |                    |
+     0                   0.5                  1
+
+    diff = if (l < 0.5) {
+      (1 - l) / 3
+    } else {
+      -(l / 3)
     }
 
-    // Darker colors
-    backgroundHsl[2] *= 0.6f
-    val darkBackgroundColor = ColorUtils.HSLToColor(backgroundHsl)
-    val darkForegroundColor = palette.swatches.maxBy {
-      ColorUtils.calculateContrast(it.rgb, darkBackgroundColor)
-    }?.rgb ?: Color.WHITE
+     */
 
-    // Even darker colors
-    backgroundHsl[2] *= 0.6f
-    val darkerBackgroundColor = ColorUtils.HSLToColor(backgroundHsl)
-    val darkerForegroundColor = palette.swatches.maxBy {
-      ColorUtils.calculateContrast(it.rgb, darkerBackgroundColor)
-    }?.rgb ?: Color.WHITE
+    // Increase luminance for dark colors, decrease for light colors
+    //val luminanceDiff = if (dominantHsl[2] < 0.5) (1 - dominantHsl[2]) / 3f else -(dominantHsl[2] / 3f)
+    val luminanceDiff = if (dominantHsl[2] < 0.5) 0.1f else -0.1f
+
+    // Secondary colors
+    dominantHsl[2] += luminanceDiff
+    val secondaryBackgroundColor = ColorUtils.HSLToColor(dominantHsl)
+    val secondaryForegroundColor = findForegroundColor(secondaryBackgroundColor, sourcePalette)
+
+    // Tertiary colors
+    dominantHsl[2] += 2 * luminanceDiff
+    val tertiaryBackgroundColor = ColorUtils.HSLToColor(dominantHsl)
+    val tertiaryForegroundColor = findForegroundColor(tertiaryBackgroundColor, sourcePalette)
 
     return Theme(
-      palette,
-      backgroundColor,
-      foregroundColor,
-      darkBackgroundColor,
-      darkForegroundColor,
-      darkerBackgroundColor,
-      darkerForegroundColor
+      sourcePalette,
+      primaryBackgroundColor,
+      primaryForegroundColor,
+      secondaryBackgroundColor,
+      secondaryForegroundColor,
+      tertiaryBackgroundColor,
+      tertiaryForegroundColor
     )
   }
+
+  private fun findForegroundColor(backgroundColor: Int, sourcePalette: Palette): Int {
+    var foregroundColor = sourcePalette.swatches.filter {
+
+      // Ignore completely black or completely white swatches
+      val notBlackOrWhite = mPaletteFiler.isAllowed(it.rgb, it.hsl)
+
+      // Also ignore swatches that don't have a minimum contrast
+      val hasEnoughContrast = true or (ColorUtils.calculateContrast(it.rgb, backgroundColor) > MINIMUM_CONTRAST_RATIO)
+
+      notBlackOrWhite && hasEnoughContrast
+    }.maxBy {
+      ColorUtils.calculateContrast(it.rgb, backgroundColor)
+    }?.rgb
+
+    if (foregroundColor == null) {
+      // Use first available color
+      foregroundColor = sourcePalette.swatches.maxBy {
+        ColorUtils.calculateContrast(it.rgb, backgroundColor)
+      }?.rgb ?:
+          // Use inverse of background color as a fallback
+          invertColor(backgroundColor)
+    }
+
+    return foregroundColor
+  }
+
+  private fun invertColor(color: Int): Int = color xor 0x00ffffff
 }

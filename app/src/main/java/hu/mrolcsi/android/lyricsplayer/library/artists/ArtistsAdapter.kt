@@ -48,22 +48,22 @@ class ArtistsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, ArtistsAdapter.
     with(holder) {
       // Apply theme
       ThemeManager.currentTheme.value?.let { theme ->
-        itemView.background = Theme.getRippleDrawable(theme.darkForegroundColor, theme.darkerBackgroundColor)
+        itemView.background = Theme.getRippleDrawable(theme.secondaryForegroundColor, theme.tertiaryBackgroundColor)
 
-        tvArtist?.setTextColor(theme.darkerForegroundColor)
+        tvArtist?.setTextColor(theme.tertiaryForegroundColor)
         tvNumOfSongs?.setTextColor(
           ColorUtils.setAlphaComponent(
-            theme.darkerForegroundColor,
-            Theme.INACTIVE_OPACITY
+            theme.tertiaryForegroundColor,
+            Theme.DISABLED_OPACITY
           )
         )
-        imgChevronRight?.imageTintList = ColorStateList.valueOf(theme.darkerForegroundColor)
+        imgChevronRight?.imageTintList = ColorStateList.valueOf(theme.tertiaryForegroundColor)
       }
 
       // Set texts
       tvArtist?.text = item.description.title
-      val numberOfAlbums = item.description.numberOfAlbums ?: 0
-      val numberOfSongs = item.description.numberOfTracks ?: 0
+      val numberOfAlbums = item.description.numberOfAlbums
+      val numberOfSongs = item.description.numberOfTracks
       val numberOfAlbumsString =
         itemView.context.resources.getQuantityString(R.plurals.artists_numberOfAlbums, numberOfAlbums, numberOfAlbums)
       val numberOfSongsString =

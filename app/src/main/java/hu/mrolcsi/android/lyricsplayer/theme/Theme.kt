@@ -9,21 +9,22 @@ import kotlin.math.roundToInt
 
 data class Theme(
   // Source palette
-  var palette: Palette,
+  var sourcePalette: Palette,
 
   // Basic colors
-  var backgroundColor: Int,
-  var foregroundColor: Int,
+  var primaryBackgroundColor: Int,
+  var primaryForegroundColor: Int,
 
-  var darkBackgroundColor: Int,
-  var darkForegroundColor: Int,
+  var secondaryBackgroundColor: Int,
+  var secondaryForegroundColor: Int,
 
-  var darkerBackgroundColor: Int,
-  var darkerForegroundColor: Int
+  var tertiaryBackgroundColor: Int,
+  var tertiaryForegroundColor: Int
 ) {
 
   companion object {
-    val INACTIVE_OPACITY = (255 * 0.9).roundToInt()
+    const val DISABLED_ALPHA = 0.8f
+    val DISABLED_OPACITY = (255 * DISABLED_ALPHA).roundToInt()
 
     fun getRippleDrawable(rippleColor: Int, backgroundColor: Int): RippleDrawable = RippleDrawable(
       ColorStateList.valueOf(rippleColor),

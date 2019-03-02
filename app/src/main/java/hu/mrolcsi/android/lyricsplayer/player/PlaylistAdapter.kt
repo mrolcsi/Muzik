@@ -43,9 +43,9 @@ class PlaylistAdapter : ListAdapter<MediaSessionCompat.QueueItem, PlaylistAdapte
 
 // Apply theme
     ThemeManager.currentTheme.value?.let { theme ->
-      holder.tvTitle.setTextColor(theme.foregroundColor)
-      holder.tvArtist.setTextColor(theme.foregroundColor)
-      holder.tvDuration.setTextColor(theme.foregroundColor)
+      holder.tvTitle.setTextColor(theme.primaryForegroundColor)
+      holder.tvArtist.setTextColor(theme.primaryForegroundColor)
+      holder.tvDuration.setTextColor(theme.primaryForegroundColor)
     }
 
     holder.bind(getItem(position))

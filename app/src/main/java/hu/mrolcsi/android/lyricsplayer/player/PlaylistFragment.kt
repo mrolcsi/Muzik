@@ -44,7 +44,7 @@ class PlaylistFragment : Fragment() {
     }
 
     ThemeManager.currentTheme.observe(this, Observer { theme ->
-      view?.setBackgroundColor(theme.backgroundColor)
+      view?.setBackgroundColor(theme.primaryBackgroundColor)
       mPlaylistAdapter.notifyDataSetChanged()
     })
   }

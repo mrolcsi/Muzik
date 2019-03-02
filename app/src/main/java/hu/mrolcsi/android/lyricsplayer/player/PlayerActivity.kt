@@ -50,7 +50,6 @@ import hu.mrolcsi.android.lyricsplayer.theme.Theme
 import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
 import kotlinx.android.synthetic.main.activity_player.*
 import kotlinx.android.synthetic.main.content_player.*
-import kotlin.math.roundToInt
 
 class PlayerActivity : AppCompatActivity() {
 
@@ -117,8 +116,8 @@ class PlayerActivity : AppCompatActivity() {
     volumeControlStream = AudioManager.STREAM_MUSIC
 
     // Apply StatusBar and NavigationBar colors again
-    applyColorToStatusBarIcons(ThemeManager.currentTheme.value?.backgroundColor ?: Color.BLACK)
-    applyColorToNavigationBarIcons(ThemeManager.currentTheme.value?.backgroundColor ?: Color.BLACK)
+    applyColorToStatusBarIcons(ThemeManager.currentTheme.value?.primaryBackgroundColor ?: Color.BLACK)
+    applyColorToNavigationBarIcons(ThemeManager.currentTheme.value?.primaryBackgroundColor ?: Color.BLACK)
   }
 
   override fun onStop() {
@@ -301,7 +300,10 @@ class PlayerActivity : AppCompatActivity() {
     val controller = MediaControllerCompat.getMediaController(this) ?: null
 
     btnPrevious.isEnabled = playbackState.isSkipToPreviousEnabled
+    btnPrevious.alpha = if (playbackState.isSkipToPreviousEnabled) 1f else 0.5f
+
     btnNext.isEnabled = playbackState.isSkipToNextEnabled
+    btnNext.alpha = if (playbackState.isSkipToNextEnabled) 1f else 0.5f
 
     when (playbackState.isPlaying) {
       true -> {
@@ -368,14 +370,14 @@ class PlayerActivity : AppCompatActivity() {
   private fun applyTheme(theme: Theme) {
     Log.d(LOG_TAG, "Applying theme...")
 
-    applyColorToNavigationBarIcons(theme.backgroundColor)
+    applyColorToNavigationBarIcons(theme.primaryBackgroundColor)
 
     val animationDuration: Long = 500
 
     // Background Color
     ValueAnimator.ofArgb(
-      ThemeManager.previousTheme?.backgroundColor ?: ContextCompat.getColor(this, R.color.backgroundColor),
-      theme.backgroundColor
+      ThemeManager.previousTheme?.primaryBackgroundColor ?: ContextCompat.getColor(this, R.color.backgroundColor),
+      theme.primaryBackgroundColor
     ).apply {
       duration = animationDuration  // milliseconds
       addUpdateListener {
@@ -387,8 +389,8 @@ class PlayerActivity : AppCompatActivity() {
 
     // Foreground Color
     ValueAnimator.ofArgb(
-      ThemeManager.previousTheme?.foregroundColor ?: Color.WHITE,
-      theme.foregroundColor
+      ThemeManager.previousTheme?.primaryForegroundColor ?: Color.WHITE,
+      theme.primaryForegroundColor
     ).apply {
       duration = animationDuration  // milliseconds
       addUpdateListener {
@@ -400,13 +402,13 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     // Test out colors
-    view1.setBackgroundColor(theme.palette.getLightVibrantColor(Color.BLACK))
-    view2.setBackgroundColor(theme.palette.getVibrantColor(Color.BLACK))
-    view3.setBackgroundColor(theme.palette.getDarkVibrantColor(Color.BLACK))
-    view4.setBackgroundColor(theme.palette.getDominantColor(Color.BLACK))
-    view5.setBackgroundColor(theme.palette.getLightMutedColor(Color.BLACK))
-    view6.setBackgroundColor(theme.palette.getMutedColor(Color.BLACK))
-    view7.setBackgroundColor(theme.palette.getDarkMutedColor(Color.BLACK))
+    view1.setBackgroundColor(theme.sourcePalette.getLightVibrantColor(Color.BLACK))
+    view2.setBackgroundColor(theme.sourcePalette.getVibrantColor(Color.BLACK))
+    view3.setBackgroundColor(theme.sourcePalette.getDarkVibrantColor(Color.BLACK))
+    view4.setBackgroundColor(theme.sourcePalette.getDominantColor(Color.BLACK))
+    view5.setBackgroundColor(theme.sourcePalette.getLightMutedColor(Color.BLACK))
+    view6.setBackgroundColor(theme.sourcePalette.getMutedColor(Color.BLACK))
+    view7.setBackgroundColor(theme.sourcePalette.getDarkMutedColor(Color.BLACK))
   }
 
   private fun applyForegroundColor(color: Int) {
@@ -437,7 +439,7 @@ class PlayerActivity : AppCompatActivity() {
     mNextDrawable.getDrawable(0).setTint(color)
 
     // Media Buttons Ripple (need to use separate drawables)
-    val rippleColor = ColorUtils.setAlphaComponent(color, (255 * 0.5).roundToInt())
+    val rippleColor = ColorUtils.setAlphaComponent(color, (255 * 0.5).toInt())
     btnPrevious.background = Theme.getRippleDrawable(rippleColor)
     btnPlayPause.background = Theme.getRippleDrawable(rippleColor)
     btnNext.background = Theme.getRippleDrawable(rippleColor)
@@ -453,7 +455,7 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     // Seek Progress background
-    tvSeekProgress.setBackgroundColor(ColorUtils.setAlphaComponent(color, (255 * 0.5).roundToInt()))
+    tvSeekProgress.setBackgroundColor(ColorUtils.setAlphaComponent(color, (255 * 0.5).toInt()))
 
     // Media Buttons Icon
     mPreviousDrawable.getDrawable(1).setTint(color)
