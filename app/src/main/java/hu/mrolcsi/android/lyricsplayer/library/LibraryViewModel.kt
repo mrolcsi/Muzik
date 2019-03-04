@@ -32,19 +32,25 @@ abstract class LibraryViewModel(app: Application) : AndroidViewModel(app) {
       mMediaBrowser.sessionToken.also { token ->
 
         Log.v(this.toString(), "Controller ready")
-        mediaController.postValue(
-          MediaControllerCompat(getApplication(), token).apply {
-            registerCallback(object : MediaControllerCompat.Callback() {
-              override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
-                currentMediaMetadata.postValue(metadata)
-              }
 
-              override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
-                currentPlaybackState.postValue(state)
-              }
-            })
-          }
-        )
+        // Attach a controller to this MediaSession
+        val controller = MediaControllerCompat(getApplication(), token).apply {
+          // Register callbacks to watch for changes
+          registerCallback(object : MediaControllerCompat.Callback() {
+            override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
+              currentMediaMetadata.postValue(metadata)
+            }
+
+            override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
+              currentPlaybackState.postValue(state)
+            }
+          })
+        }
+        mediaController.postValue(controller)
+
+        // Set initial state, and metadata
+        currentPlaybackState.postValue(controller.playbackState)
+        currentMediaMetadata.postValue(controller.metadata)
       }
     }
   }
@@ -66,6 +72,7 @@ abstract class LibraryViewModel(app: Application) : AndroidViewModel(app) {
   }
 
   companion object {
+    @Suppress("unused")
     private const val LOG_TAG = "LibraryViewModel"
   }
 }

@@ -28,13 +28,6 @@ class PlaylistFragment : Fragment() {
       mPlayerModel = ViewModelProviders.of(it).get(PlayerViewModel::class.java).apply {
         Log.d(LOG_TAG, "Got PlayerViewModel: $this")
 
-        mediaController.observe(this@PlaylistFragment, Observer { controller ->
-          controller?.let {
-            // Update playlist adapter
-            mPlaylistAdapter.submitList(controller.queue)
-          }
-        })
-
         currentMediaMetadata.observe(this@PlaylistFragment, Observer { metadata ->
           // Update playlist adapter
           val controller = MediaControllerCompat.getMediaController(it)

@@ -5,7 +5,6 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.PorterDuff
-import android.graphics.drawable.LayerDrawable
 import android.media.AudioManager
 import android.os.Bundle
 import android.support.v4.media.MediaMetadataCompat
@@ -57,11 +56,10 @@ class PlayerActivity : AppCompatActivity() {
 
   private var mUserIsSeeking = false
 
-  // Prepare drawables
-  private val mPreviousDrawable by lazy { getDrawable(R.drawable.media_previous) as LayerDrawable }
-  private val mPlayDrawable by lazy { getDrawable(R.drawable.media_play) as LayerDrawable }
-  private val mPauseDrawable by lazy { getDrawable(R.drawable.media_pause) as LayerDrawable }
-  private val mNextDrawable by lazy { getDrawable(R.drawable.media_next) as LayerDrawable }
+  // Prepare drawables (separate for each button)
+  private val mPreviousBackground by lazy { getDrawable(R.drawable.media_button_background) }
+  private val mPlayPauseBackground by lazy { getDrawable(R.drawable.media_button_background) }
+  private val mNextBackground by lazy { getDrawable(R.drawable.media_button_background) }
 
   // Glide transition
   private var mCovertArtIndex = 0
@@ -116,8 +114,10 @@ class PlayerActivity : AppCompatActivity() {
     volumeControlStream = AudioManager.STREAM_MUSIC
 
     // Apply StatusBar and NavigationBar colors again
-    applyColorToStatusBarIcons(ThemeManager.currentTheme.value?.primaryBackgroundColor ?: Color.BLACK)
-    applyColorToNavigationBarIcons(ThemeManager.currentTheme.value?.primaryBackgroundColor ?: Color.BLACK)
+    ThemeManager.currentTheme.value?.let {
+      applyColorToStatusBarIcons(it.primaryBackgroundColor)
+      applyColorToNavigationBarIcons(it.primaryBackgroundColor)
+    }
   }
 
   override fun onStop() {
@@ -197,8 +197,8 @@ class PlayerActivity : AppCompatActivity() {
     val mediaController = MediaControllerCompat.getMediaController(this)
 
     // Set icons
-    btnPrevious.setImageDrawable(mPreviousDrawable)
-    btnNext.setImageDrawable(mNextDrawable)
+//    btnPrevious.setImageDrawable(mPreviousDrawable)
+//    btnNext.setImageDrawable(mNextDrawable)
 
     // Enable controls
     sbSongProgress.isEnabled = true
@@ -247,14 +247,14 @@ class PlayerActivity : AppCompatActivity() {
             // Pause playback, stop updater
             controller.transportControls.pause()
             controller.transportControls.startProgressUpdater()
-            btnPlayPause.setImageDrawable(mPlayDrawable)
+            //btnPlayPause.setImageResource(mPlayDrawable)
           }
           PlaybackStateCompat.STATE_PAUSED,
           PlaybackStateCompat.STATE_STOPPED -> {
             // Start playback, start updater
             controller.transportControls.play()
             controller.transportControls.stopProgressUpdater()
-            btnPlayPause.setImageDrawable(mPauseDrawable)
+            //btnPlayPause.setImageDrawable(mPauseDrawable)
           }
         }
       }
@@ -308,11 +308,13 @@ class PlayerActivity : AppCompatActivity() {
     when (playbackState.isPlaying) {
       true -> {
         controller?.transportControls?.startProgressUpdater()
-        btnPlayPause.setImageDrawable(mPauseDrawable)
+        //btnPlayPause.setImageDrawable(mPauseDrawable)
+        btnPlayPause.setImageResource(android.R.drawable.ic_media_pause)
       }
       false -> {
         controller?.transportControls?.stopProgressUpdater()
-        btnPlayPause.setImageDrawable(mPlayDrawable)
+        //btnPlayPause.setImageDrawable(mPlayDrawable)
+        btnPlayPause.setImageResource(android.R.drawable.ic_media_play)
       }
     }
   }
@@ -338,7 +340,8 @@ class PlayerActivity : AppCompatActivity() {
       it.setAnimationListener(object : Animation.AnimationListener {
         override fun onAnimationRepeat(animation: Animation?) {}
 
-        override fun onAnimationEnd(animation: Animation?) {}
+        override fun onAnimationEnd(animation: Animation?) {
+        }
 
         override fun onAnimationStart(animation: Animation?) {
           imgCoverArt[mCovertArtIndex].bringToFront()
@@ -433,16 +436,9 @@ class PlayerActivity : AppCompatActivity() {
     sbSongProgress.thumb.setColorFilter(color, PorterDuff.Mode.SRC_ATOP)
 
     // Media Buttons Background
-    mPreviousDrawable.getDrawable(0).setTint(color)
-    mPlayDrawable.getDrawable(0).setTint(color)
-    mPauseDrawable.getDrawable(0).setTint(color)
-    mNextDrawable.getDrawable(0).setTint(color)
-
-    // Media Buttons Ripple (need to use separate drawables)
-    val rippleColor = ColorUtils.setAlphaComponent(color, Theme.DISABLED_OPACITY)
-    btnPrevious.background = Theme.getRippleDrawable(rippleColor)
-    btnPlayPause.background = Theme.getRippleDrawable(rippleColor)
-    btnNext.background = Theme.getRippleDrawable(rippleColor)
+    mPreviousBackground?.setTint(color)
+    mPlayPauseBackground?.setTint(color)
+    mNextBackground?.setTint(color)
   }
 
   private fun applyBackgroundColor(color: Int) {
@@ -458,10 +454,15 @@ class PlayerActivity : AppCompatActivity() {
     tvSeekProgress.setBackgroundColor(ColorUtils.setAlphaComponent(color, Theme.DISABLED_OPACITY))
 
     // Media Buttons Icon
-    mPreviousDrawable.getDrawable(1).setTint(color)
-    mPlayDrawable.getDrawable(1).setTint(color)
-    mPauseDrawable.getDrawable(1).setTint(color)
-    mNextDrawable.getDrawable(1).setTint(color)
+    btnPrevious.setColorFilter(color)
+    btnPlayPause.setColorFilter(color)
+    btnNext.setColorFilter(color)
+
+    // Media Buttons Ripple (need to use separate drawables)
+    val rippleColor = ColorUtils.setAlphaComponent(color, Theme.DISABLED_OPACITY)
+    btnPrevious.background = Theme.getRippleDrawable(rippleColor, mPreviousBackground)
+    btnPlayPause.background = Theme.getRippleDrawable(rippleColor, mPlayPauseBackground)
+    btnNext.background = Theme.getRippleDrawable(rippleColor, mNextBackground)
   }
 
   companion object {

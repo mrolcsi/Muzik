@@ -19,7 +19,6 @@ import hu.mrolcsi.android.lyricsplayer.player.PlayerActivity
 import hu.mrolcsi.android.lyricsplayer.service.exoplayer.PlayerHolder
 import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
 
-
 class LPPlayerService : LPBrowserService() {
 
   private var isForegroundService = false
