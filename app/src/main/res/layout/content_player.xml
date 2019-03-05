@@ -222,11 +222,10 @@
     android:textAlignment="center"
     android:textAppearance="@style/TextAppearance.AppCompat.Small"
     android:visibility="gone"
-    app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toStartOf="@+id/view2"
     app:layout_constraintHorizontal_bias="0.5"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@+id/playerToolbar"/>
+    app:layout_constraintTop_toBottomOf="@+id/imgCoverArt0"/>
 
   <TextView
     android:id="@+id/view2"
@@ -236,11 +235,10 @@
     android:textAlignment="center"
     android:textAppearance="@style/TextAppearance.AppCompat.Small"
     android:visibility="gone"
-    app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toStartOf="@+id/view3"
     app:layout_constraintHorizontal_bias="0.5"
     app:layout_constraintStart_toEndOf="@+id/view1"
-    app:layout_constraintTop_toBottomOf="@+id/playerToolbar"/>
+    app:layout_constraintTop_toBottomOf="@+id/imgCoverArt0"/>
 
   <TextView
     android:id="@+id/view3"
@@ -250,11 +248,10 @@
     android:textAlignment="center"
     android:textAppearance="@style/TextAppearance.AppCompat.Small"
     android:visibility="gone"
-    app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toStartOf="@+id/view4"
     app:layout_constraintHorizontal_bias="0.5"
     app:layout_constraintStart_toEndOf="@+id/view2"
-    app:layout_constraintTop_toBottomOf="@+id/playerToolbar"/>
+    app:layout_constraintTop_toBottomOf="@+id/imgCoverArt0"/>
 
   <TextView
     android:id="@+id/view4"
@@ -264,11 +261,10 @@
     android:textAlignment="center"
     android:textAppearance="@style/TextAppearance.AppCompat.Small"
     android:visibility="gone"
-    app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toStartOf="@+id/view5"
     app:layout_constraintHorizontal_bias="0.5"
     app:layout_constraintStart_toEndOf="@+id/view3"
-    app:layout_constraintTop_toBottomOf="@+id/playerToolbar"/>
+    app:layout_constraintTop_toBottomOf="@+id/imgCoverArt0"/>
 
   <TextView
     android:id="@+id/view5"
@@ -278,11 +274,10 @@
     android:textAlignment="center"
     android:textAppearance="@style/TextAppearance.AppCompat.Small"
     android:visibility="gone"
-    app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toStartOf="@+id/view6"
     app:layout_constraintHorizontal_bias="0.5"
     app:layout_constraintStart_toEndOf="@+id/view4"
-    app:layout_constraintTop_toBottomOf="@+id/playerToolbar"/>
+    app:layout_constraintTop_toBottomOf="@+id/imgCoverArt0"/>
 
   <TextView
     android:id="@+id/view6"
@@ -292,11 +287,10 @@
     android:textAlignment="center"
     android:textAppearance="@style/TextAppearance.AppCompat.Small"
     android:visibility="gone"
-    app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toStartOf="@+id/view7"
     app:layout_constraintHorizontal_bias="0.5"
     app:layout_constraintStart_toEndOf="@+id/view5"
-    app:layout_constraintTop_toBottomOf="@+id/playerToolbar"/>
+    app:layout_constraintTop_toBottomOf="@+id/imgCoverArt0"/>
 
   <TextView
     android:id="@+id/view7"
@@ -306,10 +300,9 @@
     android:textAlignment="center"
     android:textAppearance="@style/TextAppearance.AppCompat.Small"
     android:visibility="gone"
-    app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintHorizontal_bias="0.5"
     app:layout_constraintStart_toEndOf="@+id/view6"
-    app:layout_constraintTop_toBottomOf="@+id/playerToolbar"/>
+    app:layout_constraintTop_toBottomOf="@+id/imgCoverArt0"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

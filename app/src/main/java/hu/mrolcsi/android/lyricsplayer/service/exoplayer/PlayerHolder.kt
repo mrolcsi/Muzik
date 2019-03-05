@@ -3,35 +3,43 @@ package hu.mrolcsi.android.lyricsplayer.service.exoplayer
 import android.content.Context
 import android.media.MediaMetadataRetriever
 import android.net.Uri
+import android.os.AsyncTask
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.os.ResultReceiver
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
+import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.ExoPlayerFactory
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.Timeline
+import com.google.android.exoplayer2.audio.AudioAttributes
 import com.google.android.exoplayer2.ext.mediasession.DefaultPlaybackController
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
 import com.google.android.exoplayer2.ext.mediasession.TimelineQueueEditor
 import com.google.android.exoplayer2.ext.mediasession.TimelineQueueNavigator
 import com.google.android.exoplayer2.source.ConcatenatingMediaSource
 import com.google.android.exoplayer2.source.ExtractorMediaSource
+import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.util.Util
 import hu.mrolcsi.android.lyricsplayer.BuildConfig
 import hu.mrolcsi.android.lyricsplayer.extensions.media.from
+import hu.mrolcsi.android.lyricsplayer.extensions.media.fullDescription
 import hu.mrolcsi.android.lyricsplayer.extensions.media.id
 import hu.mrolcsi.android.lyricsplayer.extensions.media.mediaPath
 import hu.mrolcsi.android.lyricsplayer.extensions.media.mediaUri
-import hu.mrolcsi.android.lyricsplayer.extensions.media.toMediaSource
 import hu.mrolcsi.android.lyricsplayer.service.LastPlayedSetting
 import java.io.File
 
 class PlayerHolder(context: Context, session: MediaSessionCompat) {
+
+  //region -- PLAYBACK --
 
   private val mPlayer = ExoPlayerFactory.newSimpleInstance(
     context,
@@ -48,9 +56,11 @@ class PlayerHolder(context: Context, session: MediaSessionCompat) {
         }
       }
     })
+    audioAttributes = AudioAttributes.Builder()
+      .setUsage(C.USAGE_MEDIA)
+      .setContentType(C.CONTENT_TYPE_MUSIC)
+      .build()
   }
-
-  private val mQueue = ConcatenatingMediaSource()
 
   private val mPlaybackPreparer = object : MediaSessionConnector.PlaybackPreparer {
     override fun getCommands(): Array<String>? = null
@@ -65,38 +75,27 @@ class PlayerHolder(context: Context, session: MediaSessionCompat) {
     }
 
     override fun onPrepareFromUri(uri: Uri, extras: Bundle?) {
-      // Reset media player before loading
-      Log.v(LOG_TAG, "Loading media into Player: $uri")
+      Log.v(LOG_TAG, "onPrepareFromUri() called from ${Thread.currentThread()}")
 
-      // Load metadata
-      val retriever = MediaMetadataRetriever().apply {
-        setDataSource(context, uri)
+      AsyncTask.execute {
+        // Clear queue and load media
+        mQueue.clear()
+        mQueue.addMediaSource(
+          mMediaSourceFactory.createMediaSource(
+            mMediaSourceFactory.createMediaMetadata(uri).fullDescription
+          ),
+          Handler(Looper.getMainLooper())
+        ) {
+          // Prepare queue when ready (gets called through handler passed as parameter above)
+          onPrepare()
+        }
       }
-      val metadata = MediaMetadataCompat.Builder().from(retriever).apply {
-        // Some additional info cannot be retrieved from the retriever.
-        id = uri.path!!
-        mediaUri = uri.toString()
-      }.build()
-
-      // Create MediaSource from description
-      val mediaSource = metadata.toMediaSource(
-        DefaultDataSourceFactory(
-          context,
-          Util.getUserAgent(context, BuildConfig.APPLICATION_ID)
-        )
-      )
-
-      // clear queue and load media
-      mQueue.clear()
-      mQueue.addMediaSource(mediaSource)
-      mPlayer.prepare(mQueue)
     }
 
     override fun onPrepareFromSearch(query: String?, extras: Bundle?) {}
 
     override fun onPrepare() {
-      // Prepare the player with the current queue?
-
+      Log.v(LOG_TAG, "onPrepare() called from ${Thread.currentThread()}")
       mPlayer.prepare(mQueue)
     }
   }
@@ -122,6 +121,23 @@ class PlayerHolder(context: Context, session: MediaSessionCompat) {
     }
   }
 
+  private val mClearQueueActionProvider = object : MediaSessionConnector.CustomActionProvider {
+    override fun getCustomAction(): PlaybackStateCompat.CustomAction {
+      return PlaybackStateCompat.CustomAction
+        .Builder(ACTION_CLEAR_QUEUE, "Clear queue.", -1)
+        .build()
+    }
+
+    override fun onCustomAction(action: String?, extras: Bundle?) {
+      when (action) {
+        ACTION_CLEAR_QUEUE ->
+          session.controller.queue.forEach {
+            mQueueEditor.onRemoveQueueItem(mPlayer, it.description)
+          }
+      }
+    }
+  }
+
   private val mPlaybackController = object : DefaultPlaybackController() {
     // override functions as needed
 
@@ -136,6 +152,8 @@ class PlayerHolder(context: Context, session: MediaSessionCompat) {
 
     override fun onPause(player: Player) {
       super.onPause(player)
+
+      mProgressUpdater.stopUpdater()
 
       // Save current position to SharedPrefs
       mLastPlayed.lastPlayedPosition = player.currentPosition
@@ -155,7 +173,13 @@ class PlayerHolder(context: Context, session: MediaSessionCompat) {
     }
   }
 
-  private val mQueueNavigator = object : TimelineQueueNavigator(session) {
+  //endregion
+
+  //region -- QUEUE --
+
+  private val mQueue = ConcatenatingMediaSource()
+
+  private val mQueueNavigator = object : TimelineQueueNavigator(session, 50) {
     private val mWindow = Timeline.Window()
     override fun getMediaDescription(player: Player, windowIndex: Int): MediaDescriptionCompat {
       return player.currentTimeline.getWindow(windowIndex, mWindow, true).tag as MediaDescriptionCompat
@@ -164,25 +188,52 @@ class PlayerHolder(context: Context, session: MediaSessionCompat) {
 
   private val mQueueDataAdapter = object : TimelineQueueEditor.QueueDataAdapter {
     override fun add(position: Int, description: MediaDescriptionCompat?) {
-      val source = mMediaSourceFactory.createMediaSource(description)
-      mQueue.addMediaSource(position, source)
+      Log.v(LOG_TAG, "mQueueAdapter.add() called from ${Thread.currentThread()}")
     }
 
-    override fun remove(position: Int) {
-      mQueue.removeMediaSource(position)
+    override fun remove(position: Int) {}
+    override fun move(from: Int, to: Int) {}
+  }
+
+  private val mMediaSourceFactory = object : TimelineQueueEditor.MediaSourceFactory {
+
+    fun createMediaMetadata(uri: Uri): MediaMetadataCompat {
+      Log.v(LOG_TAG, "createMediaMetadata() called from ${Thread.currentThread()}")
+
+      // Load metadata
+      val retriever = MediaMetadataRetriever().apply {
+        setDataSource(context, uri)
+      }
+      return MediaMetadataCompat.Builder().from(retriever).apply {
+        // Some additional info cannot be retrieved from the retriever.
+        id = uri.path!!
+        mediaUri = uri.toString()
+      }.build()
     }
 
-    override fun move(from: Int, to: Int) {
-      mQueue.moveMediaSource(from, to)
+    override fun createMediaSource(description: MediaDescriptionCompat): MediaSource? {
+      Log.v(LOG_TAG, "createMediaSource() called from ${Thread.currentThread()}")
+
+      val dataSourceFactory = DefaultDataSourceFactory(context, Util.getUserAgent(context, BuildConfig.APPLICATION_ID))
+
+      // Create Metadata from Uri
+      val uri = description.mediaUri ?: Uri.fromFile(File(description.mediaPath))
+      //val metadata = createMediaMetadata(uri)
+
+      // Create MediaSource from Metadata
+      //return metadata.toMediaSource(dataSourceFactory)
+      return ExtractorMediaSource.Factory(dataSourceFactory).setTag(description).createMediaSource(uri)
     }
   }
 
-  private val mMediaSourceFactory = TimelineQueueEditor.MediaSourceFactory { description ->
-    // Return a MediaSource from the MediaDescription
-    val uri = description.mediaUri ?: Uri.fromFile(File(description.mediaPath))
-    val dataSourceFactory = DefaultDataSourceFactory(context, Util.getUserAgent(context, BuildConfig.APPLICATION_ID))
-    ExtractorMediaSource.Factory(dataSourceFactory).setTag(description).createMediaSource(uri)
-  }
+  private val mQueueEditor = AsyncTimelineQueueEditor(
+    session.controller,
+    mQueue,
+    mQueueDataAdapter,
+    mMediaSourceFactory
+  )
+
+  //endregion
 
   // Player state polling
   private val mProgressUpdater = ProgressUpdater {
@@ -203,16 +254,9 @@ class PlayerHolder(context: Context, session: MediaSessionCompat) {
   init {
     // Connect this holder to the session
     MediaSessionConnector(session, mPlaybackController).also {
-      it.setPlayer(mPlayer, mPlaybackPreparer, mUpdaterActionProvider)
+      it.setPlayer(mPlayer, mPlaybackPreparer, mUpdaterActionProvider, mClearQueueActionProvider)
       it.setQueueNavigator(mQueueNavigator)
-      it.setQueueEditor(
-        TimelineQueueEditor(
-          session.controller,
-          mQueue,
-          mQueueDataAdapter,
-          mMediaSourceFactory
-        )
-      )
+      it.setQueueEditor(mQueueEditor)
     }
   }
 
@@ -222,6 +266,7 @@ class PlayerHolder(context: Context, session: MediaSessionCompat) {
 
     const val ACTION_START_UPDATER = "ACTION_START_UPDATER"
     const val ACTION_STOP_UPDATER = "ACTION_STOP_UPDATER"
+    const val ACTION_CLEAR_QUEUE = "ACTION_CLEAR_QUEUE"
   }
 
 }

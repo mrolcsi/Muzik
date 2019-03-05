@@ -123,6 +123,9 @@ class PlayerActivity : AppCompatActivity() {
   override fun onStop() {
     super.onStop()
     mPlayerModel.disconnect()
+
+    MediaControllerCompat.getMediaController(this)
+      .transportControls.stopProgressUpdater()
   }
 
   override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -308,12 +311,10 @@ class PlayerActivity : AppCompatActivity() {
     when (playbackState.isPlaying) {
       true -> {
         controller?.transportControls?.startProgressUpdater()
-        //btnPlayPause.setImageDrawable(mPauseDrawable)
         btnPlayPause.setImageResource(android.R.drawable.ic_media_pause)
       }
       false -> {
         controller?.transportControls?.stopProgressUpdater()
-        //btnPlayPause.setImageDrawable(mPlayDrawable)
         btnPlayPause.setImageResource(android.R.drawable.ic_media_play)
       }
     }

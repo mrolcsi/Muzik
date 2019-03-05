@@ -300,7 +300,7 @@ open class LPPlayerControls(
         index,
         MediaSessionCompat.QueueItem(
           description,
-          description.id ?: Random().nextLong()
+          description.id
         )
       )
 

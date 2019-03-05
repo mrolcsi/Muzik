@@ -15,13 +15,16 @@
  */
 
 @file:Suppress("unused")
+@file:SuppressLint("WrongConstant")
 
 package hu.mrolcsi.android.lyricsplayer.extensions.media
 
+import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
 import android.net.Uri
+import android.provider.MediaStore
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.RatingCompat
@@ -31,23 +34,33 @@ import com.google.android.exoplayer2.source.ExtractorMediaSource
 import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.upstream.DataSource
 
+//region -- GETTERS --
+
 /**
  * Useful extensions for [MediaMetadataCompat].
  */
+
 inline val MediaMetadataCompat.id: String?
   get() = getString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID)
+    ?: getString(MediaStore.Audio.Media.DATA)
 
 inline val MediaMetadataCompat.title: String?
   get() = getString(MediaMetadataCompat.METADATA_KEY_TITLE)
+    ?: getString(MediaStore.Audio.Media.TITLE)
 
 inline val MediaMetadataCompat.artist: String?
   get() = getString(MediaMetadataCompat.METADATA_KEY_ARTIST)
+    ?: getString(MediaStore.Audio.Media.ARTIST)
 
 inline val MediaMetadataCompat.duration
-  get() = getLong(MediaMetadataCompat.METADATA_KEY_DURATION)
+  get() = Math.max(
+    getLong(MediaMetadataCompat.METADATA_KEY_DURATION),
+    getString(MediaStore.Audio.Media.DURATION)?.toLong() ?: -1
+  )
 
 inline val MediaMetadataCompat.album: String?
   get() = getString(MediaMetadataCompat.METADATA_KEY_ALBUM)
+    ?: getString(MediaStore.Audio.Media.ALBUM)
 
 inline val MediaMetadataCompat.author: String?
   get() = getString(MediaMetadataCompat.METADATA_KEY_AUTHOR)
@@ -57,6 +70,7 @@ inline val MediaMetadataCompat.writer: String?
 
 inline val MediaMetadataCompat.composer: String?
   get() = getString(MediaMetadataCompat.METADATA_KEY_COMPOSER)
+    ?: getString(MediaStore.Audio.Media.COMPOSER)
 
 inline val MediaMetadataCompat.compilation: String?
   get() = getString(MediaMetadataCompat.METADATA_KEY_COMPILATION)
@@ -65,19 +79,25 @@ inline val MediaMetadataCompat.date: String?
   get() = getString(MediaMetadataCompat.METADATA_KEY_DATE)
 
 inline val MediaMetadataCompat.year
-  get() = getLong(MediaMetadataCompat.METADATA_KEY_YEAR)
+  get() = Math.max(
+    getLong(MediaMetadataCompat.METADATA_KEY_YEAR),
+    getString(MediaStore.Audio.Media.YEAR)?.toLong() ?: -1
+  )
 
 inline val MediaMetadataCompat.genre: String?
   get() = getString(MediaMetadataCompat.METADATA_KEY_GENRE)
 
 inline val MediaMetadataCompat.trackNumber
-  get() = getLong(MediaMetadataCompat.METADATA_KEY_TRACK_NUMBER)
+  get() = Math.max(
+    getLong(MediaMetadataCompat.METADATA_KEY_TRACK_NUMBER).rem(1000),
+    (getString(MediaStore.Audio.Media.TRACK)?.toLong() ?: -1).rem(1000)
+  )
 
 inline val MediaMetadataCompat.trackCount
   get() = getLong(MediaMetadataCompat.METADATA_KEY_NUM_TRACKS)
 
 inline val MediaMetadataCompat.discNumber
-  get() = getLong(MediaMetadataCompat.METADATA_KEY_DISC_NUMBER)
+  get() = getLong(MediaMetadataCompat.METADATA_KEY_DISC_NUMBER) / 1000
 
 inline val MediaMetadataCompat.albumArtist: String?
   get() = getString(MediaMetadataCompat.METADATA_KEY_ALBUM_ARTIST)
@@ -120,6 +140,10 @@ inline val MediaMetadataCompat.mediaUri: Uri
 
 inline val MediaMetadataCompat.downloadStatus
   get() = getLong(MediaMetadataCompat.METADATA_KEY_DOWNLOAD_STATUS)
+
+//endregion
+
+//region -- SETTERS --
 
 /**
  * Useful extensions for [MediaMetadataCompat.Builder].
@@ -239,6 +263,8 @@ inline var MediaMetadataCompat.Builder.downloadStatus: Long
   set(value) {
     putLong(MediaMetadataCompat.METADATA_KEY_DOWNLOAD_STATUS, value)
   }
+
+//endregion
 
 /**
  * Extension method for [MediaMetadataCompat.Builder] to set the fields from

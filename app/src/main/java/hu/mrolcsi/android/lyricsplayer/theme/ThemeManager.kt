@@ -25,7 +25,7 @@ object ThemeManager {
 
   fun updateFromBitmap(bitmap: Bitmap) {
     AsyncTask.execute {
-      Log.d(LOG_TAG, "Updating Theme...")
+      Log.d(LOG_TAG, "Updating Theme from $bitmap")
 
       val palette = Palette.from(bitmap)
         .clearFilters()

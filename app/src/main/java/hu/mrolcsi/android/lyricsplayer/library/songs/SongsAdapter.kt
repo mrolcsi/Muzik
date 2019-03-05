@@ -64,7 +64,7 @@ class SongsAdapter(
 
       // Set onClickListener
       holder.itemView.setOnClickListener {
-        onItemClickListener.onItemClick(item, holder, position, RecyclerView.NO_ID)
+        onItemClickListener.onItemClick(item, holder, position, getItemId(position))
       }
     }
   }

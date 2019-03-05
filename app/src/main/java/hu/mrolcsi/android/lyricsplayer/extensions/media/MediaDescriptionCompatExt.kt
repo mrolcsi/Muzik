@@ -31,6 +31,10 @@ inline val MediaDescriptionCompat.album: String?
   get() = this.extras?.getString(MediaStore.Audio.AlbumColumns.ALBUM)
     ?: this.extras?.getString(MediaMetadataCompat.METADATA_KEY_ALBUM)
 
+inline val MediaDescriptionCompat.albumArtist: String?
+  get() = this.extras?.getString("album_artist")  // should be a constant
+    ?: this.extras?.getString(MediaMetadataCompat.METADATA_KEY_ALBUM_ARTIST)
+
 inline val MediaDescriptionCompat.numberOfSongs: Int
   get() = this.extras?.getString(MediaStore.Audio.AlbumColumns.NUMBER_OF_SONGS)?.toInt() ?: 0
 
@@ -56,10 +60,19 @@ inline val MediaDescriptionCompat.songTitle: String?
 
 inline val MediaDescriptionCompat.trackNumber: Int
   get() = this.extras?.getString(MediaStore.Audio.Media.TRACK)?.toInt()
-    ?: this.extras?.getInt(MediaMetadataCompat.METADATA_KEY_TRACK_NUMBER)
+    ?: this.extras?.getLong(MediaMetadataCompat.METADATA_KEY_TRACK_NUMBER)?.toInt()
     ?: -1
 
 inline val MediaDescriptionCompat.duration: Long
   get() = this.extras?.getString(MediaStore.Audio.Media.DURATION)?.toLong()
     ?: this.extras?.getLong(MediaMetadataCompat.METADATA_KEY_DURATION)
     ?: -1
+
+inline val MediaDescriptionCompat.year: Long
+  get() = this.extras?.getString(MediaStore.Audio.Media.YEAR)?.toLong()
+    ?: this.extras?.getLong(MediaMetadataCompat.METADATA_KEY_YEAR)
+    ?: -1
+
+inline val MediaDescriptionCompat.composer: String?
+  get() = this.extras?.getString(MediaStore.Audio.Media.COMPOSER)
+    ?: this.extras?.getString(MediaMetadataCompat.METADATA_KEY_COMPOSER)

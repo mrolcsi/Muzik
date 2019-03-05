@@ -11,25 +11,27 @@ class ProgressUpdater(
   private val mUpdaterEnabled = AtomicBoolean(false)
   private val mUpdateHandler = Handler()
 
-  fun startUpdater() {
-    if (!mUpdaterEnabled.getAndSet(true)) mUpdateHandler.post(object : Runnable {
-      override fun run() {
-        updateRunnable.invoke()
+  private val mInnerRunnable = object : Runnable {
+    override fun run() {
+      updateRunnable.invoke()
 
-        if (isEnabled) mUpdateHandler.postDelayed(this, updateFrequency)
-      }
-    })
+      if (isEnabled) mUpdateHandler.postDelayed(this, updateFrequency)
+    }
+  }
+
+  fun startUpdater() {
+    if (!mUpdaterEnabled.getAndSet(true)) mUpdateHandler.post(mInnerRunnable)
   }
 
   fun stopUpdater() {
-    mUpdateHandler.removeCallbacks(updateRunnable)
+    mUpdaterEnabled.set(false)
   }
 
-  var isEnabled
-    get() = mUpdaterEnabled.get()
-    set(value) = mUpdaterEnabled.set(value)
+  val isEnabled get() = mUpdaterEnabled.get()
 
   companion object {
+    private const val LOG_TAG = "ProgressUpdater"
+
     private const val DEFAULT_UPDATE_FREQUENCY: Long = 500 // ms
   }
 }
