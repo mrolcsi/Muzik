@@ -17,7 +17,6 @@ import hu.mrolcsi.android.lyricsplayer.extensions.media.albumArt
 import hu.mrolcsi.android.lyricsplayer.extensions.media.queueItemsAndSkip
 import hu.mrolcsi.android.lyricsplayer.player.PlayerActivity
 import hu.mrolcsi.android.lyricsplayer.service.exoplayer.PlayerHolder
-import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
 
 class LPPlayerService : LPBrowserService() {
 
@@ -70,7 +69,7 @@ class LPPlayerService : LPBrowserService() {
             updateNotification(state)
 
             metadata?.albumArt?.let { bitmap ->
-              ThemeManager.updateFromBitmap(bitmap)
+              //FIXME: ThemeManager.updateFromBitmap(bitmap)
             }
             // TODO: else -> create theme from placeholder
           }

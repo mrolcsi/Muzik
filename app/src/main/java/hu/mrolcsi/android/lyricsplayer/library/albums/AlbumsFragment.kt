@@ -31,7 +31,7 @@ class AlbumsFragment : Fragment() {
     activity?.let {
       mAlbumsModel = ViewModelProviders.of(requireActivity()).get(AlbumsViewModel::class.java)
       mAlbumsModel.getAlbums().observe(this, Observer { albums ->
-        Log.d(this.toString(), "Got items from LiveData: $albums")
+        Log.d(LOG_TAG, "Got items from LiveData: $albums")
         mAlbumsAdapter.submitList(albums)
       })
     }
@@ -64,5 +64,9 @@ class AlbumsFragment : Fragment() {
     } else {
       mAlbumsModel.artistFilter.value = null
     }
+  }
+
+  companion object {
+    private const val LOG_TAG = "AlbumsFragment"
   }
 }

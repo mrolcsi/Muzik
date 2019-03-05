@@ -3,7 +3,6 @@ package hu.mrolcsi.android.lyricsplayer.service.exoplayer
 import android.content.Context
 import android.media.MediaMetadataRetriever
 import android.net.Uri
-import android.os.AsyncTask
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -36,6 +35,7 @@ import hu.mrolcsi.android.lyricsplayer.extensions.media.mediaPath
 import hu.mrolcsi.android.lyricsplayer.extensions.media.mediaUri
 import hu.mrolcsi.android.lyricsplayer.service.LastPlayedSetting
 import java.io.File
+import java.util.concurrent.Executors
 
 class PlayerHolder(context: Context, session: MediaSessionCompat) {
 
@@ -77,7 +77,7 @@ class PlayerHolder(context: Context, session: MediaSessionCompat) {
     override fun onPrepareFromUri(uri: Uri, extras: Bundle?) {
       Log.v(LOG_TAG, "onPrepareFromUri() called from ${Thread.currentThread()}")
 
-      AsyncTask.execute {
+      mSingleThreadExecutor.submit {
         // Clear queue and load media
         mQueue.clear()
         mQueue.addMediaSource(
@@ -177,6 +177,8 @@ class PlayerHolder(context: Context, session: MediaSessionCompat) {
 
   //region -- QUEUE --
 
+  private val mSingleThreadExecutor = Executors.newSingleThreadExecutor()
+
   private val mQueue = ConcatenatingMediaSource()
 
   private val mQueueNavigator = object : TimelineQueueNavigator(session, 50) {
@@ -226,11 +228,9 @@ class PlayerHolder(context: Context, session: MediaSessionCompat) {
     }
   }
 
-  private val mQueueEditor = AsyncTimelineQueueEditor(
-    session.controller,
-    mQueue,
-    mQueueDataAdapter,
-    mMediaSourceFactory
+  private val mQueueEditor = AsyncQueueEditor(
+    TimelineQueueEditor(session.controller, mQueue, mQueueDataAdapter, mMediaSourceFactory),
+    mSingleThreadExecutor
   )
 
   //endregion

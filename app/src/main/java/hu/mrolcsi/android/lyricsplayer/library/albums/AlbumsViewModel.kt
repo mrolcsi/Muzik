@@ -20,7 +20,7 @@ class AlbumsViewModel(app: Application) : LibraryViewModel(app) {
 
   private val mSubscriptionCallbacks = object : MediaBrowserCompat.SubscriptionCallback() {
     override fun onChildrenLoaded(parentId: String, children: MutableList<MediaBrowserCompat.MediaItem>) {
-      Log.d(this@AlbumsViewModel.toString(), "Items loaded from MediaBrowser: $children")
+      Log.d(LOG_TAG, "Items loaded from MediaBrowser: $children")
       mAllAlbums.postValue(children)
     }
   }
@@ -93,4 +93,8 @@ class AlbumsViewModel(app: Application) : LibraryViewModel(app) {
     val artistName: String?,
     val numberOfTracks: Int
   )
+
+  companion object {
+    private const val LOG_TAG = "AlbumsViewModel"
+  }
 }
