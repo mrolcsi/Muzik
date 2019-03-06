@@ -4,9 +4,11 @@ import android.os.AsyncTask
 import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.session.MediaControllerCompat
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -15,6 +17,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.android.lyricsplayer.R
 import hu.mrolcsi.android.lyricsplayer.extensions.OnItemClickListener
+import hu.mrolcsi.android.lyricsplayer.extensions.media.addQueueItems
+import hu.mrolcsi.android.lyricsplayer.service.exoplayer.ExoPlayerHolder
 import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
 import kotlinx.android.synthetic.main.fragment_songs.*
 
@@ -30,15 +34,26 @@ class SongsFragment : Fragment() {
     AsyncTask.execute {
       val controller = MediaControllerCompat.getMediaController(requireActivity())
 
+      Log.d(LOG_TAG, "onItemClicked($item, $holder, $position, $id)")
+
       // Start clicked song
-      controller.transportControls.playFromMediaId(item.mediaId, null)
+      controller.transportControls.playFromMediaId(
+        item.mediaId,
+        bundleOf(ExoPlayerHolder.EXTRA_DESIRED_QUEUE_POSITION to position)
+      )
+
+      Log.d(LOG_TAG, "onItemClicked() Collecting descriptions...")
 
       // Add songs to queue
-      mVisibleSongs.forEachIndexed { index, mediaItem ->
-        // Song at [position] is already in the queue
-        if (index != position)
-          controller.addQueueItem(mediaItem.description, index)
+      val descriptions = mVisibleSongs.filterIndexed { index, _ ->
+        index != position
+      }.map {
+        it.description
       }
+
+      Log.d(LOG_TAG, "onItemClicked() Sending items to queue...")
+
+      controller.addQueueItems(descriptions)
     }
   })
 
@@ -92,5 +107,9 @@ class SongsFragment : Fragment() {
       mSongsAdapter.showTrackNumber = false
       mSongsModel.songFilter.value = SongsViewModel.SongFilter.NO_FILTER
     }
+  }
+
+  companion object {
+    private const val LOG_TAG = "SongsFragment"
   }
 }

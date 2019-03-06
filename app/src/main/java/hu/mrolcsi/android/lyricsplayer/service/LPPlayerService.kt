@@ -4,8 +4,6 @@ import android.app.Notification
 import android.app.PendingIntent
 import android.content.Intent
 import android.os.AsyncTask
-import android.support.v4.media.MediaBrowserCompat
-import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.MediaSessionCompat
@@ -17,7 +15,6 @@ import androidx.media.session.MediaButtonReceiver
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import hu.mrolcsi.android.lyricsplayer.extensions.media.albumArt
-import hu.mrolcsi.android.lyricsplayer.extensions.media.queueItemsAndSkip
 import hu.mrolcsi.android.lyricsplayer.player.PlayerActivity
 import hu.mrolcsi.android.lyricsplayer.service.exoplayer.ExoNotificationManager
 import hu.mrolcsi.android.lyricsplayer.service.exoplayer.ExoPlayerHolder
@@ -122,19 +119,13 @@ class LPPlayerService : LPBrowserService() {
         }
       })
 
-      // Load last played queue in the background
+      // FIXME: Load last played queue in the background
       AsyncTask.execute {
         with(LastPlayedSetting(applicationContext)) {
           if (lastPlayedQueue.isNotEmpty()) {
-            val queue = lastPlayedQueue.map {
-              MediaBrowserCompat.MediaItem(
-                MediaDescriptionCompat.Builder().setMediaId(it).build(),
-                MediaBrowserCompat.MediaItem.FLAG_PLAYABLE
-              )
-            }.toList()
-            controller.queueItemsAndSkip(queue, lastPlayedIndex)
-            controller.transportControls.seekTo(lastPlayedPosition)
+            // create descriptions from StringSet
           }
+          // load descriptions into the queue
         }
       }
     }

@@ -38,23 +38,23 @@ class ExoNotificationManager(
   }
 
   // Connect this notification manager to the session
-  private val mNotificationManager =
-    PlayerNotificationManager(
-      context,
-      NOTIFICATION_CHANNEL,
-      NOTIFICATION_ID,
-      mDescriptionAdapter
-    ).apply {
-      setNotificationListener(notificationListener)
-      setMediaSessionToken(session.sessionToken)
-      setPlayer(player)
-      // Some customization
-      setOngoing(true)
-      setStopAction(null)
-      setRewindIncrementMs(0)
-      setFastForwardIncrementMs(0)
-      setSmallIcon(R.drawable.ic_song)
-    }
+  private val mNotificationManager = PlayerNotificationManager.createWithNotificationChannel(
+    context,
+    NOTIFICATION_CHANNEL,
+    R.string.notification_nowPlaying_description,
+    NOTIFICATION_ID,
+    mDescriptionAdapter
+  ).apply {
+    setNotificationListener(notificationListener)
+    setMediaSessionToken(session.sessionToken)
+    setPlayer(player)
+    // Some customization
+    setOngoing(true)
+    setStopAction(null)
+    setRewindIncrementMs(0)
+    setFastForwardIncrementMs(0)
+    setSmallIcon(R.drawable.ic_song)
+  }
 
   /**
    * Get the [MediaDescriptionCompat] from the provided [Player].

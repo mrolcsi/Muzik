@@ -5,6 +5,7 @@ import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
+import android.os.HandlerThread
 import android.os.Looper
 import android.os.ResultReceiver
 import android.support.v4.media.MediaDescriptionCompat
@@ -36,11 +37,12 @@ import hu.mrolcsi.android.lyricsplayer.extensions.media.mediaPath
 import hu.mrolcsi.android.lyricsplayer.extensions.media.mediaUri
 import hu.mrolcsi.android.lyricsplayer.service.LastPlayedSetting
 import java.io.File
-import java.util.concurrent.Executors
 
 class ExoPlayerHolder(context: Context, session: MediaSessionCompat) {
 
   private val mMainHandler = Handler(Looper.getMainLooper())
+  private val mWorkerThread = HandlerThread(LOG_TAG).apply { start() }
+  private val mBackgroundHandler = Handler(mWorkerThread.looper)
 
   //region -- PLAYBACK --
 
@@ -65,6 +67,8 @@ class ExoPlayerHolder(context: Context, session: MediaSessionCompat) {
       .build()
   }
 
+  private var mDesiredQueuePosition: Int = -1
+
   private val mPlaybackPreparer = object : MediaSessionConnector.PlaybackPreparer {
     override fun getCommands(): Array<String>? = null
 
@@ -78,29 +82,19 @@ class ExoPlayerHolder(context: Context, session: MediaSessionCompat) {
     }
 
     override fun onPrepareFromUri(uri: Uri, extras: Bundle?) {
-      Log.v(LOG_TAG, "onPrepareFromUri($uri) called from ${Thread.currentThread()}")
+      Log.v(LOG_TAG, "onPrepareFromUri($uri, $extras) called from ${Thread.currentThread()}")
 
-//      mExecutor.submit {
-//        // Clear queue and load media
-//        mQueue.clear()
-//        mQueue.addMediaSource(
-//          mQueueMediaSourceFactory.createMediaSource(
-//            mQueueMediaSourceFactory.createMediaMetadata(uri).fullDescription
-//          ),
-//          mMainHandler
-//        ) {
-//          // Prepare queue when ready (gets called through handler passed as parameter above)
-//          onPrepare()
-//        }
-//      }
+      // Get the desired position of the item to be moved to.
+      mDesiredQueuePosition = extras?.getInt(EXTRA_DESIRED_QUEUE_POSITION, -1) ?: -1
 
       // Clear queue and load media
       mQueue.clear()
-      mQueue.addMediaSource(
-        mQueueMediaSourceFactory.createMediaSource(
-          mQueueMediaSourceFactory.createMediaMetadata(uri).fullDescription
-        )
+
+      val mediaSource = mQueueMediaSourceFactory.createMediaSource(
+        mQueueMediaSourceFactory.createMediaMetadata(uri).fullDescription
       )
+      mQueue.addMediaSource(mediaSource)
+
       onPrepare()
     }
 
@@ -129,23 +123,6 @@ class ExoPlayerHolder(context: Context, session: MediaSessionCompat) {
       when (action) {
         ACTION_START_UPDATER -> mProgressUpdater.startUpdater()
         ACTION_STOP_UPDATER -> mProgressUpdater.stopUpdater()
-      }
-    }
-  }
-
-  private val mClearQueueActionProvider = object : MediaSessionConnector.CustomActionProvider {
-    override fun getCustomAction(): PlaybackStateCompat.CustomAction {
-      return PlaybackStateCompat.CustomAction
-        .Builder(ACTION_CLEAR_QUEUE, "Clear queue.", -1)
-        .build()
-    }
-
-    override fun onCustomAction(action: String?, extras: Bundle?) {
-      when (action) {
-        ACTION_CLEAR_QUEUE ->
-          session.controller.queue.forEach {
-            mQueueEditor.onRemoveQueueItem(mPlayer, it.description)
-          }
       }
     }
   }
@@ -189,8 +166,6 @@ class ExoPlayerHolder(context: Context, session: MediaSessionCompat) {
 
   //region -- QUEUE --
 
-  private val mExecutor = /*Executors.newCachedThreadPool()*/  Executors.newSingleThreadExecutor()
-
   private val mQueue = ConcatenatingMediaSource(
     false,
     true,
@@ -211,19 +186,28 @@ class ExoPlayerHolder(context: Context, session: MediaSessionCompat) {
     }
   }
 
-  private val mQueueDataAdapter = object : TimelineQueueEditor.QueueDataAdapter {
+  private val mQueueDataAdapter = object : BulkTimelineQueueEditor.QueueDataAdapter {
     override fun add(position: Int, description: MediaDescriptionCompat?) {
       Log.v(LOG_TAG, "mQueueAdapter.add($position, $description) called from ${Thread.currentThread()}")
+    }
 
-      // Call prepare?
-//      mMainHandler.post {
-//        Log.v(LOG_TAG, "mPlayer.prepare(mQueue, false, false) called from ${Thread.currentThread()}")
-//        mPlayer.prepare(mQueue, false, true)
-//      }
+    override fun onItemsAdded(position: Int, descriptions: Collection<MediaDescriptionCompat>) {
+      Log.v(LOG_TAG, "mQueueAdapter.add($position, [${descriptions.size} items]) called from ${Thread.currentThread()}")
+
+      // After all the other songs were added to the queue, move the last(?) song to it's proper position.
+      if (mDesiredQueuePosition > 0) {
+        mQueue.moveMediaSource(mQueue.size - 1, mDesiredQueuePosition)
+        mDesiredQueuePosition = -1
+      }
     }
 
     override fun remove(position: Int) {}
+    override fun onItemsRemoved(from: Int, to: Int) {}
     override fun move(from: Int, to: Int) {}
+
+    override fun onClear() {
+      Log.v(LOG_TAG, "Queue cleared.")
+    }
   }
 
   private val mQueueMediaSourceFactory = object : TimelineQueueEditor.MediaSourceFactory {
@@ -260,9 +244,12 @@ class ExoPlayerHolder(context: Context, session: MediaSessionCompat) {
     }
   }
 
-  private val mQueueEditor = AsyncQueueEditor(
-    TimelineQueueEditor(session.controller, mQueue, mQueueDataAdapter, mQueueMediaSourceFactory),
-    mExecutor
+  private val mQueueEditor = BulkTimelineQueueEditor(
+    session.controller,
+    mQueue,
+    mQueueDataAdapter,
+    mQueueMediaSourceFactory,
+    mBackgroundHandler
   )
 
   //endregion
@@ -286,7 +273,7 @@ class ExoPlayerHolder(context: Context, session: MediaSessionCompat) {
   // Connect this holder to the session
   private val mMediaSessionConnector =
     MediaSessionConnector(session, mPlaybackController).also {
-      it.setPlayer(mPlayer, mPlaybackPreparer, mUpdaterActionProvider, mClearQueueActionProvider)
+      it.setPlayer(mPlayer, mPlaybackPreparer, mUpdaterActionProvider)
       it.setQueueNavigator(mQueueNavigator)
       it.setQueueEditor(mQueueEditor)
     }
@@ -301,6 +288,9 @@ class ExoPlayerHolder(context: Context, session: MediaSessionCompat) {
 
     // Release player
     mPlayer.release()
+
+    // Stop background thread
+    mWorkerThread.quitSafely()
   }
 
   companion object {
@@ -309,7 +299,8 @@ class ExoPlayerHolder(context: Context, session: MediaSessionCompat) {
 
     const val ACTION_START_UPDATER = "ACTION_START_UPDATER"
     const val ACTION_STOP_UPDATER = "ACTION_STOP_UPDATER"
-    const val ACTION_CLEAR_QUEUE = "ACTION_CLEAR_QUEUE"
+
+    const val EXTRA_DESIRED_QUEUE_POSITION = "EXTRA_DESIRED_QUEUE_POSITION"
   }
 
 }
