@@ -12,7 +12,6 @@ import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.android.lyricsplayer.R
 import hu.mrolcsi.android.lyricsplayer.extensions.OnItemClickListener
 import hu.mrolcsi.android.lyricsplayer.extensions.media.duration
-import hu.mrolcsi.android.lyricsplayer.extensions.media.trackNumber
 import hu.mrolcsi.android.lyricsplayer.extensions.millisecondsToTimeStamp
 import hu.mrolcsi.android.lyricsplayer.theme.Theme
 import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
@@ -77,12 +76,16 @@ class PlaylistAdapter(
     holder.bind(item)
   }
 
+  override fun getItemId(position: Int): Long {
+    return getItem(position).queueId
+  }
+
   class PlaylistViewHolder(override val containerView: View) :
     RecyclerView.ViewHolder(containerView), LayoutContainer {
 
     fun bind(item: MediaSessionCompat.QueueItem) {
       with(item.description) {
-        tvTrackNumber.text = this.trackNumber.toString()
+        tvTrackNumber.text = item.queueId.toString()
         tvTitle.text = this.title
         tvArtist.text = this.subtitle
         tvDuration.text = this.duration.millisecondsToTimeStamp()

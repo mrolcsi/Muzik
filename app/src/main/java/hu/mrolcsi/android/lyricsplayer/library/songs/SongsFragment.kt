@@ -25,7 +25,6 @@ class SongsFragment : Fragment() {
   private lateinit var mSongsModel: SongsViewModel
 
   private lateinit var mVisibleSongs: List<MediaBrowserCompat.MediaItem>
-  private var mSongsInQueue = false
 
   private val mSongsAdapter = SongsAdapter(OnItemClickListener { item, holder, position, id ->
     AsyncTask.execute {
@@ -38,13 +37,11 @@ class SongsFragment : Fragment() {
         // Start clicked song
         controller.transportControls.playFromMediaId(item.mediaId, null)
 
-        // Add songs to queue
-        mVisibleSongs.forEachIndexed { index, mediaItem ->
-          // Song at [position] is already in the queue
-          if (index != position)
-            controller.addQueueItem(mediaItem.description, index)
-        }
-        mSongsInQueue = true
+      // Add songs to queue
+      mVisibleSongs.forEachIndexed { index, mediaItem ->
+        // Song at [position] is already in the queue
+        if (index != position)
+          controller.addQueueItem(mediaItem.description, index)
       }
     }
   })
@@ -57,7 +54,6 @@ class SongsFragment : Fragment() {
       mSongsModel.getSongs().observe(this, Observer { songs ->
         mSongsAdapter.submitList(songs)
         mVisibleSongs = songs
-        mSongsInQueue = false
       })
     }
 

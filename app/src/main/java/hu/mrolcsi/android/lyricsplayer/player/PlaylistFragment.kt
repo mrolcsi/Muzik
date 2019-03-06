@@ -29,7 +29,7 @@ class PlaylistFragment : Fragment() {
   private val mPlaylistAdapter = PlaylistAdapter(OnItemClickListener { item, holder, position, id ->
     // Skip to clicked item
     val controller = MediaControllerCompat.getMediaController(requireActivity())
-    controller.transportControls.skipToQueueItem(position.toLong())
+    controller.transportControls.skipToQueueItem(id)
     controller.transportControls.play()
   })
 
@@ -50,7 +50,7 @@ class PlaylistFragment : Fragment() {
         currentMediaMetadata.observe(this@PlaylistFragment, Observer { metadata ->
           // Update playlist adapter
           val controller = MediaControllerCompat.getMediaController(it)
-          Log.v(LOG_TAG, "Updating playlist: Size=${controller.queue.size}")
+          Log.v(LOG_TAG, "Updating playlist: Size=${controller.queue?.size}")
           mPlaylistAdapter.submitList(controller.queue)
         })
       }
