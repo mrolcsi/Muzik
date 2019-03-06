@@ -30,12 +30,8 @@ class SongsFragment : Fragment() {
     AsyncTask.execute {
       val controller = MediaControllerCompat.getMediaController(requireActivity())
 
-      if (mSongsInQueue) {
-        // Songs already in playlist -> skip to position
-        controller.transportControls.skipToQueueItem(position.toLong())
-      } else {
-        // Start clicked song
-        controller.transportControls.playFromMediaId(item.mediaId, null)
+      // Start clicked song
+      controller.transportControls.playFromMediaId(item.mediaId, null)
 
       // Add songs to queue
       mVisibleSongs.forEachIndexed { index, mediaItem ->

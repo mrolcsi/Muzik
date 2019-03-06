@@ -24,6 +24,7 @@ import com.google.android.exoplayer2.ext.mediasession.TimelineQueueNavigator
 import com.google.android.exoplayer2.source.ConcatenatingMediaSource
 import com.google.android.exoplayer2.source.ExtractorMediaSource
 import com.google.android.exoplayer2.source.MediaSource
+import com.google.android.exoplayer2.source.ShuffleOrder
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.util.Util
@@ -38,6 +39,8 @@ import java.io.File
 import java.util.concurrent.Executors
 
 class ExoPlayerHolder(context: Context, session: MediaSessionCompat) {
+
+  private val mMainHandler = Handler(Looper.getMainLooper())
 
   //region -- PLAYBACK --
 
@@ -62,9 +65,6 @@ class ExoPlayerHolder(context: Context, session: MediaSessionCompat) {
       .build()
   }
 
-  private val mDataSourceFactory =
-    DefaultDataSourceFactory(context, Util.getUserAgent(context, BuildConfig.APPLICATION_ID))
-
   private val mPlaybackPreparer = object : MediaSessionConnector.PlaybackPreparer {
     override fun getCommands(): Array<String>? = null
 
@@ -78,21 +78,30 @@ class ExoPlayerHolder(context: Context, session: MediaSessionCompat) {
     }
 
     override fun onPrepareFromUri(uri: Uri, extras: Bundle?) {
-      Log.v(LOG_TAG, "onPrepareFromUri() called from ${Thread.currentThread()}")
+      Log.v(LOG_TAG, "onPrepareFromUri($uri) called from ${Thread.currentThread()}")
 
-      mSingleThreadExecutor.submit {
-        // Clear queue and load media
-        mQueue.clear()
-        mQueue.addMediaSource(
-          mMediaSourceFactory.createMediaSource(
-            mMediaSourceFactory.createMediaMetadata(uri).fullDescription
-          ),
-          Handler(Looper.getMainLooper())
-        ) {
-          // Prepare queue when ready (gets called through handler passed as parameter above)
-          onPrepare()
-        }
-      }
+//      mExecutor.submit {
+//        // Clear queue and load media
+//        mQueue.clear()
+//        mQueue.addMediaSource(
+//          mQueueMediaSourceFactory.createMediaSource(
+//            mQueueMediaSourceFactory.createMediaMetadata(uri).fullDescription
+//          ),
+//          mMainHandler
+//        ) {
+//          // Prepare queue when ready (gets called through handler passed as parameter above)
+//          onPrepare()
+//        }
+//      }
+
+      // Clear queue and load media
+      mQueue.clear()
+      mQueue.addMediaSource(
+        mQueueMediaSourceFactory.createMediaSource(
+          mQueueMediaSourceFactory.createMediaMetadata(uri).fullDescription
+        )
+      )
+      onPrepare()
     }
 
     override fun onPrepareFromSearch(query: String?, extras: Bundle?) {}
@@ -180,12 +189,23 @@ class ExoPlayerHolder(context: Context, session: MediaSessionCompat) {
 
   //region -- QUEUE --
 
-  private val mSingleThreadExecutor = Executors.newSingleThreadExecutor()
+  private val mExecutor = /*Executors.newCachedThreadPool()*/  Executors.newSingleThreadExecutor()
 
-  private val mQueue = ConcatenatingMediaSource()
+  private val mQueue = ConcatenatingMediaSource(
+    false,
+    true,
+    ShuffleOrder.DefaultShuffleOrder(0)
+  )
 
   private val mQueueNavigator = object : TimelineQueueNavigator(session, 50) {
+
     private val mWindow = Timeline.Window()
+
+    override fun onSkipToQueueItem(player: Player?, id: Long) {
+      Log.v(LOG_TAG, "onSkipToQueueItem($id) [QueueSize=${mQueue.size}] called from ${Thread.currentThread()}")
+      super.onSkipToQueueItem(player, id)
+    }
+
     override fun getMediaDescription(player: Player, windowIndex: Int): MediaDescriptionCompat {
       return player.currentTimeline.getWindow(windowIndex, mWindow, true).tag as MediaDescriptionCompat
     }
@@ -193,17 +213,27 @@ class ExoPlayerHolder(context: Context, session: MediaSessionCompat) {
 
   private val mQueueDataAdapter = object : TimelineQueueEditor.QueueDataAdapter {
     override fun add(position: Int, description: MediaDescriptionCompat?) {
-      Log.v(LOG_TAG, "mQueueAdapter.add() called from ${Thread.currentThread()}")
+      Log.v(LOG_TAG, "mQueueAdapter.add($position, $description) called from ${Thread.currentThread()}")
+
+      // Call prepare?
+//      mMainHandler.post {
+//        Log.v(LOG_TAG, "mPlayer.prepare(mQueue, false, false) called from ${Thread.currentThread()}")
+//        mPlayer.prepare(mQueue, false, true)
+//      }
     }
 
     override fun remove(position: Int) {}
     override fun move(from: Int, to: Int) {}
   }
 
-  private val mMediaSourceFactory = object : TimelineQueueEditor.MediaSourceFactory {
+  private val mQueueMediaSourceFactory = object : TimelineQueueEditor.MediaSourceFactory {
+
+    private val mDataSourceFactory = DefaultDataSourceFactory(
+      context, Util.getUserAgent(context, BuildConfig.APPLICATION_ID)
+    )
 
     fun createMediaMetadata(uri: Uri): MediaMetadataCompat {
-      Log.v(LOG_TAG, "createMediaMetadata() called from ${Thread.currentThread()}")
+      //Log.v(LOG_TAG, "createMediaMetadata($uri) called from ${Thread.currentThread()}")
 
       // Load metadata
       val retriever = MediaMetadataRetriever().apply {
@@ -217,7 +247,7 @@ class ExoPlayerHolder(context: Context, session: MediaSessionCompat) {
     }
 
     override fun createMediaSource(description: MediaDescriptionCompat): MediaSource? {
-      Log.v(LOG_TAG, "createMediaSource() called from ${Thread.currentThread()}")
+      //Log.v(LOG_TAG, "createMediaSource($description) called from ${Thread.currentThread()}")
 
       // Create Metadata from Uri
       val uri = description.mediaUri ?: Uri.fromFile(File(description.mediaPath))
@@ -225,13 +255,14 @@ class ExoPlayerHolder(context: Context, session: MediaSessionCompat) {
 
       // Create MediaSource from Metadata
       //return metadata.toMediaSource(dataSourceFactory)
+      // NOTE: ExtractorMediaSource.Factory is not reusable!
       return ExtractorMediaSource.Factory(mDataSourceFactory).setTag(description).createMediaSource(uri)
     }
   }
 
   private val mQueueEditor = AsyncQueueEditor(
-    TimelineQueueEditor(session.controller, mQueue, mQueueDataAdapter, mMediaSourceFactory),
-    mSingleThreadExecutor
+    TimelineQueueEditor(session.controller, mQueue, mQueueDataAdapter, mQueueMediaSourceFactory),
+    mExecutor
   )
 
   //endregion

@@ -38,10 +38,13 @@ abstract class LibraryViewModel(app: Application) : AndroidViewModel(app) {
           // Register callbacks to watch for changes
           registerCallback(object : MediaControllerCompat.Callback() {
             override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
+              Log.v(getLogTag(), "onMetadataChanged(${metadata?.bundle})")
+              // TODO: use MetadataRetriever to get additional metadata before posting
               currentMediaMetadata.postValue(metadata)
             }
 
             override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
+              //Log.v(getLogTag(), "onPlaybackStateChanged($state)")/
               currentPlaybackState.postValue(state)
             }
           })
