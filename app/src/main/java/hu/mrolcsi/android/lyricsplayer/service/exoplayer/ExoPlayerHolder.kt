@@ -37,7 +37,7 @@ import hu.mrolcsi.android.lyricsplayer.service.LastPlayedSetting
 import java.io.File
 import java.util.concurrent.Executors
 
-class PlayerHolder(context: Context, session: MediaSessionCompat) {
+class ExoPlayerHolder(context: Context, session: MediaSessionCompat) {
 
   //region -- PLAYBACK --
 
@@ -61,6 +61,9 @@ class PlayerHolder(context: Context, session: MediaSessionCompat) {
       .setContentType(C.CONTENT_TYPE_MUSIC)
       .build()
   }
+
+  private val mDataSourceFactory =
+    DefaultDataSourceFactory(context, Util.getUserAgent(context, BuildConfig.APPLICATION_ID))
 
   private val mPlaybackPreparer = object : MediaSessionConnector.PlaybackPreparer {
     override fun getCommands(): Array<String>? = null
@@ -216,15 +219,13 @@ class PlayerHolder(context: Context, session: MediaSessionCompat) {
     override fun createMediaSource(description: MediaDescriptionCompat): MediaSource? {
       Log.v(LOG_TAG, "createMediaSource() called from ${Thread.currentThread()}")
 
-      val dataSourceFactory = DefaultDataSourceFactory(context, Util.getUserAgent(context, BuildConfig.APPLICATION_ID))
-
       // Create Metadata from Uri
       val uri = description.mediaUri ?: Uri.fromFile(File(description.mediaPath))
       //val metadata = createMediaMetadata(uri)
 
       // Create MediaSource from Metadata
       //return metadata.toMediaSource(dataSourceFactory)
-      return ExtractorMediaSource.Factory(dataSourceFactory).setTag(description).createMediaSource(uri)
+      return ExtractorMediaSource.Factory(mDataSourceFactory).setTag(description).createMediaSource(uri)
     }
   }
 
@@ -251,13 +252,24 @@ class PlayerHolder(context: Context, session: MediaSessionCompat) {
   // Last Played Settings
   private val mLastPlayed = LastPlayedSetting(context)
 
-  init {
-    // Connect this holder to the session
+  // Connect this holder to the session
+  private val mMediaSessionConnector =
     MediaSessionConnector(session, mPlaybackController).also {
       it.setPlayer(mPlayer, mPlaybackPreparer, mUpdaterActionProvider, mClearQueueActionProvider)
       it.setQueueNavigator(mQueueNavigator)
       it.setQueueEditor(mQueueEditor)
     }
+
+  /**
+   * Expose the inner player to the outside.
+   */
+  fun getPlayer(): Player = mPlayer
+
+  fun release() {
+    mMediaSessionConnector.setPlayer(null, null)
+
+    // Release player
+    mPlayer.release()
   }
 
   companion object {

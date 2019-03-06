@@ -58,6 +58,7 @@ dependencies {
 
     // ExoPlayer
     implementation 'com.google.android.exoplayer:exoplayer-core:2.9.5'
+    implementation 'com.google.android.exoplayer:exoplayer-ui:2.9.5'
     implementation 'com.google.android.exoplayer:extension-mediasession:2.9.5'
 
     // Custom Activity on Crash

@@ -29,6 +29,7 @@ import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.properties.Delegates
 
+@Deprecated("Deprecated in favour of ExoPlayer implementation.", ReplaceWith("ExoPlayerHolder"))
 open class LPPlayerControls(
   private val context: Context,
   private val session: MediaSessionCompat
