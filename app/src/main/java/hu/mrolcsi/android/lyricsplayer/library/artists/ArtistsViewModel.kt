@@ -29,4 +29,6 @@ class ArtistsViewModel(app: Application) : LibraryViewModel(app) {
   fun getArtists(): LiveData<List<MediaBrowserCompat.MediaItem>> {
     return mArtists
   }
+
+  override fun getLogTag(): String = "ArtistsViewModel"
 }

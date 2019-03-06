@@ -31,7 +31,7 @@ abstract class LibraryViewModel(app: Application) : AndroidViewModel(app) {
     override fun onConnected() {
       mMediaBrowser.sessionToken.also { token ->
 
-        Log.v(LOG_TAG, "Connected to session: $token")
+        Log.v(getLogTag(), "Connected to session: $token")
 
         // Attach a controller to this MediaSession
         val controller = MediaControllerCompat(getApplication(), token).apply {
@@ -56,23 +56,20 @@ abstract class LibraryViewModel(app: Application) : AndroidViewModel(app) {
   }
 
   fun connect() {
-    Log.v(LOG_TAG, "connect($this)")
+    Log.v(getLogTag(), "connect($this)")
     mMediaBrowser.connect()
   }
 
   fun disconnect() {
-    Log.v(LOG_TAG, "disconnect($this)")
+    Log.v(getLogTag(), "disconnect($this)")
     mMediaBrowser.disconnect()
   }
 
   override fun onCleared() {
     super.onCleared()
-    Log.v(LOG_TAG, "onCleared($this): disconnect from MediaBrowser")
+    Log.v(getLogTag(), "onCleared($this): disconnect from MediaBrowser")
     mMediaBrowser.disconnect()
   }
 
-  companion object {
-    @Suppress("unused")
-    private const val LOG_TAG = "LibraryViewModel"
-  }
+  abstract fun getLogTag(): String
 }

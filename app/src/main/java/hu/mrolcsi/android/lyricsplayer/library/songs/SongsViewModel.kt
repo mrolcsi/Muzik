@@ -78,6 +78,8 @@ class SongsViewModel(app: Application) : LibraryViewModel(app) {
     }
   }
 
+  override fun getLogTag(): String = "SongsViewModel"
+
   data class SongFilter(
     val artistKey: String? = null,
     val albumKey: String? = null
