@@ -134,28 +134,29 @@ class LPPlayerService : LPBrowserService() {
               // Check if metadata has actually changed
               val mediaId = metadata.description?.mediaId
               val sameMediaId = mediaId == previousMetadata?.description?.mediaId
-              if (!sameMediaId || metadata.albumArt == null && !loadInProgress.get()
-              ) {
+              if (!sameMediaId) {
                 // Save as last received metadata
                 previousMetadata = metadata
 
-                // Load additional metadata in the background
-                AsyncTask.execute {
-                  Log.d(LOG_TAG, "Loading metadata in the background for $mediaId")
+                if (metadata.albumArt == null && !loadInProgress.get()) {
+                  // Load additional metadata in the background
+                  AsyncTask.execute {
+                    Log.d(LOG_TAG, "Loading metadata in the background for $mediaId")
 
-                  // Avoid starting another load
-                  loadInProgress.set(true)
+                    // Avoid starting another load
+                    loadInProgress.set(true)
 
-                  val newMetadata = MediaMetadataCompat.Builder(metadata).from(metadata.description).build()
+                    val newMetadata = MediaMetadataCompat.Builder(metadata).from(metadata.description).build()
 
-                  // Give newly created metadata to the session
-                  setMetadata(newMetadata)
+                    // Give newly created metadata to the session
+                    setMetadata(newMetadata)
 
-                  // Update notification
-                  updateNotification(state)
+                    // Update notification
+                    updateNotification(state)
 
-                  // Load finished
-                  loadInProgress.set(false)
+                    // Load finished
+                    loadInProgress.set(false)
+                  }
                 }
               } else {
                 // Update notification anyway
