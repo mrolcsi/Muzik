@@ -139,12 +139,12 @@ class LPPlayerService : LPBrowserService() {
                 previousMetadata = metadata
 
                 if (metadata.albumArt == null && !loadInProgress.get()) {
+                  // Avoid starting another load
+                  loadInProgress.set(true)
+
                   // Load additional metadata in the background
                   AsyncTask.execute {
                     Log.d(LOG_TAG, "Loading metadata in the background for $mediaId")
-
-                    // Avoid starting another load
-                    loadInProgress.set(true)
 
                     val newMetadata = MediaMetadataCompat.Builder(metadata).from(metadata.description).build()
 
