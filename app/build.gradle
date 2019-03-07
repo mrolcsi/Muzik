@@ -68,4 +68,7 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.2-alpha01'
     androidTestImplementation 'androidx.test:runner:1.1.2-alpha01'
     testImplementation 'junit:junit:4.12'
+
+    // TooLargeTool (only needed when debugging)
+    //implementation 'com.gu.android:toolargetool:0.2.0@aar'
 }

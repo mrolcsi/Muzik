@@ -5,6 +5,7 @@ import android.os.Handler
 import android.os.ResultReceiver
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.session.MediaControllerCompat
+import android.util.Log
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
@@ -48,6 +49,7 @@ class BulkTimelineQueueEditor(
   }
 
   override fun onCommand(player: Player, command: String, extras: Bundle?, cb: ResultReceiver?) {
+    Log.d(LOG_TAG, "Received command: $command,  Params: $extras")
     when (command) {
       COMMAND_ADD_QUEUE_ITEMS -> {
         val items = extras!!.getParcelableArrayList<MediaDescriptionCompat>(COMMAND_ARGUMENT_MEDIA_DESCRIPTIONS)!!
@@ -88,7 +90,7 @@ class BulkTimelineQueueEditor(
   fun onAddQueueItems(
     player: Player,
     descriptions: Collection<MediaDescriptionCompat>,
-    index: Int = player.currentTimeline.windowCount,
+    index: Int = queueMediaSource.size,
     handler: Handler? = null,
     onCompletionAction: (() -> Unit)? = null
   ) {
@@ -129,6 +131,8 @@ class BulkTimelineQueueEditor(
   }
 
   companion object {
+    private const val LOG_TAG = "BulkTimelineQueueEditor"
+
     const val COMMAND_ADD_QUEUE_ITEMS = "hu.mrolcsi.lyricsplayer.service.ADD_QUEUE_ITEMS"
     const val COMMAND_ADD_QUEUE_ITEMS_AT = "hu.mrolcsi.lyricsplayer.service.ADD_QUEUE_ITEMS_AT"
     const val COMMAND_REMOVE_QUEUE_ITEMS_RANGE = "hu.mrolcsi.lyricsplayer.service.REMOVE_QUEUE_ITEMS_RANGE"

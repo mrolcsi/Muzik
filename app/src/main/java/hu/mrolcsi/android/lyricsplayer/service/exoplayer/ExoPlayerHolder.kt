@@ -194,9 +194,9 @@ class ExoPlayerHolder(context: Context, session: MediaSessionCompat) {
     override fun onItemsAdded(position: Int, descriptions: Collection<MediaDescriptionCompat>) {
       Log.v(LOG_TAG, "mQueueAdapter.add($position, [${descriptions.size} items]) called from ${Thread.currentThread()}")
 
-      // After all the other songs were added to the queue, move the last(?) song to it's proper position.
-      if (mDesiredQueuePosition > 0) {
-        mQueue.moveMediaSource(mQueue.size - 1, mDesiredQueuePosition)
+      // After all the other songs were added to the queue, move the first song to it's proper position.
+      if (mDesiredQueuePosition in 0..mQueue.size) {
+        mQueue.moveMediaSource(0, mDesiredQueuePosition)
         mDesiredQueuePosition = -1
       }
     }
