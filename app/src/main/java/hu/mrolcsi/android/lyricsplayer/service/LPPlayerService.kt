@@ -13,9 +13,10 @@ import androidx.core.app.TaskStackBuilder
 import androidx.media.session.MediaButtonReceiver
 import com.google.android.exoplayer2.Player
 import hu.mrolcsi.android.lyricsplayer.extensions.media.albumArt
+import hu.mrolcsi.android.lyricsplayer.extensions.media.from
 import hu.mrolcsi.android.lyricsplayer.player.PlayerActivity
 import hu.mrolcsi.android.lyricsplayer.service.exoplayer.ExoPlayerHolder
-import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
+import java.util.concurrent.atomic.AtomicBoolean
 
 class LPPlayerService : LPBrowserService() {
 
@@ -33,9 +34,6 @@ class LPPlayerService : LPBrowserService() {
 
   // Custom built Notification
   private lateinit var mNotificationBuilder: LPNotificationBuilder
-
-  // Last received metadata
-  private var mLastMetadata: MediaMetadataCompat? = null
 
   override fun onCreate() {
     super.onCreate()
@@ -122,19 +120,48 @@ class LPPlayerService : LPBrowserService() {
 
       // Register basic callbacks
       controller.registerCallback(object : MediaControllerCompat.Callback() {
+
+        // Last received metadata
+        private var previousMetadata: MediaMetadataCompat? = null
+
+        // Load in progress indicator
+        private var loadInProgress = AtomicBoolean(false)
+
         override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
           controller.playbackState?.let { state ->
 
-            updateNotification(state)
-            // Check if metadata has actually changed
-            if (metadata?.description?.mediaId != mLastMetadata?.description?.mediaId) {
-              metadata?.albumArt?.let { bitmap ->
-                ThemeManager.updateFromBitmap(bitmap)
-              }
+            metadata?.let {
+              // Check if metadata has actually changed
+              val mediaId = metadata.description?.mediaId
+              val sameMediaId = mediaId == previousMetadata?.description?.mediaId
+              if (!sameMediaId || metadata.albumArt == null && !loadInProgress.get()
+              ) {
+                // Save as last received metadata
+                previousMetadata = metadata
 
-              // Save as last received metadata
-              mLastMetadata = metadata
-            } // TODO: else -> create theme from placeholder
+                // Load additional metadata in the background
+                AsyncTask.execute {
+                  Log.d(LOG_TAG, "Loading metadata in the background for $mediaId")
+
+                  // Avoid starting another load
+                  loadInProgress.set(true)
+
+                  val newMetadata = MediaMetadataCompat.Builder(metadata).from(metadata.description).build()
+
+                  // Give newly created metadata to the session
+                  setMetadata(newMetadata)
+
+                  // Update notification
+                  updateNotification(state)
+
+                  // Load finished
+                  loadInProgress.set(false)
+                }
+              } else {
+                // Update notification anyway
+                updateNotification(state)
+              }
+            }
           }
         }
 
@@ -143,7 +170,8 @@ class LPPlayerService : LPBrowserService() {
         }
 
         private fun updateNotification(playbackState: PlaybackStateCompat) {
-          if (controller.metadata == null) {
+          val metadata = controller.metadata
+          if (metadata == null) {
             Log.w(LOG_TAG, "MediaMetadata is null!")
             return
           }

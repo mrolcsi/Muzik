@@ -33,6 +33,7 @@ import com.google.android.exoplayer2.source.ConcatenatingMediaSource
 import com.google.android.exoplayer2.source.ExtractorMediaSource
 import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.upstream.DataSource
+import java.io.File
 
 //region -- GETTERS --
 
@@ -281,7 +282,10 @@ fun MediaMetadataCompat.Builder.from(retriever: MediaMetadataRetriever): MediaMe
   genre = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE)
   // mediaUri = jsonMusic.source
   // albumArtUri = jsonMusic.image
-  albumArt = retriever.embeddedPicture?.let { BitmapFactory.decodeByteArray(it, 0, it.size) }
+  // TODO: use placeholder art if there's no embedded art
+  albumArt = retriever.embeddedPicture?.let {
+    BitmapFactory.decodeByteArray(it, 0, it.size)
+  }
   val trackString = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_CD_TRACK_NUMBER)
   trackNumber = when {  // TODO: properly parse track numbers (like 03/12)
     trackString == null -> -1
@@ -316,6 +320,7 @@ fun MediaMetadataCompat.Builder.from(mediaId: String): MediaMetadataCompat.Build
   val retriever = MediaMetadataRetriever().apply {
     setDataSource(mediaId)
   }
+  this.mediaUri = Uri.fromFile(File(mediaId)).toString()
   return this.from(retriever)
 }
 

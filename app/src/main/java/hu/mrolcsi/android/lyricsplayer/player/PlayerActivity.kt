@@ -15,8 +15,6 @@ import android.util.TypedValue
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.view.animation.Animation
-import android.view.animation.AnimationUtils
 import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityOptionsCompat
@@ -60,12 +58,6 @@ class PlayerActivity : AppCompatActivity() {
   private val mPreviousBackground by lazy { getDrawable(R.drawable.media_button_background) }
   private val mPlayPauseBackground by lazy { getDrawable(R.drawable.media_button_background) }
   private val mNextBackground by lazy { getDrawable(R.drawable.media_button_background) }
-
-  // Glide transition
-  private var mCovertArtIndex = 0
-  private val imgCoverArt by lazy { arrayOf(imgCoverArt0, imgCoverArt1) }
-  private var mCoverInAnimation = android.R.anim.fade_in
-  private var mCoverOutAnimation = android.R.anim.fade_out
 
   //region LIFECYCLE
 
@@ -160,7 +152,7 @@ class PlayerActivity : AppCompatActivity() {
     // Prepare options for Shared Element Transition
     val options = ActivityOptionsCompat.makeSceneTransitionAnimation(
       this,
-      Pair.create(imgCoverArt[mCovertArtIndex], ViewCompat.getTransitionName(imgCoverArt[mCovertArtIndex]))
+      Pair.create(imgCoverArt0, ViewCompat.getTransitionName(imgCoverArt0))
     )
 
     when {
@@ -229,16 +221,12 @@ class PlayerActivity : AppCompatActivity() {
         // restart the song
         controller.transportControls.seekTo(0)
       } else {
-        mCoverInAnimation = R.anim.slide_in_right
-        mCoverOutAnimation = R.anim.slide_out_right
         controller.transportControls.skipToPrevious()
       }
     }
 
     btnNext.setOnClickListener {
       val controller = MediaControllerCompat.getMediaController(this@PlayerActivity)
-      mCoverInAnimation = R.anim.slide_in_left
-      mCoverOutAnimation = R.anim.slide_out_left
       controller.transportControls.skipToNext()
     }
 
@@ -325,32 +313,8 @@ class PlayerActivity : AppCompatActivity() {
     tvArtist.text = metadata.artist
     tvTitle.text = metadata.title
 
-    // slide out current imgView
-    AnimationUtils.loadAnimation(this, mCoverOutAnimation).also {
-      imgCoverArt[mCovertArtIndex].startAnimation(it)
-    }
-
-    // currentIndex = currentIndex + 1 rem 2
-    mCovertArtIndex = (mCovertArtIndex + 1).rem(2)
-
-    // set image to next imgView
-    imgCoverArt[mCovertArtIndex].setImageBitmap(metadata.albumArt)
-
-    // slide in current imgView
-    AnimationUtils.loadAnimation(this, mCoverInAnimation).also {
-      it.setAnimationListener(object : Animation.AnimationListener {
-        override fun onAnimationRepeat(animation: Animation?) {}
-
-        override fun onAnimationEnd(animation: Animation?) {
-        }
-
-        override fun onAnimationStart(animation: Animation?) {
-          imgCoverArt[mCovertArtIndex].bringToFront()
-          playerToolbar.bringToFront()
-        }
-      })
-      imgCoverArt[mCovertArtIndex].startAnimation(it)
-    }
+    // set image
+    imgCoverArt0.setImageBitmap(metadata.albumArt)
 
     metadata.albumArt?.let { bitmap ->
       // Upper 10% of Cover Art

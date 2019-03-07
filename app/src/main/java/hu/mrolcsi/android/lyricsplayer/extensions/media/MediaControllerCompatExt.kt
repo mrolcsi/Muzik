@@ -4,8 +4,11 @@ import android.os.Bundle
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.session.MediaControllerCompat
 import hu.mrolcsi.android.lyricsplayer.service.exoplayer.BulkTimelineQueueEditor
+import hu.mrolcsi.android.lyricsplayer.service.exoplayer.ExoPlayerHolder.Companion.ACTION_PLAY_FROM_DESCRIPTION
+import hu.mrolcsi.android.lyricsplayer.service.exoplayer.ExoPlayerHolder.Companion.ACTION_PREPARE_FROM_DESCRIPTION
 import hu.mrolcsi.android.lyricsplayer.service.exoplayer.ExoPlayerHolder.Companion.ACTION_START_UPDATER
 import hu.mrolcsi.android.lyricsplayer.service.exoplayer.ExoPlayerHolder.Companion.ACTION_STOP_UPDATER
+import hu.mrolcsi.android.lyricsplayer.service.exoplayer.ExoPlayerHolder.Companion.ARGUMENT_DESCRIPTION
 
 @Suppress("unused")
 private const val LOG_TAG = "MediaControllerExt"
@@ -16,6 +19,34 @@ fun MediaControllerCompat.TransportControls.startProgressUpdater() =
 
 fun MediaControllerCompat.TransportControls.stopProgressUpdater() =
   this.sendCustomAction(ACTION_STOP_UPDATER, null)
+
+fun MediaControllerCompat.TransportControls.prepareFromDescription(
+  description: MediaDescriptionCompat,
+  extras: Bundle?
+) {
+  // Gather parameters
+  val args = Bundle().apply {
+    putParcelable(ARGUMENT_DESCRIPTION, description)
+  }
+  if (extras != null) args.putAll(extras)
+
+  // Send action to Service
+  this.sendCustomAction(ACTION_PREPARE_FROM_DESCRIPTION, args)
+}
+
+fun MediaControllerCompat.TransportControls.playFromDescription(
+  description: MediaDescriptionCompat,
+  extras: Bundle?
+) {
+  // Gather parameters
+  val args = Bundle().apply {
+    putBoolean(ACTION_PLAY_FROM_DESCRIPTION, true)
+  }
+  if (extras != null) args.putAll(extras)
+
+  // Call prepare
+  prepareFromDescription(description, args)
+}
 
 fun MediaControllerCompat.clearQueue() =
   this.sendCommand(BulkTimelineQueueEditor.COMMAND_CLEAR_QUEUE, null, null)

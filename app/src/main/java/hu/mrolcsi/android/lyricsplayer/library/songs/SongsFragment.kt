@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.android.lyricsplayer.R
 import hu.mrolcsi.android.lyricsplayer.extensions.OnItemClickListener
 import hu.mrolcsi.android.lyricsplayer.extensions.media.addQueueItems
+import hu.mrolcsi.android.lyricsplayer.extensions.media.playFromDescription
 import hu.mrolcsi.android.lyricsplayer.service.exoplayer.ExoPlayerHolder
 import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
 import kotlinx.android.synthetic.main.fragment_songs.*
@@ -31,17 +32,17 @@ class SongsFragment : Fragment() {
   private lateinit var mVisibleSongs: List<MediaBrowserCompat.MediaItem>
 
   private val mSongsAdapter = SongsAdapter(OnItemClickListener { item, holder, position, id ->
+    Log.d(LOG_TAG, "onItemClicked($item, $holder, $position, $id)")
+
+    val controller = MediaControllerCompat.getMediaController(requireActivity())
+
+    // Immediately start the song that was clicked on
+    controller.transportControls.playFromDescription(
+      item.description,
+      bundleOf(ExoPlayerHolder.EXTRA_DESIRED_QUEUE_POSITION to position)
+    )
+
     AsyncTask.execute {
-      val controller = MediaControllerCompat.getMediaController(requireActivity())
-
-      Log.d(LOG_TAG, "onItemClicked($item, $holder, $position, $id)")
-
-      // Start clicked song
-      controller.transportControls.playFromMediaId(
-        item.mediaId,
-        bundleOf(ExoPlayerHolder.EXTRA_DESIRED_QUEUE_POSITION to position)
-      )
-
       Log.d(LOG_TAG, "onItemClicked() Collecting descriptions...")
 
       // Add songs to queue

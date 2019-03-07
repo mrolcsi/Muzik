@@ -1,7 +1,6 @@
 package hu.mrolcsi.android.lyricsplayer.service.exoplayer
 
 import android.content.Context
-import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
@@ -9,7 +8,6 @@ import android.os.HandlerThread
 import android.os.Looper
 import android.os.ResultReceiver
 import android.support.v4.media.MediaDescriptionCompat
-import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
@@ -30,11 +28,7 @@ import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.util.Util
 import hu.mrolcsi.android.lyricsplayer.BuildConfig
-import hu.mrolcsi.android.lyricsplayer.extensions.media.from
-import hu.mrolcsi.android.lyricsplayer.extensions.media.fullDescription
-import hu.mrolcsi.android.lyricsplayer.extensions.media.id
 import hu.mrolcsi.android.lyricsplayer.extensions.media.mediaPath
-import hu.mrolcsi.android.lyricsplayer.extensions.media.mediaUri
 import hu.mrolcsi.android.lyricsplayer.service.LastPlayedSetting
 import java.io.File
 
@@ -44,91 +38,7 @@ class ExoPlayerHolder(context: Context, session: MediaSessionCompat) {
   private val mWorkerThread = HandlerThread("PlayerWorker").apply { start() }
   private val mBackgroundHandler = Handler(mWorkerThread.looper)
 
-  //region -- PLAYBACK --
-
-  private val mPlayer = ExoPlayerFactory.newSimpleInstance(
-    context,
-    AudioOnlyRenderersFactory(context),
-    DefaultTrackSelector()
-  ).apply {
-    addListener(object : Player.EventListener {
-      override fun onPositionDiscontinuity(reason: Int) {
-        // Check against saved index if position changed
-        val newIndex = this@apply.currentWindowIndex
-        if (mLastPlayed.lastPlayedIndex != newIndex) {
-          // Save new index to SharedPrefs
-          mLastPlayed.lastPlayedIndex = newIndex
-        }
-      }
-    })
-    audioAttributes = AudioAttributes.Builder()
-      .setUsage(C.USAGE_MEDIA)
-      .setContentType(C.CONTENT_TYPE_MUSIC)
-      .build()
-  }
-
-  private var mDesiredQueuePosition: Int = -1
-
-  private val mPlaybackPreparer = object : MediaSessionConnector.PlaybackPreparer {
-    override fun getCommands(): Array<String>? = null
-
-    override fun onCommand(player: Player?, command: String?, extras: Bundle?, cb: ResultReceiver?) {}
-
-    override fun getSupportedPrepareActions(): Long = MediaSessionConnector.PlaybackPreparer.ACTIONS
-
-    override fun onPrepareFromMediaId(mediaId: String?, extras: Bundle?) {
-      // Assuming mediaId is a path
-      onPrepareFromUri(Uri.fromFile(File(mediaId)), extras)
-    }
-
-    override fun onPrepareFromUri(uri: Uri, extras: Bundle?) {
-      Log.v(LOG_TAG, "onPrepareFromUri($uri, $extras) called from ${Thread.currentThread()}")
-
-      mBackgroundHandler.post {
-        // Get the desired position of the item to be moved to.
-        mDesiredQueuePosition = extras?.getInt(EXTRA_DESIRED_QUEUE_POSITION, -1) ?: -1
-
-        // Clear queue and load media
-        mQueue.clear()
-
-        val mediaSource = mQueueMediaSourceFactory.createMediaSource(
-          mQueueMediaSourceFactory.createMediaMetadata(uri).fullDescription
-        )
-        mQueue.addMediaSource(0, mediaSource, mMainHandler) {
-          // Call prepare() on the main thread
-          onPrepare()
-        }
-      }
-    }
-
-    override fun onPrepareFromSearch(query: String?, extras: Bundle?) {}
-
-    override fun onPrepare() {
-      Log.v(LOG_TAG, "onPrepare() called from ${Thread.currentThread()}")
-      mPlayer.prepare(mQueue)
-    }
-  }
-
-  private val mUpdaterActionProvider = object : MediaSessionConnector.CustomActionProvider {
-    override fun getCustomAction(): PlaybackStateCompat.CustomAction {
-      return if (mProgressUpdater.isEnabled) {
-        PlaybackStateCompat.CustomAction
-          .Builder(ACTION_STOP_UPDATER, "Stop progress updater.", -1)
-          .build()
-      } else {
-        PlaybackStateCompat.CustomAction
-          .Builder(ACTION_START_UPDATER, "Start progress updater.", -1)
-          .build()
-      }
-    }
-
-    override fun onCustomAction(action: String?, extras: Bundle?) {
-      when (action) {
-        ACTION_START_UPDATER -> mProgressUpdater.startUpdater()
-        ACTION_STOP_UPDATER -> mProgressUpdater.stopUpdater()
-      }
-    }
-  }
+  //region -- PLAYBACK CONTROLLER --
 
   private val mPlaybackController = object : DefaultPlaybackController() {
     // override functions as needed
@@ -140,8 +50,6 @@ class ExoPlayerHolder(context: Context, session: MediaSessionCompat) {
       if (mProgressUpdater.isEnabled) {
         mProgressUpdater.startUpdater()
       }
-
-      // TODO: Load full metadata in the background
     }
 
     override fun onPause(player: Player) {
@@ -169,13 +77,138 @@ class ExoPlayerHolder(context: Context, session: MediaSessionCompat) {
 
   //endregion
 
-  //region -- QUEUE --
+  //region -- PLAYER --
 
-  private val mQueue = ConcatenatingMediaSource(
-    false,
-    true,
-    ShuffleOrder.DefaultShuffleOrder(0)
-  )
+  private val mPlayer = ExoPlayerFactory.newSimpleInstance(
+    context,
+    AudioOnlyRenderersFactory(context),
+    DefaultTrackSelector()
+  ).apply {
+    addListener(object : Player.EventListener {
+      override fun onPositionDiscontinuity(reason: Int) {
+        // Check against saved index if position changed
+        val newIndex = this@apply.currentWindowIndex
+        if (mLastPlayed.lastPlayedIndex != newIndex) {
+          // Save new index to SharedPrefs
+          mLastPlayed.lastPlayedIndex = newIndex
+        }
+      }
+    })
+    audioAttributes = AudioAttributes.Builder()
+      .setUsage(C.USAGE_MEDIA)
+      .setContentType(C.CONTENT_TYPE_MUSIC)
+      .build()
+  }
+
+  //endregion
+
+  //region -- PLAYBACK PREPARER
+
+  private var mDesiredQueuePosition: Int = -1
+
+  private val mPlaybackPreparer = object : MediaSessionConnector.PlaybackPreparer {
+    override fun getCommands(): Array<String>? = null
+
+    override fun onCommand(player: Player, command: String, extras: Bundle?, cb: ResultReceiver?) {}
+
+    override fun getSupportedPrepareActions(): Long = MediaSessionConnector.PlaybackPreparer.ACTIONS
+
+    override fun onPrepareFromMediaId(mediaId: String?, extras: Bundle?) {
+      // Assuming mediaId is a path
+      onPrepareFromUri(Uri.fromFile(File(mediaId)), extras)
+    }
+
+    override fun onPrepareFromUri(uri: Uri, extras: Bundle?) {
+      Log.v(LOG_TAG, "onPrepareFromUri($uri, $extras) called from ${Thread.currentThread()}")
+
+      mBackgroundHandler.post {
+        // Get the desired position of the item to be moved to.
+        mDesiredQueuePosition = extras?.getInt(EXTRA_DESIRED_QUEUE_POSITION, -1) ?: -1
+
+        // Clear queue and load media
+        mQueue.clear()
+
+        val mediaSource = ExtractorMediaSource.Factory(mDataSourceFactory).createMediaSource(uri)
+        mQueue.addMediaSource(0, mediaSource, mMainHandler) {
+          // Call prepare() on the main thread
+          onPrepare()
+        }
+      }
+    }
+
+    override fun onPrepareFromSearch(query: String?, extras: Bundle?) {}
+
+    fun onPrepareFromDescription(description: MediaDescriptionCompat, extras: Bundle?) {
+      mBackgroundHandler.post {
+        // Clear Queue
+        mQueue.clear()
+
+        // Get the desired position of the item to be moved to.
+        mDesiredQueuePosition = extras?.getInt(EXTRA_DESIRED_QUEUE_POSITION, -1) ?: -1
+
+        // Create MediaSource
+        val mediaSource = mQueueMediaSourceFactory.createMediaSource(description)
+
+        // Add MediaSource to Queue
+        mQueue.addMediaSource(0, mediaSource, mMainHandler) {
+          // Prepare on the main thread
+          onPrepare()
+
+          if (extras?.getBoolean(ACTION_PLAY_FROM_DESCRIPTION, false) == true) {
+            mPlayer.playWhenReady = true
+          }
+        }
+      }
+    }
+
+    override fun onPrepare() {
+      Log.v(LOG_TAG, "onPrepare() called from ${Thread.currentThread()}")
+      mPlayer.prepare(mQueue)
+    }
+  }
+
+  //endregion
+
+  //region -- CUSTOM ACTIONS
+
+  private val mUpdaterActionProvider = object : MediaSessionConnector.CustomActionProvider {
+    override fun getCustomAction(): PlaybackStateCompat.CustomAction {
+      return if (mProgressUpdater.isEnabled) {
+        PlaybackStateCompat.CustomAction
+          .Builder(ACTION_STOP_UPDATER, "Stop progress updater.", -1)
+          .build()
+      } else {
+        PlaybackStateCompat.CustomAction
+          .Builder(ACTION_START_UPDATER, "Start progress updater.", -1)
+          .build()
+      }
+    }
+
+    override fun onCustomAction(action: String?, extras: Bundle?) {
+      when (action) {
+        ACTION_START_UPDATER -> mProgressUpdater.startUpdater()
+        ACTION_STOP_UPDATER -> mProgressUpdater.stopUpdater()
+      }
+    }
+  }
+
+  private val mPrepareFromDescriptionActionProvider = object : MediaSessionConnector.CustomActionProvider {
+    override fun getCustomAction(): PlaybackStateCompat.CustomAction = PlaybackStateCompat.CustomAction
+      .Builder(ACTION_PREPARE_FROM_DESCRIPTION, "Prepare from MediaDescriptionCompat", -1)
+      .build()
+
+    override fun onCustomAction(action: String?, extras: Bundle?) {
+      if (action == ACTION_PREPARE_FROM_DESCRIPTION) {
+        val description = extras!!.getParcelable<MediaDescriptionCompat>(ARGUMENT_DESCRIPTION)!!
+        mPlaybackPreparer.onPrepareFromDescription(description, extras)
+      }
+    }
+
+  }
+
+  //endregion
+
+  //region -- QUEUE NAVIGATOR --
 
   private val mQueueNavigator = object : TimelineQueueNavigator(session, 50) {
 
@@ -190,6 +223,16 @@ class ExoPlayerHolder(context: Context, session: MediaSessionCompat) {
       return player.currentTimeline.getWindow(windowIndex, mWindow, true).tag as MediaDescriptionCompat
     }
   }
+
+  //endregion
+
+  //region -- QUEUE EDITOR --
+
+  private val mQueue = ConcatenatingMediaSource(
+    false,
+    true,
+    ShuffleOrder.DefaultShuffleOrder(0)
+  )
 
   private val mQueueDataAdapter = object : BulkTimelineQueueEditor.QueueDataAdapter {
     override fun add(position: Int, description: MediaDescriptionCompat?) {
@@ -215,37 +258,21 @@ class ExoPlayerHolder(context: Context, session: MediaSessionCompat) {
     }
   }
 
+  private val mDataSourceFactory = DefaultDataSourceFactory(
+    context, Util.getUserAgent(context, BuildConfig.APPLICATION_ID)
+  )
+
   private val mQueueMediaSourceFactory = object : TimelineQueueEditor.MediaSourceFactory {
-
-    private val mDataSourceFactory = DefaultDataSourceFactory(
-      context, Util.getUserAgent(context, BuildConfig.APPLICATION_ID)
-    )
-
-    fun createMediaMetadata(uri: Uri): MediaMetadataCompat {
-      //Log.v(LOG_TAG, "createMediaMetadata($uri) called from ${Thread.currentThread()}")
-
-      // Load metadata
-      val retriever = MediaMetadataRetriever().apply {
-        setDataSource(context, uri)
-      }
-      return MediaMetadataCompat.Builder().from(retriever).apply {
-        // Some additional info cannot be retrieved from the retriever.
-        id = uri.path!!
-        mediaUri = uri.toString()
-      }.build()
-    }
 
     override fun createMediaSource(description: MediaDescriptionCompat): MediaSource? {
       Log.v(LOG_TAG, "createMediaSource($description) called from ${Thread.currentThread()}")
 
       // Create Metadata from Uri
       val uri = description.mediaUri ?: Uri.fromFile(File(description.mediaPath))
-      //val metadata = createMediaMetadata(uri)
 
       // NOTE: ExtractorMediaSource.Factory is not reusable!
 
       // Create MediaSource from Metadata
-      //return metadata.toMediaSource(dataSourceFactory)
       return ExtractorMediaSource.Factory(mDataSourceFactory).setTag(description).createMediaSource(uri)
     }
   }
@@ -279,7 +306,7 @@ class ExoPlayerHolder(context: Context, session: MediaSessionCompat) {
   // Connect this holder to the session
   private val mMediaSessionConnector =
     MediaSessionConnector(session, mPlaybackController).also {
-      it.setPlayer(mPlayer, mPlaybackPreparer, mUpdaterActionProvider)
+      it.setPlayer(mPlayer, mPlaybackPreparer, mUpdaterActionProvider, mPrepareFromDescriptionActionProvider)
       it.setQueueNavigator(mQueueNavigator)
       it.setQueueEditor(mQueueEditor)
     }
@@ -305,6 +332,10 @@ class ExoPlayerHolder(context: Context, session: MediaSessionCompat) {
 
     const val ACTION_START_UPDATER = "ACTION_START_UPDATER"
     const val ACTION_STOP_UPDATER = "ACTION_STOP_UPDATER"
+
+    const val ACTION_PREPARE_FROM_DESCRIPTION = "ACTION_PREPARE_FROM_DESCRIPTION"
+    const val ACTION_PLAY_FROM_DESCRIPTION = "ACTION_PLAY_FROM_DESCRIPTION"
+    const val ARGUMENT_DESCRIPTION = "ARGUMENT_DESCRIPTION"
 
     const val EXTRA_DESIRED_QUEUE_POSITION = "EXTRA_DESIRED_QUEUE_POSITION"
   }

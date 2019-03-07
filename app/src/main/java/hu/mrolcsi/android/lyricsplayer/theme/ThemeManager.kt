@@ -3,6 +3,7 @@ package hu.mrolcsi.android.lyricsplayer.theme
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.os.AsyncTask
+import android.os.Looper
 import android.util.Log
 import androidx.core.graphics.ColorUtils
 import androidx.lifecycle.MutableLiveData
@@ -24,7 +25,11 @@ object ThemeManager {
   }
 
   fun updateFromBitmap(bitmap: Bitmap) {
-    AsyncTask.execute {
+    if (Looper.myLooper() == Looper.getMainLooper()) {
+      AsyncTask.execute {
+        updateFromBitmap(bitmap)
+      }
+    } else {
       Log.d(LOG_TAG, "Updating Theme from $bitmap")
 
       val palette = Palette.from(bitmap)
@@ -34,7 +39,7 @@ object ThemeManager {
 
       if (palette == previousTheme?.sourcePalette) {
         // Skip theme generation from the same(ish) palette.
-        return@execute
+        return
       }
 
       val theme = createTheme(palette)
