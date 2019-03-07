@@ -4,13 +4,21 @@ import android.app.PendingIntent
 import android.content.Context
 import android.graphics.Bitmap
 import android.support.v4.media.MediaDescriptionCompat
+import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import com.google.android.exoplayer2.Player
-import com.google.android.exoplayer2.Timeline
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import hu.mrolcsi.android.lyricsplayer.BuildConfig
 import hu.mrolcsi.android.lyricsplayer.R
+import hu.mrolcsi.android.lyricsplayer.extensions.media.from
+import hu.mrolcsi.android.lyricsplayer.extensions.media.fullDescription
 
+/**
+ * There's a bug? in ExoPlayer's [PlayerNotificationManager] that causes the notification to show 'null's
+ * when changing player states (eg. play/pause, next song, etc.).
+ *
+ * Workaround: Use [hu.mrolcsi.android.lyricsplayer.service.LPNotificationBuilder] for now.
+ */
 class ExoNotificationManager(
   context: Context,
   session: MediaSessionCompat,
@@ -19,6 +27,9 @@ class ExoNotificationManager(
 ) {
 
   private val mDescriptionAdapter = object : PlayerNotificationManager.MediaDescriptionAdapter {
+
+    private var mLastUsedDescription: MediaDescriptionCompat? = null
+
     override fun createCurrentContentIntent(player: Player): PendingIntent? = session.controller.sessionActivity
 
     override fun getCurrentContentText(player: Player): String? {
@@ -35,13 +46,27 @@ class ExoNotificationManager(
       val description = getDescription(session)
       return description?.iconBitmap
     }
+
+    /**
+     * Get current [MediaDescriptionCompat] from the provided [MediaSessionCompat].
+     */
+    private fun getDescription(session: MediaSessionCompat): MediaDescriptionCompat? {
+      val description = session.controller?.metadata?.description
+      // Check if mediaId has changed
+      if (description != null && description.mediaId != mLastUsedDescription?.mediaId) {
+        // Load additional metadata into description
+        mLastUsedDescription = MediaMetadataCompat.Builder().from(description).build().fullDescription
+      }
+
+      return mLastUsedDescription
+    }
   }
 
   // Connect this notification manager to the session
   private val mNotificationManager = PlayerNotificationManager.createWithNotificationChannel(
     context,
     NOTIFICATION_CHANNEL,
-    R.string.notification_nowPlaying_description,
+    R.string.notification_nowPlaying,
     NOTIFICATION_ID,
     mDescriptionAdapter
   ).apply {
@@ -55,22 +80,6 @@ class ExoNotificationManager(
     setFastForwardIncrementMs(0)
     setSmallIcon(R.drawable.ic_song)
   }
-
-  /**
-   * Get the [MediaDescriptionCompat] from the provided [Player].
-   */
-  private fun getDescription(player: Player): MediaDescriptionCompat? {
-    // Get current playlist position
-    val windowIndex = player.currentWindowIndex
-    // Get description from Window
-    return player.currentTimeline.getWindow(windowIndex, Timeline.Window(), true).tag as MediaDescriptionCompat
-  }
-
-  /**
-   * Get current [MediaDescriptionCompat] from the provided [MediaSessionCompat].
-   */
-  private fun getDescription(session: MediaSessionCompat): MediaDescriptionCompat? =
-    session.controller?.metadata?.description
 
   fun release() {
     mNotificationManager.setPlayer(null)

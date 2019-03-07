@@ -41,7 +41,7 @@ import java.io.File
 class ExoPlayerHolder(context: Context, session: MediaSessionCompat) {
 
   private val mMainHandler = Handler(Looper.getMainLooper())
-  private val mWorkerThread = HandlerThread(LOG_TAG).apply { start() }
+  private val mWorkerThread = HandlerThread("PlayerWorker").apply { start() }
   private val mBackgroundHandler = Handler(mWorkerThread.looper)
 
   //region -- PLAYBACK --
@@ -84,18 +84,21 @@ class ExoPlayerHolder(context: Context, session: MediaSessionCompat) {
     override fun onPrepareFromUri(uri: Uri, extras: Bundle?) {
       Log.v(LOG_TAG, "onPrepareFromUri($uri, $extras) called from ${Thread.currentThread()}")
 
-      // Get the desired position of the item to be moved to.
-      mDesiredQueuePosition = extras?.getInt(EXTRA_DESIRED_QUEUE_POSITION, -1) ?: -1
+      mBackgroundHandler.post {
+        // Get the desired position of the item to be moved to.
+        mDesiredQueuePosition = extras?.getInt(EXTRA_DESIRED_QUEUE_POSITION, -1) ?: -1
 
-      // Clear queue and load media
-      mQueue.clear()
+        // Clear queue and load media
+        mQueue.clear()
 
-      val mediaSource = mQueueMediaSourceFactory.createMediaSource(
-        mQueueMediaSourceFactory.createMediaMetadata(uri).fullDescription
-      )
-      mQueue.addMediaSource(mediaSource)
-
-      onPrepare()
+        val mediaSource = mQueueMediaSourceFactory.createMediaSource(
+          mQueueMediaSourceFactory.createMediaMetadata(uri).fullDescription
+        )
+        mQueue.addMediaSource(0, mediaSource, mMainHandler) {
+          // Call prepare() on the main thread
+          onPrepare()
+        }
+      }
     }
 
     override fun onPrepareFromSearch(query: String?, extras: Bundle?) {}
@@ -137,6 +140,8 @@ class ExoPlayerHolder(context: Context, session: MediaSessionCompat) {
       if (mProgressUpdater.isEnabled) {
         mProgressUpdater.startUpdater()
       }
+
+      // TODO: Load full metadata in the background
     }
 
     override fun onPause(player: Player) {
@@ -231,15 +236,16 @@ class ExoPlayerHolder(context: Context, session: MediaSessionCompat) {
     }
 
     override fun createMediaSource(description: MediaDescriptionCompat): MediaSource? {
-      //Log.v(LOG_TAG, "createMediaSource($description) called from ${Thread.currentThread()}")
+      Log.v(LOG_TAG, "createMediaSource($description) called from ${Thread.currentThread()}")
 
       // Create Metadata from Uri
       val uri = description.mediaUri ?: Uri.fromFile(File(description.mediaPath))
       //val metadata = createMediaMetadata(uri)
 
+      // NOTE: ExtractorMediaSource.Factory is not reusable!
+
       // Create MediaSource from Metadata
       //return metadata.toMediaSource(dataSourceFactory)
-      // NOTE: ExtractorMediaSource.Factory is not reusable!
       return ExtractorMediaSource.Factory(mDataSourceFactory).setTag(description).createMediaSource(uri)
     }
   }

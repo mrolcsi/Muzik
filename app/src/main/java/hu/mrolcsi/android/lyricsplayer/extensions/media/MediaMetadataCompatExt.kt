@@ -309,6 +309,25 @@ fun MediaMetadataCompat.Builder.from(retriever: MediaMetadataRetriever): MediaMe
 }
 
 /**
+ * Extension method for [MediaMetadataCompat.Builder] to create a [MediaMetadataCompat.Builder] object
+ * from a given [mediaId] using a [MediaMetadataRetriever].
+ */
+fun MediaMetadataCompat.Builder.from(mediaId: String): MediaMetadataCompat.Builder {
+  val retriever = MediaMetadataRetriever().apply {
+    setDataSource(mediaId)
+  }
+  return this.from(retriever)
+}
+
+/**
+ * Extension method for [MediaMetadataCompat.Builder] to create a [MediaMetadataCompat.Builder] object
+ * from a given [MediaDescriptionCompat] using a [MediaMetadataRetriever].
+ */
+fun MediaMetadataCompat.Builder.from(description: MediaDescriptionCompat): MediaMetadataCompat.Builder {
+  return this.from(description.mediaId!!)
+}
+
+/**
  * Custom property for retrieving a [MediaDescriptionCompat] which also includes
  * all of the keys from the [MediaMetadataCompat] object in its extras.
  *

@@ -18,6 +18,8 @@ abstract class LibraryViewModel(app: Application) : AndroidViewModel(app) {
   val currentMediaMetadata = MutableLiveData<MediaMetadataCompat?>()
   val currentPlaybackState = MutableLiveData<PlaybackStateCompat?>()
 
+  private var mLastMetadata: MediaMetadataCompat? = null
+
   protected val mMediaBrowser: MediaBrowserCompat by lazy {
     MediaBrowserCompat(
       getApplication(),
@@ -38,9 +40,16 @@ abstract class LibraryViewModel(app: Application) : AndroidViewModel(app) {
           // Register callbacks to watch for changes
           registerCallback(object : MediaControllerCompat.Callback() {
             override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
-              Log.v(getLogTag(), "onMetadataChanged(${metadata?.bundle})")
-              // TODO: use MetadataRetriever to get additional metadata before posting
-              currentMediaMetadata.postValue(metadata)
+              Log.v(getLogTag(), "onMetadataChanged(${metadata?.description})")
+
+              // Check if metadata has actually changed
+              if (metadata?.description?.mediaId != mLastMetadata?.description?.mediaId) {
+                // TODO: use MetadataRetriever to get additional metadata before posting
+                currentMediaMetadata.postValue(metadata)
+
+                // Save as last received metadata
+                mLastMetadata = metadata
+              }
             }
 
             override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {

@@ -73,15 +73,21 @@ class BulkTimelineQueueEditor(
   // -- QUEUE EDITOR --
 
   override fun onAddQueueItem(player: Player, description: MediaDescriptionCompat) {
-    mInternalEditor.onAddQueueItem(player, description)
+    handler.post {
+      mInternalEditor.onAddQueueItem(player, description)
+    }
   }
 
   override fun onAddQueueItem(player: Player, description: MediaDescriptionCompat, index: Int) {
-    mInternalEditor.onAddQueueItem(player, description, index)
+    handler.post {
+      mInternalEditor.onAddQueueItem(player, description, index)
+    }
   }
 
   override fun onRemoveQueueItem(player: Player, description: MediaDescriptionCompat) {
-    mInternalEditor.onRemoveQueueItem(player, description)
+    handler.post {
+      mInternalEditor.onRemoveQueueItem(player, description)
+    }
   }
 
   // -- CUSTOM IMPLEMENTATIONS --
@@ -91,32 +97,38 @@ class BulkTimelineQueueEditor(
     player: Player,
     descriptions: Collection<MediaDescriptionCompat>,
     index: Int = queueMediaSource.size,
-    handler: Handler? = null,
+    completionHandler: Handler? = null,
     onCompletionAction: (() -> Unit)? = null
   ) {
-    val mediaSources = descriptions.map { sourceFactory.createMediaSource(it) }
-    if (mediaSources.isNotEmpty()) {
-      queueMediaSource.addMediaSources(index, mediaSources, handler, onCompletionAction)
-      queueDataAdapter.onItemsAdded(index, descriptions)
+    this.handler.post {
+      val mediaSources = descriptions.map { sourceFactory.createMediaSource(it) }
+      if (mediaSources.isNotEmpty()) {
+        queueMediaSource.addMediaSources(index, mediaSources, completionHandler, onCompletionAction)
+        queueDataAdapter.onItemsAdded(index, descriptions)
+      }
     }
   }
 
   @Suppress("MemberVisibilityCanBePrivate", "UNUSED_PARAMETER")
   fun onRemoveQueueItems(player: Player, fromIndex: Int, toIndex: Int) {
-    // Range checks
-    if (fromIndex < 0 || toIndex > queueMediaSource.size || fromIndex > toIndex) {
-      throw IllegalArgumentException()
-    } else if (fromIndex != toIndex) {
-      // Checking index inequality prevents an unnecessary allocation.
-      queueDataAdapter.onItemsRemoved(fromIndex, toIndex)
-      queueMediaSource.removeMediaSourceRange(fromIndex, toIndex)
+    handler.post {
+      // Range checks
+      if (fromIndex < 0 || toIndex > queueMediaSource.size || fromIndex > toIndex) {
+        throw IllegalArgumentException()
+      } else if (fromIndex != toIndex) {
+        // Checking index inequality prevents an unnecessary allocation.
+        queueDataAdapter.onItemsRemoved(fromIndex, toIndex)
+        queueMediaSource.removeMediaSourceRange(fromIndex, toIndex)
+      }
     }
   }
 
   @Suppress("MemberVisibilityCanBePrivate")
   fun clearQueue() {
-    queueMediaSource.clear()
-    queueDataAdapter.onClear()
+    handler.post {
+      queueMediaSource.clear()
+      queueDataAdapter.onClear()
+    }
   }
 
   // -- INTERFACES --
