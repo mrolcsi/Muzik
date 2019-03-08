@@ -139,31 +139,30 @@ class ExoPlayerHolder(context: Context, session: MediaSessionCompat) {
     override fun onPrepareFromSearch(query: String?, extras: Bundle?) {}
 
     fun onPrepareFromDescription(description: MediaDescriptionCompat, extras: Bundle?) {
-      mBackgroundHandler.post {
-        // Clear Queue
-        mQueue.clear()
 
-        // Get the desired position of the item to be moved to.
-        mDesiredQueuePosition = extras?.getInt(EXTRA_DESIRED_QUEUE_POSITION, -1) ?: -1
+      // Clear Queue
+      mQueue.clear()
 
-        // Create MediaSource
-        val mediaSource = mQueueMediaSourceFactory.createMediaSource(description)
+      // Get the desired position of the item to be moved to.
+      mDesiredQueuePosition = extras?.getInt(EXTRA_DESIRED_QUEUE_POSITION, -1) ?: -1
 
-        // Add MediaSource to Queue
-        mQueue.addMediaSource(0, mediaSource, mMainHandler) {
-          // Prepare on the main thread
-          onPrepare()
+      // Create MediaSource
+      val mediaSource = mQueueMediaSourceFactory.createMediaSource(description)
 
-          if (extras?.getBoolean(ACTION_PLAY_FROM_DESCRIPTION, false) == true) {
-            mPlayer.playWhenReady = true
-          }
+      // Add MediaSource to Queue
+      mQueue.addMediaSource(0, mediaSource, mMainHandler) {
+        // Prepare on the main thread
+        onPrepare()
+
+        if (extras?.getBoolean(ACTION_PLAY_FROM_DESCRIPTION, false) == true) {
+          mPlayer.playWhenReady = true
         }
       }
     }
 
     override fun onPrepare() {
       Log.v(LOG_TAG, "onPrepare() called from ${Thread.currentThread()}")
-      mPlayer.prepare(mQueue)
+      mPlayer.prepare(mQueue, false, true)
     }
   }
 

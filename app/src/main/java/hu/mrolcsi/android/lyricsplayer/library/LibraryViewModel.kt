@@ -11,7 +11,6 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import hu.mrolcsi.android.lyricsplayer.extensions.media.albumArt
 import hu.mrolcsi.android.lyricsplayer.service.LPPlayerService
-import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
 
 abstract class LibraryViewModel(app: Application) : AndroidViewModel(app) {
 
@@ -48,11 +47,6 @@ abstract class LibraryViewModel(app: Application) : AndroidViewModel(app) {
               if (metadata?.albumArt != null && metadata.description?.mediaId != mLastMetadata?.description?.mediaId) {
                 // TODO: use MetadataRetriever to get additional metadata before posting
                 currentMediaMetadata.postValue(metadata)
-
-                // Update Theme
-                metadata.albumArt?.let { bitmap ->
-                  ThemeManager.updateFromBitmap(bitmap)
-                } // TODO: else -> create theme from placeholder
 
                 // Save as last received metadata
                 mLastMetadata = metadata

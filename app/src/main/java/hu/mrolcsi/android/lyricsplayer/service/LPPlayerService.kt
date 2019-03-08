@@ -16,7 +16,7 @@ import hu.mrolcsi.android.lyricsplayer.extensions.media.albumArt
 import hu.mrolcsi.android.lyricsplayer.extensions.media.from
 import hu.mrolcsi.android.lyricsplayer.player.PlayerActivity
 import hu.mrolcsi.android.lyricsplayer.service.exoplayer.ExoPlayerHolder
-import java.util.concurrent.atomic.AtomicBoolean
+import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
 
 class LPPlayerService : LPBrowserService() {
 
@@ -124,50 +124,60 @@ class LPPlayerService : LPBrowserService() {
         // Last received metadata
         private var previousMetadata: MediaMetadataCompat? = null
 
-        // Load in progress indicator
-        private var loadInProgress = AtomicBoolean(false)
-
-        override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
-          controller.playbackState?.let { state ->
-
-            metadata?.let {
-              // Check if metadata has actually changed
-              val mediaId = metadata.description?.mediaId
-              val sameMediaId = mediaId == previousMetadata?.description?.mediaId
-              if (!sameMediaId) {
-                // Save as last received metadata
-                previousMetadata = metadata
-
-                if (metadata.albumArt == null && !loadInProgress.get()) {
-                  // Avoid starting another load
-                  loadInProgress.set(true)
-
-                  // Load additional metadata in the background
-                  AsyncTask.execute {
-                    Log.d(LOG_TAG, "Loading metadata in the background for $mediaId")
-
-                    val newMetadata = MediaMetadataCompat.Builder(metadata).from(metadata.description).build()
-
-                    // Give newly created metadata to the session
-                    setMetadata(newMetadata)
-
-                    // Update notification
-                    updateNotification(state)
-
-                    // Load finished
-                    loadInProgress.set(false)
-                  }
-                }
-              } else {
-                // Update notification anyway
-                updateNotification(state)
-              }
-            }
-          }
-        }
+        // Previous load
+        private var currentLoadTask: AsyncTask<MediaMetadataCompat, Nothing, MediaMetadataCompat>? = null
 
         override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
           state?.let { updateNotification(it) }
+        }
+
+        override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
+          // Ignore nulls
+          controller.playbackState?.let { state ->
+            metadata?.let {
+
+              // Check if metadata has actually changed
+              val mediaId = metadata.description?.mediaId
+              val differentMediaId = mediaId != previousMetadata?.description?.mediaId
+
+              // Prepare oonPostExecute callback
+              val onPostExecute: (MediaMetadataCompat) -> Unit = { newMetadata ->
+                // Give newly created metadata to the session
+                setMetadata(newMetadata)
+
+                // Update Theme
+                newMetadata.albumArt?.let { bitmap ->
+                  ThemeManager.updateFromBitmap(bitmap)
+                }
+
+                // Update notification
+                updateNotification(state)
+              }
+
+              // Same mediaId
+              when {
+                differentMediaId -> {
+                  // Cancel previous load
+                  currentLoadTask?.cancel(true)
+
+                  // Save as last received metadata
+                  previousMetadata = metadata
+
+                  // Start new load
+                  currentLoadTask = MetadataLoaderTask(onPostExecute).execute(metadata)
+                }
+                metadata.albumArt == null && currentLoadTask?.status != AsyncTask.Status.RUNNING -> {
+                  // Start new load
+                  currentLoadTask = MetadataLoaderTask(onPostExecute).execute(metadata)
+                }
+                else -> {
+                  // Update notification anyway
+                  // (Needed to properly update media buttons)
+                  updateNotification(state)
+                }
+              }
+            }
+          }
         }
 
         private fun updateNotification(playbackState: PlaybackStateCompat) {
@@ -257,5 +267,24 @@ class LPPlayerService : LPBrowserService() {
 
   companion object {
     const val LOG_TAG = "LPPlayerService"
+
+    private open class MetadataLoaderTask(private val onPostExecute: (MediaMetadataCompat) -> Unit) :
+      AsyncTask<MediaMetadataCompat, Nothing, MediaMetadataCompat>() {
+
+      override fun doInBackground(vararg params: MediaMetadataCompat?): MediaMetadataCompat {
+        val oldMetadata = params[0]!!
+
+        Log.d(LOG_TAG, "Loading metadata in the background for ${oldMetadata.description.mediaId}")
+
+        return MediaMetadataCompat.Builder(oldMetadata).from(oldMetadata.description).build()
+      }
+
+      override fun onPostExecute(result: MediaMetadataCompat) {
+        if (!isCancelled) {
+          // Deliver result
+          onPostExecute.invoke(result)
+        }
+      }
+    }
   }
 }

@@ -20,6 +20,7 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.graphics.Bitmap
 import android.os.Build
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.MediaSessionCompat
@@ -70,6 +71,8 @@ class LPNotificationBuilder(private val context: Context) {
   private val stopPendingIntent =
     MediaButtonReceiver.buildMediaButtonPendingIntent(context, ACTION_STOP)
 
+  private var albumArt: Bitmap? = null
+
   fun buildNotification(sessionToken: MediaSessionCompat.Token): Notification {
     if (shouldCreateNowPlayingChannel()) {
       createNowPlayingChannel()
@@ -102,16 +105,19 @@ class LPNotificationBuilder(private val context: Context) {
       .setShowActionsInCompactView(playPauseIndex)
       .setShowCancelButton(true)
 
-    return builder.setContentIntent(controller.sessionActivity)
-      .setContentText(description.subtitle)
-      .setContentTitle(description.title)
-      .setDeleteIntent(stopPendingIntent)
-      .setLargeIcon(description.iconBitmap)
-      .setOnlyAlertOnce(true)
-      .setSmallIcon(R.drawable.ic_song)
-      .setStyle(mediaStyle)
-      .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-      .build()
+    return with(builder) {
+      setContentIntent(controller.sessionActivity)
+      setContentText(description.subtitle)
+      setContentTitle(description.title)
+      setDeleteIntent(stopPendingIntent)
+      description.iconBitmap?.let { albumArt = it }
+      setLargeIcon(albumArt)
+      setOnlyAlertOnce(true)
+      setSmallIcon(R.drawable.ic_song)
+      setStyle(mediaStyle)
+      setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+      build()
+    }
   }
 
   private fun shouldCreateNowPlayingChannel() =
