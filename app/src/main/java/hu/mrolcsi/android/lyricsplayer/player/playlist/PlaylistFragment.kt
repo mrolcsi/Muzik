@@ -1,4 +1,4 @@
-package hu.mrolcsi.android.lyricsplayer.player
+package hu.mrolcsi.android.lyricsplayer.player.playlist
 
 import android.animation.ValueAnimator
 import android.graphics.Color
@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.android.lyricsplayer.R
 import hu.mrolcsi.android.lyricsplayer.extensions.OnItemClickListener
+import hu.mrolcsi.android.lyricsplayer.player.PlayerViewModel
 import hu.mrolcsi.android.lyricsplayer.theme.Theme
 import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
 import kotlinx.android.synthetic.main.fragment_playlist.*
@@ -26,12 +27,13 @@ class PlaylistFragment : Fragment() {
 
   private lateinit var mPlayerModel: PlayerViewModel
 
-  private val mPlaylistAdapter = PlaylistAdapter(OnItemClickListener { item, holder, position, id ->
-    // Skip to clicked item
-    val controller = MediaControllerCompat.getMediaController(requireActivity())
-    controller.transportControls.skipToQueueItem(id)
-    controller.transportControls.play()
-  })
+  private val mPlaylistAdapter =
+    PlaylistAdapter(OnItemClickListener { item, holder, position, id ->
+      // Skip to clicked item
+      val controller = MediaControllerCompat.getMediaController(requireActivity())
+      controller.transportControls.skipToQueueItem(id)
+      controller.transportControls.play()
+    })
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)

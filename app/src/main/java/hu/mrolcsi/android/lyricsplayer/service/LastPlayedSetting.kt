@@ -4,6 +4,7 @@ import android.content.Context
 import android.preference.PreferenceManager
 import kotlin.properties.Delegates
 
+@Deprecated("Deprecated in favour of a database implementation.")
 class LastPlayedSetting(context: Context) {
 
   private val mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(context)

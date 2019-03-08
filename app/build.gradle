@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
 apply plugin: 'androidx.navigation.safeargs.kotlin'
 
 apply from: "https://gist.githubusercontent.com/mrolcsi/588d5dd7a309fab501fc/raw/30b88f5217596c425c43d101dd29708a785b05f1/Version%2520code%2520and%2520name%2520generation%2520using%2520Gradle"
@@ -54,7 +55,7 @@ dependencies {
 
     // Glide
     implementation 'com.github.bumptech.glide:glide:4.9.0'
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.9.0'
+    kapt 'com.github.bumptech.glide:compiler:4.9.0'
 
     // ExoPlayer
     implementation 'com.google.android.exoplayer:exoplayer-core:2.9.5'
@@ -65,8 +66,8 @@ dependencies {
     implementation 'cat.ereza:customactivityoncrash:2.2.0'
 
     // Testing
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.2-alpha01'
-    androidTestImplementation 'androidx.test:runner:1.1.2-alpha01'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0-alpha02'
+    androidTestImplementation 'androidx.test:runner:1.1.2-alpha02'
     testImplementation 'junit:junit:4.12'
 
     // TooLargeTool (only needed when debugging)

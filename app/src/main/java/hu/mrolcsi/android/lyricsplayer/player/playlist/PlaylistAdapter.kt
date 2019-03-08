@@ -1,4 +1,4 @@
-package hu.mrolcsi.android.lyricsplayer.player
+package hu.mrolcsi.android.lyricsplayer.player.playlist
 
 import android.graphics.Color
 import android.support.v4.media.session.MediaSessionCompat
