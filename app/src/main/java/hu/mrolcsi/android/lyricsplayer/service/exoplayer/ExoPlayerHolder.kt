@@ -28,15 +28,18 @@ import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.util.Util
 import hu.mrolcsi.android.lyricsplayer.BuildConfig
-import hu.mrolcsi.android.lyricsplayer.extensions.media.mediaPath
-import hu.mrolcsi.android.lyricsplayer.service.LastPlayedSetting
+import hu.mrolcsi.android.lyricsplayer.database.playqueue.PlayQueueDatabase
+import hu.mrolcsi.android.lyricsplayer.database.playqueue.entities.LastPlayed
+import hu.mrolcsi.android.lyricsplayer.database.playqueue.entities.PlayQueueEntry
 import java.io.File
+import java.util.concurrent.Executors
 
-class ExoPlayerHolder(context: Context, session: MediaSessionCompat) {
+class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat) {
 
   private val mMainHandler = Handler(Looper.getMainLooper())
   private val mWorkerThread = HandlerThread("PlayerWorker").apply { start() }
   private val mBackgroundHandler = Handler(mWorkerThread.looper)
+  private val mDatabaseWorker = Executors.newSingleThreadExecutor()
 
   //region -- PLAYBACK CONTROLLER --
 
@@ -58,7 +61,7 @@ class ExoPlayerHolder(context: Context, session: MediaSessionCompat) {
       mProgressUpdater.stopUpdater()
 
       // Save current position to SharedPrefs
-      mLastPlayed.lastPlayedPosition = player.currentPosition
+      mLastPlayed.trackPosition = player.currentPosition
     }
 
     override fun onStop(player: Player) {
@@ -71,7 +74,7 @@ class ExoPlayerHolder(context: Context, session: MediaSessionCompat) {
       mProgressUpdater.stopUpdater()
 
       // Save current position to SharedPrefs
-      mLastPlayed.lastPlayedPosition = player.currentPosition
+      mLastPlayed.trackPosition = player.currentPosition
     }
   }
 
@@ -88,10 +91,7 @@ class ExoPlayerHolder(context: Context, session: MediaSessionCompat) {
       override fun onPositionDiscontinuity(reason: Int) {
         // Check against saved index if position changed
         val newIndex = this@apply.currentWindowIndex
-        if (mLastPlayed.lastPlayedIndex != newIndex) {
-          // Save new index to SharedPrefs
-          mLastPlayed.lastPlayedIndex = newIndex
-        }
+        mLastPlayed.queuePosition = newIndex
       }
     })
     audioAttributes = AudioAttributes.Builder()
@@ -126,7 +126,7 @@ class ExoPlayerHolder(context: Context, session: MediaSessionCompat) {
         mDesiredQueuePosition = extras?.getInt(EXTRA_DESIRED_QUEUE_POSITION, -1) ?: -1
 
         // Clear queue and load media
-        mQueue.clear()
+        mQueueEditor.clearQueue()
 
         val mediaSource = ExtractorMediaSource.Factory(mDataSourceFactory).createMediaSource(uri)
         mQueue.addMediaSource(0, mediaSource, mMainHandler) {
@@ -140,24 +140,23 @@ class ExoPlayerHolder(context: Context, session: MediaSessionCompat) {
 
     fun onPrepareFromDescription(description: MediaDescriptionCompat, extras: Bundle?) {
 
-      // Clear Queue
-      mQueue.clear()
+      mBackgroundHandler.post {
+        // Clear Queue
+        mQueueEditor.clearQueue()
 
-      // Get the desired position of the item to be moved to.
-      mDesiredQueuePosition = extras?.getInt(EXTRA_DESIRED_QUEUE_POSITION, -1) ?: -1
+        // Get the desired position of the item to be moved to.
+        mDesiredQueuePosition = extras?.getInt(EXTRA_DESIRED_QUEUE_POSITION, -1) ?: -1
 
-      // Create MediaSource
-      val mediaSource = mQueueMediaSourceFactory.createMediaSource(description)
-
-      // Add MediaSource to Queue
-      mQueue.addMediaSource(0, mediaSource, mMainHandler) {
-        // Prepare on the main thread
-        onPrepare()
-
-        if (extras?.getBoolean(ACTION_PLAY_FROM_DESCRIPTION, false) == true) {
-          mPlayer.playWhenReady = true
+        // Add Description to Queue
+        mQueueEditor.onAddQueueItems(mPlayer, listOf(description), 0, mMainHandler) {
+          // Call onPrepare() on main thread when done.
+          onPrepare()
+          if (extras?.getBoolean(ACTION_PLAY_FROM_DESCRIPTION, false) == true) {
+            mPlayer.playWhenReady = true
+          }
         }
       }
+
     }
 
     override fun onPrepare() {
@@ -233,29 +232,77 @@ class ExoPlayerHolder(context: Context, session: MediaSessionCompat) {
     ShuffleOrder.DefaultShuffleOrder(0)
   )
 
-  private val mQueueDataAdapter = object : BulkTimelineQueueEditor.QueueDataAdapter {
-    override fun add(position: Int, description: MediaDescriptionCompat?) {
-      Log.v(LOG_TAG, "mQueueAdapter.add($position, $description) called from ${Thread.currentThread()}")
-    }
+  private val mQueueDataAdapter: BulkTimelineQueueEditor.QueueDataAdapter =
+    object : BulkTimelineQueueEditor.QueueDataAdapter {
+      override fun add(position: Int, description: MediaDescriptionCompat?) {
+        Log.v(LOG_TAG, "mQueueAdapter.add($position, $description) called from ${Thread.currentThread()}")
 
-    override fun onItemsAdded(position: Int, descriptions: Collection<MediaDescriptionCompat>) {
-      Log.v(LOG_TAG, "mQueueAdapter.add($position, [${descriptions.size} items]) called from ${Thread.currentThread()}")
+        description?.let {
+          mDatabaseWorker.submit {
+            PlayQueueDatabase.getInstance(context)
+              .getPlayQueueDao()
+              .addEntries(
+                PlayQueueEntry(position, description)
+              )
+          }
+        }
+      }
 
-      // After all the other songs were added to the queue, move the first song to it's proper position.
-      if (mDesiredQueuePosition in 0..mQueue.size) {
-        mQueue.moveMediaSource(0, mDesiredQueuePosition)
-        mDesiredQueuePosition = -1
+      override fun onItemsAdded(position: Int, descriptions: Collection<MediaDescriptionCompat>) {
+        Log.v(
+          LOG_TAG,
+          "mQueueAdapter.add($position, [${descriptions.size} items]) called from ${Thread.currentThread()}"
+        )
+
+        mBackgroundHandler.post {
+          // After all the other songs were added to the queue, move the first song to it's proper position.
+          if (mDesiredQueuePosition in 0..mQueue.size) {
+            mQueueEditor.onMoveQueueItem(mPlayer, 0, mDesiredQueuePosition)
+            mDesiredQueuePosition = -1
+          }
+        }
+
+        mDatabaseWorker.submit {
+          PlayQueueDatabase.getInstance(context)
+            .getPlayQueueDao()
+            .addEntries(
+              *descriptions.mapIndexed { index, description ->
+                PlayQueueEntry(index, description)
+              }.toTypedArray()
+            )
+        }
+      }
+
+      override fun remove(position: Int) {
+        mDatabaseWorker.submit {
+          PlayQueueDatabase.getInstance(context)
+            .getPlayQueueDao()
+            .removeEntryAtPosition(position)
+        }
+      }
+
+      override fun onItemsRemoved(from: Int, to: Int) {
+        mDatabaseWorker.submit {
+          PlayQueueDatabase.getInstance(context)
+            .getPlayQueueDao()
+            .removeEntriesInRange(from, to)
+        }
+      }
+
+      override fun move(from: Int, to: Int) {
+        // TODO: reflect change in database?
+      }
+
+      override fun onClear() {
+        Log.v(LOG_TAG, "Queue cleared.")
+
+        mDatabaseWorker.submit {
+          PlayQueueDatabase.getInstance(context)
+            .getPlayQueueDao()
+            .clearQueue()
+        }
       }
     }
-
-    override fun remove(position: Int) {}
-    override fun onItemsRemoved(from: Int, to: Int) {}
-    override fun move(from: Int, to: Int) {}
-
-    override fun onClear() {
-      Log.v(LOG_TAG, "Queue cleared.")
-    }
-  }
 
   private val mDataSourceFactory = DefaultDataSourceFactory(
     context, Util.getUserAgent(context, BuildConfig.APPLICATION_ID)
@@ -267,7 +314,7 @@ class ExoPlayerHolder(context: Context, session: MediaSessionCompat) {
       Log.v(LOG_TAG, "createMediaSource($description) called from ${Thread.currentThread()}")
 
       // Create Metadata from Uri
-      val uri = description.mediaUri ?: Uri.fromFile(File(description.mediaPath))
+      val uri = description.mediaUri ?: Uri.fromFile(File(description.mediaId))
 
       // NOTE: ExtractorMediaSource.Factory is not reusable!
 
@@ -300,7 +347,7 @@ class ExoPlayerHolder(context: Context, session: MediaSessionCompat) {
   }
 
   // Last Played Settings
-  private val mLastPlayed = LastPlayedSetting(context)
+  private val mLastPlayed = LastPlayed()
 
   // Connect this holder to the session
   private val mMediaSessionConnector =
@@ -316,13 +363,26 @@ class ExoPlayerHolder(context: Context, session: MediaSessionCompat) {
   fun getPlayer(): Player = mPlayer
 
   fun release() {
+    Log.d(LOG_TAG, "Releasing ExoPlayer and related...")
+
     mMediaSessionConnector.setPlayer(null, null)
+
+    // Save Last Played settings
+    mLastPlayed.queuePosition = mPlayer.currentWindowIndex
+    mLastPlayed.trackPosition = mPlayer.currentPosition
+
+    mDatabaseWorker.submit {
+      PlayQueueDatabase.getInstance(context)
+        .getPlayQueueDao()
+        .saveLastPlayed(mLastPlayed)
+    }
 
     // Release player
     mPlayer.release()
 
-    // Stop background thread
+    // Stop background threads
     mWorkerThread.quitSafely()
+    mDatabaseWorker.shutdown()  // or awaitTermination()?
   }
 
   companion object {

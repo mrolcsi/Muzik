@@ -96,31 +96,52 @@ class BulkTimelineQueueEditor(
   fun onAddQueueItems(
     player: Player,
     descriptions: Collection<MediaDescriptionCompat>,
-    index: Int = queueMediaSource.size,
+    index: Int = -1,
     completionHandler: Handler? = null,
     onCompletionAction: (() -> Unit)? = null
   ) {
-    this.handler.post {
+    handler.post {
       val mediaSources = descriptions.map { sourceFactory.createMediaSource(it) }
       if (mediaSources.isNotEmpty()) {
-        queueMediaSource.addMediaSources(index, mediaSources, completionHandler, onCompletionAction)
-        queueDataAdapter.onItemsAdded(index, descriptions)
+        val realIndex = if (index < 0) queueMediaSource.size else index
+        queueMediaSource.addMediaSources(
+          realIndex, mediaSources, completionHandler, onCompletionAction
+        )
+        queueDataAdapter.onItemsAdded(realIndex, descriptions)
       }
     }
   }
 
   @Suppress("MemberVisibilityCanBePrivate", "UNUSED_PARAMETER")
-  fun onRemoveQueueItems(player: Player, fromIndex: Int, toIndex: Int) {
+  fun onRemoveQueueItems(
+    player: Player,
+    fromIndex: Int,
+    toIndex: Int,
+    completionHandler: Handler? = null,
+    onCompletionAction: (() -> Unit)? = null
+  ) {
     handler.post {
       // Range checks
       if (fromIndex < 0 || toIndex > queueMediaSource.size || fromIndex > toIndex) {
         throw IllegalArgumentException()
       } else if (fromIndex != toIndex) {
         // Checking index inequality prevents an unnecessary allocation.
+        queueMediaSource.removeMediaSourceRange(fromIndex, toIndex, completionHandler, onCompletionAction)
         queueDataAdapter.onItemsRemoved(fromIndex, toIndex)
-        queueMediaSource.removeMediaSourceRange(fromIndex, toIndex)
       }
     }
+  }
+
+  @Suppress("unused", "UNUSED_PARAMETER")
+  fun onMoveQueueItem(
+    player: Player,
+    from: Int,
+    to: Int,
+    completionHandler: Handler? = null,
+    onCompletionAction: (() -> Unit)? = null
+  ) {
+    queueMediaSource.moveMediaSource(from, to, completionHandler, onCompletionAction)
+    queueDataAdapter.move(from, to)
   }
 
   @Suppress("MemberVisibilityCanBePrivate")

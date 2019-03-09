@@ -10,10 +10,14 @@ import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.TaskStackBuilder
+import androidx.core.os.bundleOf
 import androidx.media.session.MediaButtonReceiver
 import com.google.android.exoplayer2.Player
+import hu.mrolcsi.android.lyricsplayer.database.playqueue.PlayQueueDatabase
+import hu.mrolcsi.android.lyricsplayer.extensions.media.addQueueItems
 import hu.mrolcsi.android.lyricsplayer.extensions.media.albumArt
 import hu.mrolcsi.android.lyricsplayer.extensions.media.from
+import hu.mrolcsi.android.lyricsplayer.extensions.media.prepareFromDescription
 import hu.mrolcsi.android.lyricsplayer.player.PlayerActivity
 import hu.mrolcsi.android.lyricsplayer.service.exoplayer.ExoPlayerHolder
 import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
@@ -228,13 +232,30 @@ class LPPlayerService : LPBrowserService() {
         }
       })
 
-      // FIXME: Load last played queue in the background
       AsyncTask.execute {
-        with(LastPlayedSetting(applicationContext)) {
-          if (lastPlayedQueue.isNotEmpty()) {
-            // create descriptions from StringSet
+        // Get last played queue from the database
+        val queue = PlayQueueDatabase.getInstance(applicationContext)
+          .getPlayQueueDao()
+          .getQueue()
+          .map { it.createDescription() }
+
+        if (queue.isNotEmpty()) {
+          // Get last played positions from the database
+          val lastPlayed = PlayQueueDatabase.getInstance(applicationContext)
+            .getPlayQueueDao()
+            .getLastPlayed()
+
+          lastPlayed?.let {
+            // Load last played song
+            controller.transportControls.prepareFromDescription(
+              queue[lastPlayed.queuePosition],
+              bundleOf(ExoPlayerHolder.EXTRA_DESIRED_QUEUE_POSITION to lastPlayed.queuePosition)
+            )
+            // Add the other songs to the queue
+            controller.addQueueItems(queue.filterIndexed { index, _ -> index != lastPlayed.queuePosition })
+            // Seek to saved position
+            controller.transportControls.seekTo(lastPlayed.trackPosition)
           }
-          // load descriptions into the queue
         }
       }
     }
