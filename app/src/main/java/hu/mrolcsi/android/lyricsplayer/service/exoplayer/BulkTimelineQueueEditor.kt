@@ -14,6 +14,7 @@ import com.google.android.exoplayer2.source.ConcatenatingMediaSource
 import hu.mrolcsi.android.lyricsplayer.service.exoplayer.BulkTimelineQueueEditor.QueueDataAdapter
 
 // TODO: copy docs from [TimelineQueueEditor]
+// TODO: create a wholly new class based on [TimelineQueueEditor]
 
 /**
  * An extension class to [TimelineQueueEditor] that also supports *add* and *remove*
@@ -104,10 +105,10 @@ class BulkTimelineQueueEditor(
       val mediaSources = descriptions.map { sourceFactory.createMediaSource(it) }
       if (mediaSources.isNotEmpty()) {
         val realIndex = if (index < 0) queueMediaSource.size else index
-        queueMediaSource.addMediaSources(
-          realIndex, mediaSources, completionHandler, onCompletionAction
-        )
-        queueDataAdapter.onItemsAdded(realIndex, descriptions)
+        queueMediaSource.addMediaSources(realIndex, mediaSources, completionHandler ?: handler) {
+          onCompletionAction?.invoke()
+          queueDataAdapter.onItemsAdded(realIndex, descriptions)
+        }
       }
     }
   }
@@ -126,8 +127,10 @@ class BulkTimelineQueueEditor(
         throw IllegalArgumentException()
       } else if (fromIndex != toIndex) {
         // Checking index inequality prevents an unnecessary allocation.
-        queueMediaSource.removeMediaSourceRange(fromIndex, toIndex, completionHandler, onCompletionAction)
-        queueDataAdapter.onItemsRemoved(fromIndex, toIndex)
+        queueMediaSource.removeMediaSourceRange(fromIndex, toIndex, completionHandler ?: handler) {
+          onCompletionAction?.invoke()
+          queueDataAdapter.onItemsRemoved(fromIndex, toIndex)
+        }
       }
     }
   }
@@ -140,15 +143,22 @@ class BulkTimelineQueueEditor(
     completionHandler: Handler? = null,
     onCompletionAction: (() -> Unit)? = null
   ) {
-    queueMediaSource.moveMediaSource(from, to, completionHandler, onCompletionAction)
-    queueDataAdapter.move(from, to)
+    queueMediaSource.moveMediaSource(from, to, completionHandler ?: handler) {
+      onCompletionAction?.invoke()
+      queueDataAdapter.move(from, to)
+    }
   }
 
   @Suppress("MemberVisibilityCanBePrivate")
-  fun clearQueue() {
+  fun clearQueue(
+    completionHandler: Handler? = null,
+    onCompletionAction: (() -> Unit)? = null
+  ) {
     handler.post {
-      queueMediaSource.clear()
-      queueDataAdapter.onClear()
+      queueMediaSource.clear(completionHandler ?: handler) {
+        queueDataAdapter.onClear()
+        onCompletionAction?.invoke()
+      }
     }
   }
 

@@ -30,7 +30,7 @@ import com.google.android.exoplayer2.util.Util
 import hu.mrolcsi.android.lyricsplayer.BuildConfig
 import hu.mrolcsi.android.lyricsplayer.database.playqueue.PlayQueueDatabase
 import hu.mrolcsi.android.lyricsplayer.database.playqueue.entities.LastPlayed
-import hu.mrolcsi.android.lyricsplayer.database.playqueue.entities.PlayQueueEntry
+import hu.mrolcsi.android.lyricsplayer.extensions.media.mediaPath
 import java.io.File
 import java.util.concurrent.Executors
 
@@ -139,7 +139,6 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
     override fun onPrepareFromSearch(query: String?, extras: Bundle?) {}
 
     fun onPrepareFromDescription(description: MediaDescriptionCompat, extras: Bundle?) {
-
       mBackgroundHandler.post {
         // Clear Queue
         mQueueEditor.clearQueue()
@@ -156,7 +155,6 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
           }
         }
       }
-
     }
 
     override fun onPrepare() {
@@ -236,16 +234,6 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
     object : BulkTimelineQueueEditor.QueueDataAdapter {
       override fun add(position: Int, description: MediaDescriptionCompat?) {
         Log.v(LOG_TAG, "mQueueAdapter.add($position, $description) called from ${Thread.currentThread()}")
-
-        description?.let {
-          mDatabaseWorker.submit {
-            PlayQueueDatabase.getInstance(context)
-              .getPlayQueueDao()
-              .addEntries(
-                PlayQueueEntry(position, description)
-              )
-          }
-        }
       }
 
       override fun onItemsAdded(position: Int, descriptions: Collection<MediaDescriptionCompat>) {
@@ -254,53 +242,19 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
           "mQueueAdapter.add($position, [${descriptions.size} items]) called from ${Thread.currentThread()}"
         )
 
-        mBackgroundHandler.post {
-          // After all the other songs were added to the queue, move the first song to it's proper position.
-          if (mDesiredQueuePosition in 0..mQueue.size) {
-            mQueueEditor.onMoveQueueItem(mPlayer, 0, mDesiredQueuePosition)
-            mDesiredQueuePosition = -1
-          }
-        }
-
-        mDatabaseWorker.submit {
-          PlayQueueDatabase.getInstance(context)
-            .getPlayQueueDao()
-            .addEntries(
-              *descriptions.mapIndexed { index, description ->
-                PlayQueueEntry(index, description)
-              }.toTypedArray()
-            )
+        // After all the other songs were added to the queue, move the first song to it's proper position.
+        if (mDesiredQueuePosition in 0..mQueue.size) {
+          mQueueEditor.onMoveQueueItem(mPlayer, 0, mDesiredQueuePosition)
+          mDesiredQueuePosition = -1
         }
       }
 
-      override fun remove(position: Int) {
-        mDatabaseWorker.submit {
-          PlayQueueDatabase.getInstance(context)
-            .getPlayQueueDao()
-            .removeEntryAtPosition(position)
-        }
-      }
-
-      override fun onItemsRemoved(from: Int, to: Int) {
-        mDatabaseWorker.submit {
-          PlayQueueDatabase.getInstance(context)
-            .getPlayQueueDao()
-            .removeEntriesInRange(from, to)
-        }
-      }
-
-      override fun move(from: Int, to: Int) {
-        // TODO: reflect change in database?
-      }
+      override fun remove(position: Int) {}
+      override fun onItemsRemoved(from: Int, to: Int) {}
+      override fun move(from: Int, to: Int) {}
 
       override fun onClear() {
         Log.v(LOG_TAG, "Queue cleared.")
-
-        mDatabaseWorker.submit {
-          PlayQueueDatabase.getInstance(context)
-            .getPlayQueueDao()
-            .clearQueue()
-        }
       }
     }
 
@@ -314,7 +268,7 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
       Log.v(LOG_TAG, "createMediaSource($description) called from ${Thread.currentThread()}")
 
       // Create Metadata from Uri
-      val uri = description.mediaUri ?: Uri.fromFile(File(description.mediaId))
+      val uri = description.mediaUri ?: Uri.fromFile(File(description.mediaPath))
 
       // NOTE: ExtractorMediaSource.Factory is not reusable!
 

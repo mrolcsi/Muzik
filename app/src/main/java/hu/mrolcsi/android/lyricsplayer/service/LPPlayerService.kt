@@ -42,7 +42,7 @@ class LPPlayerService : LPBrowserService() {
   override fun onCreate() {
     super.onCreate()
 
-    Log.d(LOG_TAG, "onCreate()")
+    Log.i(LOG_TAG, "onCreate()")
 
     // Build a PendingIntent that can be used to launch the PlayerActivity.
     val playerActivityPendingIntent = TaskStackBuilder.create(this)
@@ -267,6 +267,7 @@ class LPPlayerService : LPBrowserService() {
   }
 
   override fun onDestroy() {
+    Log.i(LOG_TAG, "onDestroy()")
 
     // Deactivate the session
     mMediaSession.run {
