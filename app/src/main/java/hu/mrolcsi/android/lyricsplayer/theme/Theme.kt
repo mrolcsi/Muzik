@@ -30,8 +30,8 @@ data class Theme(
 
     fun getRippleDrawable(rippleColor: Int, backgroundColor: Int): RippleDrawable = RippleDrawable(
       ColorStateList.valueOf(rippleColor),
-      ColorDrawable(backgroundColor),
-      null
+      null,
+      ColorDrawable(backgroundColor)
     )
 
     fun getRippleDrawable(rippleColor: Int, background: Drawable? = null) = RippleDrawable(
