@@ -1,6 +1,7 @@
 package hu.mrolcsi.android.lyricsplayer.service
 
 import android.app.PendingIntent
+import android.app.Service
 import android.content.Intent
 import android.os.AsyncTask
 import android.support.v4.media.MediaMetadataCompat
@@ -144,7 +145,7 @@ class LPPlayerService : LPBrowserService() {
               val mediaId = metadata.description?.mediaId
               val differentMediaId = mediaId != previousMetadata?.description?.mediaId
 
-              // Prepare oonPostExecute callback
+              // Prepare onPostExecute callback
               val onPostExecute: (MediaMetadataCompat) -> Unit = { newMetadata ->
                 // Give newly created metadata to the session
                 setMetadata(newMetadata)
@@ -184,22 +185,27 @@ class LPPlayerService : LPBrowserService() {
           }
         }
 
-        private fun updateNotification(playbackState: PlaybackStateCompat) {
-          val metadata = controller.metadata
-          if (metadata == null) {
-            Log.w(LOG_TAG, "MediaMetadata is null!")
+        private fun updateNotification(state: PlaybackStateCompat) {
+          val updatedState = state.state
+          if (controller.metadata == null) {
             return
           }
 
           // Skip building a notification when state is "none".
-          val notification = if (playbackState.state != PlaybackStateCompat.STATE_NONE) {
+          val notification = if (updatedState != PlaybackStateCompat.STATE_NONE) {
             mNotificationBuilder.buildNotification(sessionToken)
           } else {
             null
           }
 
-          when (playbackState.state) {
+          when (updatedState) {
+            PlaybackStateCompat.STATE_BUFFERING,
             PlaybackStateCompat.STATE_PLAYING -> {
+              /**
+               * This may look strange, but the documentation for [Service.startForeground]
+               * notes that "calling this method does *not* put the service in the started
+               * state itself, even though the name sounds like it."
+               */
               if (!isForegroundService) {
                 startService(Intent(applicationContext, this@LPPlayerService.javaClass))
                 startForeground(LPNotificationBuilder.NOTIFICATION_ID, notification)
@@ -215,9 +221,8 @@ class LPPlayerService : LPBrowserService() {
                 isForegroundService = false
 
                 // If playback has ended, also stop the service.
-                when (playbackState.state) {
-                  PlaybackStateCompat.STATE_NONE,
-                  PlaybackStateCompat.STATE_STOPPED -> stopSelf()
+                if (updatedState == PlaybackStateCompat.STATE_NONE) {
+                  stopSelf()
                 }
 
                 if (notification != null) {
@@ -263,7 +268,7 @@ class LPPlayerService : LPBrowserService() {
 
   override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
     MediaButtonReceiver.handleIntent(mMediaSession, intent)
-    return super.onStartCommand(intent, flags, startId)
+    return Service.START_STICKY
   }
 
   override fun onDestroy() {
@@ -281,10 +286,8 @@ class LPPlayerService : LPBrowserService() {
     // Release player and related resources
     mPlayerHolder.release()
 
-    // Remove notification
-    NotificationManagerCompat.from(this).cancel(LPNotificationBuilder.NOTIFICATION_ID)
-
-    super.onDestroy()
+    // Close database
+    PlayQueueDatabase.getInstance(applicationContext).close()
   }
 
   companion object {

@@ -53,6 +53,8 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
     override fun onPlay(player: Player?) {
       super.onPlay(player)
 
+      Log.v(LOG_TAG, "onPlay()")
+
       // Start updater if it is enabled (Gets cancelled in onStop())
       if (mProgressUpdater.isEnabled) {
         mProgressUpdater.startUpdater()
@@ -62,6 +64,8 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
     override fun onPause(player: Player) {
       super.onPause(player)
 
+      Log.v(LOG_TAG, "onPause()")
+
       mProgressUpdater.stopUpdater()
 
       // Save current position to SharedPrefs
@@ -70,6 +74,8 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
 
     override fun onStop(player: Player) {
       super.onStop(player)
+
+      Log.v(LOG_TAG, "onStop()")
 
       // Rewind track
       player.seekTo(0)
