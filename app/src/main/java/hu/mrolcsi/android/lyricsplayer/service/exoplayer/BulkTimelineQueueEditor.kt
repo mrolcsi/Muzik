@@ -10,44 +10,43 @@ import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
 import com.google.android.exoplayer2.ext.mediasession.TimelineQueueEditor
+import com.google.android.exoplayer2.ext.mediasession.TimelineQueueEditor.COMMAND_MOVE_QUEUE_ITEM
+import com.google.android.exoplayer2.ext.mediasession.TimelineQueueEditor.EXTRA_FROM_INDEX
+import com.google.android.exoplayer2.ext.mediasession.TimelineQueueEditor.EXTRA_TO_INDEX
 import com.google.android.exoplayer2.source.ConcatenatingMediaSource
-import hu.mrolcsi.android.lyricsplayer.service.exoplayer.BulkTimelineQueueEditor.QueueDataAdapter
-
-// TODO: copy docs from [TimelineQueueEditor]
-// TODO: create a wholly new class based on [TimelineQueueEditor]
+import com.google.android.exoplayer2.util.Util
+import hu.mrolcsi.android.lyricsplayer.service.exoplayer.BulkTimelineQueueEditor.OnQueueChangedCallback
 
 /**
- * An extension class to [TimelineQueueEditor] that also supports *add* and *remove*
+ * An extension class to [TimelineQueueEditor] that also supports *onItemAdded* and *onItemRemoved*
  * operations to be performed in bulk.
  *
  * @param mediaController A [MediaControllerCompat] to read the current queue.
  * @param queueMediaSource The [ConcatenatingMediaSource] to manipulate.
- * @param queueDataAdapter A [QueueDataAdapter] to change the backing data.
+ * @param onQueueChangedCallback A [OnQueueChangedCallback] to get notified when the queue changes.
  * @param sourceFactory The [TimelineQueueEditor.MediaSourceFactory] to build media sources.
  * @param handler An optional [Handler] to process the operations.
+ *                It is recommended to use a single background thread.
  *
  * @see TimelineQueueEditor
  */
 class BulkTimelineQueueEditor(
   private val mediaController: MediaControllerCompat,
   private val queueMediaSource: ConcatenatingMediaSource,
-  private val queueDataAdapter: QueueDataAdapter,
+  private val onQueueChangedCallback: OnQueueChangedCallback,
   private val sourceFactory: TimelineQueueEditor.MediaSourceFactory,
   private val handler: Handler = Handler()
 ) : MediaSessionConnector.QueueEditor, MediaSessionConnector.CommandReceiver {
 
-  private val mInternalEditor: TimelineQueueEditor =
-    TimelineQueueEditor(mediaController, queueMediaSource, queueDataAdapter, sourceFactory)
-
   // -- COMMAND RECEIVER --
 
-  override fun getCommands(): Array<String> {
-    return mInternalEditor.commands +
-        COMMAND_ADD_QUEUE_ITEMS +
-        COMMAND_ADD_QUEUE_ITEMS_AT +
-        COMMAND_REMOVE_QUEUE_ITEMS_RANGE +
-        COMMAND_CLEAR_QUEUE
-  }
+  override fun getCommands(): Array<String> = arrayOf(
+    COMMAND_MOVE_QUEUE_ITEM,
+    COMMAND_ADD_QUEUE_ITEMS,
+    COMMAND_ADD_QUEUE_ITEMS_AT,
+    COMMAND_REMOVE_QUEUE_ITEMS_RANGE,
+    COMMAND_CLEAR_QUEUE
+  )
 
   override fun onCommand(player: Player, command: String, extras: Bundle?, cb: ResultReceiver?) {
     Log.d(LOG_TAG, "Received command: $command,  Params: $extras")
@@ -67,7 +66,13 @@ class BulkTimelineQueueEditor(
         onRemoveQueueItems(player, from, to)
       }
       COMMAND_CLEAR_QUEUE -> clearQueue()
-      else -> mInternalEditor.onCommand(player, command, extras, cb)
+      COMMAND_MOVE_QUEUE_ITEM -> {
+        val from = extras!!.getInt(EXTRA_FROM_INDEX, C.INDEX_UNSET)
+        val to = extras.getInt(EXTRA_TO_INDEX, C.INDEX_UNSET)
+        if (from != C.INDEX_UNSET && to != C.INDEX_UNSET) {
+          onMoveQueueItem(player, from, to)
+        }
+      }
     }
   }
 
@@ -75,102 +80,129 @@ class BulkTimelineQueueEditor(
 
   override fun onAddQueueItem(player: Player, description: MediaDescriptionCompat) {
     handler.post {
-      mInternalEditor.onAddQueueItem(player, description)
+      val mediaSource = sourceFactory.createMediaSource(description)
+      queueMediaSource.addMediaSource(mediaSource, handler) {
+        onQueueChangedCallback.onItemAdded(queueMediaSource.size - 1, description)
+      }
     }
   }
 
   override fun onAddQueueItem(player: Player, description: MediaDescriptionCompat, index: Int) {
     handler.post {
-      mInternalEditor.onAddQueueItem(player, description, index)
+      val mediaSource = sourceFactory.createMediaSource(description)
+      queueMediaSource.addMediaSource(index, mediaSource, handler) {
+        onQueueChangedCallback.onItemAdded(index, description)
+      }
+    }
+  }
+
+  @Suppress("MemberVisibilityCanBePrivate", "UNUSED_PARAMETER")
+  fun onAddQueueItems(player: Player, descriptions: Collection<MediaDescriptionCompat>, index: Int = -1) {
+    handler.post {
+      val mediaSources = descriptions.map { sourceFactory.createMediaSource(it) }
+      if (mediaSources.isNotEmpty()) {
+        val realIndex = if (index < 0) queueMediaSource.size else index
+        queueMediaSource.addMediaSources(realIndex, mediaSources, handler) {
+          onQueueChangedCallback.onItemsAdded(realIndex, descriptions)
+        }
+      }
     }
   }
 
   override fun onRemoveQueueItem(player: Player, description: MediaDescriptionCompat) {
     handler.post {
-      mInternalEditor.onRemoveQueueItem(player, description)
-    }
-  }
-
-  // -- CUSTOM IMPLEMENTATIONS --
-
-  @Suppress("MemberVisibilityCanBePrivate", "UNUSED_PARAMETER")
-  fun onAddQueueItems(
-    player: Player,
-    descriptions: Collection<MediaDescriptionCompat>,
-    index: Int = -1,
-    completionHandler: Handler? = null,
-    onCompletionAction: (() -> Unit)? = null
-  ) {
-    handler.post {
-      val mediaSources = descriptions.map { sourceFactory.createMediaSource(it) }
-      if (mediaSources.isNotEmpty()) {
-        val realIndex = if (index < 0) queueMediaSource.size else index
-        queueMediaSource.addMediaSources(realIndex, mediaSources, completionHandler ?: handler) {
-          onCompletionAction?.invoke()
-          queueDataAdapter.onItemsAdded(realIndex, descriptions)
+      val queue = mediaController.queue
+      for (i in queue.indices) {
+        if (Util.areEqual(queue[i].description.mediaId, description.mediaId)) {
+          queueMediaSource.removeMediaSource(i, handler) {
+            onQueueChangedCallback.onItemRemoved(i)
+          }
+          break
         }
       }
     }
   }
 
   @Suppress("MemberVisibilityCanBePrivate", "UNUSED_PARAMETER")
-  fun onRemoveQueueItems(
-    player: Player,
-    fromIndex: Int,
-    toIndex: Int,
-    completionHandler: Handler? = null,
-    onCompletionAction: (() -> Unit)? = null
-  ) {
+  fun onRemoveQueueItems(player: Player, fromIndex: Int, toIndex: Int) {
     handler.post {
       // Range checks
       if (fromIndex < 0 || toIndex > queueMediaSource.size || fromIndex > toIndex) {
         throw IllegalArgumentException()
       } else if (fromIndex != toIndex) {
         // Checking index inequality prevents an unnecessary allocation.
-        queueMediaSource.removeMediaSourceRange(fromIndex, toIndex, completionHandler ?: handler) {
-          onCompletionAction?.invoke()
-          queueDataAdapter.onItemsRemoved(fromIndex, toIndex)
+        queueMediaSource.removeMediaSourceRange(fromIndex, toIndex, handler) {
+          onQueueChangedCallback.onItemsRemoved(fromIndex, toIndex)
         }
       }
     }
   }
 
   @Suppress("unused", "UNUSED_PARAMETER")
-  fun onMoveQueueItem(
-    player: Player,
-    from: Int,
-    to: Int,
-    completionHandler: Handler? = null,
-    onCompletionAction: (() -> Unit)? = null
-  ) {
-    queueMediaSource.moveMediaSource(from, to, completionHandler ?: handler) {
-      onCompletionAction?.invoke()
-      queueDataAdapter.move(from, to)
+  fun onMoveQueueItem(player: Player, from: Int, to: Int) {
+    handler.post {
+      queueMediaSource.moveMediaSource(from, to, handler) {
+        onQueueChangedCallback.onItemMoved(from, to)
+      }
     }
   }
 
   @Suppress("MemberVisibilityCanBePrivate")
-  fun clearQueue(
-    completionHandler: Handler? = null,
-    onCompletionAction: (() -> Unit)? = null
-  ) {
+  fun clearQueue() {
     handler.post {
-      queueMediaSource.clear(completionHandler ?: handler) {
-        queueDataAdapter.onClear()
-        onCompletionAction?.invoke()
+      queueMediaSource.clear(handler) {
+        onQueueChangedCallback.onQueueCleared()
       }
     }
   }
 
   // -- INTERFACES --
 
-  interface QueueDataAdapter : TimelineQueueEditor.QueueDataAdapter {
+  interface OnQueueChangedCallback {
 
+    /**
+     * Called when an [MediaDescriptionCompat] was added at the given `position`.
+     *
+     * @param position The position at which the item was added.
+     * @param description The [MediaDescriptionCompat] that was added to the queue.
+     */
+    fun onItemAdded(position: Int, description: MediaDescriptionCompat)
+
+    /**
+     * Called when an item at `position` was removed from the queue.
+     *
+     * @param position The position the item was removed from.
+     */
+    fun onItemRemoved(position: Int)
+
+    /**
+     * Called when a queue item was moved from position `from` to position `to`.
+     *
+     * @param from The position from which the item was removed.
+     * @param to The target position where the item was moved to.
+     */
+    fun onItemMoved(from: Int, to: Int)
+
+    /**
+     * Called when multiple [MediaDescriptionCompat]s were added at the given `position`.
+     *
+     * @param position The position at which the item was added.
+     * @param descriptions The [MediaDescriptionCompat] collection that was added to the queue.
+     */
     fun onItemsAdded(position: Int, descriptions: Collection<MediaDescriptionCompat>)
 
+    /**
+     * Called when a range of items where removed starting at `from` and ending at `to`.
+     *
+     * @param from The first position of the removed items.
+     * @param to The last position of the removed items.
+     */
     fun onItemsRemoved(from: Int, to: Int)
 
-    fun onClear()
+    /**
+     * Called after the whole queue was cleared.
+     */
+    fun onQueueCleared()
   }
 
   companion object {

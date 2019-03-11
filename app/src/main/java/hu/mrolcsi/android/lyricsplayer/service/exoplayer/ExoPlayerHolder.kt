@@ -36,10 +36,14 @@ import java.util.concurrent.Executors
 
 class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat) {
 
+  //region  -- HANDLERS & THREADS --
+
   private val mMainHandler = Handler(Looper.getMainLooper())
   private val mWorkerThread = HandlerThread("PlayerWorker").apply { start() }
   private val mBackgroundHandler = Handler(mWorkerThread.looper)
   private val mDatabaseWorker = Executors.newSingleThreadExecutor()
+
+  //endregion
 
   //region -- PLAYBACK CONTROLLER --
 
@@ -147,9 +151,10 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
         mDesiredQueuePosition = extras?.getInt(EXTRA_DESIRED_QUEUE_POSITION, -1) ?: -1
 
         // Add Description to Queue
-        mQueueEditor.onAddQueueItems(mPlayer, listOf(description), 0, mMainHandler) {
-          // Call onPrepare() on main thread when done.
-          onPrepare()
+        mQueueEditor.onAddQueueItem(mPlayer, description, 0)
+
+        mMainHandler.post {
+          // Start playback when ready
           if (extras?.getBoolean(ACTION_PLAY_FROM_DESCRIPTION, false) == true) {
             mPlayer.playWhenReady = true
           }
@@ -230,31 +235,51 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
     ShuffleOrder.DefaultShuffleOrder(0)
   )
 
-  private val mQueueDataAdapter: BulkTimelineQueueEditor.QueueDataAdapter =
-    object : BulkTimelineQueueEditor.QueueDataAdapter {
-      override fun add(position: Int, description: MediaDescriptionCompat?) {
-        Log.v(LOG_TAG, "mQueueAdapter.add($position, $description) called from ${Thread.currentThread()}")
+  private val mOnQueueChangedCallback: BulkTimelineQueueEditor.OnQueueChangedCallback =
+    object : BulkTimelineQueueEditor.OnQueueChangedCallback {
+      override fun onItemAdded(position: Int, description: MediaDescriptionCompat) {
+        Log.v(LOG_TAG, "onItemAdded($position, $description) called from ${Thread.currentThread()}")
+
+        // This usually gets called after the first item was added.
+        // Prepare the player here, so we dont have to unnecessarily `prepare` in the other callbacks.
+        mMainHandler.post {
+          val playerState = mPlayer.playbackState
+
+          Log.v(LOG_TAG, "onItemAdded(Player State = $playerState)")
+
+          if (playerState == Player.STATE_IDLE || playerState == Player.STATE_ENDED) {
+            mPlaybackPreparer.onPrepare()
+          }
+        }
       }
 
       override fun onItemsAdded(position: Int, descriptions: Collection<MediaDescriptionCompat>) {
         Log.v(
           LOG_TAG,
-          "mQueueAdapter.add($position, [${descriptions.size} items]) called from ${Thread.currentThread()}"
+          "onItemsAdded($position, [${descriptions.size} items]) called from ${Thread.currentThread()}"
         )
 
-        // After all the other songs were added to the queue, move the first song to it's proper position.
+        // After all the other songs were added to the queue, onItemMoved the first song to it's proper position.
         if (mDesiredQueuePosition in 0..mQueue.size) {
           mQueueEditor.onMoveQueueItem(mPlayer, 0, mDesiredQueuePosition)
           mDesiredQueuePosition = -1
         }
       }
 
-      override fun remove(position: Int) {}
-      override fun onItemsRemoved(from: Int, to: Int) {}
-      override fun move(from: Int, to: Int) {}
+      override fun onItemRemoved(position: Int) {
 
-      override fun onClear() {
-        Log.v(LOG_TAG, "Queue cleared.")
+      }
+
+      override fun onItemsRemoved(from: Int, to: Int) {
+
+      }
+
+      override fun onItemMoved(from: Int, to: Int) {
+        Log.v(LOG_TAG, "onItemsMoved($from -> $to) called from ${Thread.currentThread()}")
+      }
+
+      override fun onQueueCleared() {
+        Log.v(LOG_TAG, "onQueueCleared()")
       }
     }
 
@@ -280,7 +305,7 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
   private val mQueueEditor = BulkTimelineQueueEditor(
     session.controller,
     mQueue,
-    mQueueDataAdapter,
+    mOnQueueChangedCallback,
     mQueueMediaSourceFactory,
     mBackgroundHandler
   )
@@ -305,10 +330,10 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
 
   // Connect this holder to the session
   private val mMediaSessionConnector =
-    MediaSessionConnector(session, mPlaybackController).also {
-      it.setPlayer(mPlayer, mPlaybackPreparer, mUpdaterActionProvider, mPrepareFromDescriptionActionProvider)
-      it.setQueueNavigator(mQueueNavigator)
-      it.setQueueEditor(mQueueEditor)
+    MediaSessionConnector(session, mPlaybackController).apply {
+      setPlayer(mPlayer, mPlaybackPreparer, mUpdaterActionProvider, mPrepareFromDescriptionActionProvider)
+      setQueueNavigator(mQueueNavigator)
+      setQueueEditor(mQueueEditor)
     }
 
   /**
