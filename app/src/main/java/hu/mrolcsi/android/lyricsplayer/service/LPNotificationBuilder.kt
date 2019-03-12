@@ -79,7 +79,7 @@ class LPNotificationBuilder(private val context: Context) {
     }
 
     val controller = MediaControllerCompat(context, sessionToken)
-    val description = controller.metadata.description
+    val description = controller.metadata?.description
     val playbackState = controller.playbackState
 
     val builder = NotificationCompat.Builder(context, NOTIFICATION_CHANNEL)
@@ -107,10 +107,10 @@ class LPNotificationBuilder(private val context: Context) {
 
     return with(builder) {
       setContentIntent(controller.sessionActivity)
-      setContentText(description.subtitle)
-      setContentTitle(description.title)
+      setContentText(description?.subtitle ?: "No metadata")
+      setContentTitle(description?.title ?: "No metadata")
       setDeleteIntent(stopPendingIntent)
-      description.iconBitmap?.let { albumArt = it }
+      description?.iconBitmap?.let { albumArt = it }
       setLargeIcon(albumArt)
       setOnlyAlertOnce(true)
       setSmallIcon(R.drawable.ic_song)

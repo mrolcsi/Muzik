@@ -70,6 +70,20 @@ class LPPlayerService : LPBrowserService() {
       mPlayerHolder = ExoPlayerHolder(applicationContext, this).apply {
         getPlayer().addListener(object : Player.EventListener {
           override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
+            Log.v(LOG_TAG, "onPlayerStateChanged(playWhenReady=$playWhenReady, playbackState=$playbackState)")
+//            when (playbackState) {
+//              Player.STATE_BUFFERING, Player.STATE_READY -> startService(
+//                Intent(
+//                  this@LPPlayerService,
+//                  LPPlayerService::class.java
+//                )
+//              )
+//              Player.STATE_IDLE, Player.STATE_ENDED -> {
+//                stopForeground(true)
+//                stopSelf()
+//              }
+//            }
+
 //            if (mNotification != null) {
 //              when (playWhenReady) {
 //                // Enable swipe-to-dismiss on the notification
@@ -186,10 +200,11 @@ class LPPlayerService : LPBrowserService() {
         }
 
         private fun updateNotification(state: PlaybackStateCompat) {
+          Log.v(LOG_TAG, "updateNotification($state)")
           val updatedState = state.state
-          if (controller.metadata == null) {
-            return
-          }
+//          if (controller.metadata == null) {
+//            return
+//          }
 
           // Skip building a notification when state is "none".
           val notification = if (updatedState != PlaybackStateCompat.STATE_NONE) {
@@ -207,29 +222,35 @@ class LPPlayerService : LPBrowserService() {
                * state itself, even though the name sounds like it."
                */
               if (!isForegroundService) {
+                Log.d(LOG_TAG, "updateNotification(): startService(...) and startForeground(id,notification) called.")
                 startService(Intent(applicationContext, this@LPPlayerService.javaClass))
                 startForeground(LPNotificationBuilder.NOTIFICATION_ID, notification)
                 isForegroundService = true
               } else if (notification != null) {
+                Log.v(LOG_TAG, "updateNotification() notify(id, notification) called.")
                 NotificationManagerCompat.from(applicationContext)
                   .notify(LPNotificationBuilder.NOTIFICATION_ID, notification)
               }
             }
             else -> {
               if (isForegroundService) {
+                Log.d(LOG_TAG, "updateNotification(): stopForeground(false) called.")
                 stopForeground(false)
                 isForegroundService = false
 
-                // If playback has ended, also stop the service.
-                if (updatedState == PlaybackStateCompat.STATE_NONE) {
-                  stopSelf()
-                }
-
                 if (notification != null) {
+                  Log.v(LOG_TAG, "updateNotification() notify(id, notification) called.")
                   NotificationManagerCompat.from(applicationContext)
                     .notify(LPNotificationBuilder.NOTIFICATION_ID, notification)
                 } else {
+                  Log.d(LOG_TAG, "updateNotification(): stopForeground(true) called.")
                   stopForeground(true)
+                }
+              } else {
+                // If playback has ended, also stop the service.
+                if (updatedState == PlaybackStateCompat.STATE_NONE) {
+                  Log.d(LOG_TAG, "updateNotification(): stopSelf() called.")
+                  stopSelf()
                 }
               }
             }
@@ -285,9 +306,6 @@ class LPPlayerService : LPBrowserService() {
 
     // Release player and related resources
     mPlayerHolder.release()
-
-    // Close database
-    PlayQueueDatabase.getInstance(applicationContext).close()
   }
 
   companion object {
