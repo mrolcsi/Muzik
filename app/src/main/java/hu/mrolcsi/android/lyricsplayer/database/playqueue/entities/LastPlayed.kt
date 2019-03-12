@@ -15,4 +15,9 @@ class LastPlayed {
   @ColumnInfo(name = "track_position") var trackPosition: Long = 0
   @ColumnInfo(name = "shuffle_mode") var shuffleMode: Int = 0
   @ColumnInfo(name = "repeat_mode") var repeatMode: Int = 0
+
+  override fun toString(): String {
+    return "LastPlayed(queuePosition=$queuePosition, trackPosition=$trackPosition, shuffleMode=$shuffleMode, repeatMode=$repeatMode)"
+  }
+
 }

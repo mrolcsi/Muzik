@@ -17,17 +17,17 @@ interface PlayQueueDao {
   // INSERTS
 
   @Insert(onConflict = OnConflictStrategy.REPLACE)
-  fun addEntries(vararg entries: PlayQueueEntry)
+  fun insertEntries(vararg entries: PlayQueueEntry)
 
   // DELETES
 
   @Delete
   fun removeEntries(vararg entries: PlayQueueEntry)
 
-  @Query("DELETE FROM play_queue WHERE queue_position = :position")
+  @Query("DELETE FROM play_queue WHERE _id = :position")
   fun removeEntryAtPosition(position: Int)
 
-  @Query("DELETE FROM play_queue WHERE queue_position BETWEEN :from AND :to")
+  @Query("DELETE FROM play_queue WHERE _id BETWEEN :from AND :to")
   fun removeEntriesInRange(from: Int, to: Int)
 
   @Query("DELETE from play_queue")
@@ -35,10 +35,10 @@ interface PlayQueueDao {
 
   // QUERIES
 
-  @Query("SELECT * FROM play_queue ORDER BY queue_position")
+  @Query("SELECT * FROM play_queue ORDER BY _id")
   fun queryQueue(): LiveData<List<PlayQueueEntry>>
 
-  @Query("SELECT * FROM play_queue ORDER BY queue_position")
+  @Query("SELECT * FROM play_queue ORDER BY _id")
   fun getQueue(): List<PlayQueueEntry>
 
   //endregion
@@ -48,10 +48,10 @@ interface PlayQueueDao {
   @Insert(onConflict = OnConflictStrategy.REPLACE)
   fun saveLastPlayed(lastPlayed: LastPlayed)
 
-  @Query("SELECT * FROM last_played")
+  @Query("SELECT * FROM last_played LIMIT 1")
   fun queryLastPlayed(): LiveData<LastPlayed>
 
-  @Query("SELECT * FROM last_played")
+  @Query("SELECT * FROM last_played LIMIT 1")
   fun getLastPlayed(): LastPlayed?
 
   //endregion

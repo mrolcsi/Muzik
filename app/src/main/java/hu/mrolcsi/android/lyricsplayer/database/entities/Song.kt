@@ -36,9 +36,14 @@ open class Song(
       .setDescription(album)
       .setExtras(
         bundleOf(
-          MediaStore.Audio.AudioColumns._ID to _id,
-          MediaStore.Audio.AudioColumns.DURATION to duration
+          // Store everything as String
+          MediaStore.Audio.AudioColumns._ID to _id.toString(),
+          MediaStore.Audio.AudioColumns.DURATION to duration.toString()
         )
       ).build()
+
+  override fun toString(): String {
+    return "Song(_id=$_id, _data='$_data')"
+  }
 
 }

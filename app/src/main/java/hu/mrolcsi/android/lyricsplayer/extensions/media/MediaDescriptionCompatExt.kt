@@ -13,7 +13,8 @@ inline val MediaDescriptionCompat.artistKey: String?
   get() = this.extras?.getString(MediaStore.Audio.ArtistColumns.ARTIST_KEY)
 
 inline val MediaDescriptionCompat.artist: String?
-  get() = this.extras?.getString(MediaStore.Audio.ArtistColumns.ARTIST)
+  get() = subtitle?.toString()
+    ?: this.extras?.getString(MediaStore.Audio.ArtistColumns.ARTIST)
     ?: this.extras?.getString(MediaMetadataCompat.METADATA_KEY_ARTIST)
 
 inline val MediaDescriptionCompat.numberOfAlbums: Int
@@ -28,7 +29,8 @@ inline val MediaDescriptionCompat.albumKey: String?
   get() = this.extras?.getString(MediaStore.Audio.AlbumColumns.ALBUM_KEY)
 
 inline val MediaDescriptionCompat.album: String?
-  get() = this.extras?.getString(MediaStore.Audio.AlbumColumns.ALBUM)
+  get() = description?.toString()
+    ?: this.extras?.getString(MediaStore.Audio.AlbumColumns.ALBUM)
     ?: this.extras?.getString(MediaMetadataCompat.METADATA_KEY_ALBUM)
 
 inline val MediaDescriptionCompat.albumArtist: String?
@@ -51,7 +53,8 @@ inline val MediaDescriptionCompat.id: Long
   get() = this.extras?.getString(MediaStore.Audio.Media._ID)?.toLong() ?: -1
 
 inline val MediaDescriptionCompat.mediaPath: String?
-  get() = this.extras?.getString(MediaStore.Audio.Media.DATA)
+  get() = mediaId
+    ?: this.extras?.getString(MediaStore.Audio.Media.DATA)
     ?: this.extras?.getString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID)
 
 inline val MediaDescriptionCompat.songTitle: String?
