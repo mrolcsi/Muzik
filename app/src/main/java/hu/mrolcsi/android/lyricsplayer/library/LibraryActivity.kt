@@ -28,9 +28,7 @@ import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
-import com.bumptech.glide.request.transition.DrawableCrossFadeFactory
+import hu.mrolcsi.android.lyricsplayer.GlideApp
 import hu.mrolcsi.android.lyricsplayer.R
 import hu.mrolcsi.android.lyricsplayer.extensions.applyColorToNavigationBarIcons
 import hu.mrolcsi.android.lyricsplayer.extensions.applyColorToStatusBarIcons
@@ -271,13 +269,10 @@ class LibraryActivity : AppCompatActivity() {
     // Update cover art in ActionBar
     mNowPlayingCoverArt?.let { imgView ->
       metadata?.description?.iconBitmap.let { bitmap ->
-        Glide.with(this)
+        GlideApp.with(this)
+          .asDrawable()
           .load(bitmap)
-          .transition(
-            DrawableTransitionOptions.with(
-              DrawableCrossFadeFactory.Builder().setCrossFadeEnabled(true).build()
-            )
-          ).into(imgView)
+          .into(imgView)
       }
     }
   }
@@ -295,14 +290,11 @@ class LibraryActivity : AppCompatActivity() {
     // Navigation Bar Icons
     applyColorToNavigationBarIcons(theme.secondaryBackgroundColor)
 
-    // Animate changes
-    val animationDuration: Long = 500
-
     ValueAnimator.ofArgb(
       ThemeManager.previousTheme?.primaryBackgroundColor ?: Color.BLACK,
       theme.primaryBackgroundColor
     ).apply {
-      duration = animationDuration
+      duration = Theme.PREFERRED_ANIMATION_DURATION
       addUpdateListener {
         val color = it.animatedValue as Int
         // Status Bar
@@ -317,7 +309,7 @@ class LibraryActivity : AppCompatActivity() {
       ThemeManager.previousTheme?.secondaryBackgroundColor ?: Color.BLACK,
       theme.secondaryBackgroundColor
     ).apply {
-      duration = animationDuration
+      duration = Theme.PREFERRED_ANIMATION_DURATION
       addUpdateListener {
         val color = it.animatedValue as Int
         // Navigation Bar
@@ -332,7 +324,7 @@ class LibraryActivity : AppCompatActivity() {
       ThemeManager.previousTheme?.tertiaryBackgroundColor ?: Color.BLACK,
       theme.tertiaryBackgroundColor
     ).apply {
-      duration = animationDuration
+      duration = Theme.PREFERRED_ANIMATION_DURATION
       addUpdateListener {
         val color = it.animatedValue as Int
         // Window background
@@ -345,7 +337,7 @@ class LibraryActivity : AppCompatActivity() {
       ThemeManager.previousTheme?.primaryForegroundColor ?: Color.WHITE,
       theme.primaryForegroundColor
     ).apply {
-      duration = animationDuration
+      duration = Theme.PREFERRED_ANIMATION_DURATION
       addUpdateListener {
         val color = it.animatedValue as Int
         // Toolbar Icon
@@ -364,7 +356,7 @@ class LibraryActivity : AppCompatActivity() {
       ThemeManager.previousTheme?.secondaryForegroundColor ?: Color.WHITE,
       theme.secondaryForegroundColor
     ).apply {
-      duration = animationDuration
+      duration = Theme.PREFERRED_ANIMATION_DURATION
       addUpdateListener {
         val color = it.animatedValue as Int
         // BottomNavigation Selected Colors

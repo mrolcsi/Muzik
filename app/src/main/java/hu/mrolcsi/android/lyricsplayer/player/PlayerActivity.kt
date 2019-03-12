@@ -6,6 +6,7 @@ import android.content.Intent
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.media.AudioManager
+import android.os.AsyncTask
 import android.os.Bundle
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
@@ -29,6 +30,8 @@ import androidx.core.view.get
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.palette.graphics.Palette
+import com.bumptech.glide.request.target.Target
+import hu.mrolcsi.android.lyricsplayer.GlideApp
 import hu.mrolcsi.android.lyricsplayer.R
 import hu.mrolcsi.android.lyricsplayer.extensions.applyColorToNavigationBarIcons
 import hu.mrolcsi.android.lyricsplayer.extensions.applyColorToStatusBarIcons
@@ -314,22 +317,28 @@ class PlayerActivity : AppCompatActivity() {
     tvTitle.text = metadata.title
 
     // set image
-    imgCoverArt0.setImageBitmap(metadata.albumArt)
+    GlideApp.with(this)
+      .asDrawable()
+      .load(metadata.albumArt)
+      .override(Target.SIZE_ORIGINAL)
+      .into(imgCoverArt0)
 
     metadata.albumArt?.let { bitmap ->
-      // Upper 10% of Cover Art
-      Palette.from(bitmap)
-        .clearFilters()
-        .setRegion(
-          0,
-          0,
-          bitmap.width,
-          TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24F, resources.displayMetrics).toInt()
-        ).generate { palette ->
-          val color = palette?.dominantSwatch?.rgb ?: Color.BLACK
-          window?.statusBarColor = color
-          applyColorToStatusBarIcons(color)
-        }
+      AsyncTask.execute {
+        // Upper 10% of Cover Art
+        Palette.from(bitmap)
+          .clearFilters()
+          .setRegion(
+            0,
+            0,
+            bitmap.width,
+            TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24F, resources.displayMetrics).toInt()
+          ).generate { palette ->
+            val color = palette?.dominantSwatch?.rgb ?: Color.BLACK
+            window?.statusBarColor = color
+            applyColorToStatusBarIcons(color)
+          }
+      }
     }
 
     sbSongProgress.max = (metadata.duration / 1000).toInt()
@@ -340,14 +349,12 @@ class PlayerActivity : AppCompatActivity() {
 
     applyColorToNavigationBarIcons(theme.primaryBackgroundColor)
 
-    val animationDuration: Long = 500
-
     // Background Color
     ValueAnimator.ofArgb(
       ThemeManager.previousTheme?.primaryBackgroundColor ?: ContextCompat.getColor(this, R.color.backgroundColor),
       theme.primaryBackgroundColor
     ).apply {
-      duration = animationDuration  // milliseconds
+      duration = Theme.PREFERRED_ANIMATION_DURATION
       addUpdateListener {
         val color = it.animatedValue as Int
         applyBackgroundColor(color)
@@ -360,7 +367,7 @@ class PlayerActivity : AppCompatActivity() {
       ThemeManager.previousTheme?.primaryForegroundColor ?: Color.WHITE,
       theme.primaryForegroundColor
     ).apply {
-      duration = animationDuration  // milliseconds
+      duration = Theme.PREFERRED_ANIMATION_DURATION
       addUpdateListener {
         val color = it.animatedValue as Int
 

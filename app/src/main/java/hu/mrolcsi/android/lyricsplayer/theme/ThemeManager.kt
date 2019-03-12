@@ -2,12 +2,11 @@ package hu.mrolcsi.android.lyricsplayer.theme
 
 import android.graphics.Bitmap
 import android.graphics.Color
-import android.os.AsyncTask
-import android.os.Looper
 import android.util.Log
 import androidx.core.graphics.ColorUtils
 import androidx.lifecycle.MutableLiveData
 import androidx.palette.graphics.Palette
+import java.util.concurrent.Executors
 
 // Singleton or ViewModel?
 
@@ -17,6 +16,10 @@ object ThemeManager {
 
   private const val MINIMUM_CONTRAST_RATIO = 4.5
 
+  private val mThemeWorker = Executors.newSingleThreadExecutor()
+
+  private var mPreviousBitmap: Bitmap? = null
+
   var previousTheme: Theme? = null
   val currentTheme = MutableLiveData<Theme>()
 
@@ -25,22 +28,20 @@ object ThemeManager {
   }
 
   fun updateFromBitmap(bitmap: Bitmap) {
-    if (Looper.myLooper() == Looper.getMainLooper()) {
-      AsyncTask.execute {
-        updateFromBitmap(bitmap)
-      }
-    } else {
+    mThemeWorker.submit {
       Log.d(LOG_TAG, "Updating Theme from $bitmap")
+
+      if (mPreviousBitmap?.sameAs(bitmap) == true) {
+        Log.d(LOG_TAG, "Same bitmap as before. Skipping update.")
+        return@submit
+      }
+
+      mPreviousBitmap = bitmap
 
       val palette = Palette.from(bitmap)
         .clearFilters()
         //.addFilter(mPaletteFiler)
         .generate()
-
-      if (palette == previousTheme?.sourcePalette) {
-        // Skip theme generation from the same(ish) palette.
-        return
-      }
 
       val theme = createTheme(palette)
 
