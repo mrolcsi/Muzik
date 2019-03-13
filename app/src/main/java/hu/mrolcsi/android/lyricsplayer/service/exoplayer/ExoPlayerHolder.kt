@@ -32,6 +32,7 @@ import hu.mrolcsi.android.lyricsplayer.database.playqueue.PlayQueueDatabase
 import hu.mrolcsi.android.lyricsplayer.database.playqueue.entities.LastPlayed
 import hu.mrolcsi.android.lyricsplayer.database.playqueue.entities.PlayQueueEntry
 import hu.mrolcsi.android.lyricsplayer.extensions.media.mediaPath
+import hu.mrolcsi.android.lyricsplayer.service.BecomingNoisyReceiver
 import java.io.File
 import java.util.concurrent.Executors
 
@@ -128,12 +129,30 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
 
   //region -- PLAYER --
 
+  private val mBecomingNoisyReceiver = BecomingNoisyReceiver(context, session.sessionToken)
+
   private val mPlayer = ExoPlayerFactory.newSimpleInstance(
     context,
     AudioOnlyRenderersFactory(context),
     DefaultTrackSelector()
   ).apply {
+    setAudioAttributes(
+      AudioAttributes.Builder()
+        .setUsage(C.USAGE_MEDIA)
+        .setContentType(C.CONTENT_TYPE_MUSIC)
+        .build(),
+      true
+    )
     addListener(object : Player.EventListener {
+      override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
+        // Register/unregister BecomingNoisyReceiver
+        if (playbackState == Player.STATE_READY && playWhenReady) {
+          mBecomingNoisyReceiver.register()
+        } else {
+          mBecomingNoisyReceiver.unregister()
+        }
+      }
+
       override fun onPositionDiscontinuity(reason: Int) {
         // Check against saved index if position changed
         val newIndex = this@apply.currentWindowIndex
@@ -149,10 +168,6 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
         }
       }
     })
-    audioAttributes = AudioAttributes.Builder()
-      .setUsage(C.USAGE_MEDIA)
-      .setContentType(C.CONTENT_TYPE_MUSIC)
-      .build()
   }
 
   //endregion
