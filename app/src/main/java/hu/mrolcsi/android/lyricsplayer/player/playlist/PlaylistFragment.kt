@@ -58,8 +58,18 @@ class PlaylistFragment : Fragment() {
       }
     }
 
-    ThemeManager.currentTheme.observe(this, Observer { theme ->
-      applyTheme(theme)
+    ThemeManager.currentTheme.observe(this, object : Observer<Theme> {
+
+      private var initialLoad = true
+
+      override fun onChanged(theme: Theme) {
+        if (initialLoad) {
+          applyThemeStatic(theme)
+          initialLoad = false
+        } else {
+          applyThemeAnimated(theme)
+        }
+      }
     })
   }
 
@@ -75,7 +85,12 @@ class PlaylistFragment : Fragment() {
     playlistToolbar.setTitle(R.string.playlist_title)
   }
 
-  private fun applyTheme(theme: Theme) {
+  private fun applyThemeStatic(theme: Theme) {
+    applyBackgroundColor(theme.primaryBackgroundColor)
+    applyForegroundColor(theme.primaryForegroundColor)
+  }
+
+  private fun applyThemeAnimated(theme: Theme) {
 
     // Background Color
     ValueAnimator.ofArgb(

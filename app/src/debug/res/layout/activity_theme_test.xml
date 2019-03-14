@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:id="@+id/root"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  tools:context=".theme.ThemeTestActivity">
+
+  <TextView
+    android:id="@+id/lblInput"
+    android:textStyle="bold"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="8dp"
+    android:layout_marginStart="8dp"
+    android:text="Input Image:"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent"/>
+
+  <ImageButton
+    android:id="@+id/btnPrevious"
+    android:layout_width="48dp"
+    android:layout_height="48dp"
+    android:layout_marginStart="16dp"
+    android:background="@drawable/media_button_background"
+    android:contentDescription="@string/mediaControl_previous"
+    android:elevation="@dimen/button_elevation"
+    android:enabled="false"
+    android:scaleType="fitCenter"
+    app:elevation="@dimen/button_elevation"
+    app:layout_constraintBottom_toBottomOf="@+id/imgInput"
+    app:layout_constraintEnd_toStartOf="@+id/imgInput"
+    app:layout_constraintHorizontal_bias="0.5"
+    app:layout_constraintHorizontal_chainStyle="packed"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="@+id/imgInput"
+    app:srcCompat="@android:drawable/ic_media_previous"
+    tools:visibility="visible"/>
+  <ImageView
+    android:id="@+id/imgInput"
+    android:layout_width="128dp"
+    android:layout_height="128dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="16dp"
+    android:transitionName="coverArt"
+    app:layout_constraintEnd_toStartOf="@+id/btnNext"
+    app:layout_constraintHorizontal_bias="0.5"
+    app:layout_constraintStart_toEndOf="@+id/btnPrevious"
+    app:layout_constraintTop_toBottomOf="@+id/lblInput"
+    tools:srcCompat="@tools:sample/avatars"/>
+
+  <ImageButton
+    android:id="@+id/btnNext"
+    android:layout_width="48dp"
+    android:layout_height="48dp"
+    android:layout_marginEnd="16dp"
+    android:background="@drawable/media_button_background"
+    android:contentDescription="@string/mediaControl_next"
+    android:elevation="@dimen/button_elevation"
+    android:enabled="false"
+    android:scaleType="fitCenter"
+    app:elevation="@dimen/button_elevation"
+    app:layout_constraintBottom_toBottomOf="@+id/imgInput"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintHorizontal_bias="0.5"
+    app:layout_constraintStart_toEndOf="@+id/imgInput"
+    app:layout_constraintTop_toTopOf="@+id/imgInput"
+    app:srcCompat="@android:drawable/ic_media_next"
+    tools:visibility="visible"/>
+  <TextView
+    android:id="@+id/lblPalette"
+    android:textStyle="bold"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="8dp"
+    android:layout_marginStart="8dp"
+    android:text="Palette:"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/imgInput"/>
+
+  <TextView
+    android:id="@+id/tvPaletteLightVibrant"
+    android:layout_width="48dp"
+    android:layout_height="48dp"
+    android:layout_marginTop="8dp"
+    android:text="Light Vibrant"
+    android:textAlignment="center"
+    android:textAppearance="@style/TextAppearance.AppCompat.Small"
+    app:layout_constraintEnd_toStartOf="@+id/tvPaletteVibrant"
+    app:layout_constraintHorizontal_bias="0.5"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/lblPalette"/>
+
+  <TextView
+    android:id="@+id/tvPaletteVibrant"
+    android:layout_width="@android:dimen/app_icon_size"
+    android:layout_height="@android:dimen/app_icon_size"
+    android:layout_marginTop="8dp"
+    android:text="Vibrant"
+    android:textAlignment="center"
+    android:textAppearance="@style/TextAppearance.AppCompat.Small"
+    app:layout_constraintEnd_toStartOf="@+id/tvPaletteDarkVibrant"
+    app:layout_constraintHorizontal_bias="0.5"
+    app:layout_constraintStart_toEndOf="@+id/tvPaletteLightVibrant"
+    app:layout_constraintTop_toBottomOf="@+id/lblPalette"/>
+
+  <TextView
+    android:id="@+id/tvPaletteDarkVibrant"
+    android:layout_width="@android:dimen/app_icon_size"
+    android:layout_height="@android:dimen/app_icon_size"
+    android:layout_marginTop="8dp"
+    android:text="Dark Vibrant"
+    android:textAlignment="center"
+    android:textAppearance="@style/TextAppearance.AppCompat.Small"
+    app:layout_constraintEnd_toStartOf="@+id/tvPaletteDominant"
+    app:layout_constraintHorizontal_bias="0.5"
+    app:layout_constraintStart_toEndOf="@+id/tvPaletteVibrant"
+    app:layout_constraintTop_toBottomOf="@+id/lblPalette"/>
+
+  <TextView
+    android:id="@+id/tvPaletteDominant"
+    android:layout_width="@android:dimen/app_icon_size"
+    android:layout_height="@android:dimen/app_icon_size"
+    android:layout_marginTop="8dp"
+    android:text="Dominant"
+    android:textAlignment="center"
+    android:textAppearance="@style/TextAppearance.AppCompat.Small"
+    app:layout_constraintEnd_toStartOf="@+id/tvPaletteLightMuted"
+    app:layout_constraintHorizontal_bias="0.5"
+    app:layout_constraintStart_toEndOf="@+id/tvPaletteDarkVibrant"
+    app:layout_constraintTop_toBottomOf="@+id/lblPalette"/>
+
+  <TextView
+    android:id="@+id/tvPaletteLightMuted"
+    android:layout_width="@android:dimen/app_icon_size"
+    android:layout_height="@android:dimen/app_icon_size"
+    android:layout_marginTop="8dp"
+    android:text="Light Muted"
+    android:textAlignment="center"
+    android:textAppearance="@style/TextAppearance.AppCompat.Small"
+    app:layout_constraintEnd_toStartOf="@+id/tvPaletteMuted"
+    app:layout_constraintHorizontal_bias="0.5"
+    app:layout_constraintStart_toEndOf="@+id/tvPaletteDominant"
+    app:layout_constraintTop_toBottomOf="@+id/lblPalette"/>
+
+  <TextView
+    android:id="@+id/tvPaletteMuted"
+    android:layout_width="@android:dimen/app_icon_size"
+    android:layout_height="@android:dimen/app_icon_size"
+    android:layout_marginTop="8dp"
+    android:text="Muted"
+    android:textAlignment="center"
+    android:textAppearance="@style/TextAppearance.AppCompat.Small"
+    app:layout_constraintEnd_toStartOf="@+id/tvPaletteDarkMuted"
+    app:layout_constraintHorizontal_bias="0.5"
+    app:layout_constraintStart_toEndOf="@+id/tvPaletteLightMuted"
+    app:layout_constraintTop_toBottomOf="@+id/lblPalette"/>
+
+  <TextView
+    android:id="@+id/tvPaletteDarkMuted"
+    android:layout_width="@android:dimen/app_icon_size"
+    android:layout_height="@android:dimen/app_icon_size"
+    android:layout_marginTop="8dp"
+    android:text="Dark Muted"
+    android:textAlignment="center"
+    android:textAppearance="@style/TextAppearance.AppCompat.Small"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintHorizontal_bias="0.5"
+    app:layout_constraintStart_toEndOf="@+id/tvPaletteMuted"
+    app:layout_constraintTop_toBottomOf="@+id/lblPalette"/>
+
+  <TextView
+    android:id="@+id/lblByPixelCount"
+    android:textStyle="bold"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="8dp"
+    android:layout_marginStart="8dp"
+    android:text="All colors (sorted by pixel count):"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/tvPaletteLightVibrant"/>
+
+  <androidx.recyclerview.widget.RecyclerView
+    android:id="@+id/rvAllColors"
+    android:layout_width="match_parent"
+    android:layout_height="64dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginStart="8dp"
+    android:layout_marginEnd="8dp"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/lblByPixelCount"/>
+
+  <TextView
+    android:id="@+id/lblTheme"
+    android:textStyle="bold"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="8dp"
+    android:layout_marginStart="8dp"
+    android:text="Theme:"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/rvAllColors"/>
+
+  <TextView
+    android:id="@+id/tvPrimary"
+    android:layout_width="96dp"
+    android:layout_height="96dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginStart="8dp"
+    android:gravity="center"
+    android:text="Primary Colors"
+    android:textAlignment="center"
+    app:layout_constraintEnd_toStartOf="@+id/tvSecondary"
+    app:layout_constraintHorizontal_bias="0.5"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/lblTheme"/>
+  <TextView
+    android:id="@+id/tvSecondary"
+    android:layout_width="96dp"
+    android:layout_height="96dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginStart="8dp"
+    android:gravity="center"
+    android:text="Secondary Colors"
+    android:textAlignment="center"
+    app:layout_constraintEnd_toStartOf="@+id/tvTertiary"
+    app:layout_constraintHorizontal_bias="0.5"
+    app:layout_constraintStart_toEndOf="@+id/tvPrimary"
+    app:layout_constraintTop_toBottomOf="@+id/lblTheme"/>
+  <TextView
+    android:id="@+id/tvTertiary"
+    android:layout_width="96dp"
+    android:layout_height="96dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginStart="8dp"
+    android:layout_marginEnd="8dp"
+    android:gravity="center"
+    android:text="Tertiary Colors"
+    android:textAlignment="center"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintHorizontal_bias="0.5"
+    app:layout_constraintStart_toEndOf="@+id/tvSecondary"
+    app:layout_constraintTop_toBottomOf="@+id/lblTheme"/>
+  <TextView
+    android:id="@+id/lblParameters"
+    android:textStyle="bold"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="8dp"
+    android:layout_marginStart="8dp"
+    android:text="Parameters:"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/tvPrimary"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

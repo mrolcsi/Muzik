@@ -69,6 +69,9 @@ dependencies {
     implementation "androidx.room:room-runtime:2.1.0-alpha04"
     kapt "androidx.room:room-compiler:2.1.0-alpha04"
 
+    // Checkerboard Drawable
+    debugImplementation 'com.github.duanhong169:checkerboarddrawable:1.0.2'
+
     // Testing
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0-alpha02'
     androidTestImplementation 'androidx.test:runner:1.1.2-alpha02'

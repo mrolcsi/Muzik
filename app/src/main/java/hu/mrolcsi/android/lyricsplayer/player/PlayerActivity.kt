@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.PorterDuff
+import android.graphics.drawable.Drawable
 import android.media.AudioManager
 import android.os.AsyncTask
 import android.os.Bundle
@@ -26,10 +27,13 @@ import androidx.core.graphics.ColorUtils
 import androidx.core.util.Pair
 import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
-import androidx.core.view.get
+import androidx.core.view.forEach
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.palette.graphics.Palette
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import hu.mrolcsi.android.lyricsplayer.GlideApp
 import hu.mrolcsi.android.lyricsplayer.R
@@ -62,6 +66,28 @@ class PlayerActivity : AppCompatActivity() {
   private val mPlayPauseBackground by lazy { getDrawable(R.drawable.media_button_background) }
   private val mNextBackground by lazy { getDrawable(R.drawable.media_button_background) }
 
+  private val mGlideListener = object : RequestListener<Drawable> {
+    override fun onResourceReady(
+      resource: Drawable?,
+      model: Any?,
+      target: Target<Drawable>?,
+      dataSource: DataSource?,
+      isFirstResource: Boolean
+    ): Boolean {
+      supportStartPostponedEnterTransition()
+      return false
+    }
+
+    override fun onLoadFailed(
+      e: GlideException?,
+      model: Any?,
+      target: Target<Drawable>?,
+      isFirstResource: Boolean
+    ): Boolean {
+      return false
+    }
+  }
+
   //region LIFECYCLE
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -69,6 +95,8 @@ class PlayerActivity : AppCompatActivity() {
 
     setContentView(R.layout.activity_player)
     setupToolbar()
+
+    supportPostponeEnterTransition()
 
     // Observe changes through ViewModel
     mPlayerModel = ViewModelProviders.of(this).get(PlayerViewModel::class.java).apply {
@@ -94,8 +122,18 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     // Apply changes in theme on-the-fly
-    ThemeManager.currentTheme.observe(this@PlayerActivity, Observer { theme ->
-      applyTheme(theme)
+    ThemeManager.currentTheme.observe(this@PlayerActivity, object : Observer<Theme> {
+
+      private var initialLoad = true
+
+      override fun onChanged(theme: Theme) {
+        if (initialLoad) {
+          applyThemeStatic(theme)
+          initialLoad = false
+        } else {
+          applyThemeAnimated(theme)
+        }
+      }
     })
   }
 
@@ -125,6 +163,11 @@ class PlayerActivity : AppCompatActivity() {
 
   override fun onCreateOptionsMenu(menu: Menu?): Boolean {
     menuInflater.inflate(R.menu.menu_player, menu)
+    ThemeManager.currentTheme.value?.let { theme ->
+      menu?.forEach { item ->
+        item.icon.setColorFilter(theme.primaryForegroundColor, PorterDuff.Mode.SRC_IN)
+      }
+    }
     return super.onCreateOptionsMenu(menu)
   }
 
@@ -321,6 +364,7 @@ class PlayerActivity : AppCompatActivity() {
       .asDrawable()
       .load(metadata.albumArt)
       .override(Target.SIZE_ORIGINAL)
+      .addListener(mGlideListener)
       .into(imgCoverArt0)
 
     metadata.albumArt?.let { bitmap ->
@@ -344,8 +388,15 @@ class PlayerActivity : AppCompatActivity() {
     sbSongProgress.max = (metadata.duration / 1000).toInt()
   }
 
-  private fun applyTheme(theme: Theme) {
-    Log.d(LOG_TAG, "Applying theme...")
+  private fun applyThemeStatic(theme: Theme) {
+    Log.d(LOG_TAG, "Applying theme (static)...")
+
+    applyBackgroundColor(theme.primaryBackgroundColor)
+    applyForegroundColor(theme.primaryForegroundColor)
+  }
+
+  private fun applyThemeAnimated(theme: Theme) {
+    Log.d(LOG_TAG, "Applying theme (animated)...")
 
     applyColorToNavigationBarIcons(theme.primaryBackgroundColor)
 
@@ -375,23 +426,14 @@ class PlayerActivity : AppCompatActivity() {
       }
       start()
     }
-
-    // Test out colors
-    view1.setBackgroundColor(theme.sourcePalette.getLightVibrantColor(Color.BLACK))
-    view2.setBackgroundColor(theme.sourcePalette.getVibrantColor(Color.BLACK))
-    view3.setBackgroundColor(theme.sourcePalette.getDarkVibrantColor(Color.BLACK))
-    view4.setBackgroundColor(theme.sourcePalette.getDominantColor(Color.BLACK))
-    view5.setBackgroundColor(theme.sourcePalette.getLightMutedColor(Color.BLACK))
-    view6.setBackgroundColor(theme.sourcePalette.getMutedColor(Color.BLACK))
-    view7.setBackgroundColor(theme.sourcePalette.getDarkMutedColor(Color.BLACK))
   }
 
   private fun applyForegroundColor(color: Int) {
     // Toolbar Icons
     with(playerToolbar) {
       navigationIcon?.setColorFilter(color, PorterDuff.Mode.SRC_IN)
-      for (i in 0 until menu.size()) {
-        menu[i].icon.setColorFilter(color, PorterDuff.Mode.SRC_IN)
+      menu.forEach { item ->
+        item.icon.setColorFilter(color, PorterDuff.Mode.SRC_IN)
       }
     }
 

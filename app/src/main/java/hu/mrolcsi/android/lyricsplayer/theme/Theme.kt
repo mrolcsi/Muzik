@@ -42,4 +42,28 @@ data class Theme(
       null
     )
   }
+
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (other !is Theme) return false
+
+    if (primaryBackgroundColor != other.primaryBackgroundColor) return false
+    if (primaryForegroundColor != other.primaryForegroundColor) return false
+    if (secondaryBackgroundColor != other.secondaryBackgroundColor) return false
+    if (secondaryForegroundColor != other.secondaryForegroundColor) return false
+    if (tertiaryBackgroundColor != other.tertiaryBackgroundColor) return false
+    if (tertiaryForegroundColor != other.tertiaryForegroundColor) return false
+
+    return true
+  }
+
+  override fun hashCode(): Int {
+    var result = primaryBackgroundColor
+    result = 31 * result + primaryForegroundColor
+    result = 31 * result + secondaryBackgroundColor
+    result = 31 * result + secondaryForegroundColor
+    result = 31 * result + tertiaryBackgroundColor
+    result = 31 * result + tertiaryForegroundColor
+    return result
+  }
 }
