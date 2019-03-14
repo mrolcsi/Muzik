@@ -10,31 +10,17 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.core.graphics.ColorUtils
 import androidx.navigation.findNavController
-import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.android.lyricsplayer.R
+import hu.mrolcsi.android.lyricsplayer.common.DiffCallbackRepository
 import hu.mrolcsi.android.lyricsplayer.extensions.media.numberOfAlbums
 import hu.mrolcsi.android.lyricsplayer.extensions.media.numberOfTracks
 import hu.mrolcsi.android.lyricsplayer.theme.Theme
 import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
 
 class ArtistsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, ArtistsAdapter.ArtistHolder>(
-  object : DiffUtil.ItemCallback<MediaBrowserCompat.MediaItem>() {
-    override fun areItemsTheSame(
-      oldItem: MediaBrowserCompat.MediaItem,
-      newItem: MediaBrowserCompat.MediaItem
-    ): Boolean {
-      return oldItem == newItem
-    }
-
-    override fun areContentsTheSame(
-      oldItem: MediaBrowserCompat.MediaItem,
-      newItem: MediaBrowserCompat.MediaItem
-    ): Boolean {
-      return oldItem.description.mediaId == newItem.description.mediaId
-    }
-  }
+  DiffCallbackRepository.mediaItemCallback
 ) {
 
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ArtistHolder {

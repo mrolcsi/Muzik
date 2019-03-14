@@ -36,7 +36,7 @@ interface PlayQueueDao {
   // QUERIES
 
   @Query("SELECT * FROM play_queue ORDER BY _id")
-  fun queryQueue(): LiveData<List<PlayQueueEntry>>
+  fun fetchQueue(): LiveData<List<PlayQueueEntry>>
 
   @Query("SELECT * FROM play_queue ORDER BY _id")
   fun getQueue(): List<PlayQueueEntry>
@@ -49,7 +49,7 @@ interface PlayQueueDao {
   fun saveLastPlayed(lastPlayed: LastPlayed)
 
   @Query("SELECT * FROM last_played LIMIT 1")
-  fun queryLastPlayed(): LiveData<LastPlayed>
+  fun fetchLastPlayed(): LiveData<LastPlayed>
 
   @Query("SELECT * FROM last_played LIMIT 1")
   fun getLastPlayed(): LastPlayed?

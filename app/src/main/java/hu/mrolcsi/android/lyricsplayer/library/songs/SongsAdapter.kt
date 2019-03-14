@@ -6,10 +6,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.core.graphics.ColorUtils
-import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.android.lyricsplayer.R
+import hu.mrolcsi.android.lyricsplayer.common.DiffCallbackRepository
 import hu.mrolcsi.android.lyricsplayer.extensions.OnItemClickListener
 import hu.mrolcsi.android.lyricsplayer.extensions.media.trackNumber
 import hu.mrolcsi.android.lyricsplayer.theme.Theme
@@ -18,21 +18,7 @@ import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
 class SongsAdapter(
   private val onItemClickListener: OnItemClickListener<MediaBrowserCompat.MediaItem, SongsAdapter.SongHolder>
 ) : ListAdapter<MediaBrowserCompat.MediaItem, SongsAdapter.SongHolder>(
-  object : DiffUtil.ItemCallback<MediaBrowserCompat.MediaItem>() {
-    override fun areItemsTheSame(
-      oldItem: MediaBrowserCompat.MediaItem,
-      newItem: MediaBrowserCompat.MediaItem
-    ): Boolean {
-      return oldItem == newItem
-    }
-
-    override fun areContentsTheSame(
-      oldItem: MediaBrowserCompat.MediaItem,
-      newItem: MediaBrowserCompat.MediaItem
-    ): Boolean {
-      return oldItem.description.mediaId == newItem.description.mediaId
-    }
-  }
+  DiffCallbackRepository.mediaItemCallback
 ) {
 
   var showTrackNumber: Boolean = false

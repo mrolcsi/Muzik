@@ -9,29 +9,16 @@
   android:animateLayoutChanges="true"
   tools:context=".player.PlayerActivity">
 
-  <ImageView
-    android:id="@+id/imgCoverArt0"
+  <androidx.recyclerview.widget.RecyclerView
+    android:id="@+id/rvQueue"
     android:layout_width="0dp"
     android:layout_height="0dp"
-    android:scaleType="centerCrop"
-    android:transitionName="coverArt"
-    app:layout_constraintDimensionRatio="1:1"
+    app:layout_constraintBottom_toTopOf="@+id/sbSongProgress"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent"
-    tools:src="@tools:sample/avatars"/>
+    tools:listitem="@layout/list_item_queue"/>
 
-  <!--<ImageView-->
-  <!--android:id="@+id/imgCoverArt1"-->
-  <!--android:layout_width="0dp"-->
-  <!--android:layout_height="0dp"-->
-  <!--android:scaleType="centerCrop"-->
-  <!--android:transitionName="coverArt"-->
-  <!--app:layout_constraintDimensionRatio="1:1"-->
-  <!--app:layout_constraintEnd_toEndOf="parent"-->
-  <!--app:layout_constraintStart_toStartOf="parent"-->
-  <!--app:layout_constraintTop_toTopOf="parent"-->
-  <!--tools:src="@tools:sample/avatars"/>-->
 
   <!-- Make sure Toolbar is above the Cover Art -->
   <androidx.appcompat.widget.Toolbar
@@ -45,63 +32,6 @@
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent"/>
-
-  <TextView
-    android:id="@+id/tvTitle"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="8dp"
-    android:layout_marginStart="16dp"
-    android:layout_marginEnd="16dp"
-    android:elevation="@dimen/action_bar_elevation"
-    android:textAlignment="center"
-    android:textAppearance="?android:attr/textAppearanceLarge"
-    app:elevation="@dimen/action_bar_elevation"
-    app:layout_constraintBottom_toTopOf="@+id/tvArtist"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintHorizontal_bias="0.5"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@+id/imgCoverArt0"
-    app:layout_constraintVertical_chainStyle="packed"
-    tools:text="Title"/>
-
-  <TextView
-    android:id="@+id/tvArtist"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="8dp"
-    android:layout_marginStart="16dp"
-    android:layout_marginEnd="16dp"
-    android:alpha="0.7"
-    android:elevation="@dimen/action_bar_elevation"
-    android:textAlignment="center"
-    android:textAppearance="?android:attr/textAppearanceMedium"
-    app:elevation="@dimen/action_bar_elevation"
-    app:layout_constraintBottom_toTopOf="@+id/tvAlbum"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintHorizontal_bias="0.5"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@+id/tvTitle"
-    tools:text="Artist"/>
-
-  <TextView
-    android:id="@+id/tvAlbum"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="8dp"
-    android:layout_marginBottom="8dp"
-    android:layout_marginStart="16dp"
-    android:layout_marginEnd="16dp"
-    android:alpha="0.7"
-    android:elevation="@dimen/action_bar_elevation"
-    android:textAlignment="center"
-    app:elevation="@dimen/action_bar_elevation"
-    app:layout_constraintBottom_toTopOf="@+id/sbSongProgress"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintHorizontal_bias="0.5"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@+id/tvArtist"
-    tools:text="Album"/>
 
   <SeekBar
     android:id="@+id/sbSongProgress"
@@ -150,10 +80,11 @@
     android:typeface="monospace"
     android:visibility="gone"
     app:elevation="@dimen/bottom_navigation_elevation"
-    app:layout_constraintBottom_toBottomOf="@+id/imgCoverArt0"
+    app:layout_constraintBottom_toBottomOf="@+id/rvQueue"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent"
+    app:layout_constraintVertical_bias="0.32999998"
     tools:text="01:24"
     tools:visibility="visible"/>
 

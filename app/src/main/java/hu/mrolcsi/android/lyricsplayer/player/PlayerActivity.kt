@@ -5,7 +5,6 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.PorterDuff
-import android.graphics.drawable.Drawable
 import android.media.AudioManager
 import android.os.AsyncTask
 import android.os.Bundle
@@ -19,36 +18,31 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityOptionsCompat
 import androidx.core.app.NavUtils
 import androidx.core.app.TaskStackBuilder
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
-import androidx.core.util.Pair
 import androidx.core.view.GravityCompat
-import androidx.core.view.ViewCompat
 import androidx.core.view.forEach
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.palette.graphics.Palette
-import com.bumptech.glide.load.DataSource
-import com.bumptech.glide.load.engine.GlideException
-import com.bumptech.glide.request.RequestListener
-import com.bumptech.glide.request.target.Target
-import hu.mrolcsi.android.lyricsplayer.GlideApp
+import androidx.recyclerview.widget.LinearLayoutManager
 import hu.mrolcsi.android.lyricsplayer.R
+import hu.mrolcsi.android.lyricsplayer.common.pager.RVPageScrollState
+import hu.mrolcsi.android.lyricsplayer.common.pager.RVPagerSnapHelperListenable
+import hu.mrolcsi.android.lyricsplayer.common.pager.RVPagerStateListener
+import hu.mrolcsi.android.lyricsplayer.common.pager.VisiblePageState
+import hu.mrolcsi.android.lyricsplayer.database.playqueue.PlayQueueDatabase
 import hu.mrolcsi.android.lyricsplayer.extensions.applyColorToNavigationBarIcons
 import hu.mrolcsi.android.lyricsplayer.extensions.applyColorToStatusBarIcons
-import hu.mrolcsi.android.lyricsplayer.extensions.media.album
 import hu.mrolcsi.android.lyricsplayer.extensions.media.albumArt
-import hu.mrolcsi.android.lyricsplayer.extensions.media.artist
 import hu.mrolcsi.android.lyricsplayer.extensions.media.duration
 import hu.mrolcsi.android.lyricsplayer.extensions.media.isPlaying
 import hu.mrolcsi.android.lyricsplayer.extensions.media.isSkipToNextEnabled
 import hu.mrolcsi.android.lyricsplayer.extensions.media.isSkipToPreviousEnabled
 import hu.mrolcsi.android.lyricsplayer.extensions.media.startProgressUpdater
 import hu.mrolcsi.android.lyricsplayer.extensions.media.stopProgressUpdater
-import hu.mrolcsi.android.lyricsplayer.extensions.media.title
 import hu.mrolcsi.android.lyricsplayer.extensions.secondsToTimeStamp
 import hu.mrolcsi.android.lyricsplayer.theme.Theme
 import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
@@ -66,26 +60,8 @@ class PlayerActivity : AppCompatActivity() {
   private val mPlayPauseBackground by lazy { getDrawable(R.drawable.media_button_background) }
   private val mNextBackground by lazy { getDrawable(R.drawable.media_button_background) }
 
-  private val mGlideListener = object : RequestListener<Drawable> {
-    override fun onResourceReady(
-      resource: Drawable?,
-      model: Any?,
-      target: Target<Drawable>?,
-      dataSource: DataSource?,
-      isFirstResource: Boolean
-    ): Boolean {
-      supportStartPostponedEnterTransition()
-      return false
-    }
-
-    override fun onLoadFailed(
-      e: GlideException?,
-      model: Any?,
-      target: Target<Drawable>?,
-      isFirstResource: Boolean
-    ): Boolean {
-      return false
-    }
+  private val mQueueAdapter = QueueAdapter().apply {
+    setHasStableIds(true)
   }
 
   //region LIFECYCLE
@@ -95,8 +71,9 @@ class PlayerActivity : AppCompatActivity() {
 
     setContentView(R.layout.activity_player)
     setupToolbar()
+    setupPager()
 
-    supportPostponeEnterTransition()
+    //supportPostponeEnterTransition()
 
     // Observe changes through ViewModel
     mPlayerModel = ViewModelProviders.of(this).get(PlayerViewModel::class.java).apply {
@@ -108,7 +85,24 @@ class PlayerActivity : AppCompatActivity() {
         }
       })
       currentPlaybackState.observe(this@PlayerActivity, Observer { state ->
-        state?.let { updateControls(state) }
+        state?.let {
+          updateControls(state)
+
+          // Scroll pager to current item
+          val layoutManager = (rvQueue.layoutManager as LinearLayoutManager)
+          val currentPosition =
+            (layoutManager.findLastCompletelyVisibleItemPosition() + layoutManager.findFirstCompletelyVisibleItemPosition()) / 2
+
+          val queuePosition = it.activeQueueItemId.toInt()
+
+          if (currentPosition > -1 && currentPosition != queuePosition) {
+//            if (Math.abs(queuePosition - currentPosition) > 1) {
+//              rvQueue.scrollToPosition(queuePosition)
+//            } else {
+//              rvQueue.smoothScrollToPosition(queuePosition)
+//            }
+          }
+        }
       })
       mediaController.observe(this@PlayerActivity, Observer { controller ->
         controller?.let {
@@ -119,7 +113,18 @@ class PlayerActivity : AppCompatActivity() {
           setupTransportControls()
         }
       })
+
+//      currentQueue.observe(this@PlayerActivity, Observer {
+//        mQueueAdapter.submitList(it)
+//      })
     }
+
+    PlayQueueDatabase.getInstance(this)
+      .getPlayQueueDao()
+      .fetchQueue()
+      .observe(this@PlayerActivity, Observer {
+        mQueueAdapter.submitList(it)
+      })
 
     // Apply changes in theme on-the-fly
     ThemeManager.currentTheme.observe(this@PlayerActivity, object : Observer<Theme> {
@@ -195,11 +200,11 @@ class PlayerActivity : AppCompatActivity() {
     // Respond to the action bar's Up/Home button
     val upIntent: Intent? = NavUtils.getParentActivityIntent(this)
 
-    // Prepare options for Shared Element Transition
-    val options = ActivityOptionsCompat.makeSceneTransitionAnimation(
-      this,
-      Pair.create(imgCoverArt0, ViewCompat.getTransitionName(imgCoverArt0))
-    )
+    // TODO: Prepare options for Shared Element Transition
+//    val options = ActivityOptionsCompat.makeSceneTransitionAnimation(
+//      this,
+//      Pair.create(imgCoverArt, ViewCompat.getTransitionName(imgCoverArt))
+//    )
 
     when {
       upIntent == null -> throw IllegalStateException("No Parent Activity Intent")
@@ -211,7 +216,7 @@ class PlayerActivity : AppCompatActivity() {
           // Add all of this activity's parents to the back stack
           .addNextIntentWithParentStack(upIntent)
           // Navigate up to the closest parent
-          .startActivities(options.toBundle())
+          .startActivities(/*options.toBundle()*/)
       }
       else -> {
         Log.d(LOG_TAG, "Navigate back directly.")
@@ -232,6 +237,36 @@ class PlayerActivity : AppCompatActivity() {
     supportActionBar?.setDisplayHomeAsUpEnabled(true)
     // hide title
     supportActionBar?.setDisplayShowTitleEnabled(false)
+  }
+
+  private fun setupPager() {
+    rvQueue.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+    rvQueue.adapter = mQueueAdapter
+
+    RVPagerSnapHelperListenable().attachToRecyclerView(rvQueue, object : RVPagerStateListener {
+
+      private var currentIndex = -1
+      private var newIndex = -1
+
+      override fun onPageScroll(pagesState: List<VisiblePageState>) {
+        // TODO: Blend colors
+
+      }
+
+      override fun onScrollStateChanged(state: RVPageScrollState) {
+        Log.v(LOG_TAG, "state=$state, currentIndex=$currentIndex, newIndex=$newIndex")
+        if (state is RVPageScrollState.Idle && newIndex > -1) {
+          mQueueAdapter.getItemId(newIndex)
+          MediaControllerCompat.getMediaController(this@PlayerActivity)
+            ?.transportControls
+            ?.skipToQueueItem(newIndex.toLong())
+        }
+      }
+
+      override fun onPageSelected(index: Int) {
+        newIndex = index
+      }
+    })
   }
 
   private fun setupTransportControls() {
@@ -355,18 +390,6 @@ class PlayerActivity : AppCompatActivity() {
   }
 
   private fun updateSongData(metadata: MediaMetadataCompat) {
-    tvAlbum.text = metadata.album
-    tvArtist.text = metadata.artist
-    tvTitle.text = metadata.title
-
-    // set image
-    GlideApp.with(this)
-      .asDrawable()
-      .load(metadata.albumArt)
-      .override(Target.SIZE_ORIGINAL)
-      .addListener(mGlideListener)
-      .into(imgCoverArt0)
-
     metadata.albumArt?.let { bitmap ->
       AsyncTask.execute {
         // Upper 10% of Cover Art
@@ -438,9 +461,6 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     // Texts
-    tvTitle.setTextColor(color)
-    tvArtist.setTextColor(color)
-    tvAlbum.setTextColor(color)
     tvElapsedTime.setTextColor(color)
     tvRemainingTime.setTextColor(color)
     tvSeekProgress.setTextColor(color)

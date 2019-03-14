@@ -2,7 +2,6 @@ package hu.mrolcsi.android.lyricsplayer.extensions
 
 import android.os.AsyncTask
 import androidx.annotation.MainThread
-import androidx.arch.core.util.Function
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.Transformations
@@ -67,11 +66,11 @@ fun <T, R> LiveData<T>.map(mapFunction: (T) -> LiveData<R>) = Transformations.ma
  * @return a LiveData mapped from `source` to type `<Y>` by applying`mapFunction` to each value set.
  **/
 @MainThread
-fun <T, R> LiveData<T>.mapAsync(mapFunction: Function<T, R>): LiveData<R> {
+fun <T, R> LiveData<T>.mapAsync(mapFunction: (T) -> R): LiveData<R> {
   val result = MediatorLiveData<R>()
   result.addSource(this) { x ->
     AsyncTask.execute {
-      result.postValue(mapFunction.apply(x))
+      result.postValue(mapFunction.invoke(x))
     }
   }
   return result

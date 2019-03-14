@@ -164,7 +164,6 @@ class LPPlayerService : LPBrowserService() {
         }
 
         private fun updateNotification(state: PlaybackStateCompat) {
-          Log.v(LOG_TAG, "updateNotification($state)")
           val updatedState = state.state
 //          if (controller.metadata == null) {
 //            return
@@ -191,7 +190,6 @@ class LPPlayerService : LPBrowserService() {
                 startForeground(LPNotificationBuilder.NOTIFICATION_ID, notification)
                 isForegroundService = true
               } else if (notification != null) {
-                Log.v(LOG_TAG, "updateNotification() notify(id, notification) called.")
                 NotificationManagerCompat.from(applicationContext)
                   .notify(LPNotificationBuilder.NOTIFICATION_ID, notification)
               }
@@ -210,7 +208,6 @@ class LPPlayerService : LPBrowserService() {
                 }
 
                 if (notification != null) {
-                  Log.v(LOG_TAG, "updateNotification() notify(id, notification) called.")
                   NotificationManagerCompat.from(applicationContext)
                     .notify(LPNotificationBuilder.NOTIFICATION_ID, notification)
                 } else {

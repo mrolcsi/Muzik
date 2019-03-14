@@ -60,7 +60,7 @@ object ThemeManager {
     }
   }
 
-  private fun createTheme(sourcePalette: Palette): Theme {
+  fun createTheme(sourcePalette: Palette): Theme {
 
     val swatches = sourcePalette.swatches.sortedByDescending { it.population }
 

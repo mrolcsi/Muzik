@@ -6,10 +6,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.graphics.ColorUtils
-import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.android.lyricsplayer.R
+import hu.mrolcsi.android.lyricsplayer.common.DiffCallbackRepository
 import hu.mrolcsi.android.lyricsplayer.extensions.OnItemClickListener
 import hu.mrolcsi.android.lyricsplayer.extensions.media.duration
 import hu.mrolcsi.android.lyricsplayer.extensions.millisecondsToTimeStamp
@@ -21,21 +21,7 @@ import kotlinx.android.synthetic.main.list_item_playlist.*
 class PlaylistAdapter(
   private val onItemClickListener: OnItemClickListener<MediaSessionCompat.QueueItem, PlaylistViewHolder>
 ) : ListAdapter<MediaSessionCompat.QueueItem, PlaylistAdapter.PlaylistViewHolder>(
-  object : DiffUtil.ItemCallback<MediaSessionCompat.QueueItem>() {
-    override fun areItemsTheSame(
-      oldItem: MediaSessionCompat.QueueItem,
-      newItem: MediaSessionCompat.QueueItem
-    ): Boolean {
-      return oldItem.queueId == newItem.queueId
-    }
-
-    override fun areContentsTheSame(
-      oldItem: MediaSessionCompat.QueueItem,
-      newItem: MediaSessionCompat.QueueItem
-    ): Boolean {
-      return oldItem == newItem
-    }
-  }
+  DiffCallbackRepository.queueItemCallback
 ) {
 
   var activeQueueId: Long = -1
