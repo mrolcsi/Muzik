@@ -51,3 +51,5 @@ fun Long.millisecondsToTimeStamp(): String {
     String.format(TIME_FORMAT_SHORT, minutes, seconds)
   }
 }
+
+fun Int.toColorHex() = String.format("#%X", this)

@@ -52,10 +52,6 @@ open class PagerSnapScrollListener(
   }
 
   override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-    externalListener.onScrollStateChanged(statesArray[newState])
-  }
-
-  companion object {
-    val statesArray = listOf(RVPageScrollState.Idle, RVPageScrollState.Dragging, RVPageScrollState.Settling)
+    externalListener.onScrollStateChanged(RVPageScrollState.values()[newState])
   }
 }

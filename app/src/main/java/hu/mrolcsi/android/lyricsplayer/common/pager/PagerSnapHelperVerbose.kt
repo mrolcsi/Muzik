@@ -33,6 +33,11 @@ class PagerSnapHelperVerbose(
     return view
   }
 
+  fun findSnapPosition(layoutManager: RecyclerView.LayoutManager?): Int {
+    val snapView = findSnapView(layoutManager) ?: return RecyclerView.NO_POSITION
+    return layoutManager?.getPosition(snapView) ?: RecyclerView.NO_POSITION
+  }
+
   override fun findTargetSnapPosition(layoutManager: RecyclerView.LayoutManager?, velocityX: Int, velocityY: Int): Int {
     val position = super.findTargetSnapPosition(layoutManager, velocityX, velocityY)
 

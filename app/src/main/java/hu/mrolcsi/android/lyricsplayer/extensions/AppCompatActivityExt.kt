@@ -15,7 +15,9 @@
  */
 package hu.mrolcsi.android.lyricsplayer.extensions
 
+import android.app.Activity
 import android.os.Build
+import android.support.v4.media.session.MediaControllerCompat
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -64,3 +66,6 @@ fun AppCompatActivity.applyColorToNavigationBarIcons(backgroundColor: Int) {
     }
   }
 }
+
+val Activity.mediaControllerCompat: MediaControllerCompat
+  get() = MediaControllerCompat.getMediaController(this)

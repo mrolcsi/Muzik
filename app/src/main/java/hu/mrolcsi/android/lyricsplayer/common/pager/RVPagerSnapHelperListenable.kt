@@ -20,19 +20,21 @@ interface RVPagerStateListener {
 }
 
 open class RVPagerSnapHelperListenable(private val maxPages: Int = 3) {
-  fun attachToRecyclerView(recyclerView: RecyclerView, listener: RVPagerStateListener) {
+  fun attachToRecyclerView(recyclerView: RecyclerView, listener: RVPagerStateListener): PagerSnapHelperVerbose {
     assertRecyclerViewSetup(recyclerView)
-    setUpSnapHelper(recyclerView, listener)
     setUpScrollListener(recyclerView, listener)
+    return setUpSnapHelper(recyclerView, listener)
   }
 
-  protected fun setUpScrollListener(recyclerView: RecyclerView, listener: RVPagerStateListener) =
+  private fun setUpScrollListener(recyclerView: RecyclerView, listener: RVPagerStateListener) =
     PagerSnapScrollListener(recyclerView, listener, maxPages)
 
-  protected fun setUpSnapHelper(recyclerView: RecyclerView, listener: RVPagerStateListener) =
-    PagerSnapHelperVerbose(recyclerView, listener).attachToRecyclerView(recyclerView)
+  private fun setUpSnapHelper(recyclerView: RecyclerView, listener: RVPagerStateListener) =
+    PagerSnapHelperVerbose(recyclerView, listener).apply {
+      attachToRecyclerView(recyclerView)
+    }
 
-  protected fun assertRecyclerViewSetup(recyclerView: RecyclerView) {
+  private fun assertRecyclerViewSetup(recyclerView: RecyclerView) {
     if (recyclerView.layoutManager !is LinearLayoutManager) {
       throw IllegalArgumentException("RVPagerSnapHelperListenable can only work with a linear layout manager")
     }

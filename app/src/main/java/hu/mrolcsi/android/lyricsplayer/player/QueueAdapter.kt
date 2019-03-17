@@ -3,12 +3,10 @@ package hu.mrolcsi.android.lyricsplayer.player
 import android.graphics.Bitmap
 import android.os.AsyncTask
 import android.support.v4.media.MediaMetadataCompat
-import android.util.Log
 import android.util.LruCache
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.lifecycle.MutableLiveData
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -41,10 +39,11 @@ class QueueAdapter : ListAdapter<PlayQueueEntry, QueueAdapter.QueueItemHolder>(
 
   class QueueItemHolder(override val containerView: View) : RecyclerView.ViewHolder(containerView), LayoutContainer {
 
-    val usedTheme = MutableLiveData<Theme>()
+    var usedTheme: Theme? = null
 
     fun bind(item: PlayQueueEntry) {
-      Log.v(LOG_TAG, "bind($item)")
+
+      usedTheme = null
 
       val cached = mCache[item._data]
 
@@ -71,15 +70,27 @@ class QueueAdapter : ListAdapter<PlayQueueEntry, QueueAdapter.QueueItemHolder>(
 
         // Generate theme
         metadata.albumArt?.let { albumArt ->
+          // Generate theme
           Palette.from(albumArt)
             .clearFilters()
-            .generate { palette ->
-              val theme = palette?.let { ThemeManager.createTheme(it) }
-              theme?.let {
-                // Store items in cache
-                mCache.put(item._data, Pair(albumArt, it))
+            .generate { mainPalette ->
+              mainPalette?.let { ThemeManager.createTheme(it) }?.let { theme ->
+                // Add StatusBar color to theme
+                Palette.from(albumArt)
+                  .clearFilters()
+                  .setRegion(0, 0, albumArt.width, 48)
+                  .generate {
+                    it?.let { statusBarPalette ->
+                      theme.statusBarColor = statusBarPalette.swatches.maxBy { swatch ->
+                        swatch.population
+                      }?.rgb ?: theme.primaryBackgroundColor
 
-                applyTheme(it)
+                      // Store items in cache
+                      mCache.put(item._data, Pair(albumArt, theme))
+
+                      applyTheme(theme)
+                    }
+                  }
               }
             }
         }
@@ -87,16 +98,15 @@ class QueueAdapter : ListAdapter<PlayQueueEntry, QueueAdapter.QueueItemHolder>(
     }
 
     private fun applyTheme(theme: Theme) {
-      Log.v(LOG_TAG, "Applying Theme to $this")
-
       tvTitle.setTextColor(theme.primaryForegroundColor)
       tvArtist.setTextColor(theme.primaryForegroundColor)
       tvAlbum.setTextColor(theme.primaryForegroundColor)
 
-      usedTheme.postValue(theme)
+      usedTheme = theme
     }
 
     companion object {
+      @Suppress("unused")
       private const val LOG_TAG = "QueueItemHolder"
 
       private val mCache = LruCache<String, Pair<Bitmap, Theme>>(20)

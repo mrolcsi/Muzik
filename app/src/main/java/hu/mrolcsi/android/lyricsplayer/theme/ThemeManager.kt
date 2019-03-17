@@ -46,12 +46,22 @@ object ThemeManager {
 
       // If the Theme is not cached, create it
       if (mThemeCache[hashCode] == null) {
-        val palette = Palette.from(bitmap)
+        val mainPalette = Palette.from(bitmap)
           .clearFilters()
           //.addFilter(mPaletteFiler)
           .generate()
 
-        mThemeCache.put(hashCode, createTheme(palette))
+        val theme = createTheme(mainPalette)
+
+        val statusBarPalette = Palette.from(bitmap)
+          .clearFilters()
+          .setRegion(0, 0, bitmap.width, 48)    // approx.
+          .generate()
+
+        theme.statusBarColor = statusBarPalette.swatches.maxBy { it.population }?.rgb
+          ?: theme.primaryBackgroundColor
+
+        mThemeCache.put(hashCode, theme)
       }
 
       // Save previous theme
@@ -73,42 +83,26 @@ object ThemeManager {
         ColorUtils.colorToHSL(primaryBackgroundColor, this)
       }
 
-    /*
-
-     Light
-     |       T       S       P                |
-     |       |       |       |                |
-    -+-------x-------x---+---x----------------+-
-     |                   |                    |
-     0                   0.5                  1
-
-     Dark
-     |       P          S          T          |
-     |       |          |          |          |
-    -+-------x----------x+---------x----------+-
-     |                   |                    |
-     0                   0.5                  1
-
-    diff = if (l < 0.5) {
-      (1 - l) / 3
-    } else {
-      -(l / 3)
-    }
-
-     */
-
     // Increase luminance for dark colors, decrease for light colors
     //val luminanceDiff = if (dominantHsl[2] < 0.5) (1 - dominantHsl[2]) / 3f else -(dominantHsl[2] / 3f)
     val luminanceDiff = if (dominantHsl[2] < 0.5) 0.1f else -0.1f
 
     // Secondary colors
     dominantHsl[2] += luminanceDiff
-    val secondaryBackgroundColor = swatches[1]?.rgb ?: ColorUtils.HSLToColor(dominantHsl)
+    val secondaryBackgroundColor = try {
+      swatches[1]?.rgb ?: ColorUtils.HSLToColor(dominantHsl)
+    } catch (e: IndexOutOfBoundsException) {
+      ColorUtils.HSLToColor(dominantHsl)
+    }
     val secondaryForegroundColor = findForegroundColor(secondaryBackgroundColor, sourcePalette)
 
     // Tertiary colors
     dominantHsl[2] += 2 * luminanceDiff
-    val tertiaryBackgroundColor = swatches[2]?.rgb ?: ColorUtils.HSLToColor(dominantHsl)
+    val tertiaryBackgroundColor = try {
+      swatches[2]?.rgb ?: ColorUtils.HSLToColor(dominantHsl)
+    } catch (e: IndexOutOfBoundsException) {
+      ColorUtils.HSLToColor(dominantHsl)
+    }
     val tertiaryForegroundColor = findForegroundColor(tertiaryBackgroundColor, sourcePalette)
 
     return Theme(
