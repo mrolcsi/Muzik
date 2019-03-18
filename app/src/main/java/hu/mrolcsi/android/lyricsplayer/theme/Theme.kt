@@ -7,10 +7,11 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.RippleDrawable
 import androidx.palette.graphics.Palette
 import hu.mrolcsi.android.lyricsplayer.extensions.toColorHex
+import org.json.JSONObject
 
 data class Theme(
   // Source palette
-  var sourcePalette: Palette,
+  var sourcePalette: Palette? = null,
 
   // Basic colors
   var primaryBackgroundColor: Int,
@@ -20,10 +21,21 @@ data class Theme(
   var secondaryForegroundColor: Int,
 
   var tertiaryBackgroundColor: Int,
-  var tertiaryForegroundColor: Int
-) {
+  var tertiaryForegroundColor: Int,
 
   var statusBarColor: Int = Color.TRANSPARENT
+) {
+
+  constructor(json: JSONObject) : this(
+    null,
+    json.getInt(PRIMARY_BACKGROUND),
+    json.getInt(PRIMARY_FOREGROUND),
+    json.getInt(SECONDARY_BACKGROUND),
+    json.getInt(SECONDARY_FOREGROUND),
+    json.getInt(TERTIARY_BACKGROUND),
+    json.getInt(TERTIARY_FOREGROUND),
+    json.getInt(STATUS_BAR_COLOR)
+  )
 
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
@@ -56,6 +68,17 @@ data class Theme(
         "primaryForegroundColor=${primaryForegroundColor.toColorHex()})"
   }
 
+  fun toJson(): JSONObject {
+    val json = JSONObject()
+    json.put(PRIMARY_BACKGROUND, primaryBackgroundColor)
+    json.put(PRIMARY_FOREGROUND, primaryForegroundColor)
+    json.put(SECONDARY_BACKGROUND, secondaryBackgroundColor)
+    json.put(SECONDARY_FOREGROUND, secondaryForegroundColor)
+    json.put(TERTIARY_BACKGROUND, tertiaryBackgroundColor)
+    json.put(TERTIARY_FOREGROUND, tertiaryForegroundColor)
+    json.put(STATUS_BAR_COLOR, statusBarColor)
+    return json
+  }
 
   companion object {
     const val SUBTITLE_ALPHA = 0.8f
@@ -65,6 +88,15 @@ data class Theme(
     const val DISABLED_OPACITY = (255 * DISABLED_ALPHA).toInt()
 
     const val PREFERRED_ANIMATION_DURATION: Long = 300
+
+    // JSON Keys
+    const val PRIMARY_BACKGROUND = "primaryBackground"
+    const val PRIMARY_FOREGROUND = "primaryForeground"
+    const val SECONDARY_BACKGROUND = "secondaryBackground"
+    const val SECONDARY_FOREGROUND = "secondaryForeground"
+    const val TERTIARY_BACKGROUND = "tertiaryBackground"
+    const val TERTIARY_FOREGROUND = "tertiaryForeground"
+    const val STATUS_BAR_COLOR = "statusBarColor"
 
     fun getRippleDrawable(rippleColor: Int, backgroundColor: Int): RippleDrawable = RippleDrawable(
       ColorStateList.valueOf(rippleColor),

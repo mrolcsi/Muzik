@@ -129,7 +129,7 @@ class PlayerActivity : AppCompatActivity() {
       })
     }
 
-    ThemeManager.currentTheme.observe(this, object : Observer<Theme> {
+    ThemeManager.getInstance(this).currentTheme.observe(this, object : Observer<Theme> {
 
       private var initialLoad = true
 
@@ -180,7 +180,7 @@ class PlayerActivity : AppCompatActivity() {
 
   override fun onCreateOptionsMenu(menu: Menu?): Boolean {
     menuInflater.inflate(R.menu.menu_player, menu)
-    ThemeManager.currentTheme.value?.let { theme ->
+    ThemeManager.getInstance(this).currentTheme.value?.let { theme ->
       menu?.forEach { item ->
         item.icon.setColorFilter(theme.primaryForegroundColor, PorterDuff.Mode.SRC_IN)
       }
@@ -454,9 +454,11 @@ class PlayerActivity : AppCompatActivity() {
   private fun applyThemeAnimated(theme: Theme) {
     Log.i(LOG_TAG, "applyingThemeAnimated($theme)")
 
+    val previousTheme = ThemeManager.getInstance(this).previousTheme
+
     // StatusBar Color
     ValueAnimator.ofArgb(
-      ThemeManager.previousTheme?.statusBarColor ?: ContextCompat.getColor(this, R.color.backgroundColor),
+      previousTheme?.statusBarColor ?: ContextCompat.getColor(this, R.color.backgroundColor),
       theme.statusBarColor
     ).apply {
       duration = Theme.PREFERRED_ANIMATION_DURATION
@@ -471,7 +473,7 @@ class PlayerActivity : AppCompatActivity() {
 
     // Background Color
     ValueAnimator.ofArgb(
-      ThemeManager.previousTheme?.primaryBackgroundColor ?: ContextCompat.getColor(this, R.color.backgroundColor),
+      previousTheme?.primaryBackgroundColor ?: ContextCompat.getColor(this, R.color.backgroundColor),
       theme.primaryBackgroundColor
     ).apply {
       duration = Theme.PREFERRED_ANIMATION_DURATION
@@ -484,7 +486,7 @@ class PlayerActivity : AppCompatActivity() {
 
     // Foreground Color
     ValueAnimator.ofArgb(
-      ThemeManager.previousTheme?.primaryForegroundColor ?: Color.WHITE,
+      previousTheme?.primaryForegroundColor ?: Color.WHITE,
       theme.primaryForegroundColor
     ).apply {
       duration = Theme.PREFERRED_ANIMATION_DURATION

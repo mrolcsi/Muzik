@@ -130,7 +130,7 @@ class LPPlayerService : LPBrowserService() {
 
                 // Update Theme
                 newMetadata.albumArt?.let { bitmap ->
-                  ThemeManager.updateFromBitmap(bitmap)
+                  ThemeManager.getInstance(applicationContext).updateFromBitmap(bitmap)
                 }
 
                 // Update notification

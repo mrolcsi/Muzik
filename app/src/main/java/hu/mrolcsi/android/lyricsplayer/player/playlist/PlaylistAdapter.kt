@@ -34,7 +34,7 @@ class PlaylistAdapter(
   override fun onBindViewHolder(holder: PlaylistViewHolder, position: Int) {
 
     // Apply theme
-    ThemeManager.currentTheme.value?.let { theme ->
+    ThemeManager.getInstance(holder.itemView.context).currentTheme.value?.let { theme ->
       // Apply colors
       holder.tvTrackNumber.setTextColor(theme.primaryForegroundColor)
       holder.tvTitle.setTextColor(theme.primaryForegroundColor)

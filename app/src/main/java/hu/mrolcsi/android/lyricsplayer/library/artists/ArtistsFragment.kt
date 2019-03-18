@@ -27,7 +27,7 @@ class ArtistsFragment : Fragment() {
       })
     }
 
-    ThemeManager.currentTheme.observe(this, Observer {
+    ThemeManager.getInstance(requireContext()).currentTheme.observe(this, Observer {
       // Tell adapter to reload its views
       mArtistAdapter.notifyDataSetChanged()
     })

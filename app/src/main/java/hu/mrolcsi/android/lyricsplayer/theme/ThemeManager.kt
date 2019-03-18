@@ -1,22 +1,23 @@
 package hu.mrolcsi.android.lyricsplayer.theme
 
+import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.os.AsyncTask
+import android.preference.PreferenceManager
 import android.util.Log
 import android.util.LruCache
 import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.get
 import androidx.lifecycle.MutableLiveData
 import androidx.palette.graphics.Palette
+import org.json.JSONObject
 import java.util.concurrent.Executors
 
 // Singleton or ViewModel?
 
-object ThemeManager {
-
-  private const val LOG_TAG = "ThemeManager"
-
-  private const val MINIMUM_CONTRAST_RATIO = 4
+class ThemeManager(private val sharedPrefs: SharedPreferences) {
 
   private val mThemeWorker = Executors.newSingleThreadExecutor()
 
@@ -24,7 +25,15 @@ object ThemeManager {
   private val mThemeCache = LruCache<Int, Theme>(50)
 
   var previousTheme: Theme? = null
-  val currentTheme = MutableLiveData<Theme>()
+  val currentTheme = MutableLiveData<Theme>().apply {
+    // Load last used theme from SharedPrefs
+    AsyncTask.execute {
+      sharedPrefs.getString(LAST_USED_THEME, null)?.let {
+        val lastUsedTheme = Theme(JSONObject(it))
+        this.postValue(lastUsedTheme)
+      }
+    }
+  }
 
   private val mPaletteFiler = Palette.Filter { _, hsl ->
     hsl[1] > 0.4
@@ -37,7 +46,7 @@ object ThemeManager {
 
       Log.d(LOG_TAG, "Updating Theme from $bitmap (hash=$hashCode)")
 
-      // TODO: compare with hash?
+      // compare with hash?
       if (mPreviousHash == hashCode) {
         Log.d(LOG_TAG, "Same bitmap as before. Skipping update.")
         return@submit
@@ -67,6 +76,9 @@ object ThemeManager {
       // Save previous theme
       previousTheme = currentTheme.value
       currentTheme.postValue(mThemeCache[hashCode])
+
+      // Save theme to shared prefs
+      sharedPrefs.edit().putString(LAST_USED_THEME, mThemeCache[hashCode].toJson().toString()).apply()
     }
   }
 
@@ -165,6 +177,20 @@ object ThemeManager {
     val blueDistance = Math.pow((Color.blue(color2) - Color.blue(color1).toDouble()), 2.0)
 
     return Math.sqrt(redDistance + greenDistance + blueDistance)
+  }
+
+  companion object {
+    private const val LOG_TAG = "ThemeManager"
+
+    private const val MINIMUM_CONTRAST_RATIO = 4
+
+    private const val LAST_USED_THEME = "lastUsedTheme"
+
+    @Volatile private var instance: ThemeManager? = null
+
+    fun getInstance(context: Context): ThemeManager {
+      return instance ?: ThemeManager(PreferenceManager.getDefaultSharedPreferences(context)).also { instance = it }
+    }
   }
 
 }

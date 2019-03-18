@@ -74,7 +74,7 @@ class QueueAdapter : ListAdapter<PlayQueueEntry, QueueAdapter.QueueItemHolder>(
           Palette.from(albumArt)
             .clearFilters()
             .generate { mainPalette ->
-              mainPalette?.let { ThemeManager.createTheme(it) }?.let { theme ->
+              mainPalette?.let { ThemeManager.getInstance(itemView.context).createTheme(it) }?.let { theme ->
                 // Add StatusBar color to theme
                 Palette.from(albumArt)
                   .clearFilters()

@@ -7,6 +7,8 @@ import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.PorterDuff
+import android.graphics.drawable.LayerDrawable
+import android.graphics.drawable.RippleDrawable
 import android.os.Bundle
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
@@ -93,8 +95,18 @@ class LibraryActivity : AppCompatActivity() {
       })
     }
 
-    ThemeManager.currentTheme.observe(this@LibraryActivity, Observer {
-      applyTheme(it)
+    ThemeManager.getInstance(this).currentTheme.observe(this@LibraryActivity, object : Observer<Theme> {
+
+      private var initialLoad = true
+
+      override fun onChanged(it: Theme) {
+        applyTheme(it)
+        if (initialLoad) {
+          initialLoad = false
+        } else {
+          imgLogo.visibility = View.GONE
+        }
+      }
     })
   }
 
@@ -115,8 +127,9 @@ class LibraryActivity : AppCompatActivity() {
     }
 
     // Apply StatusBar and NavigationBar colors again
-    applyColorToStatusBarIcons(ThemeManager.currentTheme.value?.primaryBackgroundColor ?: Color.BLACK)
-    applyColorToNavigationBarIcons(ThemeManager.currentTheme.value?.secondaryBackgroundColor ?: Color.BLACK)
+    val themeManager = ThemeManager.getInstance(this)
+    applyColorToStatusBarIcons(themeManager.currentTheme.value?.primaryBackgroundColor ?: Color.BLACK)
+    applyColorToNavigationBarIcons(themeManager.currentTheme.value?.secondaryBackgroundColor ?: Color.BLACK)
   }
 
   override fun onStop() {
@@ -170,6 +183,7 @@ class LibraryActivity : AppCompatActivity() {
 
       groupPermissionHint.visibility = View.VISIBLE
       navigation_bar.visibility = View.GONE
+      imgLogo.visibility = View.GONE
 
       requestPermission(Manifest.permission.READ_EXTERNAL_STORAGE, PERMISSION_REQUEST_CODE_EXTERNAL_STORAGE)
     } else {
@@ -188,16 +202,17 @@ class LibraryActivity : AppCompatActivity() {
       .setPrimaryNavigationFragment(finalHost)
       .runOnCommit {
         setupNavBar(findNavController(R.id.library_nav_host))
-        // hide hints, show navigation
-        groupPermissionHint.visibility = View.GONE
-        navigation_bar.visibility = View.VISIBLE
-        libraryToolbar.visibility = View.VISIBLE
-        imgLogo.visibility = View.GONE
       }
       .commit()
   }
 
   private fun setupNavBar(navController: NavController) {
+    // hide hints, show navigation
+    groupPermissionHint.visibility = View.GONE
+    navigation_bar.visibility = View.VISIBLE
+    libraryToolbar.visibility = View.VISIBLE
+    imgLogo.visibility = View.GONE
+
     val appBarConfig = AppBarConfiguration.Builder(
       R.id.navigation_artists,
       R.id.navigation_albums,
@@ -295,8 +310,10 @@ class LibraryActivity : AppCompatActivity() {
     // Navigation Bar Icons
     applyColorToNavigationBarIcons(theme.secondaryBackgroundColor)
 
+    val previousTheme = ThemeManager.getInstance(this).previousTheme
+
     ValueAnimator.ofArgb(
-      ThemeManager.previousTheme?.primaryBackgroundColor ?: Color.BLACK,
+      previousTheme?.primaryBackgroundColor ?: Color.BLACK,
       theme.primaryBackgroundColor
     ).apply {
       duration = Theme.PREFERRED_ANIMATION_DURATION
@@ -306,12 +323,14 @@ class LibraryActivity : AppCompatActivity() {
         window?.statusBarColor = color
         // Toolbar Background
         libraryToolbar.setBackgroundColor(color)
+        // Logo foreground
+        (imgLogo.drawable as LayerDrawable).findDrawableByLayerId(R.id.foreground).setTint(color)
       }
       start()
     }
 
     ValueAnimator.ofArgb(
-      ThemeManager.previousTheme?.secondaryBackgroundColor ?: Color.BLACK,
+      previousTheme?.secondaryBackgroundColor ?: Color.BLACK,
       theme.secondaryBackgroundColor
     ).apply {
       duration = Theme.PREFERRED_ANIMATION_DURATION
@@ -326,7 +345,7 @@ class LibraryActivity : AppCompatActivity() {
     }
 
     ValueAnimator.ofArgb(
-      ThemeManager.previousTheme?.tertiaryBackgroundColor ?: Color.BLACK,
+      previousTheme?.tertiaryBackgroundColor ?: Color.BLACK,
       theme.tertiaryBackgroundColor
     ).apply {
       duration = Theme.PREFERRED_ANIMATION_DURATION
@@ -339,7 +358,7 @@ class LibraryActivity : AppCompatActivity() {
     }
 
     ValueAnimator.ofArgb(
-      ThemeManager.previousTheme?.primaryForegroundColor ?: Color.WHITE,
+      previousTheme?.primaryForegroundColor ?: Color.WHITE,
       theme.primaryForegroundColor
     ).apply {
       duration = Theme.PREFERRED_ANIMATION_DURATION
@@ -351,14 +370,15 @@ class LibraryActivity : AppCompatActivity() {
         libraryToolbar.setTitleTextColor(color)
         libraryToolbar.setSubtitleTextColor(color)
         // Toolbar Now Playing Icon
-        mNowPlayingIcon?.imageTintList =
-          ColorStateList.valueOf(theme.primaryForegroundColor)
+        mNowPlayingIcon?.imageTintList = ColorStateList.valueOf(theme.primaryForegroundColor)
+        // Logo background
+        (imgLogo.drawable as LayerDrawable).findDrawableByLayerId(R.id.background).setTint(color)
       }
       start()
     }
 
     ValueAnimator.ofArgb(
-      ThemeManager.previousTheme?.secondaryForegroundColor ?: Color.WHITE,
+      previousTheme?.secondaryForegroundColor ?: Color.WHITE,
       theme.secondaryForegroundColor
     ).apply {
       duration = Theme.PREFERRED_ANIMATION_DURATION
@@ -380,6 +400,8 @@ class LibraryActivity : AppCompatActivity() {
       }
       start()
     }
+
+    (navigation_bar.itemBackground as RippleDrawable).setTint(theme.primaryForegroundColor)
   }
 
   companion object {

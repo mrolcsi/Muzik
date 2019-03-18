@@ -34,7 +34,7 @@ class AlbumsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, AlbumsAdapter.Al
 
     with(holder) {
       // Apply theme
-      ThemeManager.currentTheme.value?.let { theme ->
+      ThemeManager.getInstance(holder.itemView.context).currentTheme.value?.let { theme ->
         itemView.background = Theme.getRippleDrawable(theme.secondaryForegroundColor, theme.tertiaryBackgroundColor)
 
         tvAlbum?.setTextColor(theme.tertiaryForegroundColor)

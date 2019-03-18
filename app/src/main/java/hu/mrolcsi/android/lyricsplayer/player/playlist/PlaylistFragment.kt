@@ -28,7 +28,7 @@ class PlaylistFragment : Fragment() {
   private lateinit var mPlayerModel: PlayerViewModel
 
   private val mPlaylistAdapter =
-    PlaylistAdapter(OnItemClickListener { item, holder, position, id ->
+    PlaylistAdapter(OnItemClickListener { _, _, _, id ->
       // Skip to clicked item
       val controller = MediaControllerCompat.getMediaController(requireActivity())
       controller.transportControls.skipToQueueItem(id)
@@ -38,8 +38,8 @@ class PlaylistFragment : Fragment() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
-    activity?.let {
-      mPlayerModel = ViewModelProviders.of(it).get(PlayerViewModel::class.java).apply {
+    activity?.let { activity ->
+      mPlayerModel = ViewModelProviders.of(activity).get(PlayerViewModel::class.java).apply {
         Log.d(LOG_TAG, "Got PlayerViewModel: $this")
 
         currentPlaybackState.observe(this@PlaylistFragment, Observer { state ->
@@ -49,16 +49,16 @@ class PlaylistFragment : Fragment() {
           }
         })
 
-        currentMediaMetadata.observe(this@PlaylistFragment, Observer { metadata ->
+        currentMediaMetadata.observe(this@PlaylistFragment, Observer {
           // Update playlist adapter
-          val controller = MediaControllerCompat.getMediaController(it)
+          val controller = MediaControllerCompat.getMediaController(activity)
           Log.v(LOG_TAG, "Updating playlist: Size=${controller.queue?.size}")
           mPlaylistAdapter.submitList(controller.queue)
         })
       }
     }
 
-    ThemeManager.currentTheme.observe(this, object : Observer<Theme> {
+    ThemeManager.getInstance(requireContext()).currentTheme.observe(this, object : Observer<Theme> {
 
       private var initialLoad = true
 
@@ -92,9 +92,11 @@ class PlaylistFragment : Fragment() {
 
   private fun applyThemeAnimated(theme: Theme) {
 
+    val previousTheme = ThemeManager.getInstance(requireContext()).previousTheme
+
     // Background Color
     ValueAnimator.ofArgb(
-      ThemeManager.previousTheme?.primaryBackgroundColor ?: ContextCompat.getColor(
+      previousTheme?.primaryBackgroundColor ?: ContextCompat.getColor(
         requireContext(),
         R.color.backgroundColor
       ),
@@ -110,7 +112,7 @@ class PlaylistFragment : Fragment() {
 
     // Foreground Color
     ValueAnimator.ofArgb(
-      ThemeManager.previousTheme?.primaryForegroundColor ?: Color.WHITE,
+      previousTheme?.primaryForegroundColor ?: Color.WHITE,
       theme.primaryForegroundColor
     ).apply {
       duration = Theme.PREFERRED_ANIMATION_DURATION

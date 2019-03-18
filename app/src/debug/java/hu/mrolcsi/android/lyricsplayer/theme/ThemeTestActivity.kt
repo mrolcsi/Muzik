@@ -49,19 +49,21 @@ class ThemeTestActivity : AppCompatActivity() {
       })
     }
 
-    ThemeManager.currentTheme.observe(this, Observer { theme ->
+    ThemeManager.getInstance(this).currentTheme.observe(this, Observer { theme ->
       // Source Palette
-      tvPaletteLightVibrant.setBackgroundColor(theme.sourcePalette.lightVibrantSwatch?.rgb ?: Color.TRANSPARENT)
-      tvPaletteVibrant.setBackgroundColor(theme.sourcePalette.vibrantSwatch?.rgb ?: Color.TRANSPARENT)
-      tvPaletteDarkVibrant.setBackgroundColor(theme.sourcePalette.darkVibrantSwatch?.rgb ?: Color.TRANSPARENT)
-      tvPaletteDominant.setBackgroundColor(theme.sourcePalette.dominantSwatch?.rgb ?: Color.TRANSPARENT)
-      tvPaletteLightMuted.setBackgroundColor(theme.sourcePalette.lightMutedSwatch?.rgb ?: Color.TRANSPARENT)
-      tvPaletteMuted.setBackgroundColor(theme.sourcePalette.mutedSwatch?.rgb ?: Color.TRANSPARENT)
-      tvPaletteDarkMuted.setBackgroundColor(theme.sourcePalette.darkMutedSwatch?.rgb ?: Color.TRANSPARENT)
+      theme.sourcePalette?.let {
+        tvPaletteLightVibrant.setBackgroundColor(it.lightVibrantSwatch?.rgb ?: Color.TRANSPARENT)
+        tvPaletteVibrant.setBackgroundColor(it.vibrantSwatch?.rgb ?: Color.TRANSPARENT)
+        tvPaletteDarkVibrant.setBackgroundColor(it.darkVibrantSwatch?.rgb ?: Color.TRANSPARENT)
+        tvPaletteDominant.setBackgroundColor(it.dominantSwatch?.rgb ?: Color.TRANSPARENT)
+        tvPaletteLightMuted.setBackgroundColor(it.lightMutedSwatch?.rgb ?: Color.TRANSPARENT)
+        tvPaletteMuted.setBackgroundColor(it.mutedSwatch?.rgb ?: Color.TRANSPARENT)
+        tvPaletteDarkMuted.setBackgroundColor(it.darkMutedSwatch?.rgb ?: Color.TRANSPARENT)
 
-      // Palette by pixel count
-      val paletteSorted = theme.sourcePalette.swatches.sortedByDescending { it?.population ?: 0 }
-      mAllColorsAdapter.submitList(paletteSorted)
+        // Palette by pixel count
+        val paletteSorted = it.swatches.sortedByDescending { it?.population ?: 0 }
+        mAllColorsAdapter.submitList(paletteSorted)
+      }
 
       // Generated Theme
       tvPrimary.setBackgroundColor(theme.primaryBackgroundColor)
