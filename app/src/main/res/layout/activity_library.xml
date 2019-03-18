@@ -6,6 +6,7 @@
   android:id="@+id/libraryRoot"
   android:layout_width="match_parent"
   android:layout_height="match_parent"
+  android:animateLayoutChanges="true"
   tools:context=".library.LibraryActivity">
 
   <androidx.appcompat.widget.Toolbar
@@ -14,67 +15,34 @@
     android:layout_height="?attr/actionBarSize"
     android:background="?attr/colorPrimary"
     android:elevation="@dimen/action_bar_elevation"
+    android:visibility="gone"
     app:elevation="@dimen/action_bar_elevation"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="parent"/>
+    app:layout_constraintTop_toTopOf="parent"
+    tools:visibility="visible"/>
 
-  <androidx.constraintlayout.widget.Group
-    android:id="@+id/groupPermissionHint"
+  <include
+    android:id="@+id/incPermission"
+    layout="@layout/content_permission"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:visibility="gone"
-    app:constraint_referenced_ids="imgSdCard,lblPermissionHint,btnRequestPermission"/>
+    app:layout_constraintBottom_toTopOf="@+id/navigation_bar"
+    app:layout_constraintEnd_toEndOf="@+id/library_nav_host"
+    app:layout_constraintStart_toStartOf="@id/library_nav_host"
+    app:layout_constraintTop_toBottomOf="@+id/libraryToolbar"/>
 
   <ImageView
-    android:id="@+id/imgSdCard"
-    android:layout_width="@android:dimen/notification_large_icon_width"
-    android:layout_height="@android:dimen/notification_large_icon_height"
-    android:layout_marginTop="8dp"
-    android:layout_marginStart="8dp"
-    android:layout_marginEnd="8dp"
-    android:tint="@android:color/white"
-    app:layout_constraintBottom_toTopOf="@+id/lblPermissionHint"
+    android:id="@+id/imgLogo"
+    android:layout_width="144dp"
+    android:layout_height="144dp"
+    android:elevation="@dimen/action_bar_elevation"
+    app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintHorizontal_bias="0.5"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@+id/libraryToolbar"
-    app:layout_constraintVertical_chainStyle="packed"
-    app:srcCompat="@drawable/ic_sd_card"/>
-
-  <TextView
-    android:id="@+id/lblPermissionHint"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="8dp"
-    android:layout_marginStart="8dp"
-    android:layout_marginEnd="8dp"
-    android:maxWidth="320dp"
-    android:text="@string/library_readExternalStorage_rationale"
-    android:textAlignment="center"
-    android:textAppearance="?android:attr/textAppearance"
-    android:textSize="18sp"
-    app:layout_constraintBottom_toTopOf="@+id/btnRequestPermission"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintHorizontal_bias="0.5"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@+id/imgSdCard"/>
-
-  <Button
-    android:id="@+id/btnRequestPermission"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="8dp"
-    android:layout_marginBottom="8dp"
-    android:layout_marginStart="8dp"
-    android:layout_marginEnd="8dp"
-    android:onClick="requestStoragePermission"
-    android:text="@string/library_grantAccessToSdCard"
-    app:layout_constraintBottom_toTopOf="@+id/navigation_bar"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintHorizontal_bias="0.5"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@+id/lblPermissionHint"/>
+    app:layout_constraintTop_toTopOf="parent"
+    app:srcCompat="@drawable/ic_launcher"/>
 
   <FrameLayout
     android:id="@+id/library_nav_host"
@@ -91,12 +59,14 @@
     android:layout_height="wrap_content"
     android:background="?attr/colorPrimaryDark"
     android:elevation="@dimen/bottom_navigation_elevation"
+    android:visibility="gone"
     app:elevation="@dimen/bottom_navigation_elevation"
     app:itemIconTint="@drawable/bnv_selector"
     app:itemTextColor="@drawable/bnv_selector"
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintLeft_toLeftOf="parent"
     app:layout_constraintRight_toRightOf="parent"
-    app:menu="@menu/menu_navigation"/>
+    app:menu="@menu/menu_navigation"
+    tools:visibility="visible"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

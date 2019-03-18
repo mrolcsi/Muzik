@@ -51,4 +51,14 @@
     <item name="elevation">@dimen/action_bar_elevation</item>
   </style>
 
+  <style name="FluxTheme.Launcher">
+    <item name="android:windowBackground">@drawable/launch_screen</item>
+    <item name="windowActionBar">false</item>
+    <item name="android:windowActionBar">false</item>
+    <item name="windowNoTitle">true</item>
+    <item name="android:windowNoTitle">true</item>
+    <item name="android:navigationBarColor">@android:color/transparent</item>
+    <item name="android:statusBarColor">@android:color/transparent</item>
+  </style>
+
 </resources>

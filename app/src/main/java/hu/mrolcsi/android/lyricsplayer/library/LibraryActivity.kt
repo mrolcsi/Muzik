@@ -42,6 +42,7 @@ import hu.mrolcsi.android.lyricsplayer.player.PlayerViewModel
 import hu.mrolcsi.android.lyricsplayer.theme.Theme
 import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
 import kotlinx.android.synthetic.main.activity_library.*
+import kotlinx.android.synthetic.main.content_permission.*
 
 class LibraryActivity : AppCompatActivity() {
 
@@ -54,9 +55,12 @@ class LibraryActivity : AppCompatActivity() {
   private var mNavBarReady = false
 
   override fun onCreate(savedInstanceState: Bundle?) {
+    setTheme(R.style.FluxTheme_Library)
+
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_library)
     setSupportActionBar(libraryToolbar)
+    setTitle(R.string.library_title)
 
     if (savedInstanceState == null) {
       // Initial loading
@@ -177,10 +181,6 @@ class LibraryActivity : AppCompatActivity() {
   private fun createNavHost() {
     Log.d(LOG_TAG, "Creating navigation host.")
 
-    // hide hints, show navigation
-    groupPermissionHint.visibility = View.GONE
-    navigation_bar.visibility = View.VISIBLE
-
     // enable navigation
     val finalHost = NavHostFragment.create(R.navigation.library_navigation)
     supportFragmentManager.beginTransaction()
@@ -188,6 +188,11 @@ class LibraryActivity : AppCompatActivity() {
       .setPrimaryNavigationFragment(finalHost)
       .runOnCommit {
         setupNavBar(findNavController(R.id.library_nav_host))
+        // hide hints, show navigation
+        groupPermissionHint.visibility = View.GONE
+        navigation_bar.visibility = View.VISIBLE
+        libraryToolbar.visibility = View.VISIBLE
+        imgLogo.visibility = View.GONE
       }
       .commit()
   }

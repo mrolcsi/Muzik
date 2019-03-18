@@ -1,5 +1,5 @@
 <resources>
-  <string name="app_name">Lyrics Player v2</string>
+  <string name="app_name">Muzik</string>
   <!-- @formatter:off -->
   <string name="albums_byArtist_subtitle">by %s</string>
   <string name="albums_showAllSongs">Show all songs</string>
@@ -20,8 +20,9 @@
   <string name="mediaControl_previous">Previous</string>
   <string name="notification_nowPlaying">Now Playing</string>
   <string name="notification_nowPlaying_description">Shows the currently playing song in Lyrics Player</string>
+  <string name="player_title">Player</string>
+  <string name="playlist_title">Playlist</string>
   <string name="songs_fromAlbum_subtitle">from %s</string>
   <string name="songs_title">Songs</string>
-  <string name="player_playlist">Playlist</string><string name="playlist_title">Playlist</string>
   <!-- @formatter:on -->
 </resources>

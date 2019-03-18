@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+  <item android:id="@+id/background">
+    <shape android:shape="oval">
+      <solid android:color="@color/primaryColor"/>
+      <size android:height="144dp"
+        android:width="144dp"/>
+    </shape>
+  </item>
+  <item android:id="@+id/foreground">
+    <inset android:inset="24dp">
+      <bitmap android:antialias="true"
+        android:src="@drawable/ic_song"
+        android:tint="@android:color/white"/>
+    </inset>
+  </item>
+</layer-list>
