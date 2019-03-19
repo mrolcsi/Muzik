@@ -75,7 +75,7 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
         mProgressUpdater.stopUpdater()
       }
 
-      player.playWhenReady = true
+      player.playWhenReady = playWhenReady
       return true
     }
 
