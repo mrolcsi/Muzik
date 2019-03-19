@@ -1,5 +1,6 @@
 package hu.mrolcsi.android.lyricsplayer.service
 
+import android.app.Notification
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
@@ -9,26 +10,21 @@ import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
-import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.TaskStackBuilder
 import androidx.media.session.MediaButtonReceiver
 import com.google.android.exoplayer2.Player
+import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import hu.mrolcsi.android.lyricsplayer.database.playqueue.PlayQueueDatabase
 import hu.mrolcsi.android.lyricsplayer.database.playqueue.entities.LastPlayed
 import hu.mrolcsi.android.lyricsplayer.extensions.media.addQueueItems
 import hu.mrolcsi.android.lyricsplayer.extensions.media.albumArt
 import hu.mrolcsi.android.lyricsplayer.extensions.media.from
 import hu.mrolcsi.android.lyricsplayer.player.PlayerActivity
+import hu.mrolcsi.android.lyricsplayer.service.exoplayer.ExoNotificationManager
 import hu.mrolcsi.android.lyricsplayer.service.exoplayer.ExoPlayerHolder
 import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
 
 class LPPlayerService : LPBrowserService() {
-
-  // Indicates if the service is running in the foreground
-  private var isForegroundService = false
-
-  // Indicates f the service has been ordered to stop
-  private var isServiceStopped = false
 
   // MediaSession and Player implementations
   private lateinit var mMediaSession: MediaSessionCompat
@@ -38,12 +34,7 @@ class LPPlayerService : LPBrowserService() {
   private var mLastPlayed: LastPlayed? = null
 
   // ExoPlayer Notification
-  //private lateinit var mExoNotificationManager: ExoNotificationManager
-  //private var mNotificationId: Int = 0
-  //private var mNotification: Notification? = null
-
-  // Custom built Notification
-  private lateinit var mNotificationBuilder: LPNotificationBuilder
+  private lateinit var mExoNotificationManager: ExoNotificationManager
 
   override fun onCreate() {
     super.onCreate()
@@ -57,12 +48,12 @@ class LPPlayerService : LPBrowserService() {
       .addNextIntentWithParentStack(Intent(this, PlayerActivity::class.java))
       .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)
 
-    // prepare notification
-    mNotificationBuilder = LPNotificationBuilder(this)
-
     // Create a MediaSessionCompat
     mMediaSession = MediaSessionCompat(this, LOG_TAG).apply {
       setSessionActivity(playerActivityPendingIntent)
+
+      // Set the session's token so that client activities can communicate with it.
+      setSessionToken(sessionToken)
 
       // Enable callbacks from MediaButtons and TransportControls
       setFlags(
@@ -72,22 +63,54 @@ class LPPlayerService : LPBrowserService() {
       )
 
       // Connect this session with the ExoPlayer
-      mPlayerHolder = ExoPlayerHolder(applicationContext, this).apply {
-        getPlayer().addListener(object : Player.EventListener {
+      mPlayerHolder = ExoPlayerHolder(applicationContext, this).also {
+        mExoNotificationManager = ExoNotificationManager(applicationContext,
+          this,
+          it.getPlayer(),
+          object : PlayerNotificationManager.NotificationListener {
+
+            private var isForeground = false
+
+            override fun onNotificationPosted(notificationId: Int, notification: Notification?, ongoing: Boolean) {
+              if (it.getPlayer().playWhenReady && !isForeground) {
+                startService(Intent(applicationContext, LPPlayerService::class.java))
+                startForeground(notificationId, notification)
+                isForeground = true
+              }
+
+              if (!it.getPlayer().playWhenReady && isForeground) {
+                stopForeground(false)
+                isForeground = false
+              }
+            }
+
+            override fun onNotificationCancelled(notificationId: Int, dismissedByUser: Boolean) {
+              stopForeground(true)
+              stopSelf()
+              isForeground = false
+            }
+          })
+
+        it.getPlayer().addListener(object : Player.EventListener {
           override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
             Log.v(LOG_TAG, "onPlayerStateChanged(playWhenReady=$playWhenReady, playbackState=$playbackState)")
+
+            // Make notification dismissible
+            if (!playWhenReady) {
+              stopForeground(false)
+            }
 
             when (playbackState) {
               Player.STATE_READY -> {
                 // Set player to last played settings
-                mLastPlayed?.let {
-                  Log.d(LOG_TAG, "Loaded 'Last Played' from database: $it")
+                mLastPlayed?.let { lastPlayed ->
+                  Log.d(LOG_TAG, "Loaded 'Last Played' from database: $lastPlayed")
 
                   // Skip to last played song
-                  controller.transportControls.skipToQueueItem(it.queuePosition.toLong())
+                  controller.transportControls.skipToQueueItem(lastPlayed.queuePosition.toLong())
 
                   // Seek to saved position
-                  controller.transportControls.seekTo(it.trackPosition)
+                  controller.transportControls.seekTo(lastPlayed.trackPosition)
 
                   // Set mLastPlayed to null, so we won't call this again
                   mLastPlayed = null
@@ -97,9 +120,6 @@ class LPPlayerService : LPBrowserService() {
           }
         })
       }
-
-      // Set the session's token so that client activities can communicate with it.
-      setSessionToken(sessionToken)
 
       // Register basic callbacks
       controller.registerCallback(object : MediaControllerCompat.Callback() {
@@ -111,12 +131,14 @@ class LPPlayerService : LPBrowserService() {
         private var currentLoadTask: AsyncTask<MediaMetadataCompat, Nothing, MediaMetadataCompat>? = null
 
         override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
-          state?.let { updateNotification(it) }
+          state?.let {
+            //updateNotification(it)
+          }
         }
 
         override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
           // Ignore nulls
-          controller.playbackState?.let { state ->
+          controller.playbackState?.let {
             metadata?.let {
 
               // Check if metadata has actually changed
@@ -132,9 +154,6 @@ class LPPlayerService : LPBrowserService() {
                 newMetadata.albumArt?.let { bitmap ->
                   ThemeManager.getInstance(applicationContext).updateFromBitmap(bitmap)
                 }
-
-                // Update notification
-                updateNotification(state)
               }
 
               // Same mediaId
@@ -152,67 +171,6 @@ class LPPlayerService : LPBrowserService() {
                 metadata.albumArt == null && currentLoadTask?.status != AsyncTask.Status.RUNNING -> {
                   // Start new load
                   currentLoadTask = MetadataLoaderTask(onPostExecute).execute(metadata)
-                }
-                else -> {
-                  // Update notification anyway
-                  // (Needed to properly update media buttons)
-                  updateNotification(state)
-                }
-              }
-            }
-          }
-        }
-
-        private fun updateNotification(state: PlaybackStateCompat) {
-          val updatedState = state.state
-//          if (controller.metadata == null) {
-//            return
-//          }
-
-          // Skip building a notification when state is "none".
-          val notification = if (updatedState != PlaybackStateCompat.STATE_NONE) {
-            mNotificationBuilder.buildNotification(sessionToken)
-          } else {
-            null
-          }
-
-          when (updatedState) {
-            PlaybackStateCompat.STATE_BUFFERING,
-            PlaybackStateCompat.STATE_PLAYING -> {
-              /**
-               * This may look strange, but the documentation for [Service.startForeground]
-               * notes that "calling this method does *not* put the service in the started
-               * state itself, even though the name sounds like it."
-               */
-              if (!isForegroundService) {
-                Log.d(LOG_TAG, "updateNotification(): startService(...) and startForeground(id,notification) called.")
-                startService(Intent(applicationContext, this@LPPlayerService.javaClass))
-                startForeground(LPNotificationBuilder.NOTIFICATION_ID, notification)
-                isForegroundService = true
-              } else if (notification != null) {
-                NotificationManagerCompat.from(applicationContext)
-                  .notify(LPNotificationBuilder.NOTIFICATION_ID, notification)
-              }
-            }
-            else -> {
-              if (isForegroundService) {
-                Log.d(LOG_TAG, "updateNotification(): stopForeground(false) called.")
-                stopForeground(false)
-                isForegroundService = false
-
-                // If playback has ended, also stop the service.
-                if (updatedState == PlaybackStateCompat.STATE_NONE) {
-                  Log.d(LOG_TAG, "updateNotification(): stopSelf() called.")
-                  stopSelf()
-                  //stopThis()
-                }
-
-                if (notification != null) {
-                  NotificationManagerCompat.from(applicationContext)
-                    .notify(LPNotificationBuilder.NOTIFICATION_ID, notification)
-                } else {
-                  Log.d(LOG_TAG, "updateNotification(): stopForeground(true) called.")
-                  stopForeground(true)
                 }
               }
             }
@@ -249,31 +207,23 @@ class LPPlayerService : LPBrowserService() {
 
   override fun onDestroy() {
     // Avoid calling stop multiple times.
-    if (!isServiceStopped) {
-      Log.i(LOG_TAG, "onDestroy()")
 
-      // Deactivate the session
-      mMediaSession.run {
-        isActive = false
-        release()
-      }
+    Log.i(LOG_TAG, "onDestroy()")
 
-      // Detach the player from the notification
-      //mExoNotificationManager.release()
-
-      // Release player and related resources
-      mPlayerHolder.release()
-
-      // Close database
-      PlayQueueDatabase.getInstance(applicationContext).close()
+    // Deactivate the session
+    mMediaSession.run {
+      isActive = false
+      release()
     }
-  }
 
-  private fun stopThis() {
-    stopSelf()
-    onDestroy()
+    // Detach the player from the notification
+    mExoNotificationManager.release()
 
-    isServiceStopped = true
+    // Release player and related resources
+    mPlayerHolder.release()
+
+    // Close database
+    //PlayQueueDatabase.getInstance(applicationContext).close()
   }
 
   companion object {

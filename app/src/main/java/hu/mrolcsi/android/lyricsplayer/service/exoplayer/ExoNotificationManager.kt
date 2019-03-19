@@ -13,12 +13,6 @@ import hu.mrolcsi.android.lyricsplayer.R
 import hu.mrolcsi.android.lyricsplayer.extensions.media.from
 import hu.mrolcsi.android.lyricsplayer.extensions.media.fullDescription
 
-/**
- * There's a bug? in ExoPlayer's [PlayerNotificationManager] that causes the notification to show 'null's
- * when changing player states (eg. play/pause, next song, etc.).
- *
- * Workaround: Use [hu.mrolcsi.android.lyricsplayer.service.LPNotificationBuilder] for now.
- */
 class ExoNotificationManager(
   context: Context,
   session: MediaSessionCompat,
@@ -68,14 +62,14 @@ class ExoNotificationManager(
     NOTIFICATION_CHANNEL,
     R.string.notification_nowPlaying,
     NOTIFICATION_ID,
-    mDescriptionAdapter
+    mDescriptionAdapter,
+    notificationListener
   ).apply {
-    setNotificationListener(notificationListener)
     setMediaSessionToken(session.sessionToken)
     setPlayer(player)
     // Some customization
-    setOngoing(true)
-    setStopAction(null)
+    setUseChronometer(false)
+    setUseStopAction(false)
     setRewindIncrementMs(0)
     setFastForwardIncrementMs(0)
     setSmallIcon(R.drawable.ic_song)

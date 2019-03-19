@@ -12,17 +12,18 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import com.google.android.exoplayer2.C
+import com.google.android.exoplayer2.ControlDispatcher
+import com.google.android.exoplayer2.DefaultControlDispatcher
 import com.google.android.exoplayer2.ExoPlayerFactory
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.Timeline
 import com.google.android.exoplayer2.audio.AudioAttributes
-import com.google.android.exoplayer2.ext.mediasession.DefaultPlaybackController
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
 import com.google.android.exoplayer2.ext.mediasession.TimelineQueueEditor
 import com.google.android.exoplayer2.ext.mediasession.TimelineQueueNavigator
 import com.google.android.exoplayer2.source.ConcatenatingMediaSource
-import com.google.android.exoplayer2.source.ExtractorMediaSource
 import com.google.android.exoplayer2.source.MediaSource
+import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.source.ShuffleOrder
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
@@ -49,54 +50,36 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
 
   //region -- PLAYBACK CONTROLLER --
 
-  private val mPlaybackController = object : DefaultPlaybackController() {
-    // override functions as needed
+  private val mPlaybackController = object : DefaultControlDispatcher() {
+    override fun dispatchSetPlayWhenReady(player: Player, playWhenReady: Boolean): Boolean {
+      if (playWhenReady) {
+        Log.v(LOG_TAG, "onPlay()")
 
-    override fun getSupportedPlaybackActions(player: Player?): Long {
-      if (player == null || player.currentTimeline.isEmpty) {
-        return 0
+        // Start updater if it is enabled (Gets cancelled in onStop())
+        if (mProgressUpdater.isEnabled) {
+          mProgressUpdater.startUpdater()
+        }
+      } else {
+        Log.v(LOG_TAG, "onPause()")
+
+        // Save current position
+        mLastPlayed.queuePosition = mPlayer.currentWindowIndex
+        mLastPlayed.trackPosition = player.currentPosition
+
+        mDatabaseWorker.submit {
+          PlayQueueDatabase.getInstance(context)
+            .getPlayQueueDao()
+            .saveLastPlayed(mLastPlayed)
+        }
+
+        mProgressUpdater.stopUpdater()
       }
-      var actions = super.getSupportedPlaybackActions(player) or PlaybackStateCompat.ACTION_SEEK_TO
-      if (fastForwardIncrementMs > 0) {
-        actions = actions or PlaybackStateCompat.ACTION_FAST_FORWARD
-      }
-      if (rewindIncrementMs > 0) {
-        actions = actions or PlaybackStateCompat.ACTION_REWIND
-      }
-      return actions
+
+      player.playWhenReady = true
+      return true
     }
 
-    override fun onPlay(player: Player?) {
-      super.onPlay(player)
-
-      Log.v(LOG_TAG, "onPlay()")
-
-      // Start updater if it is enabled (Gets cancelled in onStop())
-      if (mProgressUpdater.isEnabled) {
-        mProgressUpdater.startUpdater()
-      }
-    }
-
-    override fun onPause(player: Player) {
-      Log.v(LOG_TAG, "onPause()")
-
-      // Save current position
-      mLastPlayed.queuePosition = mPlayer.currentWindowIndex
-      mLastPlayed.trackPosition = player.currentPosition
-
-      // Pause the player
-      super.onPause(player)
-
-      mDatabaseWorker.submit {
-        PlayQueueDatabase.getInstance(context)
-          .getPlayQueueDao()
-          .saveLastPlayed(mLastPlayed)
-      }
-
-      mProgressUpdater.stopUpdater()
-    }
-
-    override fun onStop(player: Player) {
+    override fun dispatchStop(player: Player, reset: Boolean): Boolean {
       Log.v(LOG_TAG, "onStop()")
 
       // Save Last Played settings (before stopping)
@@ -104,7 +87,7 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
       mLastPlayed.trackPosition = mPlayer.currentPosition
 
       // Stop the player
-      super.onStop(player)
+      player.stop()
 
       mDatabaseWorker.submit {
         PlayQueueDatabase.getInstance(context)
@@ -117,11 +100,8 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
 
       // Cancel Handler
       mProgressUpdater.stopUpdater()
-    }
 
-    override fun onSeekTo(player: Player?, position: Long) {
-      Log.v(LOG_TAG, "onSeekTo($position)")
-      super.onSeekTo(player, position)
+      return true
     }
   }
 
@@ -177,9 +157,15 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
   private var mDesiredQueuePosition: Int = -1
 
   private val mPlaybackPreparer = object : MediaSessionConnector.PlaybackPreparer {
-    override fun getCommands(): Array<String>? = null
-
-    override fun onCommand(player: Player, command: String, extras: Bundle?, cb: ResultReceiver?) {}
+    override fun onCommand(
+      player: Player?,
+      controlDispatcher: ControlDispatcher?,
+      command: String?,
+      extras: Bundle?,
+      cb: ResultReceiver?
+    ): Boolean {
+      return false
+    }
 
     override fun getSupportedPrepareActions(): Long = MediaSessionConnector.PlaybackPreparer.ACTIONS
 
@@ -198,7 +184,7 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
         // Clear queue and load media
         mQueueEditor.clearQueue()
 
-        val mediaSource = ExtractorMediaSource.Factory(mDataSourceFactory).createMediaSource(uri)
+        val mediaSource = ProgressiveMediaSource.Factory(mDataSourceFactory).createMediaSource(uri)
         mQueue.addMediaSource(0, mediaSource, mMainHandler) {
           // Call prepare() on the main thread
           onPrepare()
@@ -239,7 +225,7 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
   //region -- CUSTOM ACTIONS
 
   private val mUpdaterActionProvider = object : MediaSessionConnector.CustomActionProvider {
-    override fun getCustomAction(): PlaybackStateCompat.CustomAction {
+    override fun getCustomAction(player: Player?): PlaybackStateCompat.CustomAction {
       return if (mProgressUpdater.isEnabled) {
         PlaybackStateCompat.CustomAction
           .Builder(ACTION_STOP_UPDATER, "Stop progress updater.", -1)
@@ -251,7 +237,12 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
       }
     }
 
-    override fun onCustomAction(action: String?, extras: Bundle?) {
+    override fun onCustomAction(
+      player: Player?,
+      controlDispatcher: ControlDispatcher?,
+      action: String?,
+      extras: Bundle?
+    ) {
       when (action) {
         ACTION_START_UPDATER -> mProgressUpdater.startUpdater()
         ACTION_STOP_UPDATER -> mProgressUpdater.stopUpdater()
@@ -260,17 +251,21 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
   }
 
   private val mPrepareFromDescriptionActionProvider = object : MediaSessionConnector.CustomActionProvider {
-    override fun getCustomAction(): PlaybackStateCompat.CustomAction = PlaybackStateCompat.CustomAction
+    override fun getCustomAction(player: Player?) = PlaybackStateCompat.CustomAction
       .Builder(ACTION_PREPARE_FROM_DESCRIPTION, "Prepare from MediaDescriptionCompat", -1)
       .build()
 
-    override fun onCustomAction(action: String?, extras: Bundle?) {
+    override fun onCustomAction(
+      player: Player?,
+      controlDispatcher: ControlDispatcher?,
+      action: String?,
+      extras: Bundle?
+    ) {
       if (action == ACTION_PREPARE_FROM_DESCRIPTION) {
         val description = extras!!.getParcelable<MediaDescriptionCompat>(ARGUMENT_DESCRIPTION)!!
         mPlaybackPreparer.onPrepareFromDescription(description, extras)
       }
     }
-
   }
 
   //endregion
@@ -281,9 +276,9 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
 
     private val mWindow = Timeline.Window()
 
-    override fun onSkipToQueueItem(player: Player, id: Long) {
+    override fun onSkipToQueueItem(player: Player?, controlDispatcher: ControlDispatcher?, id: Long) {
       Log.v(LOG_TAG, "onSkipToQueueItem($id) [QueueSize=${mQueue.size}] called from ${Thread.currentThread()}")
-      super.onSkipToQueueItem(player, id)
+      super.onSkipToQueueItem(player, controlDispatcher, id)
     }
 
     override fun getMediaDescription(player: Player, windowIndex: Int): MediaDescriptionCompat {
@@ -405,7 +400,7 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
       // NOTE: ExtractorMediaSource.Factory is not reusable!
 
       // Create MediaSource from Metadata
-      return ExtractorMediaSource.Factory(mDataSourceFactory).setTag(description).createMediaSource(uri)
+      return ProgressiveMediaSource.Factory(mDataSourceFactory).setTag(description).createMediaSource(uri)
     }
   }
 
@@ -437,8 +432,11 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
 
   // Connect this holder to the session
   private val mMediaSessionConnector =
-    MediaSessionConnector(session, mPlaybackController).apply {
-      setPlayer(mPlayer, mPlaybackPreparer, mUpdaterActionProvider, mPrepareFromDescriptionActionProvider)
+    MediaSessionConnector(session).apply {
+      setPlayer(mPlayer)
+      setPlaybackPreparer(mPlaybackPreparer)
+      setCustomActionProviders(mUpdaterActionProvider, mPrepareFromDescriptionActionProvider)
+      setControlDispatcher(mPlaybackController)
       setQueueNavigator(mQueueNavigator)
       setQueueEditor(mQueueEditor)
     }
@@ -451,7 +449,7 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
   fun release() {
     Log.d(LOG_TAG, "Releasing ExoPlayer and related...")
 
-    mMediaSessionConnector.setPlayer(null, null)
+    mMediaSessionConnector.setPlayer(null)
 
     // Release player
     mPlayer.release()

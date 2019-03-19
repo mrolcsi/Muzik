@@ -7,6 +7,7 @@ import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.util.Log
 import com.google.android.exoplayer2.C
+import com.google.android.exoplayer2.ControlDispatcher
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
 import com.google.android.exoplayer2.ext.mediasession.TimelineQueueEditor
@@ -36,43 +37,49 @@ class BulkTimelineQueueEditor(
   private val onQueueChangedCallback: OnQueueChangedCallback,
   private val sourceFactory: TimelineQueueEditor.MediaSourceFactory,
   private val handler: Handler = Handler()
-) : MediaSessionConnector.QueueEditor, MediaSessionConnector.CommandReceiver {
+) : MediaSessionConnector.QueueEditor {
 
   // -- COMMAND RECEIVER --
 
-  override fun getCommands(): Array<String> = arrayOf(
-    COMMAND_MOVE_QUEUE_ITEM,
-    COMMAND_ADD_QUEUE_ITEMS,
-    COMMAND_ADD_QUEUE_ITEMS_AT,
-    COMMAND_REMOVE_QUEUE_ITEMS_RANGE,
-    COMMAND_CLEAR_QUEUE
-  )
-
-  override fun onCommand(player: Player, command: String, extras: Bundle?, cb: ResultReceiver?) {
+  override fun onCommand(
+    player: Player,
+    controlDispatcher: ControlDispatcher?,
+    command: String,
+    extras: Bundle?,
+    cb: ResultReceiver?
+  ): Boolean {
     Log.d(LOG_TAG, "Received command: $command,  Params: $extras")
-    when (command) {
+    return when (command) {
       COMMAND_ADD_QUEUE_ITEMS -> {
         val items = extras!!.getParcelableArrayList<MediaDescriptionCompat>(COMMAND_ARGUMENT_MEDIA_DESCRIPTIONS)!!
         onAddQueueItems(player, items)
+        true
       }
       COMMAND_ADD_QUEUE_ITEMS_AT -> {
         val items = extras!!.getParcelableArrayList<MediaDescriptionCompat>(COMMAND_ARGUMENT_MEDIA_DESCRIPTIONS)!!
         val index = extras.getInt(COMMAND_ARGUMENT_INDEX, C.INDEX_UNSET)
         onAddQueueItems(player, items, index)
+        true
       }
       COMMAND_REMOVE_QUEUE_ITEMS_RANGE -> {
         val from = extras!!.getInt(COMMAND_ARGUMENT_FROM_INDEX, C.INDEX_UNSET)
         val to = extras.getInt(COMMAND_ARGUMENT_TO_INDEX, C.INDEX_UNSET)
         onRemoveQueueItems(player, from, to)
+        true
       }
-      COMMAND_CLEAR_QUEUE -> clearQueue()
+      COMMAND_CLEAR_QUEUE -> {
+        clearQueue()
+        true
+      }
       COMMAND_MOVE_QUEUE_ITEM -> {
         val from = extras!!.getInt(EXTRA_FROM_INDEX, C.INDEX_UNSET)
         val to = extras.getInt(EXTRA_TO_INDEX, C.INDEX_UNSET)
         if (from != C.INDEX_UNSET && to != C.INDEX_UNSET) {
           onMoveQueueItem(player, from, to)
         }
+        true
       }
+      else -> false
     }
   }
 
