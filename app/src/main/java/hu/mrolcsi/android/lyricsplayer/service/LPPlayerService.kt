@@ -5,6 +5,9 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
 import android.os.AsyncTask
+import android.os.CancellationSignal
+import android.os.Handler
+import android.os.HandlerThread
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.MediaSessionCompat
@@ -26,6 +29,9 @@ import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
 
 class LPPlayerService : LPBrowserService() {
 
+  private val mBackgroundThread = HandlerThread("PlayerServiceHandler").apply { start() }
+  private val mBackgroundHandler = Handler(mBackgroundThread.looper)
+
   // MediaSession and Player implementations
   private lateinit var mMediaSession: MediaSessionCompat
   private lateinit var mPlayerHolder: ExoPlayerHolder
@@ -35,6 +41,7 @@ class LPPlayerService : LPBrowserService() {
 
   // ExoPlayer Notification
   private lateinit var mExoNotificationManager: ExoNotificationManager
+  private var mIsForeground = false
 
   override fun onCreate() {
     super.onCreate()
@@ -63,42 +70,41 @@ class LPPlayerService : LPBrowserService() {
       )
 
       // Connect this session with the ExoPlayer
-      mPlayerHolder = ExoPlayerHolder(applicationContext, this).also {
-        mExoNotificationManager =
-          ExoNotificationManager(applicationContext,
-            this,
-            it.getPlayer(),
-            object : PlayerNotificationManager.NotificationListener {
+      mPlayerHolder = ExoPlayerHolder(applicationContext, this).also { exo ->
+        mExoNotificationManager = ExoNotificationManager(
+          applicationContext,
+          this,
+          exo.getPlayer(),
+          object : PlayerNotificationManager.NotificationListener {
 
-              private var isForeground = false
-
-              override fun onNotificationPosted(notificationId: Int, notification: Notification?, ongoing: Boolean) {
-                if (it.getPlayer().playWhenReady && !isForeground) {
-                  startService(Intent(applicationContext, LPPlayerService::class.java))
-                  startForeground(notificationId, notification)
-                  isForeground = true
-                }
-
-                if (!it.getPlayer().playWhenReady && isForeground) {
-                  stopForeground(false)
-                  isForeground = false
-                }
+            override fun onNotificationPosted(notificationId: Int, notification: Notification?, ongoing: Boolean) {
+              if (exo.getPlayer().playWhenReady && !mIsForeground) {
+                startService(Intent(applicationContext, LPPlayerService::class.java))
+                startForeground(notificationId, notification)
+                mIsForeground = true
               }
 
-              override fun onNotificationCancelled(notificationId: Int, dismissedByUser: Boolean) {
-                stopForeground(true)
-                stopSelf()
-                isForeground = false
+              if (!exo.getPlayer().playWhenReady && mIsForeground) {
+                stopForeground(false)
+                mIsForeground = false
               }
-            })
+            }
 
-        it.getPlayer().addListener(object : Player.EventListener {
+            override fun onNotificationCancelled(notificationId: Int, dismissedByUser: Boolean) {
+              stopForeground(true)
+              stopSelf()
+              mIsForeground = false
+            }
+          })
+
+        exo.getPlayer().addListener(object : Player.EventListener {
           override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
             Log.v(LOG_TAG, "onPlayerStateChanged(playWhenReady=$playWhenReady, playbackState=$playbackState)")
 
             // Make notification dismissible
-            if (!playWhenReady) {
+            if (!playWhenReady && mIsForeground) {
               stopForeground(false)
+              mIsForeground = false
             }
 
             when (playbackState) {
@@ -128,56 +134,58 @@ class LPPlayerService : LPBrowserService() {
         // Last received metadata
         private var previousMetadata: MediaMetadataCompat? = null
 
-        // Previous load
-        private var currentLoadTask: AsyncTask<MediaMetadataCompat, Nothing, MediaMetadataCompat>? = null
+        private var mLoaderRunnable: Runnable? = null
+        private var mCancellationSignal: CancellationSignal? = null
 
-        override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
-          state?.let {
-            //updateNotification(it)
-          }
-        }
+        override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {}
 
         override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
           // Ignore nulls
-          controller.playbackState?.let {
-            metadata?.let {
+          metadata?.let {
+            Log.v(LOG_TAG, "onMetadataChanged(${metadata.description}, albumArt=${metadata.albumArt})")
 
-              // Check if metadata has actually changed
-              val mediaId = metadata.description?.mediaId
-              val differentMediaId = mediaId != previousMetadata?.description?.mediaId
+            // Check if metadata has actually changed
+            val mediaId = metadata.description?.mediaId
+            val differentMediaId = mediaId != previousMetadata?.description?.mediaId
 
-              // Prepare onPostExecute callback
-              val onPostExecute: (MediaMetadataCompat) -> Unit = { newMetadata ->
-                // Give newly created metadata to the session
-                setMetadata(newMetadata)
+            previousMetadata = metadata
 
-                // Update Theme
-                newMetadata.albumArt?.let { bitmap ->
-                  ThemeManager.getInstance(applicationContext).updateFromBitmap(bitmap)
-                }
+            when {
+              differentMediaId || metadata.albumArt == null -> {
+                mCancellationSignal?.cancel()
+                mCancellationSignal = loadNewMetadata(metadata)
               }
-
-              // Same mediaId
-              when {
-                differentMediaId -> {
-                  // Cancel previous load
-                  currentLoadTask?.cancel(true)
-
-                  // Save as last received metadata
-                  previousMetadata = metadata
-
-                  // Start new load
-                  currentLoadTask = MetadataLoaderTask(onPostExecute).execute(metadata)
-                }
-                metadata.albumArt == null && currentLoadTask?.status != AsyncTask.Status.RUNNING -> {
-                  // Start new load
-                  currentLoadTask = MetadataLoaderTask(onPostExecute).execute(metadata)
-                }
+              else -> {
+                // update Theme
+                ThemeManager.getInstance(applicationContext).updateFromBitmap(metadata.albumArt!!)
               }
             }
           }
         }
-      })
+
+        private fun loadNewMetadata(source: MediaMetadataCompat): CancellationSignal {
+          if (mLoaderRunnable != null) {
+            mBackgroundHandler.removeCallbacks(mLoaderRunnable)
+          }
+          val cancellationSignal = CancellationSignal()
+          mLoaderRunnable = getLoaderRunnable(source, cancellationSignal)
+          mBackgroundHandler.post(mLoaderRunnable)
+          return cancellationSignal
+        }
+
+        private fun getLoaderRunnable(source: MediaMetadataCompat, cancellationSignal: CancellationSignal): Runnable {
+          return Runnable {
+            Log.d(LOG_TAG, "Loading additional metadata for ${source.description.mediaId}")
+
+            val newMetadata = MediaMetadataCompat.Builder(source).from(source.description).build()
+
+            if (!cancellationSignal.isCanceled) {
+              setMetadata(newMetadata)
+            }
+          }
+        }
+
+      }, mBackgroundHandler)
 
       AsyncTask.execute {
         // Get last played queue from the database
@@ -229,24 +237,5 @@ class LPPlayerService : LPBrowserService() {
 
   companion object {
     const val LOG_TAG = "LPPlayerService"
-
-    private open class MetadataLoaderTask(private val onPostExecute: (MediaMetadataCompat) -> Unit) :
-      AsyncTask<MediaMetadataCompat, Nothing, MediaMetadataCompat>() {
-
-      override fun doInBackground(vararg params: MediaMetadataCompat?): MediaMetadataCompat {
-        val oldMetadata = params[0]!!
-
-        Log.d(LOG_TAG, "Loading metadata in the background for ${oldMetadata.description.mediaId}")
-
-        return MediaMetadataCompat.Builder(oldMetadata).from(oldMetadata.description).build()
-      }
-
-      override fun onPostExecute(result: MediaMetadataCompat) {
-        if (!isCancelled) {
-          // Deliver result
-          onPostExecute.invoke(result)
-        }
-      }
-    }
   }
 }
