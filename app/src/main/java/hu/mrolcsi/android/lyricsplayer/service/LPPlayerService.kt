@@ -20,8 +20,8 @@ import hu.mrolcsi.android.lyricsplayer.extensions.media.addQueueItems
 import hu.mrolcsi.android.lyricsplayer.extensions.media.albumArt
 import hu.mrolcsi.android.lyricsplayer.extensions.media.from
 import hu.mrolcsi.android.lyricsplayer.player.PlayerActivity
-import hu.mrolcsi.android.lyricsplayer.service.exoplayer.ExoNotificationManager
 import hu.mrolcsi.android.lyricsplayer.service.exoplayer.ExoPlayerHolder
+import hu.mrolcsi.android.lyricsplayer.service.exoplayer.notification.ExoNotificationManager
 import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
 
 class LPPlayerService : LPBrowserService() {
@@ -64,32 +64,33 @@ class LPPlayerService : LPBrowserService() {
 
       // Connect this session with the ExoPlayer
       mPlayerHolder = ExoPlayerHolder(applicationContext, this).also {
-        mExoNotificationManager = ExoNotificationManager(applicationContext,
-          this,
-          it.getPlayer(),
-          object : PlayerNotificationManager.NotificationListener {
+        mExoNotificationManager =
+          ExoNotificationManager(applicationContext,
+            this,
+            it.getPlayer(),
+            object : PlayerNotificationManager.NotificationListener {
 
-            private var isForeground = false
+              private var isForeground = false
 
-            override fun onNotificationPosted(notificationId: Int, notification: Notification?, ongoing: Boolean) {
-              if (it.getPlayer().playWhenReady && !isForeground) {
-                startService(Intent(applicationContext, LPPlayerService::class.java))
-                startForeground(notificationId, notification)
-                isForeground = true
+              override fun onNotificationPosted(notificationId: Int, notification: Notification?, ongoing: Boolean) {
+                if (it.getPlayer().playWhenReady && !isForeground) {
+                  startService(Intent(applicationContext, LPPlayerService::class.java))
+                  startForeground(notificationId, notification)
+                  isForeground = true
+                }
+
+                if (!it.getPlayer().playWhenReady && isForeground) {
+                  stopForeground(false)
+                  isForeground = false
+                }
               }
 
-              if (!it.getPlayer().playWhenReady && isForeground) {
-                stopForeground(false)
+              override fun onNotificationCancelled(notificationId: Int, dismissedByUser: Boolean) {
+                stopForeground(true)
+                stopSelf()
                 isForeground = false
               }
-            }
-
-            override fun onNotificationCancelled(notificationId: Int, dismissedByUser: Boolean) {
-              stopForeground(true)
-              stopSelf()
-              isForeground = false
-            }
-          })
+            })
 
         it.getPlayer().addListener(object : Player.EventListener {
           override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {

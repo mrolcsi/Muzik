@@ -1,4 +1,4 @@
-package hu.mrolcsi.android.lyricsplayer.service.exoplayer
+package hu.mrolcsi.android.lyricsplayer.service.exoplayer.notification
 
 import android.app.PendingIntent
 import android.content.Context
@@ -57,7 +57,7 @@ class ExoNotificationManager(
   }
 
   // Connect this notification manager to the session
-  private val mNotificationManager = PlayerNotificationManager.createWithNotificationChannel(
+  private val mNotificationManager = PlayerNotificationManagerExt.createWithNotificationChannel(
     context,
     NOTIFICATION_CHANNEL,
     R.string.notification_nowPlaying,
@@ -73,6 +73,10 @@ class ExoNotificationManager(
     setRewindIncrementMs(0)
     setFastForwardIncrementMs(0)
     setSmallIcon(R.drawable.ic_song)
+    setPlayIcon(R.drawable.ic_media_play)
+    setPauseIcon(R.drawable.ic_media_pause)
+    setPreviousIcon(R.drawable.ic_media_previous)
+    setNextIcon(R.drawable.ic_media_next)
   }
 
   fun release() {
