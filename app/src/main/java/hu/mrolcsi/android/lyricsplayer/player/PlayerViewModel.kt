@@ -6,9 +6,9 @@ import android.support.v4.media.session.MediaSessionCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import hu.mrolcsi.android.lyricsplayer.extensions.switchMap
-import hu.mrolcsi.android.lyricsplayer.library.LibraryViewModel
+import hu.mrolcsi.android.lyricsplayer.library.SessionViewModel
 
-class PlayerViewModel(app: Application) : LibraryViewModel(app) {
+class PlayerViewModel(app: Application) : SessionViewModel(app) {
 
   override fun getLogTag(): String = "PlayerViewModel"
 

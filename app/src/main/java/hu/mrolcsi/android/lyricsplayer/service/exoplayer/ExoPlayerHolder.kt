@@ -270,6 +270,15 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
 
   //endregion
 
+  //region -- METADATA PROVIDER --
+
+  private val mMetadataProvider: ExoMetadataProvider = ExoMetadataProvider(session.controller) {
+    // Call invalidate on session when the metadata cache was updated.
+    mSessionConnector.invalidateMediaSessionMetadata()
+  }
+
+  //endregion
+
   //region -- QUEUE NAVIGATOR --
 
   private val mQueueNavigator = object : TimelineQueueNavigator(session, 50) {
@@ -431,9 +440,10 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
   private val mLastPlayed = LastPlayed()
 
   // Connect this holder to the session
-  private val mMediaSessionConnector =
+  private val mSessionConnector =
     MediaSessionConnector(session).apply {
       setPlayer(mPlayer)
+      setMediaMetadataProvider(mMetadataProvider)
       setPlaybackPreparer(mPlaybackPreparer)
       setCustomActionProviders(mUpdaterActionProvider, mPrepareFromDescriptionActionProvider)
       setControlDispatcher(mPlaybackController)
@@ -449,7 +459,7 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
   fun release() {
     Log.d(LOG_TAG, "Releasing ExoPlayer and related...")
 
-    mMediaSessionConnector.setPlayer(null)
+    mSessionConnector.setPlayer(null)
 
     // Release player
     mPlayer.release()

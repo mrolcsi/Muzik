@@ -3,6 +3,7 @@ package hu.mrolcsi.android.lyricsplayer.service.exoplayer.notification
 import android.app.PendingIntent
 import android.content.Context
 import android.graphics.Bitmap
+import android.os.AsyncTask
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
@@ -10,6 +11,7 @@ import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import hu.mrolcsi.android.lyricsplayer.BuildConfig
 import hu.mrolcsi.android.lyricsplayer.R
+import hu.mrolcsi.android.lyricsplayer.extensions.media.albumArt
 import hu.mrolcsi.android.lyricsplayer.extensions.media.from
 import hu.mrolcsi.android.lyricsplayer.extensions.media.fullDescription
 
@@ -38,21 +40,26 @@ class ExoNotificationManager(
 
     override fun getCurrentLargeIcon(player: Player, callback: PlayerNotificationManager.BitmapCallback?): Bitmap? {
       val description = getDescription(session)
-      return description?.iconBitmap
+
+      description?.let {
+        if (description.iconBitmap == null) {
+          AsyncTask.execute {
+            // load bitmap from MetadataRetriever
+            val metadata = MediaMetadataCompat.Builder().from(description).build()
+            mLastUsedDescription = metadata.fullDescription
+            callback?.onBitmap(metadata.albumArt)
+          }
+        }
+      }
+
+      return mLastUsedDescription?.iconBitmap
     }
 
     /**
      * Get current [MediaDescriptionCompat] from the provided [MediaSessionCompat].
      */
     private fun getDescription(session: MediaSessionCompat): MediaDescriptionCompat? {
-      val description = session.controller?.metadata?.description
-      // Check if mediaId has changed
-      if (description != null && description.mediaId != mLastUsedDescription?.mediaId) {
-        // Load additional metadata into description
-        mLastUsedDescription = MediaMetadataCompat.Builder().from(description).build().fullDescription
-      }
-
-      return mLastUsedDescription
+      return session.controller?.metadata?.description
     }
   }
 
@@ -68,7 +75,7 @@ class ExoNotificationManager(
     setMediaSessionToken(session.sessionToken)
     setPlayer(player)
     // Some customization
-    setUseChronometer(false)
+    setUseChronometer(true)
     setUseStopAction(false)
     setRewindIncrementMs(0)
     setFastForwardIncrementMs(0)

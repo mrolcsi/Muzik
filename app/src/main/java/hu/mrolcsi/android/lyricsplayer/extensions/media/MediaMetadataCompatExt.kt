@@ -303,7 +303,7 @@ fun MediaMetadataCompat.Builder.from(retriever: MediaMetadataRetriever): MediaMe
   // Add downloadStatus to force the creation of an "extras" bundle in the resulting
   // MediaMetadataCompat object. This is needed to send accurate metadata to the
   // media session during updates.
-  downloadStatus = MediaDescriptionCompat.STATUS_DOWNLOADED
+  downloadStatus = MediaDescriptionCompat.STATUS_NOT_DOWNLOADED
 
   // Release retriever. We don't need it anymore.
   retriever.release()

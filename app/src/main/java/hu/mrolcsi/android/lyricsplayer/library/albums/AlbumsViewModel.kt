@@ -11,10 +11,10 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import hu.mrolcsi.android.lyricsplayer.R
 import hu.mrolcsi.android.lyricsplayer.extensions.switchMap
-import hu.mrolcsi.android.lyricsplayer.library.LibraryViewModel
+import hu.mrolcsi.android.lyricsplayer.library.SessionViewModel
 import hu.mrolcsi.android.lyricsplayer.service.LPBrowserService
 
-class AlbumsViewModel(app: Application) : LibraryViewModel(app) {
+class AlbumsViewModel(app: Application) : SessionViewModel(app) {
 
   // TODO: do filtering through Transformation.map?
 

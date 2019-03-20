@@ -257,6 +257,7 @@ class PlayerActivity : AppCompatActivity() {
     rvQueue.apply {
       layoutManager = LinearLayoutManager(this@PlayerActivity, LinearLayoutManager.HORIZONTAL, false)
       adapter = mQueueAdapter
+      setHasFixedSize(true)
     }
 
     mSnapHelper = RVPagerSnapHelperListenable().attachToRecyclerView(rvQueue, object : RVPagerStateListener {

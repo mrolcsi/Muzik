@@ -3,6 +3,7 @@ package hu.mrolcsi.android.lyricsplayer.theme
 import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.os.AsyncTask
 import android.preference.PreferenceManager
@@ -12,12 +13,14 @@ import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.get
 import androidx.lifecycle.MutableLiveData
 import androidx.palette.graphics.Palette
+import hu.mrolcsi.android.lyricsplayer.R
 import org.json.JSONObject
 import java.util.concurrent.Executors
 
 // Singleton or ViewModel?
 
 class ThemeManager(private val sharedPrefs: SharedPreferences) {
+
 
   private val mThemeWorker = Executors.newSingleThreadExecutor()
 
@@ -39,10 +42,13 @@ class ThemeManager(private val sharedPrefs: SharedPreferences) {
     hsl[1] > 0.4
   }
 
-  fun updateFromBitmap(bitmap: Bitmap) {
+  fun updateFromBitmap(bitmap: Bitmap?) {
     mThemeWorker.submit {
+
+      val coverArt = bitmap ?: mPlaceholderCoverArt
+
       // Calculate hash for this bitmap
-      val hashCode = bitmap.bitmapHash()
+      val hashCode = coverArt.bitmapHash()
 
       Log.d(LOG_TAG, "Updating Theme from $bitmap (hash=$hashCode)")
 
@@ -55,16 +61,16 @@ class ThemeManager(private val sharedPrefs: SharedPreferences) {
 
       // If the Theme is not cached, create it
       if (mThemeCache[hashCode] == null) {
-        val mainPalette = Palette.from(bitmap)
+        val mainPalette = Palette.from(coverArt)
           .clearFilters()
           //.addFilter(mPaletteFiler)
           .generate()
 
         val theme = createTheme(mainPalette)
 
-        val statusBarPalette = Palette.from(bitmap)
+        val statusBarPalette = Palette.from(coverArt)
           .clearFilters()
-          .setRegion(0, 0, bitmap.width, 48)    // approx.
+          .setRegion(0, 0, coverArt.width, 48)    // approx.
           .generate()
 
         theme.statusBarColor = statusBarPalette.swatches.maxBy { it.population }?.rgb
@@ -186,9 +192,14 @@ class ThemeManager(private val sharedPrefs: SharedPreferences) {
 
     private const val LAST_USED_THEME = "lastUsedTheme"
 
+    private lateinit var mPlaceholderCoverArt: Bitmap
+
     @Volatile private var instance: ThemeManager? = null
 
     fun getInstance(context: Context): ThemeManager {
+      if (!Companion::mPlaceholderCoverArt.isInitialized) {
+        mPlaceholderCoverArt = BitmapFactory.decodeResource(context.resources, R.drawable.placeholder_cover_art)
+      }
       return instance ?: ThemeManager(PreferenceManager.getDefaultSharedPreferences(context)).also { instance = it }
     }
   }

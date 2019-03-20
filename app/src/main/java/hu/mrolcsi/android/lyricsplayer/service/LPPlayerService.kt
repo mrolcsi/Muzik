@@ -5,9 +5,6 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
 import android.os.AsyncTask
-import android.os.CancellationSignal
-import android.os.Handler
-import android.os.HandlerThread
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.MediaSessionCompat
@@ -21,16 +18,12 @@ import hu.mrolcsi.android.lyricsplayer.database.playqueue.PlayQueueDatabase
 import hu.mrolcsi.android.lyricsplayer.database.playqueue.entities.LastPlayed
 import hu.mrolcsi.android.lyricsplayer.extensions.media.addQueueItems
 import hu.mrolcsi.android.lyricsplayer.extensions.media.albumArt
-import hu.mrolcsi.android.lyricsplayer.extensions.media.from
 import hu.mrolcsi.android.lyricsplayer.player.PlayerActivity
 import hu.mrolcsi.android.lyricsplayer.service.exoplayer.ExoPlayerHolder
 import hu.mrolcsi.android.lyricsplayer.service.exoplayer.notification.ExoNotificationManager
 import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
 
 class LPPlayerService : LPBrowserService() {
-
-  private val mBackgroundThread = HandlerThread("PlayerServiceHandler").apply { start() }
-  private val mBackgroundHandler = Handler(mBackgroundThread.looper)
 
   // MediaSession and Player implementations
   private lateinit var mMediaSession: MediaSessionCompat
@@ -131,61 +124,14 @@ class LPPlayerService : LPBrowserService() {
       // Register basic callbacks
       controller.registerCallback(object : MediaControllerCompat.Callback() {
 
-        // Last received metadata
-        private var previousMetadata: MediaMetadataCompat? = null
-
-        private var mLoaderRunnable: Runnable? = null
-        private var mCancellationSignal: CancellationSignal? = null
-
         override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {}
 
         override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
-          // Ignore nulls
-          metadata?.let {
-            Log.v(LOG_TAG, "onMetadataChanged(${metadata.description}, albumArt=${metadata.albumArt})")
-
-            // Check if metadata has actually changed
-            val mediaId = metadata.description?.mediaId
-            val differentMediaId = mediaId != previousMetadata?.description?.mediaId
-
-            previousMetadata = metadata
-
-            when {
-              differentMediaId || metadata.albumArt == null -> {
-                mCancellationSignal?.cancel()
-                mCancellationSignal = loadNewMetadata(metadata)
-              }
-              else -> {
-                // update Theme
-                ThemeManager.getInstance(applicationContext).updateFromBitmap(metadata.albumArt!!)
-              }
-            }
+          metadata?.albumArt.let {
+            ThemeManager.getInstance(applicationContext).updateFromBitmap(it)
           }
         }
-
-        private fun loadNewMetadata(source: MediaMetadataCompat): CancellationSignal {
-          if (mLoaderRunnable != null) {
-            mBackgroundHandler.removeCallbacks(mLoaderRunnable)
-          }
-          val cancellationSignal = CancellationSignal()
-          mLoaderRunnable = getLoaderRunnable(source, cancellationSignal)
-          mBackgroundHandler.post(mLoaderRunnable)
-          return cancellationSignal
-        }
-
-        private fun getLoaderRunnable(source: MediaMetadataCompat, cancellationSignal: CancellationSignal): Runnable {
-          return Runnable {
-            Log.d(LOG_TAG, "Loading additional metadata for ${source.description.mediaId}")
-
-            val newMetadata = MediaMetadataCompat.Builder(source).from(source.description).build()
-
-            if (!cancellationSignal.isCanceled) {
-              setMetadata(newMetadata)
-            }
-          }
-        }
-
-      }, mBackgroundHandler)
+      })
 
       AsyncTask.execute {
         // Get last played queue from the database

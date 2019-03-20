@@ -9,6 +9,7 @@ import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.drawable.LayerDrawable
 import android.graphics.drawable.RippleDrawable
+import android.os.AsyncTask
 import android.os.Bundle
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
@@ -35,6 +36,8 @@ import hu.mrolcsi.android.lyricsplayer.R
 import hu.mrolcsi.android.lyricsplayer.extensions.applyColorToNavigationBarIcons
 import hu.mrolcsi.android.lyricsplayer.extensions.applyColorToStatusBarIcons
 import hu.mrolcsi.android.lyricsplayer.extensions.isPermissionGranted
+import hu.mrolcsi.android.lyricsplayer.extensions.media.albumArt
+import hu.mrolcsi.android.lyricsplayer.extensions.media.from
 import hu.mrolcsi.android.lyricsplayer.extensions.requestPermission
 import hu.mrolcsi.android.lyricsplayer.extensions.shouldShowPermissionRationale
 import hu.mrolcsi.android.lyricsplayer.library.albums.AlbumsFragmentArgs
@@ -83,9 +86,6 @@ class LibraryActivity : AppCompatActivity() {
 
         // Update from state
         updateControls(controller?.playbackState)
-
-        // Update from metadata
-        updateSongData(controller?.metadata)
       })
       currentPlaybackState.observe(this@LibraryActivity, Observer { playbackState ->
         updateControls(playbackState)
@@ -286,13 +286,26 @@ class LibraryActivity : AppCompatActivity() {
   }
 
   private fun updateSongData(metadata: MediaMetadataCompat?) {
-    // Update cover art in ActionBar
-    mNowPlayingCoverArt?.let { imgView ->
-      metadata?.description?.iconBitmap.let { bitmap ->
-        GlideApp.with(this)
-          .asDrawable()
-          .load(bitmap)
-          .into(imgView)
+    metadata?.let {
+      if (metadata.albumArt == null) {
+        AsyncTask.execute {
+          val fullMetadata = MediaMetadataCompat.Builder(metadata).from(metadata.description).build()
+          fullMetadata.albumArt?.let {
+            mNowPlayingCoverArt?.post {
+              GlideApp.with(this)
+                .load(it)
+                .into(mNowPlayingCoverArt!!)
+            }
+          }
+        }
+      } else {
+        mNowPlayingCoverArt?.let { imgView ->
+          metadata.albumArt.let { bitmap ->
+            GlideApp.with(this)
+              .load(bitmap)
+              .into(imgView)
+          }
+        }
       }
     }
   }

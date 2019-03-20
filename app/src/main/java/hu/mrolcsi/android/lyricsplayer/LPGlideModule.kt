@@ -1,13 +1,18 @@
 package hu.mrolcsi.android.lyricsplayer
 
 import android.content.Context
-import android.graphics.drawable.Drawable
+import android.graphics.Bitmap
 import com.bumptech.glide.GlideBuilder
 import com.bumptech.glide.annotation.GlideModule
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.load.engine.cache.InternalCacheDiskCacheFactory
+import com.bumptech.glide.load.engine.cache.LruResourceCache
+import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions
 import com.bumptech.glide.module.AppGlideModule
+import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.transition.DrawableCrossFadeFactory
 import hu.mrolcsi.android.lyricsplayer.theme.Theme
+
 
 @GlideModule
 class LPGlideModule : AppGlideModule() {
@@ -20,8 +25,21 @@ class LPGlideModule : AppGlideModule() {
       .build()
 
     builder.setDefaultTransitionOptions(
-      Drawable::class.java,
-      DrawableTransitionOptions.withCrossFade(factory)
+      Bitmap::class.java,
+      BitmapTransitionOptions.withCrossFade(factory)
     )
+
+    builder.setMemoryCache(LruResourceCache(MEMORY_CACHE_SIZE.toLong()))
+    builder.setDiskCache(InternalCacheDiskCacheFactory(context, (MEMORY_CACHE_SIZE * 10).toLong()))
+
+    builder.setDefaultRequestOptions(
+      RequestOptions()
+        .placeholder(R.drawable.placeholder_cover_art)
+        .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+    )
+  }
+
+  companion object {
+    private const val MEMORY_CACHE_SIZE = 1024 * 1024 * 20 // 20mb
   }
 }

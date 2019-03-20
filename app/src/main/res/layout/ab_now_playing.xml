@@ -29,10 +29,12 @@
     android:padding="16dp"
     android:alpha="0.8"
     android:tint="@android:color/white"
+    android:visibility="gone"
     app:layout_constraintBottom_toBottomOf="@+id/imgCoverArt"
     app:layout_constraintEnd_toEndOf="@+id/imgCoverArt"
     app:layout_constraintStart_toStartOf="@+id/imgCoverArt"
     app:layout_constraintTop_toTopOf="@+id/imgCoverArt"
-    app:srcCompat="@drawable/ic_song"/>
+    app:srcCompat="@drawable/ic_song"
+    tools:visibility="visible"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

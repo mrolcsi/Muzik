@@ -9,10 +9,10 @@ import hu.mrolcsi.android.lyricsplayer.extensions.media.albumKey
 import hu.mrolcsi.android.lyricsplayer.extensions.media.artistKey
 import hu.mrolcsi.android.lyricsplayer.extensions.media.trackNumber
 import hu.mrolcsi.android.lyricsplayer.extensions.switchMap
-import hu.mrolcsi.android.lyricsplayer.library.LibraryViewModel
+import hu.mrolcsi.android.lyricsplayer.library.SessionViewModel
 import hu.mrolcsi.android.lyricsplayer.service.LPBrowserService
 
-class SongsViewModel(app: Application) : LibraryViewModel(app) {
+class SongsViewModel(app: Application) : SessionViewModel(app) {
 
   private val mSubscriptionCallbacks = object : MediaBrowserCompat.SubscriptionCallback() {
     override fun onChildrenLoaded(parentId: String, children: MutableList<MediaBrowserCompat.MediaItem>) {

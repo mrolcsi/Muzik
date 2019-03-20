@@ -3,6 +3,7 @@ package hu.mrolcsi.android.lyricsplayer.player
 import android.graphics.Bitmap
 import android.os.AsyncTask
 import android.support.v4.media.MediaMetadataCompat
+import android.util.Log
 import android.util.LruCache
 import android.view.LayoutInflater
 import android.view.View
@@ -10,6 +11,7 @@ import android.view.ViewGroup
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import hu.mrolcsi.android.lyricsplayer.GlideApp
 import hu.mrolcsi.android.lyricsplayer.R
 import hu.mrolcsi.android.lyricsplayer.common.DiffCallbackRepository
 import hu.mrolcsi.android.lyricsplayer.database.playqueue.entities.PlayQueueEntry
@@ -30,6 +32,8 @@ class QueueAdapter : ListAdapter<PlayQueueEntry, QueueAdapter.QueueItemHolder>(
   }
 
   override fun onBindViewHolder(holder: QueueItemHolder, position: Int) {
+    Log.v(LOG_TAG, "onBindViewHolder($holder, $position")
+
     holder.bind(getItem(position))
   }
 
@@ -63,14 +67,16 @@ class QueueAdapter : ListAdapter<PlayQueueEntry, QueueAdapter.QueueItemHolder>(
       AsyncTask.execute {
         val metadata = MediaMetadataCompat.Builder().from(item._data).build()
 
-        itemView.post {
-          // set image
-          imgCoverArt.setImageBitmap(metadata.albumArt)
+        imgCoverArt.post {
+          GlideApp.with(imgCoverArt)
+            .load(metadata.albumArt)
+            .into(imgCoverArt)
         }
 
         // Generate theme
         metadata.albumArt?.let { albumArt ->
           // Generate theme
+          // TODO: use ThemeManager
           Palette.from(albumArt)
             .clearFilters()
             .generate { mainPalette ->
@@ -112,5 +118,9 @@ class QueueAdapter : ListAdapter<PlayQueueEntry, QueueAdapter.QueueItemHolder>(
       private val mCache = LruCache<String, Pair<Bitmap, Theme>>(20)
     }
 
+  }
+
+  companion object {
+    private const val LOG_TAG = "QueueAdapter"
   }
 }

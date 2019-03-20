@@ -9,10 +9,9 @@ import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
-import hu.mrolcsi.android.lyricsplayer.extensions.media.albumArt
 import hu.mrolcsi.android.lyricsplayer.service.LPPlayerService
 
-abstract class LibraryViewModel(app: Application) : AndroidViewModel(app) {
+abstract class SessionViewModel(app: Application) : AndroidViewModel(app) {
 
   val mediaController = MutableLiveData<MediaControllerCompat?>()
 
@@ -41,15 +40,15 @@ abstract class LibraryViewModel(app: Application) : AndroidViewModel(app) {
           // Register callbacks to watch for changes
           registerCallback(object : MediaControllerCompat.Callback() {
             override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
-              Log.v(getLogTag(), "onMetadataChanged(${metadata?.description})")
+              metadata?.let {
+                Log.v(getLogTag(), "onMetadataChanged(${metadata.description})")
 
-              // Check if metadata has actually changed
-              if (metadata?.albumArt != null && metadata.description?.mediaId != mLastMetadata?.description?.mediaId) {
-                // TODO: use MetadataRetriever to get additional metadata before posting
-                currentMediaMetadata.postValue(metadata)
-
-                // Save as last received metadata
-                mLastMetadata = metadata
+                // Check if metadata has actually changed
+                if (metadata.description?.mediaId != mLastMetadata?.description?.mediaId) {
+                  currentMediaMetadata.postValue(metadata)
+                  // Save as last received metadata
+                  mLastMetadata = metadata
+                }
               }
             }
 

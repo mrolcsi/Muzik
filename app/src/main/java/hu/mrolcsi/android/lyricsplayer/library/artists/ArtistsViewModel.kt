@@ -4,10 +4,10 @@ import android.app.Application
 import android.support.v4.media.MediaBrowserCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import hu.mrolcsi.android.lyricsplayer.library.LibraryViewModel
+import hu.mrolcsi.android.lyricsplayer.library.SessionViewModel
 import hu.mrolcsi.android.lyricsplayer.service.LPBrowserService
 
-class ArtistsViewModel(app: Application) : LibraryViewModel(app) {
+class ArtistsViewModel(app: Application) : SessionViewModel(app) {
 
   private val mSubscriptionCallbacks = object : MediaBrowserCompat.SubscriptionCallback() {
     override fun onChildrenLoaded(parentId: String, children: MutableList<MediaBrowserCompat.MediaItem>) {
