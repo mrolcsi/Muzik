@@ -80,7 +80,6 @@ class QueueAdapter : ListAdapter<MediaSessionCompat.QueueItem, QueueAdapter.Queu
         imgCoverArt.post {
           GlideApp.with(imgCoverArt)
             .load(metadata.albumArt)
-            .placeholder(null)
             .into(imgCoverArt)
         }
 

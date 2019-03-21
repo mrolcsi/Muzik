@@ -12,8 +12,9 @@ import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import hu.mrolcsi.android.lyricsplayer.BuildConfig
 import hu.mrolcsi.android.lyricsplayer.R
 import hu.mrolcsi.android.lyricsplayer.extensions.media.albumArt
+import hu.mrolcsi.android.lyricsplayer.extensions.media.artist
 import hu.mrolcsi.android.lyricsplayer.extensions.media.from
-import hu.mrolcsi.android.lyricsplayer.extensions.media.fullDescription
+import hu.mrolcsi.android.lyricsplayer.extensions.media.title
 
 class ExoNotificationManager(
   context: Context,
@@ -24,47 +25,49 @@ class ExoNotificationManager(
 
   private val mDescriptionAdapter = object : PlayerNotificationManager.MediaDescriptionAdapter {
 
-    private var mLastUsedDescription: MediaDescriptionCompat? = null
+    private var mLastValidMetadata: MediaMetadataCompat? = null
 
     override fun createCurrentContentIntent(player: Player): PendingIntent? = session.controller.sessionActivity
 
     override fun getCurrentContentText(player: Player): String? {
-      val description = getDescription(session)
-      return description?.subtitle.toString()
+      val metadata = getSessionMetadata(session)
+      return metadata?.artist ?: "Unknown Artist" // TODO: I18n
     }
 
-    override fun getCurrentContentTitle(player: Player): String {
-      val description = getDescription(session)
-      return description?.title.toString()
+    override fun getCurrentContentTitle(player: Player): String? {
+      val metadata = getSessionMetadata(session)
+      return metadata?.title ?: "Unknown Song" // TODO: I18n
     }
 
     override fun getCurrentLargeIcon(player: Player, callback: PlayerNotificationManager.BitmapCallback?): Bitmap? {
-      val description = getDescription(session)
+      val metadata = getSessionMetadata(session)
 
-      description?.let {
-        if (description.iconBitmap == null) {
+      metadata?.let {
+        if (metadata.albumArt == null) {
           AsyncTask.execute {
             // load bitmap from MetadataRetriever
-            val metadata = MediaMetadataCompat.Builder().from(description).build()
-            mLastUsedDescription = metadata.fullDescription
-            callback?.onBitmap(metadata.albumArt)
+            val newMetadata = MediaMetadataCompat.Builder(metadata).from(metadata.description).build()
+            callback?.onBitmap(newMetadata.albumArt)
+            mLastValidMetadata = newMetadata
           }
+        } else {
+          mLastValidMetadata = metadata
         }
       }
 
-      return mLastUsedDescription?.iconBitmap
+      return metadata?.albumArt ?: mLastValidMetadata?.albumArt
     }
 
     /**
      * Get current [MediaDescriptionCompat] from the provided [MediaSessionCompat].
      */
-    private fun getDescription(session: MediaSessionCompat): MediaDescriptionCompat? {
-      return session.controller?.metadata?.description
+    private fun getSessionMetadata(session: MediaSessionCompat): MediaMetadataCompat? {
+      return session.controller?.metadata
     }
   }
 
   // Connect this notification manager to the session
-  private val mNotificationManager = PlayerNotificationManagerExt.createWithNotificationChannel(
+  private val mNotificationManager = PlayerNotificationManager2.createWithNotificationChannel(
     context,
     NOTIFICATION_CHANNEL,
     R.string.notification_nowPlaying,

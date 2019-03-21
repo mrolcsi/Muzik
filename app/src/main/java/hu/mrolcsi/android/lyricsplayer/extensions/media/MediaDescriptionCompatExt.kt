@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package hu.mrolcsi.android.lyricsplayer.extensions.media
 
 import android.graphics.Bitmap

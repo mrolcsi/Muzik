@@ -6,7 +6,7 @@ import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import com.google.android.exoplayer2.util.NotificationUtil
 
-class PlayerNotificationManagerExt(
+class PlayerNotificationManager2(
   context: Context?,
   channelId: String?,
   notificationId: Int,
@@ -15,20 +15,31 @@ class PlayerNotificationManagerExt(
 ) : PlayerNotificationManager(context, channelId, notificationId, mediaDescriptionAdapter, notificationListener) {
 
   override fun getActionIndicesForCompactView(actionNames: MutableList<String>, player: Player): IntArray {
-    val playPauseActionIndex = super.getActionIndicesForCompactView(actionNames, player)
+    // Gather indices for actions
+    val playPauseIndices = super.getActionIndicesForCompactView(actionNames, player)
+    val previousActionIndex = actionNames.indexOf(ACTION_PREVIOUS)
     val nextActionIndex = actionNames.indexOf(ACTION_NEXT)
-    return if (nextActionIndex != -1) {
-      playPauseActionIndex + nextActionIndex
-    } else {
-      playPauseActionIndex
+
+    // Initialize result array
+    var result = intArrayOf()
+
+    // Check if actions exist before adding
+    if (previousActionIndex >= 0) {
+      result += previousActionIndex
     }
+    result += playPauseIndices
+    if (nextActionIndex >= 0) {
+      result += nextActionIndex
+    }
+
+    return result
   }
 
   companion object {
     /**
-     * Creates a notification manager and a low-priority notification channel with the specified
-     * `channelId` and `channelName`. The [com.google.android.exoplayer2.ui.PlayerNotificationManager.NotificationListener] passed as the last
-     * parameter will be notified when the notification is created and cancelled.
+     * Creates a notification manager and a low-priority notification channel with the specified `channelId`
+     * and `channelName`. The [com.google.android.exoplayer2.ui.PlayerNotificationManager.NotificationListener]
+     * passed as the last parameter will be notified when the notification is created and cancelled.
      *
      * @param context The [Context].
      * @param channelId The id of the notification channel.
@@ -45,11 +56,11 @@ class PlayerNotificationManagerExt(
       notificationId: Int,
       mediaDescriptionAdapter: MediaDescriptionAdapter,
       notificationListener: NotificationListener?
-    ): PlayerNotificationManagerExt {
+    ): PlayerNotificationManager2 {
       NotificationUtil.createNotificationChannel(
         context, channelId, channelName, NotificationUtil.IMPORTANCE_LOW
       )
-      return PlayerNotificationManagerExt(
+      return PlayerNotificationManager2(
         context, channelId, notificationId, mediaDescriptionAdapter, notificationListener
       )
     }

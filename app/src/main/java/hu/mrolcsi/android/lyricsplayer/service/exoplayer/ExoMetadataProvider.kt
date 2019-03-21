@@ -7,10 +7,9 @@ import android.os.Handler
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
-import android.support.v4.media.session.MediaSessionCompat
 import android.util.Log
-import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.Player
+import com.google.android.exoplayer2.Timeline
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
 import hu.mrolcsi.android.lyricsplayer.extensions.media.albumArt
 import hu.mrolcsi.android.lyricsplayer.extensions.media.from
@@ -28,6 +27,8 @@ class ExoMetadataProvider(
 
   private val mMetadataCache = HashMap<String, MediaMetadataCompat?>()
 
+  private val mWindow = Timeline.Window()
+
   override fun getMetadata(player: Player): MediaMetadataCompat? {
     // Get description from queue
     val description = getDescription(player) ?: return null
@@ -38,7 +39,7 @@ class ExoMetadataProvider(
     val cachedMetadata = mMetadataCache[mediaId]
 
     return if (cachedMetadata != null) {
-      Log.v(LOG_TAG, "Item in cache: {${cachedMetadata.description}, hasAlbumArt?=${cachedMetadata.albumArt != null}}")
+      Log.v(LOG_TAG, "Item in cache: {${cachedMetadata.description}, albumArt?=${cachedMetadata.albumArt}}")
       cachedMetadata
     } else {
       // Start a load in the background then return default metadata
@@ -60,33 +61,17 @@ class ExoMetadataProvider(
   }
 
   /**
-   * Returns the [MediaDescriptionCompat] of the [MediaSessionCompat.QueueItem] of the active queue item.
+   * Returns the [MediaDescriptionCompat] from the timeline.
    */
   private fun getDescription(player: Player): MediaDescriptionCompat? {
     if (player.currentTimeline.isEmpty) {
       return null
     }
-    val builder = MediaMetadataCompat.Builder()
-    if (player.isPlayingAd) {
-      builder.putLong(MediaMetadataCompat.METADATA_KEY_ADVERTISEMENT, 1)
-    }
-    builder.putLong(
-      MediaMetadataCompat.METADATA_KEY_DURATION,
-      if (player.duration == C.TIME_UNSET) -1 else player.duration
-    )
-    val activeQueueItemId = mediaController.playbackState.activeQueueItemId
-    if (activeQueueItemId != MediaSessionCompat.QueueItem.UNKNOWN_ID.toLong()) {
-      val queue = mediaController.queue
-      var i = 0
-      while (queue != null && i < queue.size) {
-        val queueItem = queue[i]
-        if (queueItem.queueId == activeQueueItemId) {
-          return queueItem.description
-        }
-        i++
-      }
-    }
-    return null
+
+    return player
+      .currentTimeline
+      .getWindow(player.currentWindowIndex, mWindow, true)
+      .tag as MediaDescriptionCompat
   }
 
   private fun fetchMetadata(source: MediaMetadataCompat): MediaMetadataCompat {

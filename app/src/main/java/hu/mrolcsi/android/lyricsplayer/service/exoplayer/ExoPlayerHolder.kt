@@ -187,7 +187,7 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
         mQueueEditor.clearQueue()
 
         val mediaSource = ProgressiveMediaSource.Factory(mDataSourceFactory).createMediaSource(uri)
-        mQueue.addMediaSource(0, mediaSource, mMainHandler) {
+        mQueueDataSource.addMediaSource(0, mediaSource, mMainHandler) {
           // Call prepare() on the main thread
           onPrepare()
         }
@@ -218,7 +218,7 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
 
     override fun onPrepare() {
       Log.v(LOG_TAG, "onPrepare() called from ${Thread.currentThread()}")
-      mPlayer.prepare(mQueue, false, true)
+      mPlayer.prepare(mQueueDataSource, false, true)
     }
   }
 
@@ -291,7 +291,10 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
     private val mWindow = Timeline.Window()
 
     override fun onSkipToQueueItem(player: Player?, controlDispatcher: ControlDispatcher?, id: Long) {
-      Log.v(LOG_TAG, "onSkipToQueueItem($id) [QueueSize=${mQueue.size}] called from ${Thread.currentThread()}")
+      Log.v(
+        LOG_TAG,
+        "onSkipToQueueItem($id) [QueueSize=${mQueueDataSource.size}] called from ${Thread.currentThread()}"
+      )
       super.onSkipToQueueItem(player, controlDispatcher, id)
     }
 
@@ -304,7 +307,7 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
 
   //region -- QUEUE EDITOR --
 
-  private val mQueue = ConcatenatingMediaSource(
+  private val mQueueDataSource = ConcatenatingMediaSource(
     false,
     true,
     ShuffleOrder.DefaultShuffleOrder(0)
@@ -336,7 +339,7 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
         )
 
         // After all the other songs were added to the queue, onItemMoved the first song to it's proper position.
-        if (mDesiredQueuePosition in 0..mQueue.size) {
+        if (mDesiredQueuePosition in 0..mQueueDataSource.size) {
           mQueueEditor.onMoveQueueItem(mPlayer, 0, mDesiredQueuePosition)
           mDesiredQueuePosition = -1
         }
@@ -379,8 +382,8 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
 
         mDatabaseWorker.submit {
           val queue = emptyList<PlayQueueEntry>().toMutableList()
-          for (i in 0 until mQueue.size) {
-            queue.add(PlayQueueEntry(i, mQueue.getMediaSource(i).tag as MediaDescriptionCompat))
+          for (i in 0 until mQueueDataSource.size) {
+            queue.add(PlayQueueEntry(i, mQueueDataSource.getMediaSource(i).tag as MediaDescriptionCompat))
           }
 
           PlayQueueDatabase.getInstance(context)
@@ -420,7 +423,7 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
 
   private val mQueueEditor = BulkTimelineQueueEditor(
     session.controller,
-    mQueue,
+    mQueueDataSource,
     mOnQueueChangedCallback,
     mQueueMediaSourceFactory,
     mBackgroundHandler

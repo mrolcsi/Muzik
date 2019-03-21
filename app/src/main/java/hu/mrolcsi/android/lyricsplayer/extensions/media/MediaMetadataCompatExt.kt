@@ -44,14 +44,17 @@ import java.io.File
 inline val MediaMetadataCompat.id: String?
   get() = getString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID)
     ?: getString(MediaStore.Audio.Media.DATA)
+    ?: description.mediaId
 
 inline val MediaMetadataCompat.title: String?
   get() = getString(MediaMetadataCompat.METADATA_KEY_TITLE)
     ?: getString(MediaStore.Audio.Media.TITLE)
+    ?: description.title.toString()
 
 inline val MediaMetadataCompat.artist: String?
   get() = getString(MediaMetadataCompat.METADATA_KEY_ARTIST)
     ?: getString(MediaStore.Audio.Media.ARTIST)
+    ?: description.artist
 
 inline val MediaMetadataCompat.duration
   get() = Math.max(
@@ -62,6 +65,7 @@ inline val MediaMetadataCompat.duration
 inline val MediaMetadataCompat.album: String?
   get() = getString(MediaMetadataCompat.METADATA_KEY_ALBUM)
     ?: getString(MediaStore.Audio.Media.ALBUM)
+    ?: description.album
 
 inline val MediaMetadataCompat.author: String?
   get() = getString(MediaMetadataCompat.METADATA_KEY_AUTHOR)
