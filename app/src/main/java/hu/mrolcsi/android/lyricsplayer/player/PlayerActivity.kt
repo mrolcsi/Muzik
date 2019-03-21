@@ -5,10 +5,10 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.PorterDuff
+import android.graphics.drawable.ColorDrawable
 import android.media.AudioManager
 import android.os.Bundle
 import android.support.v4.media.MediaMetadataCompat
-import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import android.view.Menu
@@ -25,7 +25,9 @@ import androidx.core.graphics.ColorUtils
 import androidx.core.util.Pair
 import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
+import androidx.core.view.doOnNextLayout
 import androidx.core.view.forEach
+import androidx.core.view.postDelayed
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -36,7 +38,6 @@ import hu.mrolcsi.android.lyricsplayer.common.pager.RVPageScrollState
 import hu.mrolcsi.android.lyricsplayer.common.pager.RVPagerSnapHelperListenable
 import hu.mrolcsi.android.lyricsplayer.common.pager.RVPagerStateListener
 import hu.mrolcsi.android.lyricsplayer.common.pager.VisiblePageState
-import hu.mrolcsi.android.lyricsplayer.database.playqueue.PlayQueueDatabase
 import hu.mrolcsi.android.lyricsplayer.extensions.applyColorToNavigationBarIcons
 import hu.mrolcsi.android.lyricsplayer.extensions.applyColorToStatusBarIcons
 import hu.mrolcsi.android.lyricsplayer.extensions.media.duration
@@ -47,6 +48,7 @@ import hu.mrolcsi.android.lyricsplayer.extensions.media.startProgressUpdater
 import hu.mrolcsi.android.lyricsplayer.extensions.media.stopProgressUpdater
 import hu.mrolcsi.android.lyricsplayer.extensions.mediaControllerCompat
 import hu.mrolcsi.android.lyricsplayer.extensions.secondsToTimeStamp
+import hu.mrolcsi.android.lyricsplayer.extensions.toColorHex
 import hu.mrolcsi.android.lyricsplayer.theme.Theme
 import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
 import kotlinx.android.synthetic.main.activity_player.*
@@ -84,33 +86,19 @@ class PlayerActivity : AppCompatActivity() {
     mPlayerModel = ViewModelProviders.of(this).get(PlayerViewModel::class.java).apply {
       Log.d(LOG_TAG, "Got PlayerViewModel: $this")
 
+      mediaController.observe(this@PlayerActivity, Observer { controller ->
+        controller?.let {
+          // Apply MediaController to this Activity
+          mediaControllerCompat = controller
+
+          // Finish building the UI
+          setupTransportControls()
+        }
+      })
       currentMediaMetadata.observe(this@PlayerActivity, Observer { metadata ->
         metadata?.let {
           updateSongData(metadata)
-
-          // Scroll pager to current item
-          val layoutManager = (rvQueue.layoutManager as LinearLayoutManager)
-          val adapterPosition = mSnapHelper.findSnapPosition(layoutManager)
-
-          // If Metadata has changed, then PlaybackState should have changed as well.
-          val queuePosition = mediaControllerCompat.playbackState.activeQueueItemId.toInt()
-
-          Log.d(
-            LOG_TAG, "onMetadataChange(" +
-                "adapterPosition=$adapterPosition, " +
-                "queuePosition=$queuePosition) " +
-                "ScrollState=$mScrollState"
-          )
-
-          if (mScrollState == RVPageScrollState.IDLE) {
-            if (adapterPosition > RecyclerView.NO_POSITION && adapterPosition != queuePosition) {
-              if (Math.abs(queuePosition - adapterPosition) > 1) {
-                rvQueue.scrollToPosition(queuePosition)
-              } else {
-                rvQueue.smoothScrollToPosition(queuePosition)
-              }
-            }
-          }
+          updatePager()
         }
       })
       currentPlaybackState.observe(this@PlayerActivity, Observer { state ->
@@ -118,14 +106,12 @@ class PlayerActivity : AppCompatActivity() {
           updateControls(state)
         }
       })
-      mediaController.observe(this@PlayerActivity, Observer { controller ->
-        controller?.let {
-          // Apply MediaController to this Activity
-          MediaControllerCompat.setMediaController(this@PlayerActivity, controller)
+      currentQueue.observe(this@PlayerActivity, Observer {
+        // Update Queue
+        mQueueAdapter.submitList(mediaControllerCompat.queue)
 
-          // Finish building the UI
-          setupTransportControls()
-        }
+        // Resume animation
+        supportStartPostponedEnterTransition()
       })
     }
 
@@ -135,30 +121,31 @@ class PlayerActivity : AppCompatActivity() {
 
       override fun onChanged(it: Theme) {
         if (initialLoad) {
-          applyTheme(it, false)
+          applyThemeStatic(it)
           initialLoad = false
         } else {
-          val layoutManager = (rvQueue.layoutManager as LinearLayoutManager)
-          val adapterPosition = mSnapHelper.findSnapPosition(layoutManager)
+          val backgroundColor = (content_player.background as ColorDrawable).color
+          Log.v(
+            LOG_TAG,
+            "onThemeChanged(" +
+                "backgroundColor=${backgroundColor.toColorHex()}, " +
+                "themeColor=${it.primaryBackgroundColor.toColorHex()}" +
+                ")"
+          )
+          if (backgroundColor != it.primaryBackgroundColor) {
+            val visiblePosition = mSnapHelper.findSnapPosition(rvQueue.layoutManager)
+            val activeId = mediaControllerCompat.playbackState.activeQueueItemId
+            val activePosition = mQueueAdapter.getItemPositionById(activeId)
 
-          // If Metadata has changed, then PlaybackState should have changed as well.
-          val queuePosition = mediaControllerCompat.playbackState.activeQueueItemId.toInt()
-
-          if (Math.abs(queuePosition - adapterPosition) > 1) {
-            applyTheme(it, true)
+            if (Math.abs(visiblePosition - activePosition) > 1) {
+              applyThemeAnimated(it)
+            } else {
+              applyThemeStatic(it)
+            }
           }
         }
       }
     })
-
-    // TODO: Use SessionQueue
-    PlayQueueDatabase.getInstance(this)
-      .getPlayQueueDao()
-      .fetchQueue()
-      .observe(this@PlayerActivity, Observer {
-        mQueueAdapter.submitList(it)
-        supportStartPostponedEnterTransition()
-      })
   }
 
   override fun onStart() {
@@ -258,6 +245,10 @@ class PlayerActivity : AppCompatActivity() {
       layoutManager = LinearLayoutManager(this@PlayerActivity, LinearLayoutManager.HORIZONTAL, false)
       adapter = mQueueAdapter
       setHasFixedSize(true)
+      doOnNextLayout {
+        // This could be more sophisticated
+        it.postDelayed(500) { updatePager() }
+      }
     }
 
     mSnapHelper = RVPagerSnapHelperListenable().attachToRecyclerView(rvQueue, object : RVPagerStateListener {
@@ -308,12 +299,12 @@ class PlayerActivity : AppCompatActivity() {
 
         if (state == RVPageScrollState.IDLE) {
           // check if item position is different from the now playing position
-          val queuePosition = mediaControllerCompat.playbackState.activeQueueItemId.toInt()
+          val queuePosition = mediaControllerCompat.playbackState.activeQueueItemId
           val pagerPosition = mSnapHelper.findSnapPosition(rvQueue.layoutManager)
+          val itemId = mQueueAdapter.getItemId(pagerPosition)
 
-          if (queuePosition != pagerPosition) {
-            mQueueAdapter.getItemId(pagerPosition)
-            mediaControllerCompat.transportControls?.skipToQueueItem(pagerPosition.toLong())
+          if (queuePosition != itemId) {
+            mediaControllerCompat.transportControls?.skipToQueueItem(itemId)
           }
         }
       }
@@ -434,11 +425,44 @@ class PlayerActivity : AppCompatActivity() {
     sbSongProgress.max = (metadata.duration / 1000).toInt()
   }
 
-  private fun applyTheme(theme: Theme, animate: Boolean) {
-    if (animate) {
-      applyThemeAnimated(theme)
-    } else {
-      applyThemeStatic(theme)
+  private fun updatePager() {
+    // Scroll pager to current item
+    val visiblePosition = mSnapHelper.findSnapPosition(rvQueue.layoutManager)
+
+    // Skip if Pager is not ready yet
+    if (visiblePosition < 0) {
+      Log.d(LOG_TAG, "updatePager(visiblePosition=$visiblePosition)")
+      return
+    }
+
+    val visibleId = mQueueAdapter.getItemId(visiblePosition)
+
+    // If Metadata has changed, then PlaybackState should have changed as well.
+    val activeId = mediaControllerCompat.playbackState.activeQueueItemId
+    val activePosition = mQueueAdapter.getItemPositionById(activeId)
+
+    Log.d(
+      LOG_TAG,
+      "updatePager(" +
+          "visiblePosition=$visiblePosition, " +
+          "visibleId=$visibleId, " +
+          "activeId=$activeId, " +
+          "activePosition=$activePosition) " +
+          "ScrollState=$mScrollState"
+    )
+
+    if (mScrollState == RVPageScrollState.IDLE) {
+      if (activePosition > RecyclerView.NO_POSITION && visibleId != activeId) {
+        if (Math.abs(activePosition - visiblePosition) > 1) {
+          rvQueue.scrollToPosition(activePosition)
+        } else {
+          rvQueue.smoothScrollToPosition(activePosition)
+        }
+      } else if (activePosition == RecyclerView.NO_POSITION) {
+        // Try again after the adapter settles?
+        Log.v(LOG_TAG, "updatePager() DELAY CHANGE")
+        rvQueue.postDelayed(300) { updatePager() }
+      }
     }
   }
 

@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.android.lyricsplayer.R
+import hu.mrolcsi.android.lyricsplayer.database.playqueue.PlayQueueDatabase
 import hu.mrolcsi.android.lyricsplayer.extensions.OnItemClickListener
 import hu.mrolcsi.android.lyricsplayer.player.PlayerViewModel
 import hu.mrolcsi.android.lyricsplayer.theme.Theme
@@ -42,21 +43,31 @@ class PlaylistFragment : Fragment() {
       mPlayerModel = ViewModelProviders.of(activity).get(PlayerViewModel::class.java).apply {
         Log.d(LOG_TAG, "Got PlayerViewModel: $this")
 
-        currentPlaybackState.observe(this@PlaylistFragment, Observer { state ->
+        currentMediaMetadata.observe(this@PlaylistFragment, Observer { state ->
           state?.let {
             // Update active queueId in adapter (notifyDataSetChanged will do the rest)
-            mPlaylistAdapter.activeQueueId = state.activeQueueItemId
-          }
-        })
+            val controller = MediaControllerCompat.getMediaController(requireActivity())
+            mPlaylistAdapter.activeQueueId = controller.playbackState.activeQueueItemId
 
-        currentMediaMetadata.observe(this@PlaylistFragment, Observer {
-          // Update playlist adapter
-          val controller = MediaControllerCompat.getMediaController(activity)
-          Log.v(LOG_TAG, "Updating playlist: Size=${controller.queue?.size}")
-          mPlaylistAdapter.submitList(controller.queue)
+            val layoutManager = rvPlaylist.layoutManager as LinearLayoutManager
+            val activePosition = controller.playbackState.activeQueueItemId.toInt()
+            val first = layoutManager.findFirstCompletelyVisibleItemPosition()
+            val last = layoutManager.findLastCompletelyVisibleItemPosition()
+
+            if (activePosition !in first..last) {
+              layoutManager.scrollToPositionWithOffset(activePosition, 100)
+            }
+          }
         })
       }
     }
+
+    PlayQueueDatabase.getInstance(requireContext())
+      .getPlayQueueDao()
+      .fetchQueue()
+      .observe(this, Observer {
+        mPlaylistAdapter.submitList(it)
+      })
 
     ThemeManager.getInstance(requireContext()).currentTheme.observe(this, object : Observer<Theme> {
 
@@ -78,10 +89,13 @@ class PlaylistFragment : Fragment() {
   }
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-    rvBrowser.layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
-    rvBrowser.adapter = mPlaylistAdapter
-    rvBrowser.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
+    rvPlaylist.apply {
+      layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
+      adapter = mPlaylistAdapter
+      addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
+    }
 
+    // TODO: Dynamic title
     playlistToolbar.setTitle(R.string.playlist_title)
   }
 
@@ -125,7 +139,7 @@ class PlaylistFragment : Fragment() {
   }
 
   private fun applyBackgroundColor(color: Int) {
-    rvBrowser.setBackgroundColor(color)
+    rvPlaylist.setBackgroundColor(color)
     mPlaylistAdapter.notifyDataSetChanged()
     playlistToolbar.setBackgroundColor(color)
   }

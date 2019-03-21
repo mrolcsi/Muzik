@@ -13,6 +13,7 @@ import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.get
 import androidx.lifecycle.MutableLiveData
 import androidx.palette.graphics.Palette
+import hu.mrolcsi.android.lyricsplayer.BuildConfig
 import hu.mrolcsi.android.lyricsplayer.R
 import org.json.JSONObject
 import java.util.concurrent.Executors
@@ -44,6 +45,11 @@ class ThemeManager(private val sharedPrefs: SharedPreferences) {
 
   fun updateFromBitmap(bitmap: Bitmap?) {
     mThemeWorker.submit {
+
+      if (BuildConfig.DEBUG && bitmap == null) {
+        Log.v(LOG_TAG, "Ignore null bitmap.")
+        return@submit
+      }
 
       val coverArt = bitmap ?: mPlaceholderCoverArt
 

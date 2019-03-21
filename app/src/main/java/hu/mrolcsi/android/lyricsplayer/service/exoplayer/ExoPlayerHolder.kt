@@ -281,7 +281,7 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
 
   //region -- QUEUE NAVIGATOR --
 
-  private val mQueueNavigator = object : TimelineQueueNavigator(session, 50) {
+  private val mQueueNavigator = object : TimelineQueueNavigator(session) {
 
     private val mWindow = Timeline.Window()
 

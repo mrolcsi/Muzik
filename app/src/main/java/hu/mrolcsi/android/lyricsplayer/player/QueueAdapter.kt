@@ -3,6 +3,7 @@ package hu.mrolcsi.android.lyricsplayer.player
 import android.graphics.Bitmap
 import android.os.AsyncTask
 import android.support.v4.media.MediaMetadataCompat
+import android.support.v4.media.session.MediaSessionCompat
 import android.util.Log
 import android.util.LruCache
 import android.view.LayoutInflater
@@ -14,7 +15,6 @@ import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.android.lyricsplayer.GlideApp
 import hu.mrolcsi.android.lyricsplayer.R
 import hu.mrolcsi.android.lyricsplayer.common.DiffCallbackRepository
-import hu.mrolcsi.android.lyricsplayer.database.playqueue.entities.PlayQueueEntry
 import hu.mrolcsi.android.lyricsplayer.extensions.media.albumArt
 import hu.mrolcsi.android.lyricsplayer.extensions.media.from
 import hu.mrolcsi.android.lyricsplayer.theme.Theme
@@ -22,8 +22,8 @@ import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.list_item_queue.*
 
-class QueueAdapter : ListAdapter<PlayQueueEntry, QueueAdapter.QueueItemHolder>(
-  DiffCallbackRepository.playQueueEntryCallback
+class QueueAdapter : ListAdapter<MediaSessionCompat.QueueItem, QueueAdapter.QueueItemHolder>(
+  DiffCallbackRepository.queueItemCallback
 ) {
 
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): QueueItemHolder {
@@ -38,18 +38,27 @@ class QueueAdapter : ListAdapter<PlayQueueEntry, QueueAdapter.QueueItemHolder>(
   }
 
   override fun getItemId(position: Int): Long {
-    return getItem(position)._id
+    return getItem(position).queueId
+  }
+
+  fun getItemPositionById(id: Long): Int {
+    for (i in 0 until itemCount) {
+      if (getItemId(i) == id) {
+        return i
+      }
+    }
+    return RecyclerView.NO_POSITION
   }
 
   class QueueItemHolder(override val containerView: View) : RecyclerView.ViewHolder(containerView), LayoutContainer {
 
     var usedTheme: Theme? = null
 
-    fun bind(item: PlayQueueEntry) {
+    fun bind(item: MediaSessionCompat.QueueItem) {
 
       usedTheme = null
 
-      val cached = mCache[item._data]
+      val cached = mCache[item.description.mediaId]
 
       if (cached != null) {
         imgCoverArt.setImageBitmap(cached.first)
@@ -58,14 +67,14 @@ class QueueAdapter : ListAdapter<PlayQueueEntry, QueueAdapter.QueueItemHolder>(
         loadAsync(item)
       }
 
-      tvTitle.text = item.title
-      tvArtist.text = item.artist ?: "Unknown Artist"   // TODO: i18n
-      tvAlbum.text = item.album ?: "Unknown Album"      // TODO: i18n
+      tvTitle.text = item.description.title
+      tvArtist.text = item.description.subtitle ?: "Unknown Artist"   // TODO: i18n
+      tvAlbum.text = item.description.description ?: "Unknown Album"      // TODO: i18n
     }
 
-    private fun loadAsync(item: PlayQueueEntry) {
+    private fun loadAsync(item: MediaSessionCompat.QueueItem) {
       AsyncTask.execute {
-        val metadata = MediaMetadataCompat.Builder().from(item._data).build()
+        val metadata = MediaMetadataCompat.Builder().from(item.description.mediaId!!).build()
 
         imgCoverArt.post {
           GlideApp.with(imgCoverArt)
@@ -92,7 +101,7 @@ class QueueAdapter : ListAdapter<PlayQueueEntry, QueueAdapter.QueueItemHolder>(
                       }?.rgb ?: theme.primaryBackgroundColor
 
                       // Store items in cache
-                      mCache.put(item._data, Pair(albumArt, theme))
+                      mCache.put(item.description.mediaId, Pair(albumArt, theme))
 
                       applyTheme(theme)
                     }

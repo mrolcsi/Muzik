@@ -36,23 +36,24 @@ class AlbumsViewModel(app: Application) : SessionViewModel(app) {
     mMediaBrowser.connect()
   }
 
-  fun getAlbums(): LiveData<List<MediaBrowserCompat.MediaItem>> {
-    // When "songFilter" changes, replace the contents of "albums" with the contents of "result".
-    return artistFilter.switchMap { artist ->
-      when (artist) {
-        null -> mAllAlbums
-        else -> {
-          mAllAlbums.switchMap { allAlbums ->
-            val filteredAlbums = MutableLiveData<List<MediaBrowserCompat.MediaItem>>()
-            AsyncTask.execute {
-              filteredAlbums.postValue(filterByArtist(allAlbums, artist))
+  val albums: LiveData<List<MediaBrowserCompat.MediaItem>>
+    get() {
+      // When "songFilter" changes, replace the contents of "albums" with the contents of "result".
+      return artistFilter.switchMap { artist ->
+        when (artist) {
+          null -> mAllAlbums
+          else -> {
+            mAllAlbums.switchMap { allAlbums ->
+              val filteredAlbums = MutableLiveData<List<MediaBrowserCompat.MediaItem>>()
+              AsyncTask.execute {
+                filteredAlbums.postValue(filterByArtist(allAlbums, artist))
+              }
+              filteredAlbums
             }
-            filteredAlbums
           }
         }
       }
     }
-  }
 
   val artistFilter = MutableLiveData<ArtistInfo>()
 
