@@ -34,8 +34,9 @@ class LPGlideModule : AppGlideModule() {
 
     builder.setDefaultRequestOptions(
       RequestOptions()
-        .placeholder(R.drawable.placeholder_cover_art)
         .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+        .placeholder(null)
+        .error(R.drawable.placeholder_cover_art)
     )
   }
 
