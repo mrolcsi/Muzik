@@ -16,6 +16,7 @@ import hu.mrolcsi.android.lyricsplayer.theme.Theme
 import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.list_item_playlist.*
+import kotlin.properties.Delegates
 
 class PlaylistAdapter(
   private val onItemClickListener: OnItemClickListener<PlayQueueEntry, PlaylistViewHolder>
@@ -23,7 +24,13 @@ class PlaylistAdapter(
   DiffCallbackRepository.playQueueEntryCallback
 ) {
 
-  var activeQueueId: Long = -1
+  var activeQueueId by Delegates.observable(-1L) { prop, old, new ->
+    // When active item changes, update rows
+    if (old != new) {
+      notifyItemChanged(old.toInt())
+      notifyItemChanged(new.toInt())
+    }
+  }
 
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PlaylistViewHolder {
     val itemView = LayoutInflater.from(parent.context).inflate(R.layout.list_item_playlist, parent, false)

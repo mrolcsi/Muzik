@@ -13,7 +13,6 @@ import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.get
 import androidx.lifecycle.MutableLiveData
 import androidx.palette.graphics.Palette
-import hu.mrolcsi.android.lyricsplayer.BuildConfig
 import hu.mrolcsi.android.lyricsplayer.R
 import org.json.JSONObject
 import java.util.concurrent.Executors
@@ -43,18 +42,11 @@ class ThemeManager(private val sharedPrefs: SharedPreferences) {
     hsl[1] > 0.4
   }
 
-  fun updateFromBitmap(bitmap: Bitmap?) {
+  fun updateFromBitmap(bitmap: Bitmap) {
     mThemeWorker.submit {
 
-      if (BuildConfig.DEBUG && bitmap == null) {
-        Log.v(LOG_TAG, "Ignore null bitmap.")
-        return@submit
-      }
-
-      val coverArt = bitmap ?: mPlaceholderCoverArt
-
       // Calculate hash for this bitmap
-      val hashCode = coverArt.bitmapHash()
+      val hashCode = bitmap.bitmapHash()
 
       Log.d(LOG_TAG, "Updating Theme from $bitmap (hash=$hashCode)")
 
@@ -66,32 +58,46 @@ class ThemeManager(private val sharedPrefs: SharedPreferences) {
       mPreviousHash = hashCode
 
       // If the Theme is not cached, create it
-      if (mThemeCache[hashCode] == null) {
-        val mainPalette = Palette.from(coverArt)
-          .clearFilters()
-          //.addFilter(mPaletteFiler)
-          .generate()
-
-        val theme = createTheme(mainPalette)
-
-        val statusBarPalette = Palette.from(coverArt)
-          .clearFilters()
-          .setRegion(0, 0, coverArt.width, 48)    // approx.
-          .generate()
-
-        theme.statusBarColor = statusBarPalette.swatches.maxBy { it.population }?.rgb
-          ?: theme.primaryBackgroundColor
-
-        mThemeCache.put(hashCode, theme)
-      }
+      val theme = createFromBitmap(bitmap)
 
       // Save previous theme
       previousTheme = currentTheme.value
-      currentTheme.postValue(mThemeCache[hashCode])
+      currentTheme.postValue(theme)
 
       // Save theme to shared prefs
-      sharedPrefs.edit().putString(LAST_USED_THEME, mThemeCache[hashCode].toJson().toString()).apply()
+      sharedPrefs.edit().putString(LAST_USED_THEME, theme.toJson().toString()).apply()
     }
+  }
+
+  fun createFromBitmap(bitmap: Bitmap): Theme {
+
+    // Calculate hash for this bitmap
+    val hashCode = bitmap.bitmapHash()
+
+    val cachedTheme = mThemeCache[hashCode]
+
+    if (cachedTheme != null) {
+      return cachedTheme
+    }
+
+    val mainPalette = Palette.from(bitmap)
+      .clearFilters()
+      //.addFilter(mPaletteFiler)
+      .generate()
+
+    val theme = createTheme(mainPalette)
+
+    val statusBarPalette = Palette.from(bitmap)
+      .clearFilters()
+      .setRegion(0, 0, bitmap.width, 48)    // approx.
+      .generate()
+
+    theme.statusBarColor = statusBarPalette.swatches.maxBy { it.population }?.rgb
+      ?: theme.primaryBackgroundColor
+
+    mThemeCache.put(hashCode, theme)
+
+    return theme
   }
 
   fun createTheme(sourcePalette: Palette): Theme {

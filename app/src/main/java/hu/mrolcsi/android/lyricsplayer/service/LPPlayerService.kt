@@ -4,6 +4,7 @@ import android.app.Notification
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
+import android.graphics.BitmapFactory
 import android.os.AsyncTask
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
@@ -14,6 +15,7 @@ import androidx.core.app.TaskStackBuilder
 import androidx.media.session.MediaButtonReceiver
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
+import hu.mrolcsi.android.lyricsplayer.R
 import hu.mrolcsi.android.lyricsplayer.database.playqueue.PlayQueueDatabase
 import hu.mrolcsi.android.lyricsplayer.database.playqueue.entities.LastPlayed
 import hu.mrolcsi.android.lyricsplayer.extensions.media.addQueueItems
@@ -24,6 +26,10 @@ import hu.mrolcsi.android.lyricsplayer.service.exoplayer.notification.ExoNotific
 import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
 
 class LPPlayerService : LPBrowserService() {
+
+  private val mPlaceholderCoverArt by lazy {
+    BitmapFactory.decodeResource(resources, R.drawable.placeholder_cover_art)
+  }
 
   // MediaSession and Player implementations
   private lateinit var mMediaSession: MediaSessionCompat
@@ -127,7 +133,7 @@ class LPPlayerService : LPBrowserService() {
         override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {}
 
         override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
-          metadata?.albumArt.let {
+          metadata?.albumArt?.let {
             ThemeManager.getInstance(applicationContext).updateFromBitmap(it)
           }
         }

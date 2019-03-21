@@ -1,5 +1,7 @@
 package hu.mrolcsi.android.lyricsplayer.service.exoplayer
 
+import android.graphics.Bitmap
+import android.media.MediaMetadataRetriever
 import android.os.AsyncTask
 import android.os.Handler
 import android.support.v4.media.MediaDescriptionCompat
@@ -12,10 +14,12 @@ import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
 import hu.mrolcsi.android.lyricsplayer.extensions.media.albumArt
 import hu.mrolcsi.android.lyricsplayer.extensions.media.from
+import hu.mrolcsi.android.lyricsplayer.extensions.media.id
 
 class ExoMetadataProvider(
   private val mediaController: MediaControllerCompat,
   metadataExtrasPrefix: String? = null,
+  private val placeholderAlbumArt: Bitmap? = null,
   private val onCacheUpdated: (MediaMetadataCompat) -> Unit = {}
 ) : MediaSessionConnector.MediaMetadataProvider {
 
@@ -86,9 +90,16 @@ class ExoMetadataProvider(
   }
 
   private fun fetchMetadata(source: MediaMetadataCompat): MediaMetadataCompat {
-    return MediaMetadataCompat.Builder(source)
-      .from(source.description)
-      .build()
+    val metadataBuilder = MediaMetadataCompat.Builder(source).from(source.description)
+
+    val retriever = MediaMetadataRetriever().apply {
+      setDataSource(source.id)
+    }
+    if (retriever.embeddedPicture == null) {
+      metadataBuilder.albumArt = placeholderAlbumArt
+    }
+
+    return metadataBuilder.build()
   }
 
   companion object {

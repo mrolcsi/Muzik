@@ -43,8 +43,8 @@ class PlaylistFragment : Fragment() {
       mPlayerModel = ViewModelProviders.of(activity).get(PlayerViewModel::class.java).apply {
         Log.d(LOG_TAG, "Got PlayerViewModel: $this")
 
-        currentMediaMetadata.observe(this@PlaylistFragment, Observer { state ->
-          state?.let {
+        currentMediaMetadata.observe(this@PlaylistFragment, Observer { metadata ->
+          metadata?.let {
             // Update active queueId in adapter (notifyDataSetChanged will do the rest)
             val controller = MediaControllerCompat.getMediaController(requireActivity())
             mPlaylistAdapter.activeQueueId = controller.playbackState.activeQueueItemId
@@ -55,7 +55,7 @@ class PlaylistFragment : Fragment() {
             val last = layoutManager.findLastCompletelyVisibleItemPosition()
 
             if (activePosition !in first..last) {
-              layoutManager.scrollToPositionWithOffset(activePosition, 100)
+              layoutManager.scrollToPositionWithOffset(activePosition, 500)
             }
           }
         })

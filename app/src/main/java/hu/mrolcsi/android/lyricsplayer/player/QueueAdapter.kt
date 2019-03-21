@@ -1,6 +1,7 @@
 package hu.mrolcsi.android.lyricsplayer.player
 
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.AsyncTask
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
@@ -9,7 +10,6 @@ import android.util.LruCache
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.android.lyricsplayer.GlideApp
@@ -56,8 +56,6 @@ class QueueAdapter : ListAdapter<MediaSessionCompat.QueueItem, QueueAdapter.Queu
 
     fun bind(item: MediaSessionCompat.QueueItem) {
 
-      usedTheme = null
-
       val cached = mCache[item.description.mediaId]
 
       if (cached != null) {
@@ -73,42 +71,24 @@ class QueueAdapter : ListAdapter<MediaSessionCompat.QueueItem, QueueAdapter.Queu
     }
 
     private fun loadAsync(item: MediaSessionCompat.QueueItem) {
+      imgCoverArt.setImageBitmap(null)
+      usedTheme = null
+
       AsyncTask.execute {
-        val metadata = MediaMetadataCompat.Builder().from(item.description.mediaId!!).build()
+        val metadata = MediaMetadataCompat.Builder().from(item.description).build()
 
         imgCoverArt.post {
           GlideApp.with(imgCoverArt)
             .load(metadata.albumArt)
+            .placeholder(null)
             .into(imgCoverArt)
         }
 
         // Generate theme
-        metadata.albumArt?.let { albumArt ->
-          // Generate theme
-          // TODO: use ThemeManager
-          Palette.from(albumArt)
-            .clearFilters()
-            .generate { mainPalette ->
-              mainPalette?.let { ThemeManager.getInstance(itemView.context).createTheme(it) }?.let { theme ->
-                // Add StatusBar color to theme
-                Palette.from(albumArt)
-                  .clearFilters()
-                  .setRegion(0, 0, albumArt.width, 48)
-                  .generate {
-                    it?.let { statusBarPalette ->
-                      theme.statusBarColor = statusBarPalette.swatches.maxBy { swatch ->
-                        swatch.population
-                      }?.rgb ?: theme.primaryBackgroundColor
-
-                      // Store items in cache
-                      mCache.put(item.description.mediaId, Pair(albumArt, theme))
-
-                      applyTheme(theme)
-                    }
-                  }
-              }
-            }
-        }
+        val albumArt = metadata.albumArt
+          ?: BitmapFactory.decodeResource(itemView.resources, R.drawable.placeholder_cover_art)
+        val newTheme = ThemeManager.getInstance(itemView.context).createFromBitmap(albumArt)
+        itemView.post { applyTheme(newTheme) }
       }
     }
 

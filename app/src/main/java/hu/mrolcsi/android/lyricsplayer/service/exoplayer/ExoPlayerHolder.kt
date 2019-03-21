@@ -1,6 +1,7 @@
 package hu.mrolcsi.android.lyricsplayer.service.exoplayer
 
 import android.content.Context
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
@@ -29,6 +30,7 @@ import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.util.Util
 import hu.mrolcsi.android.lyricsplayer.BuildConfig
+import hu.mrolcsi.android.lyricsplayer.R
 import hu.mrolcsi.android.lyricsplayer.database.playqueue.PlayQueueDatabase
 import hu.mrolcsi.android.lyricsplayer.database.playqueue.entities.LastPlayed
 import hu.mrolcsi.android.lyricsplayer.database.playqueue.entities.PlayQueueEntry
@@ -272,7 +274,10 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
 
   //region -- METADATA PROVIDER --
 
-  private val mMetadataProvider: ExoMetadataProvider = ExoMetadataProvider(session.controller) {
+  private val mMetadataProvider: ExoMetadataProvider = ExoMetadataProvider(
+    mediaController = session.controller,
+    placeholderAlbumArt = BitmapFactory.decodeResource(context.resources, R.drawable.placeholder_cover_art)
+  ) {
     // Call invalidate on session when the metadata cache was updated.
     mSessionConnector.invalidateMediaSessionMetadata()
   }

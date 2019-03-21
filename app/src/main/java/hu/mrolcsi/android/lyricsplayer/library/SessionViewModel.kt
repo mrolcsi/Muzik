@@ -9,6 +9,7 @@ import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
+import hu.mrolcsi.android.lyricsplayer.extensions.media.albumArt
 import hu.mrolcsi.android.lyricsplayer.service.LPPlayerService
 
 abstract class SessionViewModel(app: Application) : AndroidViewModel(app) {
@@ -44,7 +45,8 @@ abstract class SessionViewModel(app: Application) : AndroidViewModel(app) {
                 Log.v(getLogTag(), "onMetadataChanged(${metadata.description})")
 
                 // Check if metadata has actually changed
-                if (metadata.description?.mediaId != mLastMetadata?.description?.mediaId) {
+                // Only post metadata whn it has an albumArt
+                if (metadata.description?.mediaId != mLastMetadata?.description?.mediaId && metadata.albumArt != null) {
                   currentMediaMetadata.postValue(metadata)
                   // Save as last received metadata
                   mLastMetadata = metadata
