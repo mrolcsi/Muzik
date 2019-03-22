@@ -3,5 +3,6 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/ExoPlayer" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/ExoPlayer/extensions/ffmpeg/src/main/jni/ffmpeg" vcs="Git" />
   </component>
 </project>

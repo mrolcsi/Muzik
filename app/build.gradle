@@ -67,6 +67,8 @@ dependencies {
     implementation project(':exoplayer-library-core')
     implementation project(':exoplayer-library-ui')
     implementation project(':exoplayer-extension-mediasession')
+    implementation project(':exoplayer-extension-ffmpeg')
+    implementation project(':exoplayer-extension-flac')
 
     // Custom Activity on Crash
     implementation 'cat.ereza:customactivityoncrash:2.2.0'

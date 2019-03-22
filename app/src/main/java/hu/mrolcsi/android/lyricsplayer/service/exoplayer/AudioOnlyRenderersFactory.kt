@@ -8,6 +8,8 @@ import com.google.android.exoplayer2.audio.AudioRendererEventListener
 import com.google.android.exoplayer2.audio.MediaCodecAudioRenderer
 import com.google.android.exoplayer2.drm.DrmSessionManager
 import com.google.android.exoplayer2.drm.FrameworkMediaCrypto
+import com.google.android.exoplayer2.ext.ffmpeg.FfmpegAudioRenderer
+import com.google.android.exoplayer2.ext.flac.LibflacAudioRenderer
 import com.google.android.exoplayer2.mediacodec.MediaCodecSelector
 import com.google.android.exoplayer2.metadata.MetadataOutput
 import com.google.android.exoplayer2.text.TextOutput
@@ -23,7 +25,9 @@ internal class AudioOnlyRenderersFactory(private val context: Context) : Rendere
     drmSessionManager: DrmSessionManager<FrameworkMediaCrypto>?
   ): Array<Renderer> {
     return arrayOf(
-      MediaCodecAudioRenderer(context, MediaCodecSelector.DEFAULT, eventHandler, audioRendererEventListener)
+      MediaCodecAudioRenderer(context, MediaCodecSelector.DEFAULT, eventHandler, audioRendererEventListener),
+      LibflacAudioRenderer(eventHandler, audioRendererEventListener),
+      FfmpegAudioRenderer(eventHandler, audioRendererEventListener)
     )
   }
 }
