@@ -12,6 +12,7 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import androidx.core.app.TaskStackBuilder
+import androidx.core.os.bundleOf
 import androidx.media.session.MediaButtonReceiver
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
@@ -20,6 +21,7 @@ import hu.mrolcsi.android.lyricsplayer.database.playqueue.PlayQueueDatabase
 import hu.mrolcsi.android.lyricsplayer.database.playqueue.entities.LastPlayed
 import hu.mrolcsi.android.lyricsplayer.extensions.media.addQueueItems
 import hu.mrolcsi.android.lyricsplayer.extensions.media.albumArt
+import hu.mrolcsi.android.lyricsplayer.extensions.media.prepareFromDescription
 import hu.mrolcsi.android.lyricsplayer.player.PlayerActivity
 import hu.mrolcsi.android.lyricsplayer.service.exoplayer.ExoPlayerHolder
 import hu.mrolcsi.android.lyricsplayer.service.exoplayer.notification.ExoNotificationManager
@@ -149,17 +151,25 @@ class LPPlayerService : LPBrowserService() {
         Log.d(LOG_TAG, "Loaded queue from database: $queue")
 
         if (queue.isNotEmpty()) {
-          // Load last played songs
-          controller.addQueueItems(queue)
-
           // Get last played positions from the database
           mLastPlayed = PlayQueueDatabase.getInstance(applicationContext)
             .getPlayQueueDao()
             .getLastPlayed()
 
-          mLastPlayed?.let {
-            controller.transportControls.setRepeatMode(it.repeatMode)
-            controller.transportControls.setShuffleMode(it.shuffleMode)
+          mLastPlayed?.let { lastPlayed ->
+            // Load last played songs (starting with last played position)
+            controller.transportControls.prepareFromDescription(
+              queue[lastPlayed.queuePosition],
+              bundleOf(ExoPlayerHolder.EXTRA_DESIRED_QUEUE_POSITION to lastPlayed.queuePosition)
+            )
+            queue.filterIndexed { index, _ ->
+              index != lastPlayed.queuePosition
+            }.also {
+              controller.addQueueItems(it)
+            }
+
+            controller.transportControls.setRepeatMode(lastPlayed.repeatMode)
+            controller.transportControls.setShuffleMode(lastPlayed.shuffleMode)
           }
         }
       }

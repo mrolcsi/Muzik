@@ -3,6 +3,8 @@ package hu.mrolcsi.android.lyricsplayer.extensions.media
 import android.os.Bundle
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.session.MediaControllerCompat
+import androidx.core.os.bundleOf
+import com.google.android.exoplayer2.ext.mediasession.TimelineQueueEditor
 import hu.mrolcsi.android.lyricsplayer.service.exoplayer.BulkTimelineQueueEditor
 import hu.mrolcsi.android.lyricsplayer.service.exoplayer.ExoPlayerHolder.Companion.ACTION_PLAY_FROM_DESCRIPTION
 import hu.mrolcsi.android.lyricsplayer.service.exoplayer.ExoPlayerHolder.Companion.ACTION_PREPARE_FROM_DESCRIPTION
@@ -96,4 +98,13 @@ fun MediaControllerCompat.removeQueueItems(from: Int, to: Int) {
     putInt(BulkTimelineQueueEditor.COMMAND_ARGUMENT_TO_INDEX, to)
   }
   sendCommand(BulkTimelineQueueEditor.COMMAND_REMOVE_QUEUE_ITEMS_RANGE, params, null)
+}
+
+fun MediaControllerCompat.moveQueueItem(from: Int, to: Int) {
+  // Put parameters into a bundle
+  val params = bundleOf(
+    BulkTimelineQueueEditor.COMMAND_ARGUMENT_FROM_INDEX to from,
+    BulkTimelineQueueEditor.COMMAND_ARGUMENT_TO_INDEX to to
+  )
+  sendCommand(TimelineQueueEditor.COMMAND_MOVE_QUEUE_ITEM, params, null)
 }
