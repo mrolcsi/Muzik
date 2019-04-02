@@ -19,7 +19,6 @@
     app:layout_constraintTop_toTopOf="parent"
     tools:listitem="@layout/list_item_queue"/>
 
-
   <!-- Make sure Toolbar is above the Cover Art -->
   <androidx.appcompat.widget.Toolbar
     android:id="@+id/playerToolbar"
@@ -37,7 +36,7 @@
     android:id="@+id/sbSongProgress"
     android:layout_width="0dp"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="24dp"
+    android:layout_marginBottom="32dp"
     android:enabled="false"
     app:layout_constraintBottom_toTopOf="@+id/btnPlayPause"
     app:layout_constraintEnd_toEndOf="parent"
@@ -89,10 +88,22 @@
     tools:visibility="visible"/>
 
   <ImageButton
+    android:id="@+id/btnShuffle"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="16dp"
+    android:background="?attr/selectableItemBackgroundBorderless"
+    android:contentDescription="@string/player_toggleShuffle"
+    app:layout_constraintBottom_toBottomOf="@+id/btnPlayPause"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="@+id/btnPlayPause"
+    app:srcCompat="@drawable/exo_controls_shuffle"/>
+
+  <ImageButton
     android:id="@+id/btnPrevious"
     android:layout_width="48dp"
     android:layout_height="48dp"
-    android:layout_marginStart="16dp"
+    android:layout_marginStart="8dp"
     android:layout_marginEnd="8dp"
     android:background="@drawable/media_button_background"
     android:contentDescription="@string/mediaControl_previous"
@@ -103,7 +114,7 @@
     app:layout_constraintBottom_toBottomOf="@+id/btnPlayPause"
     app:layout_constraintEnd_toStartOf="@+id/btnPlayPause"
     app:layout_constraintHorizontal_chainStyle="packed"
-    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintStart_toEndOf="@+id/btnShuffle"
     app:layout_constraintTop_toTopOf="@+id/btnPlayPause"
     app:srcCompat="@android:drawable/ic_media_previous"
     tools:visibility="visible"/>
@@ -130,7 +141,7 @@
     android:layout_width="48dp"
     android:layout_height="48dp"
     android:layout_marginStart="8dp"
-    android:layout_marginEnd="16dp"
+    android:layout_marginEnd="8dp"
     android:background="@drawable/media_button_background"
     android:contentDescription="@string/mediaControl_next"
     android:elevation="@dimen/button_elevation"
@@ -138,11 +149,22 @@
     android:scaleType="fitCenter"
     app:elevation="@dimen/button_elevation"
     app:layout_constraintBottom_toBottomOf="@+id/btnPlayPause"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintHorizontal_bias="0.5"
+    app:layout_constraintEnd_toStartOf="@+id/btnRepeat"
     app:layout_constraintStart_toEndOf="@+id/btnPlayPause"
     app:layout_constraintTop_toTopOf="@+id/btnPlayPause"
     app:srcCompat="@android:drawable/ic_media_next"
     tools:visibility="visible"/>
+
+  <ImageButton
+    android:id="@+id/btnRepeat"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="16dp"
+    android:background="?attr/selectableItemBackgroundBorderless"
+    android:contentDescription="@string/player_toggleRepeat"
+    app:layout_constraintBottom_toBottomOf="@+id/btnPlayPause"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintTop_toTopOf="@+id/btnPlayPause"
+    app:srcCompat="@drawable/exo_controls_repeat_all"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

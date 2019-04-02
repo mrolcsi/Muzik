@@ -149,6 +149,28 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
             .saveLastPlayed(mLastPlayed)
         }
       }
+
+      override fun onRepeatModeChanged(repeatMode: Int) {
+        Log.v(LOG_TAG, "onRepeatModeChanged($repeatMode)")
+
+        mLastPlayed.repeatMode = repeatMode
+        mDatabaseWorker.submit {
+          PlayQueueDatabase.getInstance(context)
+            .getPlayQueueDao()
+            .saveLastPlayed(mLastPlayed)
+        }
+      }
+
+      override fun onShuffleModeEnabledChanged(shuffleModeEnabled: Boolean) {
+        Log.v(LOG_TAG, "onShuffleEnabledChanged($shuffleModeEnabled)")
+
+        mLastPlayed.shuffleMode = if (shuffleModeEnabled) 1 else 0
+        mDatabaseWorker.submit {
+          PlayQueueDatabase.getInstance(context)
+            .getPlayQueueDao()
+            .saveLastPlayed(mLastPlayed)
+        }
+      }
     })
   }
 

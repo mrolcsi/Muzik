@@ -16,6 +16,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.ImageView
 import android.widget.SeekBar
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.app.NavUtils
@@ -64,6 +65,9 @@ class PlayerActivity : AppCompatActivity() {
   private val mPreviousBackground by lazy { getDrawable(R.drawable.media_button_background) }
   private val mPlayPauseBackground by lazy { getDrawable(R.drawable.media_button_background) }
   private val mNextBackground by lazy { getDrawable(R.drawable.media_button_background) }
+  private val mRepeatNone by lazy { getDrawable(R.drawable.exo_controls_repeat_off) }
+  private val mRepeatOne by lazy { getDrawable(R.drawable.exo_controls_repeat_one) }
+  private val mRepeatAll by lazy { getDrawable(R.drawable.exo_controls_repeat_all) }
 
   private val mQueueAdapter = QueueAdapter().apply {
     setHasStableIds(true)
@@ -133,7 +137,11 @@ class PlayerActivity : AppCompatActivity() {
                 ")"
           )
           if (backgroundColor != it.primaryBackgroundColor) {
-            val visiblePosition = mSnapHelper.findSnapPosition(rvQueue.layoutManager)
+            val visiblePosition = if (mQueueAdapter.realItemCount == 0) {
+              -1
+            } else {
+              mSnapHelper.findSnapPosition(rvQueue.layoutManager) % mQueueAdapter.realItemCount
+            }
             val activeId = mediaControllerCompat.playbackState.activeQueueItemId
             val activePosition = mQueueAdapter.getItemPositionById(activeId)
 
@@ -347,20 +355,58 @@ class PlayerActivity : AppCompatActivity() {
       rvQueue.smoothScrollToPosition(currentPosition + 1)
     }
 
-    btnPlayPause.apply {
-      setOnClickListener {
-        when (mediaControllerCompat.playbackState.state) {
-          PlaybackStateCompat.STATE_PLAYING -> {
-            // Pause playback, stop updater
-            mediaControllerCompat.transportControls.pause()
-            mediaControllerCompat.transportControls.startProgressUpdater()
-          }
-          PlaybackStateCompat.STATE_PAUSED,
-          PlaybackStateCompat.STATE_STOPPED -> {
-            // Start playback, start updater
-            mediaControllerCompat.transportControls.play()
-            mediaControllerCompat.transportControls.stopProgressUpdater()
-          }
+    btnPlayPause.setOnClickListener {
+      when (mediaControllerCompat.playbackState.state) {
+        PlaybackStateCompat.STATE_PLAYING -> {
+          // Pause playback, stop updater
+          mediaControllerCompat.transportControls.pause()
+          mediaControllerCompat.transportControls.startProgressUpdater()
+        }
+        PlaybackStateCompat.STATE_PAUSED,
+        PlaybackStateCompat.STATE_STOPPED -> {
+          // Start playback, start updater
+          mediaControllerCompat.transportControls.play()
+          mediaControllerCompat.transportControls.stopProgressUpdater()
+        }
+      }
+    }
+
+    btnShuffle.setOnClickListener {
+      when (mediaControllerCompat.shuffleMode) {
+        PlaybackStateCompat.SHUFFLE_MODE_NONE -> {
+          mediaControllerCompat.transportControls.setShuffleMode(
+            PlaybackStateCompat.SHUFFLE_MODE_ALL
+          )
+          Toast.makeText(this, R.string.player_shuffleEnabled, Toast.LENGTH_SHORT).show()
+        }
+        else -> {
+          mediaControllerCompat.transportControls.setShuffleMode(
+            PlaybackStateCompat.SHUFFLE_MODE_NONE
+          )
+          Toast.makeText(this, R.string.player_shuffleDisabled, Toast.LENGTH_SHORT).show()
+        }
+      }
+    }
+
+    btnRepeat.setOnClickListener {
+      when (mediaControllerCompat.repeatMode) {
+        PlaybackStateCompat.REPEAT_MODE_NONE -> {
+          mediaControllerCompat.transportControls.setRepeatMode(
+            PlaybackStateCompat.REPEAT_MODE_ONE
+          )
+          Toast.makeText(this, R.string.player_repeatOne, Toast.LENGTH_SHORT).show()
+        }
+        PlaybackStateCompat.REPEAT_MODE_ONE -> {
+          mediaControllerCompat.transportControls.setRepeatMode(
+            PlaybackStateCompat.REPEAT_MODE_ALL
+          )
+          Toast.makeText(this, R.string.player_repeatAll, Toast.LENGTH_SHORT).show()
+        }
+        else -> {
+          mediaControllerCompat.transportControls.setRepeatMode(
+            PlaybackStateCompat.REPEAT_MODE_NONE
+          )
+          Toast.makeText(this, R.string.player_repeatDisabled, Toast.LENGTH_SHORT).show()
         }
       }
     }
@@ -419,6 +465,17 @@ class PlayerActivity : AppCompatActivity() {
         btnPlayPause.setImageResource(android.R.drawable.ic_media_play)
       }
     }
+
+    when (mediaControllerCompat.shuffleMode) {
+      PlaybackStateCompat.SHUFFLE_MODE_NONE -> btnShuffle.alpha = 0.5f
+      PlaybackStateCompat.SHUFFLE_MODE_ALL -> btnShuffle.alpha = 1f
+    }
+
+    when (mediaControllerCompat.repeatMode) {
+      PlaybackStateCompat.REPEAT_MODE_NONE -> btnRepeat.setImageDrawable(mRepeatNone)
+      PlaybackStateCompat.REPEAT_MODE_ONE -> btnRepeat.setImageDrawable(mRepeatOne)
+      PlaybackStateCompat.REPEAT_MODE_ALL -> btnRepeat.setImageDrawable(mRepeatAll)
+    }
   }
 
   private fun updateSongData(metadata: MediaMetadataCompat) {
@@ -427,7 +484,11 @@ class PlayerActivity : AppCompatActivity() {
 
   private fun updatePager() {
     // Scroll pager to current item
-    val visiblePosition = mSnapHelper.findSnapPosition(rvQueue.layoutManager)
+    val visiblePosition = if (mQueueAdapter.realItemCount == 0) {
+      -1
+    } else {
+      mSnapHelper.findSnapPosition(rvQueue.layoutManager) % mQueueAdapter.realItemCount
+    }
 
     // Skip if Pager is not ready yet
     if (visiblePosition < 0) {
@@ -546,6 +607,13 @@ class PlayerActivity : AppCompatActivity() {
     mPreviousBackground?.setTint(color)
     mPlayPauseBackground?.setTint(color)
     mNextBackground?.setTint(color)
+
+    // Additional Buttons
+    btnShuffle.drawable.setTint(color)
+
+    mRepeatNone?.setTint(color)
+    mRepeatOne?.setTint(color)
+    mRepeatAll?.setTint(color)
   }
 
   private fun applyBackgroundColor(color: Int) {

@@ -20,7 +20,14 @@
   <string name="mediaControl_previous">Previous</string>
   <string name="notification_nowPlaying">Now Playing</string>
   <string name="notification_nowPlaying_description">Shows the currently playing song in Lyrics Player</string>
+  <string name="player_repeatAll">Repeating all songs.</string>
+  <string name="player_repeatDisabled">Repeat disabled.</string>
+  <string name="player_repeatOne">Repeating one song.</string>
+  <string name="player_shuffleDisabled">Shuffle disabled.</string>
+  <string name="player_shuffleEnabled">Shuffle enabled.</string>
   <string name="player_title">Player</string>
+  <string name="player_toggleRepeat">Toggle Repeat</string>
+  <string name="player_toggleShuffle">Toggle Shuffle</string>
   <string name="playlist_title">Playlist</string>
   <string name="songs_fromAlbum_subtitle">from %s</string>
   <string name="songs_title">Songs</string>

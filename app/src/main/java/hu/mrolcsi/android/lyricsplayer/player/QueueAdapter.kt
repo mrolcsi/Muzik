@@ -37,12 +37,27 @@ class QueueAdapter : ListAdapter<MediaSessionCompat.QueueItem, QueueAdapter.Queu
     holder.bind(getItem(position))
   }
 
+  override fun getItem(position: Int): MediaSessionCompat.QueueItem {
+    return if (realItemCount == 0) {
+      super.getItem(position)
+    } else {
+      super.getItem(position % realItemCount)
+    }
+  }
+
+  override fun getItemCount(): Int {
+    // To enable infinite scrolling
+    return if (super.getItemCount() == 0) 0 else Int.MAX_VALUE
+  }
+
+  val realItemCount get() = super.getItemCount()
+
   override fun getItemId(position: Int): Long {
     return getItem(position).queueId
   }
 
   fun getItemPositionById(id: Long): Int {
-    for (i in 0 until itemCount) {
+    for (i in 0 until realItemCount) {
       if (getItemId(i) == id) {
         return i
       }

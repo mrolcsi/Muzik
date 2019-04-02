@@ -156,6 +156,11 @@ class LPPlayerService : LPBrowserService() {
           mLastPlayed = PlayQueueDatabase.getInstance(applicationContext)
             .getPlayQueueDao()
             .getLastPlayed()
+
+          mLastPlayed?.let {
+            controller.transportControls.setRepeatMode(it.repeatMode)
+            controller.transportControls.setShuffleMode(it.shuffleMode)
+          }
         }
       }
     }
