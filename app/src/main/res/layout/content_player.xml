@@ -97,7 +97,8 @@
     app:layout_constraintBottom_toBottomOf="@+id/btnPlayPause"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="@+id/btnPlayPause"
-    app:srcCompat="@drawable/exo_controls_shuffle"/>
+    app:srcCompat="@drawable/ic_shuffle"
+    tools:tint="@android:color/white"/>
 
   <ImageButton
     android:id="@+id/btnPrevious"
@@ -165,6 +166,7 @@
     app:layout_constraintBottom_toBottomOf="@+id/btnPlayPause"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintTop_toTopOf="@+id/btnPlayPause"
-    app:srcCompat="@drawable/exo_controls_repeat_all"/>
+    app:srcCompat="@drawable/ic_repeat_all"
+    tools:tint="@android:color/white"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -65,9 +65,20 @@ class PlayerActivity : AppCompatActivity() {
   private val mPreviousBackground by lazy { getDrawable(R.drawable.media_button_background) }
   private val mPlayPauseBackground by lazy { getDrawable(R.drawable.media_button_background) }
   private val mNextBackground by lazy { getDrawable(R.drawable.media_button_background) }
-  private val mRepeatNone by lazy { getDrawable(R.drawable.exo_controls_repeat_off) }
-  private val mRepeatOne by lazy { getDrawable(R.drawable.exo_controls_repeat_one) }
-  private val mRepeatAll by lazy { getDrawable(R.drawable.exo_controls_repeat_all) }
+
+  private val mRepeatNone by lazy {
+    getDrawable(R.drawable.ic_repeat_all)
+      ?.constantState
+      ?.newDrawable(resources)
+      ?.mutate()
+      ?.apply { alpha = Theme.DISABLED_OPACITY }
+  }
+  private val mRepeatOne by lazy {
+    getDrawable(R.drawable.ic_repeat_one)
+  }
+  private val mRepeatAll by lazy {
+    getDrawable(R.drawable.ic_repeat_all)
+  }
 
   private val mQueueAdapter = QueueAdapter().apply {
     setHasStableIds(true)
