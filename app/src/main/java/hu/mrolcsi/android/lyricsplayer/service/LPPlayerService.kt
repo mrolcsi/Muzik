@@ -17,6 +17,7 @@ import androidx.core.app.TaskStackBuilder
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.media.session.MediaButtonReceiver
+import com.google.android.exoplayer2.ExoPlaybackException
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import hu.mrolcsi.android.lyricsplayer.R
@@ -24,6 +25,7 @@ import hu.mrolcsi.android.lyricsplayer.database.playqueue.PlayQueueDatabase
 import hu.mrolcsi.android.lyricsplayer.database.playqueue.entities.LastPlayed
 import hu.mrolcsi.android.lyricsplayer.extensions.media.addQueueItems
 import hu.mrolcsi.android.lyricsplayer.extensions.media.albumArt
+import hu.mrolcsi.android.lyricsplayer.extensions.media.isSkipToNextEnabled
 import hu.mrolcsi.android.lyricsplayer.extensions.media.prepareFromDescription
 import hu.mrolcsi.android.lyricsplayer.player.PlayerActivity
 import hu.mrolcsi.android.lyricsplayer.service.exoplayer.ExoPlayerHolder
@@ -127,6 +129,19 @@ class LPPlayerService : LPBrowserService() {
                   mLastPlayed = null
                 }
               }
+            }
+          }
+
+          override fun onPlayerError(error: ExoPlaybackException?) {
+            val player = exo.getPlayer()
+
+            if (controller.playbackState.isSkipToNextEnabled && player.playWhenReady) {
+              // Skip to next track
+              controller.transportControls.skipToNext()
+              controller.transportControls.prepare()
+              controller.transportControls.play()
+            } else {
+              // Send error to client
             }
           }
         })

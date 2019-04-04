@@ -12,9 +12,16 @@ import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
+import android.util.Pair
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.ControlDispatcher
 import com.google.android.exoplayer2.DefaultControlDispatcher
+import com.google.android.exoplayer2.ExoPlaybackException
+import com.google.android.exoplayer2.ExoPlaybackException.TYPE_OUT_OF_MEMORY
+import com.google.android.exoplayer2.ExoPlaybackException.TYPE_REMOTE
+import com.google.android.exoplayer2.ExoPlaybackException.TYPE_RENDERER
+import com.google.android.exoplayer2.ExoPlaybackException.TYPE_SOURCE
+import com.google.android.exoplayer2.ExoPlaybackException.TYPE_UNEXPECTED
 import com.google.android.exoplayer2.ExoPlayerFactory
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.Timeline
@@ -28,6 +35,7 @@ import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.source.ShuffleOrder
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
+import com.google.android.exoplayer2.util.ErrorMessageProvider
 import com.google.android.exoplayer2.util.Util
 import hu.mrolcsi.android.lyricsplayer.BuildConfig
 import hu.mrolcsi.android.lyricsplayer.R
@@ -56,6 +64,11 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
     override fun dispatchSetPlayWhenReady(player: Player, playWhenReady: Boolean): Boolean {
       if (playWhenReady) {
         Log.v(LOG_TAG, "onPlay()")
+
+        // Prepare player if needed (like after an error)
+        if (player.playbackState == Player.STATE_IDLE || player.playbackState == Player.STATE_ENDED) {
+          mPlaybackPreparer.onPrepare()
+        }
 
         // Start updater if it is enabled (Gets cancelled in onStop())
         if (mProgressUpdater.isEnabled) {
@@ -453,6 +466,20 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
 
   //endregion
 
+  //region ERROR MESSAGE PROVIDER
+
+  private val mErrorMessageProvider = ErrorMessageProvider<ExoPlaybackException> { exception ->
+    when (exception.type) {
+      TYPE_SOURCE -> Pair.create(exception.type, context.getString(R.string.error_source))
+      TYPE_RENDERER -> Pair.create(exception.type, context.getString(R.string.error_renderer))
+      TYPE_OUT_OF_MEMORY -> Pair.create(exception.type, context.getString(R.string.error_outOfMemory))
+      TYPE_UNEXPECTED, TYPE_REMOTE -> Pair.create(exception.type, context.getString(R.string.error_unexpected))
+      else -> Pair.create(exception.type, context.getString(R.string.error_unexpected))
+    }
+  }
+
+  //endregion
+
   // Player state polling
   private val mProgressUpdater = ProgressUpdater {
     // Update session with the current position
@@ -479,6 +506,7 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
       setControlDispatcher(mPlaybackController)
       setQueueNavigator(mQueueNavigator)
       setQueueEditor(mQueueEditor)
+      setErrorMessageProvider(mErrorMessageProvider)
     }
 
   /**
