@@ -24,11 +24,17 @@ class PlaylistAdapter(
   DiffCallbackRepository.playQueueEntryCallback
 ) {
 
-  var activeQueueId by Delegates.observable(-1L) { prop, old, new ->
+  var activeQueueId by Delegates.observable(-1L) { _, old, new ->
     // When active item changes, update rows
     if (old != new) {
       notifyItemChanged(old.toInt())
       notifyItemChanged(new.toInt())
+    }
+  }
+
+  var isPlaying by Delegates.observable(false) { _, old, new ->
+    if (old != new) {
+      notifyItemChanged(activeQueueId.toInt())
     }
   }
 
@@ -56,8 +62,14 @@ class PlaylistAdapter(
 
     val item = getItem(position)
 
-    // Hide Now Playing indicator
-    val activeQueueId = activeQueueId
+    // Hide/Show Now Playing indicator
+    if (item._id == activeQueueId) {
+      if (isPlaying) {
+        holder.imgNowPlaying.setImageResource(R.drawable.ic_media_play)
+      } else {
+        holder.imgNowPlaying.setImageResource(R.drawable.ic_media_pause)
+      }
+    }
     holder.imgNowPlaying.visibility = if (item._id == activeQueueId) View.VISIBLE else View.GONE
     holder.tvTrackNumber.visibility = if (item._id != activeQueueId) View.VISIBLE else View.GONE
 

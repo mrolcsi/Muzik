@@ -4,6 +4,7 @@ import android.animation.ValueAnimator
 import android.graphics.Color
 import android.os.Bundle
 import android.support.v4.media.session.MediaControllerCompat
+import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -19,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.android.lyricsplayer.R
 import hu.mrolcsi.android.lyricsplayer.database.playqueue.PlayQueueDatabase
 import hu.mrolcsi.android.lyricsplayer.extensions.OnItemClickListener
+import hu.mrolcsi.android.lyricsplayer.extensions.media.isPlaying
 import hu.mrolcsi.android.lyricsplayer.player.PlayerViewModel
 import hu.mrolcsi.android.lyricsplayer.theme.Theme
 import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
@@ -42,6 +44,21 @@ class PlaylistFragment : Fragment() {
     activity?.let { activity ->
       mPlayerModel = ViewModelProviders.of(activity).get(PlayerViewModel::class.java).apply {
         Log.d(LOG_TAG, "Got PlayerViewModel: $this")
+
+
+        currentPlaybackState.observe(this@PlaylistFragment, object : Observer<PlaybackStateCompat?> {
+
+          private var previousState: PlaybackStateCompat? = null
+
+          override fun onChanged(it: PlaybackStateCompat?) {
+            if (it != null) {
+              if (previousState?.state != it.state) {
+                previousState = it
+                mPlaylistAdapter.isPlaying = it.isPlaying
+              }
+            }
+          }
+        })
 
         currentMediaMetadata.observe(this@PlaylistFragment, Observer { metadata ->
           metadata?.let {
