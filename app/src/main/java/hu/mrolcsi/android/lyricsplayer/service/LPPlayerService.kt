@@ -158,12 +158,13 @@ class LPPlayerService : LPBrowserService() {
 
           mLastPlayed?.let { lastPlayed ->
             // Load last played songs (starting with last played position)
+            val queuePosition = if (lastPlayed.queuePosition in 0 until queue.size) lastPlayed.queuePosition else 0
             controller.transportControls.prepareFromDescription(
-              queue[lastPlayed.queuePosition],
-              bundleOf(ExoPlayerHolder.EXTRA_DESIRED_QUEUE_POSITION to lastPlayed.queuePosition)
+              queue[queuePosition],
+              bundleOf(ExoPlayerHolder.EXTRA_DESIRED_QUEUE_POSITION to queuePosition)
             )
             queue.filterIndexed { index, _ ->
-              index != lastPlayed.queuePosition
+              index != queuePosition
             }.also {
               controller.addQueueItems(it)
             }
