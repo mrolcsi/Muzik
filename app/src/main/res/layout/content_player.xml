@@ -9,6 +9,18 @@
   android:animateLayoutChanges="true"
   tools:context=".player.PlayerActivity">
 
+  <ImageView
+    android:id="@+id/imgCoverArt"
+    android:layout_width="0dp"
+    android:layout_height="0dp"
+    android:scaleType="centerCrop"
+    android:transitionName="coverArt"
+    app:layout_constraintDimensionRatio="1:1"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent"
+    tools:src="@tools:sample/avatars[5]"/>
+
   <androidx.recyclerview.widget.RecyclerView
     android:id="@+id/rvQueue"
     android:layout_width="0dp"
@@ -20,6 +32,7 @@
     tools:listitem="@layout/list_item_queue"/>
 
   <!-- Make sure Toolbar is above the Cover Art -->
+
   <androidx.appcompat.widget.Toolbar
     android:id="@+id/playerToolbar"
     android:layout_width="match_parent"

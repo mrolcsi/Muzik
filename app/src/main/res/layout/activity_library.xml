@@ -63,10 +63,22 @@
     app:elevation="@dimen/bottom_navigation_elevation"
     app:itemIconTint="@drawable/bnv_selector"
     app:itemTextColor="@drawable/bnv_selector"
-    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintBottom_toTopOf="@+id/miniPlayer"
     app:layout_constraintLeft_toLeftOf="parent"
     app:layout_constraintRight_toRightOf="parent"
     app:menu="@menu/menu_navigation"
     tools:visibility="visible"/>
+
+  <fragment
+    android:id="@+id/miniPlayer"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:elevation="@dimen/bottom_navigation_elevation"
+    android:name="hu.mrolcsi.android.lyricsplayer.library.MiniPlayerFragment"
+    app:elevation="@dimen/bottom_navigation_elevation"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    tools:layout="@layout/fragment_miniplayer"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

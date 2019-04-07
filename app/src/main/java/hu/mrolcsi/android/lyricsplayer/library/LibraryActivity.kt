@@ -2,7 +2,6 @@ package hu.mrolcsi.android.lyricsplayer.library
 
 import android.Manifest
 import android.animation.ValueAnimator
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.graphics.Color
@@ -10,19 +9,11 @@ import android.graphics.PorterDuff
 import android.graphics.drawable.LayerDrawable
 import android.graphics.drawable.RippleDrawable
 import android.os.Bundle
-import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
-import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
-import android.view.Menu
-import android.view.MenuItem
 import android.view.View
-import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityOptionsCompat
 import androidx.core.graphics.ColorUtils
-import androidx.core.util.Pair
-import androidx.core.view.ViewCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.NavController
@@ -30,17 +21,14 @@ import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
-import hu.mrolcsi.android.lyricsplayer.GlideApp
 import hu.mrolcsi.android.lyricsplayer.R
 import hu.mrolcsi.android.lyricsplayer.extensions.applyColorToNavigationBarIcons
 import hu.mrolcsi.android.lyricsplayer.extensions.applyColorToStatusBarIcons
 import hu.mrolcsi.android.lyricsplayer.extensions.isPermissionGranted
-import hu.mrolcsi.android.lyricsplayer.extensions.media.albumArt
 import hu.mrolcsi.android.lyricsplayer.extensions.requestPermission
 import hu.mrolcsi.android.lyricsplayer.extensions.shouldShowPermissionRationale
 import hu.mrolcsi.android.lyricsplayer.library.albums.AlbumsFragmentArgs
 import hu.mrolcsi.android.lyricsplayer.library.songs.SongsFragmentArgs
-import hu.mrolcsi.android.lyricsplayer.player.PlayerActivity
 import hu.mrolcsi.android.lyricsplayer.player.PlayerViewModel
 import hu.mrolcsi.android.lyricsplayer.theme.Theme
 import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
@@ -50,10 +38,6 @@ import kotlinx.android.synthetic.main.content_permission.*
 class LibraryActivity : AppCompatActivity() {
 
   private lateinit var mPlayerModel: PlayerViewModel
-
-  private var mNowPlayingMenuItem: MenuItem? = null
-  private var mNowPlayingCoverArt: ImageView? = null
-  private var mNowPlayingIcon: ImageView? = null
 
   private var mNavBarReady = false
 
@@ -81,15 +65,6 @@ class LibraryActivity : AppCompatActivity() {
       mediaController.observe(this@LibraryActivity, Observer { controller ->
         // Set mediaController to the Activity
         MediaControllerCompat.setMediaController(this@LibraryActivity, controller)
-
-        // Update from state
-        updateControls(controller?.playbackState)
-      })
-      currentPlaybackState.observe(this@LibraryActivity, Observer { playbackState ->
-        updateControls(playbackState)
-      })
-      currentMediaMetadata.observe(this@LibraryActivity, Observer { metadata ->
-        updateSongData(metadata)
       })
     }
 
@@ -127,51 +102,12 @@ class LibraryActivity : AppCompatActivity() {
     // Apply StatusBar and NavigationBar colors again
     val themeManager = ThemeManager.getInstance(this)
     applyColorToStatusBarIcons(themeManager.currentTheme.value?.primaryBackgroundColor ?: Color.BLACK)
-    applyColorToNavigationBarIcons(themeManager.currentTheme.value?.secondaryBackgroundColor ?: Color.BLACK)
+    applyColorToNavigationBarIcons(themeManager.currentTheme.value?.primaryBackgroundColor ?: Color.BLACK)
   }
 
   override fun onStop() {
     super.onStop()
     mPlayerModel.disconnect()
-  }
-
-  override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-    menuInflater.inflate(R.menu.menu_library, menu)
-    return super.onCreateOptionsMenu(menu)
-  }
-
-  override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
-    menu?.let {
-      mNowPlayingMenuItem = menu.findItem(R.id.menuNowPlaying).also { item ->
-        with(item.actionView) {
-          setOnClickListener { onOptionsItemSelected(item) }
-          mNowPlayingCoverArt = this.findViewById(R.id.imgCoverArt)
-          mNowPlayingIcon = this.findViewById(R.id.imgPlay)
-        }
-      }
-    }
-
-    return super.onPrepareOptionsMenu(menu)
-  }
-
-  override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-    return when (item?.itemId) {
-      R.id.menuNowPlaying -> {
-        // Shared Element Transition
-        val options = ActivityOptionsCompat.makeSceneTransitionAnimation(
-          this,
-          Pair.create(mNowPlayingCoverArt, ViewCompat.getTransitionName(mNowPlayingCoverArt!!))
-        )
-        startActivity(
-          Intent(this, PlayerActivity::class.java),
-          options.toBundle()
-        )
-        // Navigation Controller loses current destination
-        // when opening Activity through NavController.navigate(destination)
-        true
-      }
-      else -> super.onOptionsItemSelected(item)
-    }
   }
 
   @Suppress("UNUSED_PARAMETER")
@@ -283,46 +219,33 @@ class LibraryActivity : AppCompatActivity() {
     }
   }
 
-  private fun updateSongData(metadata: MediaMetadataCompat?) {
-    metadata?.let {
-      mNowPlayingCoverArt?.let { imgView ->
-        metadata.albumArt.let { bitmap ->
-          GlideApp.with(this)
-            .load(bitmap)
-            .into(imgView)
-        }
-      }
-    }
-  }
-
-  private fun updateControls(playbackState: PlaybackStateCompat?) {
-    // Show/hide Now Playing in ActionBar
-    mNowPlayingMenuItem?.isVisible = playbackState != null
-  }
-
   private fun applyTheme(theme: Theme) {
     Log.d(LOG_TAG, "Applying theme...")
 
     // Status Bar Icons
     applyColorToStatusBarIcons(theme.primaryBackgroundColor)
     // Navigation Bar Icons
-    applyColorToNavigationBarIcons(theme.secondaryBackgroundColor)
+    applyColorToNavigationBarIcons(theme.primaryBackgroundColor)
 
     val previousTheme = ThemeManager.getInstance(this).previousTheme
 
     ValueAnimator.ofArgb(
       previousTheme?.primaryBackgroundColor ?: Color.BLACK,
       theme.primaryBackgroundColor
-    ).apply {
+    ).run {
       duration = Theme.PREFERRED_ANIMATION_DURATION
       addUpdateListener {
         val color = it.animatedValue as Int
+
         // Status Bar
         window?.statusBarColor = color
+        // Navigation Bar
+        window?.navigationBarColor = color
         // Toolbar Background
         libraryToolbar.setBackgroundColor(color)
         // Logo foreground
         (imgLogo.drawable as LayerDrawable).findDrawableByLayerId(R.id.foreground).setTint(color)
+
       }
       start()
     }
@@ -330,12 +253,11 @@ class LibraryActivity : AppCompatActivity() {
     ValueAnimator.ofArgb(
       previousTheme?.secondaryBackgroundColor ?: Color.BLACK,
       theme.secondaryBackgroundColor
-    ).apply {
+    ).run {
       duration = Theme.PREFERRED_ANIMATION_DURATION
       addUpdateListener {
         val color = it.animatedValue as Int
-        // Navigation Bar
-        window?.navigationBarColor = color
+
         // BottomNavigation Background
         navigation_bar.setBackgroundColor(color)
       }
@@ -345,10 +267,11 @@ class LibraryActivity : AppCompatActivity() {
     ValueAnimator.ofArgb(
       previousTheme?.tertiaryBackgroundColor ?: Color.BLACK,
       theme.tertiaryBackgroundColor
-    ).apply {
+    ).run {
       duration = Theme.PREFERRED_ANIMATION_DURATION
       addUpdateListener {
         val color = it.animatedValue as Int
+
         // Window background
         window?.decorView?.setBackgroundColor(color)
       }
@@ -358,17 +281,16 @@ class LibraryActivity : AppCompatActivity() {
     ValueAnimator.ofArgb(
       previousTheme?.primaryForegroundColor ?: Color.WHITE,
       theme.primaryForegroundColor
-    ).apply {
+    ).run {
       duration = Theme.PREFERRED_ANIMATION_DURATION
       addUpdateListener {
         val color = it.animatedValue as Int
+
         // Toolbar Icon
         libraryToolbar.navigationIcon?.setColorFilter(color, PorterDuff.Mode.SRC_IN)
         // Title and Subtitle
         libraryToolbar.setTitleTextColor(color)
         libraryToolbar.setSubtitleTextColor(color)
-        // Toolbar Now Playing Icon
-        mNowPlayingIcon?.imageTintList = ColorStateList.valueOf(theme.primaryForegroundColor)
         // Logo background
         (imgLogo.drawable as LayerDrawable).findDrawableByLayerId(R.id.background).setTint(color)
       }
@@ -378,10 +300,11 @@ class LibraryActivity : AppCompatActivity() {
     ValueAnimator.ofArgb(
       previousTheme?.secondaryForegroundColor ?: Color.WHITE,
       theme.secondaryForegroundColor
-    ).apply {
+    ).run {
       duration = Theme.PREFERRED_ANIMATION_DURATION
       addUpdateListener {
         val color = it.animatedValue as Int
+
         // BottomNavigation Selected Colors
         val navigationTintList = ColorStateList(
           arrayOf(

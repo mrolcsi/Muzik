@@ -67,6 +67,6 @@ fun AppCompatActivity.applyColorToNavigationBarIcons(backgroundColor: Int) {
   }
 }
 
-var Activity.mediaControllerCompat: MediaControllerCompat
+var Activity.mediaControllerCompat: MediaControllerCompat?
   get() = MediaControllerCompat.getMediaController(this)
   set(controller) = MediaControllerCompat.setMediaController(this, controller)

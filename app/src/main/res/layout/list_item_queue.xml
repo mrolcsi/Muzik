@@ -12,7 +12,6 @@
     android:layout_height="0dp"
     android:elevation="@dimen/action_bar_elevation"
     android:scaleType="centerCrop"
-    android:transitionName="coverArt"
     app:elevation="@dimen/action_bar_elevation"
     app:layout_constraintDimensionRatio="1:1"
     app:layout_constraintEnd_toEndOf="parent"

@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:layout_width="match_parent"
+  android:layout_height="wrap_content"
+  android:clickable="true"
+  android:elevation="@dimen/bottom_navigation_elevation"
+  android:focusable="true"
+  app:elevation="@dimen/bottom_navigation_elevation"
+  tools:context=".library.LibraryActivity">
+
+  <androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <ImageView
+      android:id="@+id/imgCoverArt"
+      android:layout_width="64dp"
+      android:layout_height="64dp"
+      android:layout_marginTop="3dp"
+      android:contentDescription="@string/notification_nowPlaying_description"
+      android:scaleType="centerCrop"
+      android:transitionName="coverArt"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent"
+      tools:srcCompat="@tools:sample/avatars"/>
+
+    <ProgressBar
+      android:id="@+id/pbSongProgress"
+      style="?android:attr/progressBarStyleHorizontal"
+      android:layout_width="0dp"
+      android:layout_height="4dp"
+      android:elevation="0dp"
+      app:elevation="0dp"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent"
+      tools:max="10"
+      tools:progress="4"/>
+
+    <TextView
+      android:id="@+id/tvTitle"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="8dp"
+      android:layout_marginEnd="8dp"
+      android:maxLines="2"
+      android:scrollHorizontally="true"
+      app:layout_constraintBottom_toTopOf="@+id/tvArtist"
+      app:layout_constraintEnd_toStartOf="@+id/btnPrevious"
+      app:layout_constraintStart_toEndOf="@+id/imgCoverArt"
+      app:layout_constraintTop_toBottomOf="@+id/pbSongProgress"
+      tools:text="Title"/>
+
+    <TextView
+      android:id="@+id/tvArtist"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="8dp"
+      android:layout_marginEnd="8dp"
+      android:alpha="0.7"
+      android:maxLines="2"
+      android:scrollHorizontally="true"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toStartOf="@+id/btnPrevious"
+      app:layout_constraintStart_toEndOf="@+id/imgCoverArt"
+      app:layout_constraintTop_toBottomOf="@+id/tvTitle"
+      tools:text="Artist"/>
+
+    <ImageButton
+      android:id="@+id/btnPrevious"
+      android:layout_width="42dp"
+      android:layout_height="42dp"
+      android:layout_marginEnd="8dp"
+      android:background="@drawable/media_button_background"
+      android:contentDescription="@string/mediaControl_previous"
+      android:elevation="@dimen/button_elevation"
+      android:enabled="false"
+      android:scaleType="fitCenter"
+      android:visibility="gone"
+      app:elevation="@dimen/button_elevation"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toStartOf="@+id/btnPlayPause"
+      app:layout_constraintTop_toBottomOf="@+id/pbSongProgress"
+      app:srcCompat="@android:drawable/ic_media_previous"
+      tools:visibility="visible"/>
+
+    <ImageButton
+      android:id="@+id/btnPlayPause"
+      android:layout_width="48dp"
+      android:layout_height="48dp"
+      android:layout_marginEnd="8dp"
+      android:background="@drawable/media_button_background"
+      android:contentDescription="@string/mediaControl_playPause"
+      android:elevation="@dimen/button_elevation"
+      android:enabled="false"
+      android:scaleType="fitCenter"
+      android:visibility="gone"
+      app:elevation="@dimen/button_elevation"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toStartOf="@+id/btnNext"
+      app:layout_constraintTop_toBottomOf="@+id/pbSongProgress"
+      app:srcCompat="@android:drawable/ic_media_play"
+      tools:visibility="visible"/>
+
+    <ImageButton
+      android:id="@+id/btnNext"
+      android:layout_width="42dp"
+      android:layout_height="42dp"
+      android:layout_marginEnd="8dp"
+      android:background="@drawable/media_button_background"
+      android:contentDescription="@string/mediaControl_next"
+      android:elevation="@dimen/button_elevation"
+      android:enabled="false"
+      android:scaleType="fitCenter"
+      android:visibility="gone"
+      app:elevation="@dimen/button_elevation"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintTop_toBottomOf="@+id/pbSongProgress"
+      app:srcCompat="@android:drawable/ic_media_next"
+      tools:visibility="visible"/>
+
+  </androidx.constraintlayout.widget.ConstraintLayout>
+
+</FrameLayout>

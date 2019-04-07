@@ -6,15 +6,16 @@ import android.content.Intent
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.Drawable
 import android.media.AudioManager
 import android.os.Bundle
 import android.support.v4.media.MediaMetadataCompat
+import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -33,6 +34,11 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
+import hu.mrolcsi.android.lyricsplayer.GlideApp
 import hu.mrolcsi.android.lyricsplayer.R
 import hu.mrolcsi.android.lyricsplayer.common.pager.PagerSnapHelperVerbose
 import hu.mrolcsi.android.lyricsplayer.common.pager.RVPageScrollState
@@ -41,6 +47,7 @@ import hu.mrolcsi.android.lyricsplayer.common.pager.RVPagerStateListener
 import hu.mrolcsi.android.lyricsplayer.common.pager.VisiblePageState
 import hu.mrolcsi.android.lyricsplayer.extensions.applyColorToNavigationBarIcons
 import hu.mrolcsi.android.lyricsplayer.extensions.applyColorToStatusBarIcons
+import hu.mrolcsi.android.lyricsplayer.extensions.media.albumArt
 import hu.mrolcsi.android.lyricsplayer.extensions.media.duration
 import hu.mrolcsi.android.lyricsplayer.extensions.media.isPlaying
 import hu.mrolcsi.android.lyricsplayer.extensions.media.isSkipToNextEnabled
@@ -86,6 +93,21 @@ class PlayerActivity : AppCompatActivity() {
   private lateinit var mSnapHelper: PagerSnapHelperVerbose
   private var mScrollState: RVPageScrollState = RVPageScrollState.IDLE
 
+  private val mGlideListener = object : RequestListener<Drawable> {
+    override fun onResourceReady(
+      resource: Drawable?, model: Any?, target: Target<Drawable>?, dataSource: DataSource?, isFirstResource: Boolean
+    ): Boolean {
+      supportStartPostponedEnterTransition()
+      return false
+    }
+
+    override fun onLoadFailed(
+      e: GlideException?, model: Any?, target: Target<Drawable>?, isFirstResource: Boolean
+    ): Boolean {
+      return false
+    }
+  }
+
   //region LIFECYCLE
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -107,7 +129,7 @@ class PlayerActivity : AppCompatActivity() {
           mediaControllerCompat = controller
 
           // Finish building the UI
-          setupTransportControls()
+          setupTransportControls(controller)
         }
       })
       currentMediaMetadata.observe(this@PlayerActivity, Observer { metadata ->
@@ -123,10 +145,7 @@ class PlayerActivity : AppCompatActivity() {
       })
       currentQueue.observe(this@PlayerActivity, Observer {
         // Update Queue
-        mQueueAdapter.submitList(mediaControllerCompat.queue)
-
-        // Resume animation
-        supportStartPostponedEnterTransition()
+        mQueueAdapter.submitList(it)
       })
     }
 
@@ -153,7 +172,7 @@ class PlayerActivity : AppCompatActivity() {
             } else {
               mSnapHelper.findSnapPosition(rvQueue.layoutManager) % mQueueAdapter.realItemCount
             }
-            val activeId = mediaControllerCompat.playbackState.activeQueueItemId
+            val activeId = mediaControllerCompat?.playbackState?.activeQueueItemId ?: -1
             val activePosition = mQueueAdapter.getItemPositionById(activeId)
 
             if (Math.abs(visiblePosition - activePosition) > 1) {
@@ -181,7 +200,7 @@ class PlayerActivity : AppCompatActivity() {
     super.onStop()
     mPlayerModel.disconnect()
 
-    mediaControllerCompat.transportControls.stopProgressUpdater()
+    mediaControllerCompat?.transportControls?.stopProgressUpdater()
   }
 
   override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -219,13 +238,11 @@ class PlayerActivity : AppCompatActivity() {
     val upIntent: Intent? = NavUtils.getParentActivityIntent(this)
 
     // Prepare options for Shared Element Transition
-    val view = mSnapHelper.findSnapView(rvQueue.layoutManager)?.findViewById<ImageView>(R.id.imgCoverArt)
-    val options = view?.let {
-      ActivityOptionsCompat.makeSceneTransitionAnimation(
-        this,
-        Pair.create(view, ViewCompat.getTransitionName(view))
-      )
-    }
+    //val view = mSnapHelper.findSnapView(rvQueue.layoutManager)?.findViewById<ImageView>(R.id.imgCoverArt)
+    val options = ActivityOptionsCompat.makeSceneTransitionAnimation(
+      this,
+      Pair.create(imgCoverArt, ViewCompat.getTransitionName(imgCoverArt))
+    )
 
     when {
       upIntent == null -> throw IllegalStateException("No Parent Activity Intent")
@@ -237,7 +254,7 @@ class PlayerActivity : AppCompatActivity() {
           // Add all of this activity's parents to the back stack
           .addNextIntentWithParentStack(upIntent)
           // Navigate up to the closest parent
-          .startActivities(options?.toBundle())
+          .startActivities(options.toBundle())
       }
       else -> {
         Log.d(LOG_TAG, "Navigate back directly.")
@@ -260,7 +277,7 @@ class PlayerActivity : AppCompatActivity() {
   }
 
   private fun setupPager() {
-    rvQueue.apply {
+    rvQueue.run {
       layoutManager = LinearLayoutManager(this@PlayerActivity, LinearLayoutManager.HORIZONTAL, false)
       adapter = mQueueAdapter
       setHasFixedSize(true)
@@ -318,19 +335,19 @@ class PlayerActivity : AppCompatActivity() {
 
         if (state == RVPageScrollState.IDLE) {
           // check if item position is different from the now playing position
-          val queuePosition = mediaControllerCompat.playbackState.activeQueueItemId
+          val queuePosition = mediaControllerCompat?.playbackState?.activeQueueItemId
           val pagerPosition = mSnapHelper.findSnapPosition(rvQueue.layoutManager)
           val itemId = mQueueAdapter.getItemId(pagerPosition)
 
           if (queuePosition != itemId) {
-            mediaControllerCompat.transportControls?.skipToQueueItem(itemId)
+            mediaControllerCompat?.transportControls?.skipToQueueItem(itemId)
           }
         }
       }
     })
   }
 
-  private fun setupTransportControls() {
+  private fun setupTransportControls(controller: MediaControllerCompat) {
     // Enable controls
     sbSongProgress.isEnabled = true
     btnPrevious.isEnabled = true
@@ -338,12 +355,12 @@ class PlayerActivity : AppCompatActivity() {
     btnNext.isEnabled = true
 
     // Update song metadata
-    mediaControllerCompat.metadata?.let {
+    controller.metadata?.let {
       updateSongData(it)
     }
 
     // Update music controls
-    mediaControllerCompat.playbackState?.let {
+    controller.playbackState?.let {
       updateControls(it)
     }
 
@@ -352,7 +369,7 @@ class PlayerActivity : AppCompatActivity() {
     btnPrevious.setOnClickListener {
       if (sbSongProgress.progress > 5) {
         // restart the song
-        mediaControllerCompat.transportControls?.seekTo(0)
+        controller.transportControls?.seekTo(0)
       } else {
         //mediaControllerCompat.transportControls?.skipToPrevious()
         val currentPosition = mSnapHelper.findSnapPosition(rvQueue.layoutManager)
@@ -367,31 +384,31 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     btnPlayPause.setOnClickListener {
-      when (mediaControllerCompat.playbackState.state) {
+      when (controller.playbackState.state) {
         PlaybackStateCompat.STATE_PLAYING -> {
           // Pause playback, stop updater
-          mediaControllerCompat.transportControls.pause()
-          mediaControllerCompat.transportControls.startProgressUpdater()
+          controller.transportControls.pause()
+          controller.transportControls.startProgressUpdater()
         }
         PlaybackStateCompat.STATE_PAUSED,
         PlaybackStateCompat.STATE_STOPPED -> {
           // Start playback, start updater
-          mediaControllerCompat.transportControls.play()
-          mediaControllerCompat.transportControls.stopProgressUpdater()
+          controller.transportControls.play()
+          controller.transportControls.stopProgressUpdater()
         }
       }
     }
 
     btnShuffle.setOnClickListener {
-      when (mediaControllerCompat.shuffleMode) {
+      when (controller.shuffleMode) {
         PlaybackStateCompat.SHUFFLE_MODE_NONE -> {
-          mediaControllerCompat.transportControls.setShuffleMode(
+          controller.transportControls.setShuffleMode(
             PlaybackStateCompat.SHUFFLE_MODE_ALL
           )
           Toast.makeText(this, R.string.player_shuffleEnabled, Toast.LENGTH_SHORT).show()
         }
         else -> {
-          mediaControllerCompat.transportControls.setShuffleMode(
+          controller.transportControls.setShuffleMode(
             PlaybackStateCompat.SHUFFLE_MODE_NONE
           )
           Toast.makeText(this, R.string.player_shuffleDisabled, Toast.LENGTH_SHORT).show()
@@ -400,21 +417,21 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     btnRepeat.setOnClickListener {
-      when (mediaControllerCompat.repeatMode) {
+      when (controller.repeatMode) {
         PlaybackStateCompat.REPEAT_MODE_NONE -> {
-          mediaControllerCompat.transportControls.setRepeatMode(
+          controller.transportControls.setRepeatMode(
             PlaybackStateCompat.REPEAT_MODE_ONE
           )
           Toast.makeText(this, R.string.player_repeatOne, Toast.LENGTH_SHORT).show()
         }
         PlaybackStateCompat.REPEAT_MODE_ONE -> {
-          mediaControllerCompat.transportControls.setRepeatMode(
+          controller.transportControls.setRepeatMode(
             PlaybackStateCompat.REPEAT_MODE_ALL
           )
           Toast.makeText(this, R.string.player_repeatAll, Toast.LENGTH_SHORT).show()
         }
         else -> {
-          mediaControllerCompat.transportControls.setRepeatMode(
+          controller.transportControls.setRepeatMode(
             PlaybackStateCompat.REPEAT_MODE_NONE
           )
           Toast.makeText(this, R.string.player_repeatDisabled, Toast.LENGTH_SHORT).show()
@@ -440,7 +457,7 @@ class PlayerActivity : AppCompatActivity() {
 
       override fun onStopTrackingTouch(seekBar: SeekBar?) {
         tvSeekProgress.visibility = View.GONE
-        mediaController.transportControls.seekTo((mProgress * 1000).toLong())
+        controller.transportControls.seekTo((mProgress * 1000).toLong())
         mUserIsSeeking = false
       }
     })
@@ -459,30 +476,29 @@ class PlayerActivity : AppCompatActivity() {
       sbSongProgress.progress = elapsedTime.toInt()
     }
 
-
     btnPrevious.isEnabled = playbackState.isSkipToPreviousEnabled
-    btnPrevious.alpha = if (playbackState.isSkipToPreviousEnabled) 1f else 0.5f
+    btnPrevious.alpha = if (playbackState.isSkipToPreviousEnabled) 1f else Theme.DISABLED_ALPHA
 
     btnNext.isEnabled = playbackState.isSkipToNextEnabled
-    btnNext.alpha = if (playbackState.isSkipToNextEnabled) 1f else 0.5f
+    btnNext.alpha = if (playbackState.isSkipToNextEnabled) 1f else Theme.DISABLED_ALPHA
 
     when (playbackState.isPlaying) {
       true -> {
-        mediaControllerCompat.transportControls.startProgressUpdater()
+        mediaControllerCompat?.transportControls?.startProgressUpdater()
         btnPlayPause.setImageResource(android.R.drawable.ic_media_pause)
       }
       false -> {
-        mediaControllerCompat.transportControls.stopProgressUpdater()
+        mediaControllerCompat?.transportControls?.stopProgressUpdater()
         btnPlayPause.setImageResource(android.R.drawable.ic_media_play)
       }
     }
 
-    when (mediaControllerCompat.shuffleMode) {
-      PlaybackStateCompat.SHUFFLE_MODE_NONE -> btnShuffle.alpha = 0.5f
+    when (mediaControllerCompat?.shuffleMode) {
+      PlaybackStateCompat.SHUFFLE_MODE_NONE -> btnShuffle.alpha = Theme.DISABLED_ALPHA
       PlaybackStateCompat.SHUFFLE_MODE_ALL -> btnShuffle.alpha = 1f
     }
 
-    when (mediaControllerCompat.repeatMode) {
+    when (mediaControllerCompat?.repeatMode) {
       PlaybackStateCompat.REPEAT_MODE_NONE -> btnRepeat.setImageDrawable(mRepeatNone)
       PlaybackStateCompat.REPEAT_MODE_ONE -> btnRepeat.setImageDrawable(mRepeatOne)
       PlaybackStateCompat.REPEAT_MODE_ALL -> btnRepeat.setImageDrawable(mRepeatAll)
@@ -490,6 +506,12 @@ class PlayerActivity : AppCompatActivity() {
   }
 
   private fun updateSongData(metadata: MediaMetadataCompat) {
+
+    GlideApp.with(this)
+      .load(metadata.albumArt)
+      .listener(mGlideListener)
+      .into(imgCoverArt)
+
     sbSongProgress.max = (metadata.duration / 1000).toInt()
   }
 
@@ -510,7 +532,7 @@ class PlayerActivity : AppCompatActivity() {
     val visibleId = mQueueAdapter.getItemId(visiblePosition)
 
     // If Metadata has changed, then PlaybackState should have changed as well.
-    val activeId = mediaControllerCompat.playbackState.activeQueueItemId
+    val activeId = mediaControllerCompat?.playbackState?.activeQueueItemId ?: -1
     val activePosition = mQueueAdapter.getItemPositionById(activeId)
 
     Log.d(
@@ -557,7 +579,7 @@ class PlayerActivity : AppCompatActivity() {
     ValueAnimator.ofArgb(
       previousTheme?.statusBarColor ?: ContextCompat.getColor(this, R.color.backgroundColor),
       theme.statusBarColor
-    ).apply {
+    ).run {
       duration = Theme.PREFERRED_ANIMATION_DURATION
       addUpdateListener {
         val color = it.animatedValue as Int
@@ -572,7 +594,7 @@ class PlayerActivity : AppCompatActivity() {
     ValueAnimator.ofArgb(
       previousTheme?.primaryBackgroundColor ?: ContextCompat.getColor(this, R.color.backgroundColor),
       theme.primaryBackgroundColor
-    ).apply {
+    ).run {
       duration = Theme.PREFERRED_ANIMATION_DURATION
       addUpdateListener {
         val color = it.animatedValue as Int
@@ -585,7 +607,7 @@ class PlayerActivity : AppCompatActivity() {
     ValueAnimator.ofArgb(
       previousTheme?.primaryForegroundColor ?: Color.WHITE,
       theme.primaryForegroundColor
-    ).apply {
+    ).run {
       duration = Theme.PREFERRED_ANIMATION_DURATION
       addUpdateListener {
         val color = it.animatedValue as Int
