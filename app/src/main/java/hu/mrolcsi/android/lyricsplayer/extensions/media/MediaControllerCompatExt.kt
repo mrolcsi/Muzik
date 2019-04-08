@@ -3,9 +3,11 @@ package hu.mrolcsi.android.lyricsplayer.extensions.media
 import android.os.Bundle
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.session.MediaControllerCompat
+import android.support.v4.media.session.PlaybackStateCompat
 import androidx.core.os.bundleOf
 import com.google.android.exoplayer2.ext.mediasession.TimelineQueueEditor
 import hu.mrolcsi.android.lyricsplayer.service.exoplayer.BulkTimelineQueueEditor
+import hu.mrolcsi.android.lyricsplayer.service.exoplayer.ExoPlayerHolder
 import hu.mrolcsi.android.lyricsplayer.service.exoplayer.ExoPlayerHolder.Companion.ACTION_PLAY_FROM_DESCRIPTION
 import hu.mrolcsi.android.lyricsplayer.service.exoplayer.ExoPlayerHolder.Companion.ACTION_PREPARE_FROM_DESCRIPTION
 import hu.mrolcsi.android.lyricsplayer.service.exoplayer.ExoPlayerHolder.Companion.ACTION_START_UPDATER
@@ -107,4 +109,12 @@ fun MediaControllerCompat.moveQueueItem(from: Int, to: Int) {
     BulkTimelineQueueEditor.COMMAND_ARGUMENT_TO_INDEX to to
   )
   sendCommand(TimelineQueueEditor.COMMAND_MOVE_QUEUE_ITEM, params, null)
+}
+
+fun MediaControllerCompat.TransportControls.setShuffleMode(@PlaybackStateCompat.ShuffleMode shuffleMode: Int, seed: Long) {
+  val bundle = Bundle().apply {
+    putInt(ExoPlayerHolder.EXTRA_SHUFFLE_MODE, shuffleMode)
+    putLong(ExoPlayerHolder.EXTRA_SHUFFLE_SEED, seed)
+  }
+  sendCustomAction(ExoPlayerHolder.ACTION_SET_SHUFFLE_MODE, bundle)
 }

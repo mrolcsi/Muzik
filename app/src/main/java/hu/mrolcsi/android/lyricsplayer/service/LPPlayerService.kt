@@ -27,6 +27,7 @@ import hu.mrolcsi.android.lyricsplayer.extensions.media.addQueueItems
 import hu.mrolcsi.android.lyricsplayer.extensions.media.albumArt
 import hu.mrolcsi.android.lyricsplayer.extensions.media.isSkipToNextEnabled
 import hu.mrolcsi.android.lyricsplayer.extensions.media.prepareFromDescription
+import hu.mrolcsi.android.lyricsplayer.extensions.media.setShuffleMode
 import hu.mrolcsi.android.lyricsplayer.player.PlayerActivity
 import hu.mrolcsi.android.lyricsplayer.service.exoplayer.ExoPlayerHolder
 import hu.mrolcsi.android.lyricsplayer.service.exoplayer.notification.ExoNotificationManager
@@ -194,7 +195,7 @@ class LPPlayerService : LPBrowserService() {
               }
 
               controller.transportControls.setRepeatMode(lastPlayed.repeatMode)
-              controller.transportControls.setShuffleMode(lastPlayed.shuffleMode)
+              controller.transportControls.setShuffleMode(lastPlayed.shuffleMode, lastPlayed.shuffleSeed)
             }
           }
         }

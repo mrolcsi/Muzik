@@ -16,6 +16,14 @@ android {
         versionName makeVersionNameDebug()
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = ["room.schemaLocation": "$projectDir/src/androidTest/schemas".toString()]
+            }
+        }
+    }
+    sourceSets {
+        androidTest.assets.srcDirs += files("$projectDir/src/androidTest/schemas".toString())
     }
     buildTypes {
         release {
@@ -74,8 +82,9 @@ dependencies {
     implementation 'cat.ereza:customactivityoncrash:2.2.0'
 
     // Room
-    implementation "androidx.room:room-runtime:2.1.0-alpha05"
-    kapt "androidx.room:room-compiler:2.1.0-alpha05"
+    implementation "androidx.room:room-runtime:2.1.0-alpha06"
+    kapt "androidx.room:room-compiler:2.1.0-alpha06"
+    androidTestImplementation "androidx.room:room-testing:2.1.0-alpha06"
 
     // Checkerboard Drawable
     debugImplementation 'com.github.duanhong169:checkerboarddrawable:1.0.2'
@@ -83,6 +92,7 @@ dependencies {
     // Testing
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0-alpha02'
     androidTestImplementation 'androidx.test:runner:1.1.2-alpha02'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.0'
     testImplementation 'junit:junit:4.12'
 
     // TooLargeTool (only needed when debugging)

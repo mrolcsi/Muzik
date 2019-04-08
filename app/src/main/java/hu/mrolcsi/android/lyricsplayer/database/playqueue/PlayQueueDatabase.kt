@@ -10,7 +10,7 @@ import hu.mrolcsi.android.lyricsplayer.database.playqueue.entities.PlayQueueEntr
 
 @Database(
   entities = [PlayQueueEntry::class, LastPlayed::class],
-  version = 1
+  version = 2
 )
 abstract class PlayQueueDatabase : RoomDatabase() {
 
@@ -33,7 +33,9 @@ abstract class PlayQueueDatabase : RoomDatabase() {
 
     private fun buildDatabase(context: Context): PlayQueueDatabase {
       return Room.databaseBuilder(context, PlayQueueDatabase::class.java, DATABASE_NAME)
-        .enableMultiInstanceInvalidation()
+        .addMigrations(
+          PlayQueueMigrations.MIGRATION_1_2
+        )
         .build()
     }
   }

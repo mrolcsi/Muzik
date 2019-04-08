@@ -46,6 +46,7 @@ import hu.mrolcsi.android.lyricsplayer.extensions.media.mediaPath
 import hu.mrolcsi.android.lyricsplayer.service.BecomingNoisyReceiver
 import java.io.File
 import java.util.concurrent.Executors
+import kotlin.random.Random
 
 class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat) {
 
@@ -118,6 +119,26 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
 
       return true
     }
+
+    override fun dispatchSetShuffleModeEnabled(player: Player?, shuffleModeEnabled: Boolean): Boolean {
+      Log.v(LOG_TAG, "setShuffleMode($shuffleModeEnabled, (dataSourceSize=${mQueueDataSource.size}))")
+
+      // Use a new ShuffleOrder with a random seed
+      mShuffleSeed = Random.nextLong()
+      mQueueDataSource.setShuffleOrder(ShuffleOrder.DefaultShuffleOrder(mQueueDataSource.size, mShuffleSeed))
+
+      return super.dispatchSetShuffleModeEnabled(player, shuffleModeEnabled)
+    }
+
+    fun dispatchSetShuffleModeEnabled(player: Player?, shuffleModeEnabled: Boolean, seed: Long): Boolean {
+      Log.v(LOG_TAG, "setShuffleMode($shuffleModeEnabled, $seed, (dataSourceSize=${mQueueDataSource.size}))")
+
+      // Use a new ShuffleOrder with supplied seed
+      mShuffleSeed = seed
+      mQueueDataSource.setShuffleOrder(ShuffleOrder.DefaultShuffleOrder(mQueueDataSource.size, mShuffleSeed))
+
+      return super.dispatchSetShuffleModeEnabled(player, shuffleModeEnabled)
+    }
   }
 
   //endregion
@@ -178,6 +199,7 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
         Log.v(LOG_TAG, "onShuffleEnabledChanged($shuffleModeEnabled)")
 
         mLastPlayed.shuffleMode = if (shuffleModeEnabled) 1 else 0
+        mLastPlayed.shuffleSeed = mShuffleSeed
         mDatabaseWorker.submit {
           PlayQueueDatabase.getInstance(context)
             .getPlayQueueDao()
@@ -305,6 +327,29 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
     }
   }
 
+  private val mSetShuffleModeActionProvider = object : MediaSessionConnector.CustomActionProvider {
+    override fun getCustomAction(player: Player?) = PlaybackStateCompat.CustomAction
+      .Builder(ACTION_SET_SHUFFLE_MODE, "Set Shuffle mode.", -1)
+      .build()
+
+    override fun onCustomAction(
+      player: Player?,
+      controlDispatcher: ControlDispatcher?,
+      action: String?,
+      extras: Bundle?
+    ) {
+      val shuffleMode = extras?.getInt(EXTRA_SHUFFLE_MODE)
+      val shuffleSeed = extras?.getLong(EXTRA_SHUFFLE_SEED)
+
+      mPlaybackController.dispatchSetShuffleModeEnabled(
+        player,
+        shuffleMode != PlaybackStateCompat.SHUFFLE_MODE_NONE,
+        shuffleSeed ?: Random.nextLong()
+      )
+    }
+
+  }
+
   //endregion
 
   //region -- METADATA PROVIDER --
@@ -342,10 +387,12 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
 
   //region -- QUEUE EDITOR --
 
+  private var mShuffleSeed = Random.nextLong()
+
   private val mQueueDataSource = ConcatenatingMediaSource(
     false,
     true,
-    ShuffleOrder.DefaultShuffleOrder(0)
+    ShuffleOrder.DefaultShuffleOrder(0, mShuffleSeed)
   )
 
   private val mOnQueueChangedCallback: BulkTimelineQueueEditor.OnQueueChangedCallback =
@@ -353,6 +400,15 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
       override fun onItemAdded(position: Int, description: MediaDescriptionCompat) {
         Log.v(LOG_TAG, "onItemAdded($position, $description) called from ${Thread.currentThread()}")
 
+        // Reset Shuffle Order
+        mQueueDataSource.setShuffleOrder(
+          ShuffleOrder.DefaultShuffleOrder(
+            mQueueDataSource.size,
+            mShuffleSeed
+          )
+        )
+
+        // Prepare player if needed
         mMainHandler.post {
           val playerState = mPlayer.playbackState
           if (playerState == Player.STATE_IDLE || playerState == Player.STATE_ENDED) {
@@ -360,6 +416,7 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
           }
         }
 
+        // Save queue to Database
         mDatabaseWorker.submit {
           PlayQueueDatabase.getInstance(context)
             .getPlayQueueDao()
@@ -373,12 +430,21 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
           "onItemsAdded($position, [${descriptions.size} items]) called from ${Thread.currentThread()}"
         )
 
-        // After all the other songs were added to the queue, onItemMoved the first song to it's proper position.
+        // After all the other songs were added to the queue, move the first song to it's proper position.
         if (mDesiredQueuePosition in 0..mQueueDataSource.size) {
           mQueueEditor.onMoveQueueItem(mPlayer, 0, mDesiredQueuePosition)
           mDesiredQueuePosition = -1
         }
 
+        // Reset Shuffle Order
+        mQueueDataSource.setShuffleOrder(
+          ShuffleOrder.DefaultShuffleOrder(
+            mQueueDataSource.size,
+            mShuffleSeed
+          )
+        )
+
+        // Prepare player if needed
         mMainHandler.post {
           val playerState = mPlayer.playbackState
           if (playerState == Player.STATE_IDLE || playerState == Player.STATE_ENDED) {
@@ -386,6 +452,7 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
           }
         }
 
+        // Save queue to Database
         mDatabaseWorker.submit {
           val queue = descriptions.mapIndexed { index, description ->
             PlayQueueEntry(position + index, description)
@@ -502,7 +569,11 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
       setPlayer(mPlayer)
       setMediaMetadataProvider(mMetadataProvider)
       setPlaybackPreparer(mPlaybackPreparer)
-      setCustomActionProviders(mUpdaterActionProvider, mPrepareFromDescriptionActionProvider)
+      setCustomActionProviders(
+        mUpdaterActionProvider,
+        mPrepareFromDescriptionActionProvider,
+        mSetShuffleModeActionProvider
+      )
       setControlDispatcher(mPlaybackController)
       setQueueNavigator(mQueueNavigator)
       setQueueEditor(mQueueEditor)
@@ -539,6 +610,10 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
     const val ARGUMENT_DESCRIPTION = "ARGUMENT_DESCRIPTION"
 
     const val EXTRA_DESIRED_QUEUE_POSITION = "EXTRA_DESIRED_QUEUE_POSITION"
+
+    const val ACTION_SET_SHUFFLE_MODE = "ACTION_SET_SHUFFLE_MODE"
+    const val EXTRA_SHUFFLE_MODE = "EXTRA_SHUFFLE_MODE"
+    const val EXTRA_SHUFFLE_SEED = "EXTRA_SHUFFLE_SEED"
   }
 
 }
