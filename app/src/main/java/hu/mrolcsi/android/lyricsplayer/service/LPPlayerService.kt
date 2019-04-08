@@ -1,9 +1,11 @@
 package hu.mrolcsi.android.lyricsplayer.service
 
+import android.Manifest
 import android.app.Notification
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.os.AsyncTask
 import android.support.v4.media.MediaMetadataCompat
@@ -12,6 +14,7 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import androidx.core.app.TaskStackBuilder
+import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.media.session.MediaButtonReceiver
 import com.google.android.exoplayer2.Player
@@ -141,39 +144,47 @@ class LPPlayerService : LPBrowserService() {
         }
       })
 
-      AsyncTask.execute {
-        // Get last played queue from the database
-        val queue = PlayQueueDatabase.getInstance(applicationContext)
-          .getPlayQueueDao()
-          .getQueue()
-          .map { it.createDescription() }
-
-        Log.d(LOG_TAG, "Loaded queue from database: $queue")
-
-        if (queue.isNotEmpty()) {
-          // Get last played positions from the database
-          mLastPlayed = PlayQueueDatabase.getInstance(applicationContext)
+      // Check permissions before proceeding
+      if (ContextCompat.checkSelfPermission(
+          applicationContext,
+          Manifest.permission.READ_EXTERNAL_STORAGE
+        ) == PackageManager.PERMISSION_GRANTED
+      ) {
+        AsyncTask.execute {
+          // Get last played queue from the database
+          val queue = PlayQueueDatabase.getInstance(applicationContext)
             .getPlayQueueDao()
-            .getLastPlayed()
+            .getQueue()
+            .map { it.createDescription() }
 
-          mLastPlayed?.let { lastPlayed ->
-            // Load last played songs (starting with last played position)
-            val queuePosition = if (lastPlayed.queuePosition in 0 until queue.size) lastPlayed.queuePosition else 0
-            controller.transportControls.prepareFromDescription(
-              queue[queuePosition],
-              bundleOf(ExoPlayerHolder.EXTRA_DESIRED_QUEUE_POSITION to queuePosition)
-            )
-            queue.filterIndexed { index, _ ->
-              index != queuePosition
-            }.also {
-              controller.addQueueItems(it)
+          Log.d(LOG_TAG, "Loaded queue from database: $queue")
+
+          if (queue.isNotEmpty()) {
+            // Get last played positions from the database
+            mLastPlayed = PlayQueueDatabase.getInstance(applicationContext)
+              .getPlayQueueDao()
+              .getLastPlayed()
+
+            mLastPlayed?.let { lastPlayed ->
+              // Load last played songs (starting with last played position)
+              val queuePosition = if (lastPlayed.queuePosition in 0 until queue.size) lastPlayed.queuePosition else 0
+              controller.transportControls.prepareFromDescription(
+                queue[queuePosition],
+                bundleOf(ExoPlayerHolder.EXTRA_DESIRED_QUEUE_POSITION to queuePosition)
+              )
+              queue.filterIndexed { index, _ ->
+                index != queuePosition
+              }.also {
+                controller.addQueueItems(it)
+              }
+
+              controller.transportControls.setRepeatMode(lastPlayed.repeatMode)
+              controller.transportControls.setShuffleMode(lastPlayed.shuffleMode)
             }
-
-            controller.transportControls.setRepeatMode(lastPlayed.repeatMode)
-            controller.transportControls.setShuffleMode(lastPlayed.shuffleMode)
           }
         }
       }
+
     }
   }
 
