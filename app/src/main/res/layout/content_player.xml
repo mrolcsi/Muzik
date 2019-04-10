@@ -25,10 +25,12 @@
     android:id="@+id/rvQueue"
     android:layout_width="0dp"
     android:layout_height="0dp"
+    android:alpha="0.0"
     app:layout_constraintBottom_toTopOf="@+id/sbSongProgress"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent"
+    tools:alpha="1.0"
     tools:listitem="@layout/list_item_queue"/>
 
   <!-- Make sure Toolbar is above the Cover Art -->

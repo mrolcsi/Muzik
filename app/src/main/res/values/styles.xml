@@ -25,6 +25,16 @@
     <item name="colorPrimaryDark">@color/primaryDarkColor</item>
   </style>
 
+  <style name="FluxTheme.Launcher">
+    <item name="android:windowBackground">@drawable/launch_screen</item>
+    <item name="windowActionBar">false</item>
+    <item name="android:windowActionBar">false</item>
+    <item name="windowNoTitle">true</item>
+    <item name="android:windowNoTitle">true</item>
+    <item name="android:navigationBarColor">@android:color/transparent</item>
+    <item name="android:statusBarColor">@android:color/transparent</item>
+  </style>
+
   <style name="FluxTheme.Library">
     <item name="actionBarStyle">@style/ActionBarStyle</item>
 
@@ -39,6 +49,9 @@
 
     <item name="metaButtonBarButtonStyle">?android:attr/buttonBarButtonStyle</item>
     <item name="metaButtonBarStyle">?android:attr/buttonBarStyle</item>
+
+    <item name="android:windowEnterTransition">@transition/slide_bottom</item>
+    <item name="android:windowExitTransition">@transition/slide_bottom</item>
   </style>
 
   <!-- Visible ActionBar -->
@@ -49,16 +62,6 @@
 
     <item name="android:elevation">@dimen/action_bar_elevation</item>
     <item name="elevation">@dimen/action_bar_elevation</item>
-  </style>
-
-  <style name="FluxTheme.Launcher">
-    <item name="android:windowBackground">@drawable/launch_screen</item>
-    <item name="windowActionBar">false</item>
-    <item name="android:windowActionBar">false</item>
-    <item name="windowNoTitle">true</item>
-    <item name="android:windowNoTitle">true</item>
-    <item name="android:navigationBarColor">@android:color/transparent</item>
-    <item name="android:statusBarColor">@android:color/transparent</item>
   </style>
 
 </resources>

@@ -222,11 +222,6 @@ class LibraryActivity : AppCompatActivity() {
   private fun applyTheme(theme: Theme) {
     Log.d(LOG_TAG, "Applying theme...")
 
-    // Status Bar Icons
-    applyColorToStatusBarIcons(theme.primaryBackgroundColor)
-    // Navigation Bar Icons
-    applyColorToNavigationBarIcons(theme.primaryBackgroundColor)
-
     val previousTheme = ThemeManager.getInstance(this).previousTheme
 
     ValueAnimator.ofArgb(
@@ -236,6 +231,11 @@ class LibraryActivity : AppCompatActivity() {
       duration = Theme.PREFERRED_ANIMATION_DURATION
       addUpdateListener {
         val color = it.animatedValue as Int
+
+        // Status Bar Icons
+        applyColorToStatusBarIcons(color)
+        // Navigation Bar Icons
+        applyColorToNavigationBarIcons(color)
 
         // Status Bar
         window?.statusBarColor = color

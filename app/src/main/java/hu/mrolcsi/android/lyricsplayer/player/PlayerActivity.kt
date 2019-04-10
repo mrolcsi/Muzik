@@ -98,6 +98,13 @@ class PlayerActivity : AppCompatActivity() {
       resource: Drawable?, model: Any?, target: Target<Drawable>?, dataSource: DataSource?, isFirstResource: Boolean
     ): Boolean {
       supportStartPostponedEnterTransition()
+      if (rvQueue.alpha == 0.0f) {
+        ViewCompat.animate(rvQueue)
+          .alpha(1f)
+          .setStartDelay(Theme.PREFERRED_ANIMATION_DURATION)
+          .setDuration(Theme.PREFERRED_ANIMATION_DURATION)
+          .start()
+      }
       return false
     }
 
