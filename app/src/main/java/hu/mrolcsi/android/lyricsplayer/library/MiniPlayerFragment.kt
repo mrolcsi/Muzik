@@ -23,6 +23,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import hu.mrolcsi.android.lyricsplayer.GlideApp
 import hu.mrolcsi.android.lyricsplayer.R
+import hu.mrolcsi.android.lyricsplayer.common.OnSwipeTouchListener
 import hu.mrolcsi.android.lyricsplayer.extensions.media.albumArt
 import hu.mrolcsi.android.lyricsplayer.extensions.media.artist
 import hu.mrolcsi.android.lyricsplayer.extensions.media.duration
@@ -93,7 +94,8 @@ class MiniPlayerFragment : Fragment() {
   }
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-    view.setOnClickListener {
+
+    fun openPlayer() {
       // Shared Element Transition
       val options = ActivityOptionsCompat.makeSceneTransitionAnimation(
         requireActivity(),
@@ -107,6 +109,14 @@ class MiniPlayerFragment : Fragment() {
       // when opening Activity through NavController.navigate(destination)
     }
 
+    view.setOnClickListener {
+      openPlayer()
+    }
+    view.setOnTouchListener(object : OnSwipeTouchListener(requireContext()) {
+      override fun onSwipeDown() {
+        openPlayer()
+      }
+    })
   }
 
   override fun onStop() {

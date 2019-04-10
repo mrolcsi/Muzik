@@ -13,8 +13,10 @@ import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
+import android.view.GestureDetector
 import android.view.Menu
 import android.view.MenuItem
+import android.view.MotionEvent
 import android.view.View
 import android.widget.SeekBar
 import android.widget.Toast
@@ -113,6 +115,30 @@ class PlayerActivity : AppCompatActivity() {
     ): Boolean {
       return false
     }
+  }
+
+  // Gesture Detection
+  private val mGestureDetector by lazy {
+    GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
+
+      private val SWIPE_THRESHOLD = 100
+      private val SWIPE_VELOCITY_THRESHOLD = 100
+
+      override fun onFling(e1: MotionEvent, e2: MotionEvent, velocityX: Float, velocityY: Float): Boolean {
+        val diffY = e2.y - e1.y
+        val diffX = e2.x - e1.x
+        if (Math.abs(diffX) < Math.abs(diffY)) {
+          if (Math.abs(diffY) > SWIPE_THRESHOLD && Math.abs(velocityY) > SWIPE_VELOCITY_THRESHOLD) {
+            if (diffY > 0) {
+              // onSwipeDown
+              onBackPressed()
+              return true
+            }
+          }
+        }
+        return false
+      }
+    })
   }
 
   //region LIFECYCLE
@@ -241,6 +267,12 @@ class PlayerActivity : AppCompatActivity() {
       return
     }
 
+    // Fade out queue
+    ViewCompat.animate(rvQueue)
+      .alpha(0f)
+      .setDuration(Theme.PREFERRED_ANIMATION_DURATION)
+      .start()
+
     // Respond to the action bar's Up/Home button
     val upIntent: Intent? = NavUtils.getParentActivityIntent(this)
 
@@ -352,6 +384,10 @@ class PlayerActivity : AppCompatActivity() {
         }
       }
     })
+  }
+
+  override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
+    return mGestureDetector.onTouchEvent(ev) || super.dispatchTouchEvent(ev)
   }
 
   private fun setupTransportControls(controller: MediaControllerCompat) {
