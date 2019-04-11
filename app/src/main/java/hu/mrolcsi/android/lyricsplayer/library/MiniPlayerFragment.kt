@@ -21,9 +21,9 @@ import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import hu.mrolcsi.android.lyricsplayer.GlideApp
 import hu.mrolcsi.android.lyricsplayer.R
 import hu.mrolcsi.android.lyricsplayer.common.OnSwipeTouchListener
+import hu.mrolcsi.android.lyricsplayer.common.glide.GlideApp
 import hu.mrolcsi.android.lyricsplayer.extensions.media.albumArt
 import hu.mrolcsi.android.lyricsplayer.extensions.media.artist
 import hu.mrolcsi.android.lyricsplayer.extensions.media.duration

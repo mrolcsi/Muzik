@@ -1,4 +1,4 @@
-package hu.mrolcsi.android.lyricsplayer
+package hu.mrolcsi.android.lyricsplayer.common.glide
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -11,6 +11,7 @@ import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions
 import com.bumptech.glide.module.AppGlideModule
 import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.transition.DrawableCrossFadeFactory
+import hu.mrolcsi.android.lyricsplayer.R
 import hu.mrolcsi.android.lyricsplayer.theme.Theme
 
 

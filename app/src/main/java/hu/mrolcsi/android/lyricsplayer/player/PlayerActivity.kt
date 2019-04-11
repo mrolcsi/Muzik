@@ -40,8 +40,8 @@ import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
-import hu.mrolcsi.android.lyricsplayer.GlideApp
 import hu.mrolcsi.android.lyricsplayer.R
+import hu.mrolcsi.android.lyricsplayer.common.glide.GlideApp
 import hu.mrolcsi.android.lyricsplayer.common.pager.PagerSnapHelperVerbose
 import hu.mrolcsi.android.lyricsplayer.common.pager.RVPageScrollState
 import hu.mrolcsi.android.lyricsplayer.common.pager.RVPagerSnapHelperListenable
@@ -200,13 +200,12 @@ class PlayerActivity : AppCompatActivity() {
                 ")"
           )
           if (backgroundColor != it.primaryBackgroundColor) {
-            val visiblePosition = if (mQueueAdapter.realItemCount == 0) {
-              -1
-            } else {
-              mSnapHelper.findSnapPosition(rvQueue.layoutManager) % mQueueAdapter.realItemCount
-            }
+//            val visiblePosition = if (mQueueAdapter.realItemCount == 0) -1
+//            else mSnapHelper.findSnapPosition(rvQueue.layoutManager) //% mQueueAdapter.realItemCount
+            val visiblePosition = mSnapHelper.findSnapPosition(rvQueue.layoutManager)
+
             val activeId = mediaControllerCompat?.playbackState?.activeQueueItemId ?: -1
-            val activePosition = mQueueAdapter.getItemPositionById(activeId)
+            val activePosition = mQueueAdapter.getItemPositionById(activeId/*, visiblePosition*/)
 
             if (Math.abs(visiblePosition - activePosition) > 1) {
               applyThemeAnimated(it)
@@ -374,11 +373,11 @@ class PlayerActivity : AppCompatActivity() {
 
         if (state == RVPageScrollState.IDLE) {
           // check if item position is different from the now playing position
-          val queuePosition = mediaControllerCompat?.playbackState?.activeQueueItemId
+          val queueId = mediaControllerCompat?.playbackState?.activeQueueItemId
           val pagerPosition = mSnapHelper.findSnapPosition(rvQueue.layoutManager)
           val itemId = mQueueAdapter.getItemId(pagerPosition)
 
-          if (queuePosition != itemId) {
+          if (queueId != itemId) {
             mediaControllerCompat?.transportControls?.skipToQueueItem(itemId)
           }
         }
@@ -560,11 +559,9 @@ class PlayerActivity : AppCompatActivity() {
 
   private fun updatePager() {
     // Scroll pager to current item
-    val visiblePosition = if (mQueueAdapter.realItemCount == 0) {
-      -1
-    } else {
-      mSnapHelper.findSnapPosition(rvQueue.layoutManager) % mQueueAdapter.realItemCount
-    }
+//    val visiblePosition = if (mQueueAdapter.realItemCount == 0) -1
+//    else mSnapHelper.findSnapPosition(rvQueue.layoutManager) % mQueueAdapter.realItemCount
+    val visiblePosition = mSnapHelper.findSnapPosition(rvQueue.layoutManager)
 
     // Skip if Pager is not ready yet
     if (visiblePosition < 0) {
@@ -575,27 +572,27 @@ class PlayerActivity : AppCompatActivity() {
     val visibleId = mQueueAdapter.getItemId(visiblePosition)
 
     // If Metadata has changed, then PlaybackState should have changed as well.
-    val activeId = mediaControllerCompat?.playbackState?.activeQueueItemId ?: -1
-    val activePosition = mQueueAdapter.getItemPositionById(activeId)
+    val queueId = mediaControllerCompat?.playbackState?.activeQueueItemId ?: -1
+    val queuePosition = mQueueAdapter.getItemPositionById(queueId/*, visiblePosition*/)
 
     Log.d(
       LOG_TAG,
       "updatePager(" +
           "visiblePosition=$visiblePosition, " +
           "visibleId=$visibleId, " +
-          "activeId=$activeId, " +
-          "activePosition=$activePosition) " +
+          "queuePosition=$queuePosition, " +
+          "queueId=$queueId) " +
           "ScrollState=$mScrollState"
     )
 
     if (mScrollState == RVPageScrollState.IDLE) {
-      if (activePosition > RecyclerView.NO_POSITION && visibleId != activeId) {
-        if (Math.abs(activePosition - visiblePosition) > 1) {
-          rvQueue.scrollToPosition(activePosition)
+      if (queuePosition > RecyclerView.NO_POSITION && visibleId != queueId) {
+        if (Math.abs(queuePosition - visiblePosition) > 1) {
+          rvQueue.scrollToPosition(queuePosition)
         } else {
-          rvQueue.smoothScrollToPosition(activePosition)
+          rvQueue.smoothScrollToPosition(queuePosition)
         }
-      } else if (activePosition == RecyclerView.NO_POSITION) {
+      } else if (queuePosition == RecyclerView.NO_POSITION) {
         // Try again after the adapter settles?
         Log.v(LOG_TAG, "updatePager() DELAY CHANGE")
         rvQueue.postDelayed(300) { updatePager() }

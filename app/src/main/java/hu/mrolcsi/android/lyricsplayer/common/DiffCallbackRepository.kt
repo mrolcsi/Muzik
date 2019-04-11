@@ -28,14 +28,14 @@ object DiffCallbackRepository {
       oldItem: MediaSessionCompat.QueueItem,
       newItem: MediaSessionCompat.QueueItem
     ): Boolean {
-      return oldItem.description.mediaId == newItem.description.mediaId
+      return oldItem.queueId == newItem.queueId
     }
 
     override fun areContentsTheSame(
       oldItem: MediaSessionCompat.QueueItem,
       newItem: MediaSessionCompat.QueueItem
     ): Boolean {
-      return areItemsTheSame(oldItem, newItem)
+      return oldItem.description.mediaId == newItem.description.mediaId
     }
 
   }
