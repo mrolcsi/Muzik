@@ -2,7 +2,6 @@ package hu.mrolcsi.android.lyricsplayer.library
 
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.os.Bundle
@@ -13,14 +12,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
-import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
-import androidx.core.util.Pair
 import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.navigation.findNavController
+import androidx.navigation.fragment.FragmentNavigatorExtras
 import hu.mrolcsi.android.lyricsplayer.R
 import hu.mrolcsi.android.lyricsplayer.common.OnSwipeTouchListener
 import hu.mrolcsi.android.lyricsplayer.common.glide.GlideApp
@@ -34,7 +33,6 @@ import hu.mrolcsi.android.lyricsplayer.extensions.media.startProgressUpdater
 import hu.mrolcsi.android.lyricsplayer.extensions.media.stopProgressUpdater
 import hu.mrolcsi.android.lyricsplayer.extensions.media.title
 import hu.mrolcsi.android.lyricsplayer.extensions.mediaControllerCompat
-import hu.mrolcsi.android.lyricsplayer.player.PlayerActivity
 import hu.mrolcsi.android.lyricsplayer.player.PlayerViewModel
 import hu.mrolcsi.android.lyricsplayer.theme.Theme
 import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
@@ -64,27 +62,27 @@ class MiniPlayerFragment : Fragment() {
     )
   }
 
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
+  override fun onActivityCreated(savedInstanceState: Bundle?) {
+    super.onActivityCreated(savedInstanceState)
 
-    activity?.let { activity ->
-      mPlayerModel = ViewModelProviders.of(activity).get(PlayerViewModel::class.java).apply {
+    activity?.run {
+      mPlayerModel = ViewModelProviders.of(this).get(PlayerViewModel::class.java).apply {
 
-        mediaController.observe(this@MiniPlayerFragment, Observer { controller ->
+        mediaController.observe(viewLifecycleOwner, Observer { controller ->
           controller?.let { setupControls(controller) }
         })
 
-        currentPlaybackState.observe(this@MiniPlayerFragment, Observer { state ->
+        currentPlaybackState.observe(viewLifecycleOwner, Observer { state ->
           state?.let { updateControls(state) }
         })
 
-        currentMediaMetadata.observe(this@MiniPlayerFragment, Observer { metadata ->
+        currentMediaMetadata.observe(viewLifecycleOwner, Observer { metadata ->
           metadata?.let { updateMetadata(metadata) }
         })
       }
     }
 
-    ThemeManager.getInstance(requireContext()).currentTheme.observe(this, Observer {
+    ThemeManager.getInstance(requireContext()).currentTheme.observe(viewLifecycleOwner, Observer {
       applyTheme(it)
     })
   }
@@ -96,17 +94,15 @@ class MiniPlayerFragment : Fragment() {
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 
     fun openPlayer() {
-      // Shared Element Transition
-      val options = ActivityOptionsCompat.makeSceneTransitionAnimation(
-        requireActivity(),
-        Pair.create(imgCoverArt, ViewCompat.getTransitionName(imgCoverArt))
+      val extras = FragmentNavigatorExtras(
+        imgCoverArt to ViewCompat.getTransitionName(imgCoverArt)!!
       )
-      startActivity(
-        Intent(requireContext(), PlayerActivity::class.java),
-        options.toBundle()
+      activity?.findNavController(R.id.main_nav_host)?.navigate(
+        R.id.action_library_to_player,
+        null,
+        null,
+        extras
       )
-      // Navigation Controller loses current destination
-      // when opening Activity through NavController.navigate(destination)
     }
 
     view.setOnClickListener {

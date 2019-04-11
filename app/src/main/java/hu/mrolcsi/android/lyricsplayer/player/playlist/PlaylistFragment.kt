@@ -38,15 +38,15 @@ class PlaylistFragment : Fragment() {
       controller.transportControls.play()
     })
 
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
+  override fun onActivityCreated(savedInstanceState: Bundle?) {
+    super.onActivityCreated(savedInstanceState)
 
-    activity?.let { activity ->
-      mPlayerModel = ViewModelProviders.of(activity).get(PlayerViewModel::class.java).apply {
+    activity?.run {
+      mPlayerModel = ViewModelProviders.of(this).get(PlayerViewModel::class.java).apply {
         Log.d(LOG_TAG, "Got PlayerViewModel: $this")
 
 
-        currentPlaybackState.observe(this@PlaylistFragment, object : Observer<PlaybackStateCompat?> {
+        currentPlaybackState.observe(viewLifecycleOwner, object : Observer<PlaybackStateCompat?> {
 
           private var previousState: PlaybackStateCompat? = null
 
@@ -60,7 +60,7 @@ class PlaylistFragment : Fragment() {
           }
         })
 
-        currentMediaMetadata.observe(this@PlaylistFragment, Observer { metadata ->
+        currentMediaMetadata.observe(viewLifecycleOwner, Observer { metadata ->
           metadata?.let {
             // Update active queueId in adapter (notifyDataSetChanged will do the rest)
             val controller = MediaControllerCompat.getMediaController(requireActivity())
@@ -86,7 +86,7 @@ class PlaylistFragment : Fragment() {
         mPlaylistAdapter.submitList(it)
       })
 
-    ThemeManager.getInstance(requireContext()).currentTheme.observe(this, object : Observer<Theme> {
+    ThemeManager.getInstance(requireContext()).currentTheme.observe(viewLifecycleOwner, object : Observer<Theme> {
 
       private var initialLoad = true
 

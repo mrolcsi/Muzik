@@ -2,7 +2,6 @@ package hu.mrolcsi.android.lyricsplayer.player
 
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.drawable.ColorDrawable
@@ -14,28 +13,27 @@ import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import android.view.GestureDetector
-import android.view.Menu
-import android.view.MenuItem
+import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup
 import android.widget.SeekBar
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityOptionsCompat
-import androidx.core.app.NavUtils
-import androidx.core.app.TaskStackBuilder
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
-import androidx.core.util.Pair
 import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.doOnNextLayout
 import androidx.core.view.forEach
 import androidx.core.view.postDelayed
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.transition.Transition
+import androidx.transition.TransitionInflater
+import androidx.transition.TransitionListenerAdapter
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
@@ -56,37 +54,36 @@ import hu.mrolcsi.android.lyricsplayer.extensions.media.isSkipToNextEnabled
 import hu.mrolcsi.android.lyricsplayer.extensions.media.isSkipToPreviousEnabled
 import hu.mrolcsi.android.lyricsplayer.extensions.media.startProgressUpdater
 import hu.mrolcsi.android.lyricsplayer.extensions.media.stopProgressUpdater
-import hu.mrolcsi.android.lyricsplayer.extensions.mediaControllerCompat
 import hu.mrolcsi.android.lyricsplayer.extensions.secondsToTimeStamp
 import hu.mrolcsi.android.lyricsplayer.extensions.toColorHex
 import hu.mrolcsi.android.lyricsplayer.theme.Theme
 import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
-import kotlinx.android.synthetic.main.activity_player.*
 import kotlinx.android.synthetic.main.content_player.*
+import kotlinx.android.synthetic.main.fragment_player.*
 
-class PlayerActivity : AppCompatActivity() {
+class PlayerFragment : Fragment() {
 
   private lateinit var mPlayerModel: PlayerViewModel
 
   private var mUserIsSeeking = false
 
   // Prepare drawables (separate for each button)
-  private val mPreviousBackground by lazy { getDrawable(R.drawable.media_button_background) }
-  private val mPlayPauseBackground by lazy { getDrawable(R.drawable.media_button_background) }
-  private val mNextBackground by lazy { getDrawable(R.drawable.media_button_background) }
+  private val mPreviousBackground by lazy { context?.getDrawable(R.drawable.media_button_background) }
+  private val mPlayPauseBackground by lazy { context?.getDrawable(R.drawable.media_button_background) }
+  private val mNextBackground by lazy { context?.getDrawable(R.drawable.media_button_background) }
 
   private val mRepeatNone by lazy {
-    getDrawable(R.drawable.ic_repeat_all)
+    context?.getDrawable(R.drawable.ic_repeat_all)
       ?.constantState
       ?.newDrawable(resources)
       ?.mutate()
       ?.apply { alpha = Theme.DISABLED_OPACITY }
   }
   private val mRepeatOne by lazy {
-    getDrawable(R.drawable.ic_repeat_one)
+    context?.getDrawable(R.drawable.ic_repeat_one)
   }
   private val mRepeatAll by lazy {
-    getDrawable(R.drawable.ic_repeat_all)
+    context?.getDrawable(R.drawable.ic_repeat_all)
   }
 
   private val mQueueAdapter = QueueAdapter().apply {
@@ -99,27 +96,21 @@ class PlayerActivity : AppCompatActivity() {
     override fun onResourceReady(
       resource: Drawable?, model: Any?, target: Target<Drawable>?, dataSource: DataSource?, isFirstResource: Boolean
     ): Boolean {
-      supportStartPostponedEnterTransition()
-      if (rvQueue.alpha == 0.0f) {
-        ViewCompat.animate(rvQueue)
-          .alpha(1f)
-          .setStartDelay(Theme.PREFERRED_ANIMATION_DURATION)
-          .setDuration(Theme.PREFERRED_ANIMATION_DURATION)
-          .start()
-      }
+      startPostponedEnterTransition()
       return false
     }
 
     override fun onLoadFailed(
       e: GlideException?, model: Any?, target: Target<Drawable>?, isFirstResource: Boolean
     ): Boolean {
+      startPostponedEnterTransition()
       return false
     }
   }
 
   // Gesture Detection
   private val mGestureDetector by lazy {
-    GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
+    GestureDetector(requireContext(), object : GestureDetector.SimpleOnGestureListener() {
 
       private val SWIPE_THRESHOLD = 100
       private val SWIPE_VELOCITY_THRESHOLD = 100
@@ -146,120 +137,157 @@ class PlayerActivity : AppCompatActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
-    setContentView(R.layout.activity_player)
-    setupToolbar()
-    setupPager()
+    postponeEnterTransition()
 
-    supportPostponeEnterTransition()
+    enterTransition = TransitionInflater
+      .from(requireContext())
+      .inflateTransition(R.transition.slide_bottom)
+      .setDuration(Theme.PREFERRED_ANIMATION_DURATION)
+      .excludeTarget(imgCoverArt, true)
+      .addListener(object : TransitionListenerAdapter() {
+        override fun onTransitionEnd(transition: Transition) {
+          Log.v(LOG_TAG, "enterTransition.onTransitionEnd()")
 
-    // Observe changes through ViewModel
-    mPlayerModel = ViewModelProviders.of(this).get(PlayerViewModel::class.java).apply {
-      Log.d(LOG_TAG, "Got PlayerViewModel: $this")
+          ViewCompat.animate(rvQueue)
+            .alpha(1f)
+            .setDuration(Theme.PREFERRED_ANIMATION_DURATION)
+            .start()
 
-      mediaController.observe(this@PlayerActivity, Observer { controller ->
-        controller?.let {
-          // Apply MediaController to this Activity
-          mediaControllerCompat = controller
-
-          // Finish building the UI
-          setupTransportControls(controller)
-        }
-      })
-      currentMediaMetadata.observe(this@PlayerActivity, Observer { metadata ->
-        metadata?.let {
-          updateSongData(metadata)
-          updatePager()
-        }
-      })
-      currentPlaybackState.observe(this@PlayerActivity, Observer { state ->
-        state?.let {
-          updateControls(state)
-        }
-      })
-      currentQueue.observe(this@PlayerActivity, Observer {
-        // Update Queue
-        mQueueAdapter.submitList(it)
-      })
-    }
-
-    ThemeManager.getInstance(this).currentTheme.observe(this, object : Observer<Theme> {
-
-      private var initialLoad = true
-
-      override fun onChanged(it: Theme) {
-        if (initialLoad) {
-          applyThemeStatic(it)
-          initialLoad = false
-        } else {
-          val backgroundColor = (content_player.background as ColorDrawable).color
-          Log.v(
-            LOG_TAG,
-            "onThemeChanged(" +
-                "backgroundColor=${backgroundColor.toColorHex()}, " +
-                "themeColor=${it.primaryBackgroundColor.toColorHex()}" +
-                ")"
-          )
-          if (backgroundColor != it.primaryBackgroundColor) {
-//            val visiblePosition = if (mQueueAdapter.realItemCount == 0) -1
-//            else mSnapHelper.findSnapPosition(rvQueue.layoutManager) //% mQueueAdapter.realItemCount
-            val visiblePosition = mSnapHelper.findSnapPosition(rvQueue.layoutManager)
-
-            val activeId = mediaControllerCompat?.playbackState?.activeQueueItemId ?: -1
-            val activePosition = mQueueAdapter.getItemPositionById(activeId/*, visiblePosition*/)
-
-            if (Math.abs(visiblePosition - activePosition) > 1) {
-              applyThemeAnimated(it)
-            } else {
-              applyThemeStatic(it)
+          context?.let {
+            ThemeManager.getInstance(it).currentTheme.value?.let { theme ->
+              activity?.window?.statusBarColor = theme.statusBarColor
+              activity?.applyColorToStatusBarIcons(theme.statusBarColor)
             }
           }
         }
+      })
+
+    returnTransition = TransitionInflater
+      .from(requireContext())
+      .inflateTransition(R.transition.slide_bottom)
+      .setDuration(Theme.PREFERRED_ANIMATION_DURATION)
+      .excludeTarget(imgCoverArt, true)
+      .addListener(object : TransitionListenerAdapter() {
+        override fun onTransitionStart(transition: Transition) {
+          Log.v(LOG_TAG, "returnTransition.onTransitionStart()")
+
+          ViewCompat.animate(rvQueue)
+            .alpha(0f)
+            .setDuration(Theme.PREFERRED_ANIMATION_DURATION)
+            .start()
+
+          context?.let {
+            ThemeManager.getInstance(requireContext()).currentTheme.value?.let { theme ->
+              activity?.window?.statusBarColor = theme.primaryBackgroundColor
+              activity?.applyColorToStatusBarIcons(theme.primaryBackgroundColor)
+            }
+          }
+        }
+      })
+
+    sharedElementEnterTransition = TransitionInflater
+      .from(requireContext())
+      .inflateTransition(android.R.transition.move)
+      .setDuration(Theme.PREFERRED_ANIMATION_DURATION)
+
+    sharedElementReturnTransition = TransitionInflater
+      .from(requireContext())
+      .inflateTransition(android.R.transition.move)
+      .setDuration(Theme.PREFERRED_ANIMATION_DURATION)
+  }
+
+  override fun onActivityCreated(savedInstanceState: Bundle?) {
+    super.onActivityCreated(savedInstanceState)
+
+    activity?.run {
+      mPlayerModel = ViewModelProviders.of(this).get(PlayerViewModel::class.java).apply {
+        Log.d(LOG_TAG, "Got PlayerViewModel: $this")
+
+        mediaController.observe(viewLifecycleOwner, Observer { controller ->
+          controller?.let {
+            // Apply MediaController to this Activity
+            MediaControllerCompat.setMediaController(requireActivity(), it)
+
+            // Finish building the UI
+            setupTransportControls(controller)
+          }
+        })
+        currentMediaMetadata.observe(viewLifecycleOwner, Observer { metadata ->
+          metadata?.let {
+            updateSongData(metadata)
+            updatePager()
+          }
+        })
+        currentPlaybackState.observe(viewLifecycleOwner, Observer { state ->
+          state?.let {
+            updateControls(state)
+          }
+        })
+        currentQueue.observe(viewLifecycleOwner, Observer {
+          // Update Queue
+          mQueueAdapter.submitList(it)
+        })
       }
-    })
+
+      ThemeManager.getInstance(requireContext()).currentTheme.observe(viewLifecycleOwner, object : Observer<Theme> {
+
+        private var initialLoad = true
+
+        override fun onChanged(it: Theme) {
+          if (initialLoad) {
+            applyThemeStatic(it)
+            initialLoad = false
+          } else {
+            val backgroundColor = (content_player.background as ColorDrawable).color
+            Log.v(
+              LOG_TAG,
+              "onThemeChanged(" +
+                  "backgroundColor=${backgroundColor.toColorHex()}, " +
+                  "themeColor=${it.primaryBackgroundColor.toColorHex()}" +
+                  ")"
+            )
+            if (backgroundColor != it.primaryBackgroundColor) {
+//            val visiblePosition = if (mQueueAdapter.realItemCount == 0) -1
+//            else mSnapHelper.findSnapPosition(rvQueue.layoutManager) //% mQueueAdapter.realItemCount
+              val visiblePosition = mSnapHelper.findSnapPosition(rvQueue.layoutManager)
+
+              val activeId = MediaControllerCompat.getMediaController(requireActivity())
+                ?.playbackState?.activeQueueItemId ?: -1
+              val activePosition = mQueueAdapter.getItemPositionById(activeId/*, visiblePosition*/)
+
+              if (Math.abs(visiblePosition - activePosition) > 1) {
+                applyThemeAnimated(it)
+              } else {
+                applyThemeStatic(it)
+              }
+            }
+          }
+        }
+      })
+    }
   }
 
-  override fun onStart() {
-    super.onStart()
-    mPlayerModel.connect()
+  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
+    inflater.inflate(R.layout.fragment_player, container, false)
+
+  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    setupToolbar()
+    setupPager()
   }
 
-  public override fun onResume() {
+  override fun onResume() {
     super.onResume()
-    volumeControlStream = AudioManager.STREAM_MUSIC
+    activity?.volumeControlStream = AudioManager.STREAM_MUSIC
   }
 
   override fun onStop() {
     super.onStop()
-    mPlayerModel.disconnect()
 
-    mediaControllerCompat?.transportControls?.stopProgressUpdater()
+    MediaControllerCompat.getMediaController(requireActivity())?.transportControls?.stopProgressUpdater()
   }
 
-  override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-    menuInflater.inflate(R.menu.menu_player, menu)
-    ThemeManager.getInstance(this).currentTheme.value?.let { theme ->
-      menu?.forEach { item ->
-        item.icon.setColorFilter(theme.primaryForegroundColor, PorterDuff.Mode.SRC_IN)
-      }
-    }
-    return super.onCreateOptionsMenu(menu)
-  }
-
-  override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-    return when (item?.itemId) {
-      android.R.id.home -> {
-        onBackPressed()
-        true
-      }
-      R.id.menuPlaylist -> {
-        drawer_layout.openDrawer(GravityCompat.END)
-        true
-      }
-      else -> super.onOptionsItemSelected(item)
-    }
-  }
-
-  override fun onBackPressed() {
+  // TODO: handle onBackPressed!
+  fun onBackPressed() {
     // If drawer is open, just close it
     if (drawer_layout.isDrawerOpen(GravityCompat.END)) {
       drawer_layout.closeDrawer(GravityCompat.END)
@@ -271,52 +299,35 @@ class PlayerActivity : AppCompatActivity() {
       .alpha(0f)
       .setDuration(Theme.PREFERRED_ANIMATION_DURATION)
       .start()
-
-    // Respond to the action bar's Up/Home button
-    val upIntent: Intent? = NavUtils.getParentActivityIntent(this)
-
-    // Prepare options for Shared Element Transition
-    //val view = mSnapHelper.findSnapView(rvQueue.layoutManager)?.findViewById<ImageView>(R.id.imgCoverArt)
-    val options = ActivityOptionsCompat.makeSceneTransitionAnimation(
-      this,
-      Pair.create(imgCoverArt, ViewCompat.getTransitionName(imgCoverArt))
-    )
-
-    when {
-      upIntent == null -> throw IllegalStateException("No Parent Activity Intent")
-      NavUtils.shouldUpRecreateTask(this, upIntent) -> {
-        Log.d(LOG_TAG, "Navigate back creating new stack.")
-        // This activity is NOT part of this app's task, so create a new task
-        // when navigating up, with a synthesized back stack.
-        TaskStackBuilder.create(this)
-          // Add all of this activity's parents to the back stack
-          .addNextIntentWithParentStack(upIntent)
-          // Navigate up to the closest parent
-          .startActivities(options.toBundle())
-      }
-      else -> {
-        Log.d(LOG_TAG, "Navigate back directly.")
-        // TODO: Create Shared Element Transition
-        // This activity is part of this app's task, so simply
-        // navigate up to the logical parent activity.
-        finishAfterTransition()
-      }
-    }
   }
 
   //endregion
 
   private fun setupToolbar() {
-    setSupportActionBar(playerToolbar)
-    // show home button
-    supportActionBar?.setDisplayHomeAsUpEnabled(true)
-    // hide title
-    supportActionBar?.setDisplayShowTitleEnabled(false)
+    ThemeManager.getInstance(requireContext()).currentTheme.value?.let { theme ->
+      playerToolbar.menu?.forEach { item ->
+        item.icon.setColorFilter(theme.primaryForegroundColor, PorterDuff.Mode.SRC_IN)
+      }
+    }
+
+    playerToolbar.setOnMenuItemClickListener { item ->
+      when (item?.itemId) {
+        android.R.id.home -> {
+          onBackPressed()
+          true
+        }
+        R.id.menuPlaylist -> {
+          drawer_layout.openDrawer(GravityCompat.END)
+          true
+        }
+        else -> super.onOptionsItemSelected(item)
+      }
+    }
   }
 
   private fun setupPager() {
     rvQueue.run {
-      layoutManager = LinearLayoutManager(this@PlayerActivity, LinearLayoutManager.HORIZONTAL, false)
+      layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
       adapter = mQueueAdapter
       setHasFixedSize(true)
       doOnNextLayout {
@@ -361,8 +372,8 @@ class PlayerActivity : AppCompatActivity() {
                 ratio
               )
 
-              window?.statusBarColor = statusBarColor
-              applyColorToStatusBarIcons(statusBarColor)
+              activity?.window?.statusBarColor = statusBarColor
+              activity?.applyColorToStatusBarIcons(statusBarColor)
             }
           }
         }
@@ -372,22 +383,24 @@ class PlayerActivity : AppCompatActivity() {
         mScrollState = state
 
         if (state == RVPageScrollState.IDLE) {
+          val controller = MediaControllerCompat.getMediaController(requireActivity())
           // check if item position is different from the now playing position
-          val queueId = mediaControllerCompat?.playbackState?.activeQueueItemId
+          val queueId = controller.playbackState.activeQueueItemId
           val pagerPosition = mSnapHelper.findSnapPosition(rvQueue.layoutManager)
           val itemId = mQueueAdapter.getItemId(pagerPosition)
 
           if (queueId != itemId) {
-            mediaControllerCompat?.transportControls?.skipToQueueItem(itemId)
+            controller.transportControls.skipToQueueItem(itemId)
           }
         }
       }
     })
   }
 
-  override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
-    return mGestureDetector.onTouchEvent(ev) || super.dispatchTouchEvent(ev)
-  }
+  // TODO: handle swipe down gesture
+//  override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
+//    return mGestureDetector.onTouchEvent(ev) || super.dispatchTouchEvent(ev)
+//  }
 
   private fun setupTransportControls(controller: MediaControllerCompat) {
     // Enable controls
@@ -447,13 +460,13 @@ class PlayerActivity : AppCompatActivity() {
           controller.transportControls.setShuffleMode(
             PlaybackStateCompat.SHUFFLE_MODE_ALL
           )
-          Toast.makeText(this, R.string.player_shuffleEnabled, Toast.LENGTH_SHORT).show()
+          Toast.makeText(context, R.string.player_shuffleEnabled, Toast.LENGTH_SHORT).show()
         }
         else -> {
           controller.transportControls.setShuffleMode(
             PlaybackStateCompat.SHUFFLE_MODE_NONE
           )
-          Toast.makeText(this, R.string.player_shuffleDisabled, Toast.LENGTH_SHORT).show()
+          Toast.makeText(context, R.string.player_shuffleDisabled, Toast.LENGTH_SHORT).show()
         }
       }
     }
@@ -464,19 +477,19 @@ class PlayerActivity : AppCompatActivity() {
           controller.transportControls.setRepeatMode(
             PlaybackStateCompat.REPEAT_MODE_ONE
           )
-          Toast.makeText(this, R.string.player_repeatOne, Toast.LENGTH_SHORT).show()
+          Toast.makeText(context, R.string.player_repeatOne, Toast.LENGTH_SHORT).show()
         }
         PlaybackStateCompat.REPEAT_MODE_ONE -> {
           controller.transportControls.setRepeatMode(
             PlaybackStateCompat.REPEAT_MODE_ALL
           )
-          Toast.makeText(this, R.string.player_repeatAll, Toast.LENGTH_SHORT).show()
+          Toast.makeText(context, R.string.player_repeatAll, Toast.LENGTH_SHORT).show()
         }
         else -> {
           controller.transportControls.setRepeatMode(
             PlaybackStateCompat.REPEAT_MODE_NONE
           )
-          Toast.makeText(this, R.string.player_repeatDisabled, Toast.LENGTH_SHORT).show()
+          Toast.makeText(context, R.string.player_repeatDisabled, Toast.LENGTH_SHORT).show()
         }
       }
     }
@@ -524,23 +537,25 @@ class PlayerActivity : AppCompatActivity() {
     btnNext.isEnabled = playbackState.isSkipToNextEnabled
     btnNext.alpha = if (playbackState.isSkipToNextEnabled) 1f else Theme.DISABLED_ALPHA
 
+    val controller = MediaControllerCompat.getMediaController(requireActivity())
+
     when (playbackState.isPlaying) {
       true -> {
-        mediaControllerCompat?.transportControls?.startProgressUpdater()
+        controller.transportControls.startProgressUpdater()
         btnPlayPause.setImageResource(android.R.drawable.ic_media_pause)
       }
       false -> {
-        mediaControllerCompat?.transportControls?.stopProgressUpdater()
+        controller.transportControls.stopProgressUpdater()
         btnPlayPause.setImageResource(android.R.drawable.ic_media_play)
       }
     }
 
-    when (mediaControllerCompat?.shuffleMode) {
+    when (controller.shuffleMode) {
       PlaybackStateCompat.SHUFFLE_MODE_NONE -> btnShuffle.alpha = Theme.DISABLED_ALPHA
       PlaybackStateCompat.SHUFFLE_MODE_ALL -> btnShuffle.alpha = 1f
     }
 
-    when (mediaControllerCompat?.repeatMode) {
+    when (controller.repeatMode) {
       PlaybackStateCompat.REPEAT_MODE_NONE -> btnRepeat.setImageDrawable(mRepeatNone)
       PlaybackStateCompat.REPEAT_MODE_ONE -> btnRepeat.setImageDrawable(mRepeatOne)
       PlaybackStateCompat.REPEAT_MODE_ALL -> btnRepeat.setImageDrawable(mRepeatAll)
@@ -572,7 +587,7 @@ class PlayerActivity : AppCompatActivity() {
     val visibleId = mQueueAdapter.getItemId(visiblePosition)
 
     // If Metadata has changed, then PlaybackState should have changed as well.
-    val queueId = mediaControllerCompat?.playbackState?.activeQueueItemId ?: -1
+    val queueId = MediaControllerCompat.getMediaController(requireActivity()).playbackState.activeQueueItemId
     val queuePosition = mQueueAdapter.getItemPositionById(queueId/*, visiblePosition*/)
 
     Log.d(
@@ -603,9 +618,6 @@ class PlayerActivity : AppCompatActivity() {
   private fun applyThemeStatic(theme: Theme) {
     Log.i(LOG_TAG, "applyThemeStatic($theme)")
 
-    window?.statusBarColor = theme.statusBarColor
-    applyColorToStatusBarIcons(theme.statusBarColor)
-
     applyBackgroundColor(theme.primaryBackgroundColor)
     applyForegroundColor(theme.primaryForegroundColor)
   }
@@ -613,26 +625,26 @@ class PlayerActivity : AppCompatActivity() {
   private fun applyThemeAnimated(theme: Theme) {
     Log.i(LOG_TAG, "applyingThemeAnimated($theme)")
 
-    val previousTheme = ThemeManager.getInstance(this).previousTheme
+    val previousTheme = ThemeManager.getInstance(requireContext()).previousTheme
 
     // StatusBar Color
     ValueAnimator.ofArgb(
-      previousTheme?.statusBarColor ?: ContextCompat.getColor(this, R.color.backgroundColor),
+      previousTheme?.statusBarColor ?: ContextCompat.getColor(requireContext(), R.color.backgroundColor),
       theme.statusBarColor
     ).run {
       duration = Theme.PREFERRED_ANIMATION_DURATION
       addUpdateListener {
         val color = it.animatedValue as Int
 
-        window?.statusBarColor = color
-        applyColorToStatusBarIcons(color)
+        activity?.window?.statusBarColor = color
+        activity?.applyColorToStatusBarIcons(color)
       }
       start()
     }
 
     // Background Color
     ValueAnimator.ofArgb(
-      previousTheme?.primaryBackgroundColor ?: ContextCompat.getColor(this, R.color.backgroundColor),
+      previousTheme?.primaryBackgroundColor ?: ContextCompat.getColor(requireContext(), R.color.backgroundColor),
       theme.primaryBackgroundColor
     ).run {
       duration = Theme.PREFERRED_ANIMATION_DURATION
@@ -694,8 +706,8 @@ class PlayerActivity : AppCompatActivity() {
     content_player.setBackgroundColor(color)
 
     // Navigation Bar
-    window?.navigationBarColor = color
-    applyColorToNavigationBarIcons(color)
+    activity?.window?.navigationBarColor = color
+    activity?.applyColorToNavigationBarIcons(color)
 
     // Seek Progress background
     tvSeekProgress.setBackgroundColor(ColorUtils.setAlphaComponent(color, Theme.DISABLED_OPACITY))
@@ -713,6 +725,6 @@ class PlayerActivity : AppCompatActivity() {
   }
 
   companion object {
-    private const val LOG_TAG = "PlayerActivity"
+    private const val LOG_TAG = "PlayerFragment"
   }
 }

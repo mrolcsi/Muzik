@@ -58,18 +58,18 @@ class SongsFragment : Fragment() {
     }
   })
 
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
+  override fun onActivityCreated(savedInstanceState: Bundle?) {
+    super.onActivityCreated(savedInstanceState)
 
-    activity?.let {
-      mSongsModel = ViewModelProviders.of(requireActivity()).get(SongsViewModel::class.java)
-      mSongsModel.getSongs().observe(this, Observer { songs ->
+    activity?.run {
+      mSongsModel = ViewModelProviders.of(this).get(SongsViewModel::class.java)
+      mSongsModel.getSongs().observe(viewLifecycleOwner, Observer { songs ->
         mSongsAdapter.submitList(songs)
         mVisibleSongs = songs
       })
     }
 
-    ThemeManager.getInstance(requireContext()).currentTheme.observe(this, Observer {
+    ThemeManager.getInstance(requireContext()).currentTheme.observe(viewLifecycleOwner, Observer {
       // Tell adapter to reload its views
       mSongsAdapter.notifyDataSetChanged()
     })

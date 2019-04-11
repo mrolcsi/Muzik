@@ -7,7 +7,7 @@
   android:layout_width="match_parent"
   android:layout_height="match_parent"
   android:animateLayoutChanges="true"
-  tools:context=".library.LibraryActivity">
+  tools:context=".library.LibraryFragment">
 
   <androidx.appcompat.widget.Toolbar
     android:id="@+id/libraryToolbar"
@@ -15,43 +15,22 @@
     android:layout_height="?attr/actionBarSize"
     android:background="?attr/colorPrimary"
     android:elevation="@dimen/action_bar_elevation"
-    android:visibility="gone"
     app:elevation="@dimen/action_bar_elevation"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="parent"
-    tools:visibility="visible"/>
+    app:layout_constraintTop_toTopOf="parent"/>
 
-  <include
-    android:id="@+id/incPermission"
-    layout="@layout/content_permission"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:visibility="gone"
-    app:layout_constraintBottom_toTopOf="@+id/navigation_bar"
-    app:layout_constraintEnd_toEndOf="@+id/library_nav_host"
-    app:layout_constraintStart_toStartOf="@id/library_nav_host"
-    app:layout_constraintTop_toBottomOf="@+id/libraryToolbar"/>
-
-  <ImageView
-    android:id="@+id/imgLogo"
-    android:layout_width="144dp"
-    android:layout_height="144dp"
-    android:elevation="@dimen/action_bar_elevation"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="parent"
-    app:srcCompat="@drawable/ic_launcher"/>
-
-  <FrameLayout
+  <fragment
     android:id="@+id/library_nav_host"
     android:layout_width="0dp"
     android:layout_height="0dp"
+    android:name="androidx.navigation.fragment.NavHostFragment"
+    app:defaultNavHost="true"
     app:layout_constraintBottom_toTopOf="@+id/navigation_bar"
     app:layout_constraintLeft_toLeftOf="parent"
     app:layout_constraintRight_toRightOf="parent"
-    app:layout_constraintTop_toBottomOf="@+id/libraryToolbar"/>
+    app:layout_constraintTop_toBottomOf="@+id/libraryToolbar"
+    app:navGraph="@navigation/library_navigation"/>
 
   <com.google.android.material.bottomnavigation.BottomNavigationView
     android:id="@+id/navigation_bar"
@@ -59,15 +38,13 @@
     android:layout_height="wrap_content"
     android:background="?attr/colorPrimaryDark"
     android:elevation="@dimen/bottom_navigation_elevation"
-    android:visibility="gone"
     app:elevation="@dimen/bottom_navigation_elevation"
     app:itemIconTint="@drawable/bnv_selector"
     app:itemTextColor="@drawable/bnv_selector"
     app:layout_constraintBottom_toTopOf="@+id/miniPlayer"
     app:layout_constraintLeft_toLeftOf="parent"
     app:layout_constraintRight_toRightOf="parent"
-    app:menu="@menu/menu_navigation"
-    tools:visibility="visible"/>
+    app:menu="@menu/menu_navigation"/>
 
   <fragment
     android:id="@+id/miniPlayer"

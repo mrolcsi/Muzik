@@ -35,7 +35,7 @@ fun AppCompatActivity.requestPermission(permission: String, requestId: Int) =
 fun AppCompatActivity.batchRequestPermissions(permissions: Array<String>, requestId: Int) =
   ActivityCompat.requestPermissions(this, permissions, requestId)
 
-fun AppCompatActivity.applyColorToStatusBarIcons(backgroundColor: Int) {
+fun Activity.applyColorToStatusBarIcons(backgroundColor: Int) {
   if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
     window?.decorView?.apply {
       val flags = systemUiVisibility
@@ -51,7 +51,7 @@ fun AppCompatActivity.applyColorToStatusBarIcons(backgroundColor: Int) {
   }
 }
 
-fun AppCompatActivity.applyColorToNavigationBarIcons(backgroundColor: Int) {
+fun Activity.applyColorToNavigationBarIcons(backgroundColor: Int) {
   if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
     window?.decorView?.apply {
       val flags = systemUiVisibility

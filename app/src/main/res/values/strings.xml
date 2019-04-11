@@ -24,6 +24,7 @@
   <string name="mediaControl_previous">Previous</string>
   <string name="notification_nowPlaying">Now Playing</string>
   <string name="notification_nowPlaying_description">Shows the currently playing song in Lyrics Player</string>
+  <string name="player_noSongLoaded">No song loaded.</string>
   <string name="player_repeatAll">Repeating all songs.</string>
   <string name="player_repeatDisabled">Repeat disabled.</string>
   <string name="player_repeatOne">Repeating one song.</string>

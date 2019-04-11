@@ -20,6 +20,7 @@ import androidx.media.session.MediaButtonReceiver
 import com.google.android.exoplayer2.ExoPlaybackException
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
+import hu.mrolcsi.android.lyricsplayer.MainActivity
 import hu.mrolcsi.android.lyricsplayer.R
 import hu.mrolcsi.android.lyricsplayer.database.playqueue.PlayQueueDatabase
 import hu.mrolcsi.android.lyricsplayer.database.playqueue.entities.LastPlayed
@@ -28,7 +29,6 @@ import hu.mrolcsi.android.lyricsplayer.extensions.media.albumArt
 import hu.mrolcsi.android.lyricsplayer.extensions.media.isSkipToNextEnabled
 import hu.mrolcsi.android.lyricsplayer.extensions.media.prepareFromDescription
 import hu.mrolcsi.android.lyricsplayer.extensions.media.setShuffleMode
-import hu.mrolcsi.android.lyricsplayer.player.PlayerActivity
 import hu.mrolcsi.android.lyricsplayer.service.exoplayer.ExoPlayerHolder
 import hu.mrolcsi.android.lyricsplayer.service.exoplayer.notification.ExoNotificationManager
 import hu.mrolcsi.android.lyricsplayer.theme.ThemeManager
@@ -55,11 +55,12 @@ class LPPlayerService : LPBrowserService() {
 
     Log.i(LOG_TAG, "onCreate()")
 
-    // Build a PendingIntent that can be used to launch the PlayerActivity.
+    // Build a PendingIntent that can be used to launch the PlayerFragment.
     val playerActivityPendingIntent = TaskStackBuilder.create(this)
       // add all of DetailsActivity's parents to the stack,
       // followed by DetailsActivity itself
-      .addNextIntentWithParentStack(Intent(this, PlayerActivity::class.java))
+      // TODO: deep link to PlayerFragment?
+      .addNextIntentWithParentStack(Intent(this, MainActivity::class.java))
       .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)
 
     // Create a MediaSessionCompat

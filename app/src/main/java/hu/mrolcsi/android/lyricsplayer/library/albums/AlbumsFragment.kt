@@ -25,18 +25,18 @@ class AlbumsFragment : Fragment() {
 
   private var mAlbumsAdapter: AlbumsAdapter = AlbumsAdapter()
 
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
+  override fun onActivityCreated(savedInstanceState: Bundle?) {
+    super.onActivityCreated(savedInstanceState)
 
-    activity?.let {
-      mAlbumsModel = ViewModelProviders.of(requireActivity()).get(AlbumsViewModel::class.java)
-      mAlbumsModel.albums.observe(this, Observer { albums ->
+    activity?.run {
+      mAlbumsModel = ViewModelProviders.of(this).get(AlbumsViewModel::class.java)
+      mAlbumsModel.albums.observe(viewLifecycleOwner, Observer { albums ->
         Log.d(LOG_TAG, "Got items from LiveData: $albums")
         mAlbumsAdapter.submitList(albums)
       })
     }
 
-    ThemeManager.getInstance(requireContext()).currentTheme.observe(this, Observer {
+    ThemeManager.getInstance(requireContext()).currentTheme.observe(viewLifecycleOwner, Observer {
       // Tell adapter to reload its views
       mAlbumsAdapter.notifyDataSetChanged()
     })

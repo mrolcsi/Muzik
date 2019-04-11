@@ -17,17 +17,17 @@ class ArtistsFragment : Fragment() {
 
   private val mArtistAdapter = ArtistsAdapter()
 
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
+  override fun onActivityCreated(savedInstanceState: Bundle?) {
+    super.onActivityCreated(savedInstanceState)
 
-    activity?.let {
+    activity?.run {
       val model = ViewModelProviders.of(this).get(ArtistsViewModel::class.java)
-      model.getArtists().observe(this, Observer { artists ->
+      model.getArtists().observe(viewLifecycleOwner, Observer { artists ->
         mArtistAdapter.submitList(artists)
       })
     }
 
-    ThemeManager.getInstance(requireContext()).currentTheme.observe(this, Observer {
+    ThemeManager.getInstance(requireContext()).currentTheme.observe(viewLifecycleOwner, Observer {
       // Tell adapter to reload its views
       mArtistAdapter.notifyDataSetChanged()
     })

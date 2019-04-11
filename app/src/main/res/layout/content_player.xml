@@ -7,7 +7,7 @@
   android:layout_width="match_parent"
   android:layout_height="match_parent"
   android:animateLayoutChanges="true"
-  tools:context=".player.PlayerActivity">
+  tools:context=".player.PlayerFragment">
 
   <ImageView
     android:id="@+id/imgCoverArt"
@@ -45,7 +45,9 @@
     app:elevation="@dimen/action_bar_elevation"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="parent"/>
+    app:layout_constraintTop_toTopOf="parent"
+    app:menu="@menu/menu_player"
+    app:navigationIcon="?attr/homeAsUpIndicator"/>
 
   <SeekBar
     android:id="@+id/sbSongProgress"

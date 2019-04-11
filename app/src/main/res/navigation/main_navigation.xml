@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:id="@+id/main_navigation"
+  app:startDestination="@id/navigation_library">
+
+  <action
+    android:id="@+id/action_global_to_player"
+    app:destination="@id/navigation_player"
+    app:enterAnim="@android:anim/fade_in"
+    app:exitAnim="@android:anim/fade_out"
+    app:popEnterAnim="@android:anim/fade_in"
+    app:popExitAnim="@android:anim/fade_out"
+    app:popUpTo="@+id/navigation_library"/>
+
+  <fragment android:id="@+id/navigation_library"
+    android:label="@string/library_title"
+    android:name="hu.mrolcsi.android.lyricsplayer.library.LibraryFragment"
+    tools:layout="@layout/fragment_library">
+
+    <action android:id="@+id/action_library_to_player"
+      app:destination="@id/navigation_player"
+      app:enterAnim="@anim/slide_in_up"
+      app:exitAnim="@anim/slide_out_up"
+      app:popEnterAnim="@anim/slide_in_down"
+      app:popExitAnim="@anim/slide_out_down"/>
+
+  </fragment>
+
+  <fragment
+    android:id="@+id/navigation_player"
+    android:name="hu.mrolcsi.android.lyricsplayer.player.PlayerFragment"
+    tools:layout="@layout/fragment_player"/>
+
+</navigation>
