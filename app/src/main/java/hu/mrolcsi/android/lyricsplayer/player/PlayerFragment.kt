@@ -148,11 +148,6 @@ class PlayerFragment : Fragment() {
         override fun onTransitionEnd(transition: Transition) {
           Log.v(LOG_TAG, "enterTransition.onTransitionEnd()")
 
-          ViewCompat.animate(rvQueue)
-            .alpha(1f)
-            .setDuration(Theme.PREFERRED_ANIMATION_DURATION)
-            .start()
-
           context?.let {
             ThemeManager.getInstance(it).currentTheme.value?.let { theme ->
               activity?.window?.statusBarColor = theme.statusBarColor
@@ -170,11 +165,6 @@ class PlayerFragment : Fragment() {
       .addListener(object : TransitionListenerAdapter() {
         override fun onTransitionStart(transition: Transition) {
           Log.v(LOG_TAG, "returnTransition.onTransitionStart()")
-
-          ViewCompat.animate(rvQueue)
-            .alpha(0f)
-            .setDuration(Theme.PREFERRED_ANIMATION_DURATION)
-            .start()
 
           context?.let {
             ThemeManager.getInstance(requireContext()).currentTheme.value?.let { theme ->
@@ -607,6 +597,13 @@ class PlayerFragment : Fragment() {
         } else {
           rvQueue.smoothScrollToPosition(queuePosition)
         }
+
+        // Make view visible
+        ViewCompat.animate(rvQueue)
+          .alpha(1f)
+          .setDuration(Theme.PREFERRED_ANIMATION_DURATION)
+          .start()
+
       } else if (queuePosition == RecyclerView.NO_POSITION) {
         // Try again after the adapter settles?
         Log.v(LOG_TAG, "updatePager() DELAY CHANGE")
