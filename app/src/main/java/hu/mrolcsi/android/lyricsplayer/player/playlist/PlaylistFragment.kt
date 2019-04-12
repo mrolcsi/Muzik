@@ -124,6 +124,7 @@ class PlaylistFragment : Fragment() {
   private fun applyThemeAnimated(theme: Theme) {
 
     val previousTheme = ThemeManager.getInstance(requireContext()).previousTheme
+    val animationDuration = context?.resources?.getInteger(R.integer.preferredAnimationDuration)?.toLong() ?: 300L
 
     // Background Color
     ValueAnimator.ofArgb(
@@ -133,7 +134,7 @@ class PlaylistFragment : Fragment() {
       ),
       theme.primaryBackgroundColor
     ).apply {
-      duration = Theme.PREFERRED_ANIMATION_DURATION
+      duration = animationDuration
       addUpdateListener {
         val color = it.animatedValue as Int
         applyBackgroundColor(color)
@@ -146,7 +147,7 @@ class PlaylistFragment : Fragment() {
       previousTheme?.primaryForegroundColor ?: Color.WHITE,
       theme.primaryForegroundColor
     ).apply {
-      duration = Theme.PREFERRED_ANIMATION_DURATION
+      duration = animationDuration
       addUpdateListener {
         val color = it.animatedValue as Int
         applyForegroundColor(color)

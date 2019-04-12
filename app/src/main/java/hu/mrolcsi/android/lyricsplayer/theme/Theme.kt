@@ -87,8 +87,6 @@ data class Theme(
     const val DISABLED_ALPHA = 0.5f
     const val DISABLED_OPACITY = (255 * DISABLED_ALPHA).toInt()
 
-    const val PREFERRED_ANIMATION_DURATION: Long = 300
-
     // JSON Keys
     const val PRIMARY_BACKGROUND = "primaryBackground"
     const val PRIMARY_FOREGROUND = "primaryForeground"

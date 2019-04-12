@@ -99,12 +99,13 @@ class LibraryFragment : Fragment() {
     Log.d(LOG_TAG, "Applying theme...")
 
     val previousTheme = ThemeManager.getInstance(requireContext()).previousTheme
+    val animationDuration = context?.resources?.getInteger(R.integer.preferredAnimationDuration)?.toLong() ?: 300L
 
     ValueAnimator.ofArgb(
       previousTheme?.primaryBackgroundColor ?: Color.BLACK,
       theme.primaryBackgroundColor
     ).run {
-      duration = Theme.PREFERRED_ANIMATION_DURATION
+      duration = animationDuration
       addUpdateListener {
         val color = it.animatedValue as Int
 
@@ -127,7 +128,7 @@ class LibraryFragment : Fragment() {
       previousTheme?.secondaryBackgroundColor ?: Color.BLACK,
       theme.secondaryBackgroundColor
     ).run {
-      duration = Theme.PREFERRED_ANIMATION_DURATION
+      duration = animationDuration
       addUpdateListener {
         val color = it.animatedValue as Int
 
@@ -141,7 +142,7 @@ class LibraryFragment : Fragment() {
       previousTheme?.tertiaryBackgroundColor ?: Color.BLACK,
       theme.tertiaryBackgroundColor
     ).run {
-      duration = Theme.PREFERRED_ANIMATION_DURATION
+      duration = animationDuration
       addUpdateListener {
         val color = it.animatedValue as Int
 
@@ -155,7 +156,7 @@ class LibraryFragment : Fragment() {
       previousTheme?.primaryForegroundColor ?: Color.WHITE,
       theme.primaryForegroundColor
     ).run {
-      duration = Theme.PREFERRED_ANIMATION_DURATION
+      duration = animationDuration
       addUpdateListener {
         val color = it.animatedValue as Int
 
@@ -172,7 +173,7 @@ class LibraryFragment : Fragment() {
       previousTheme?.secondaryForegroundColor ?: Color.WHITE,
       theme.secondaryForegroundColor
     ).run {
-      duration = Theme.PREFERRED_ANIMATION_DURATION
+      duration = animationDuration
       addUpdateListener {
         val color = it.animatedValue as Int
 

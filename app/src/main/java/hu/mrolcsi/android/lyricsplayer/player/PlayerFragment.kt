@@ -2,6 +2,7 @@ package hu.mrolcsi.android.lyricsplayer.player
 
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
+import android.content.Context
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.drawable.ColorDrawable
@@ -19,6 +20,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.SeekBar
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.GravityCompat
@@ -122,7 +124,7 @@ class PlayerFragment : Fragment() {
           if (Math.abs(diffY) > SWIPE_THRESHOLD && Math.abs(velocityY) > SWIPE_VELOCITY_THRESHOLD) {
             if (diffY > 0) {
               // onSwipeDown
-              onBackPressed()
+              activity?.onBackPressed()
               return true
             }
           }
@@ -134,15 +136,30 @@ class PlayerFragment : Fragment() {
 
   //region LIFECYCLE
 
+  override fun onAttach(context: Context) {
+    super.onAttach(context)
+    requireActivity().onBackPressedDispatcher.addCallback(this, OnBackPressedCallback {
+      // If drawer is open, just close it
+      if (drawer_layout.isDrawerOpen(GravityCompat.END)) {
+        drawer_layout.closeDrawer(GravityCompat.END)
+        true
+      } else {
+        false
+      }
+    })
+  }
+
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
     postponeEnterTransition()
 
+    val animationDuration = context?.resources?.getInteger(R.integer.preferredAnimationDuration)?.toLong() ?: 300L
+
     enterTransition = TransitionInflater
       .from(requireContext())
       .inflateTransition(R.transition.slide_bottom)
-      .setDuration(Theme.PREFERRED_ANIMATION_DURATION)
+      .setDuration(animationDuration)
       .excludeTarget(imgCoverArt, true)
       .addListener(object : TransitionListenerAdapter() {
         override fun onTransitionEnd(transition: Transition) {
@@ -160,7 +177,7 @@ class PlayerFragment : Fragment() {
     returnTransition = TransitionInflater
       .from(requireContext())
       .inflateTransition(R.transition.slide_bottom)
-      .setDuration(Theme.PREFERRED_ANIMATION_DURATION)
+      .setDuration(animationDuration)
       .excludeTarget(imgCoverArt, true)
       .addListener(object : TransitionListenerAdapter() {
         override fun onTransitionStart(transition: Transition) {
@@ -178,12 +195,12 @@ class PlayerFragment : Fragment() {
     sharedElementEnterTransition = TransitionInflater
       .from(requireContext())
       .inflateTransition(android.R.transition.move)
-      .setDuration(Theme.PREFERRED_ANIMATION_DURATION)
+      .setDuration(animationDuration)
 
     sharedElementReturnTransition = TransitionInflater
       .from(requireContext())
       .inflateTransition(android.R.transition.move)
-      .setDuration(Theme.PREFERRED_ANIMATION_DURATION)
+      .setDuration(animationDuration)
   }
 
   override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -276,21 +293,6 @@ class PlayerFragment : Fragment() {
     MediaControllerCompat.getMediaController(requireActivity())?.transportControls?.stopProgressUpdater()
   }
 
-  // TODO: handle onBackPressed!
-  fun onBackPressed() {
-    // If drawer is open, just close it
-    if (drawer_layout.isDrawerOpen(GravityCompat.END)) {
-      drawer_layout.closeDrawer(GravityCompat.END)
-      return
-    }
-
-    // Fade out queue
-    ViewCompat.animate(rvQueue)
-      .alpha(0f)
-      .setDuration(Theme.PREFERRED_ANIMATION_DURATION)
-      .start()
-  }
-
   //endregion
 
   private fun setupToolbar() {
@@ -300,12 +302,12 @@ class PlayerFragment : Fragment() {
       }
     }
 
+    playerToolbar.setNavigationOnClickListener {
+      activity?.onBackPressed()
+    }
+
     playerToolbar.setOnMenuItemClickListener { item ->
       when (item?.itemId) {
-        android.R.id.home -> {
-          onBackPressed()
-          true
-        }
         R.id.menuPlaylist -> {
           drawer_layout.openDrawer(GravityCompat.END)
           true
@@ -601,7 +603,7 @@ class PlayerFragment : Fragment() {
         // Make view visible
         ViewCompat.animate(rvQueue)
           .alpha(1f)
-          .setDuration(Theme.PREFERRED_ANIMATION_DURATION)
+          .setDuration(context?.resources?.getInteger(R.integer.preferredAnimationDuration)?.toLong() ?: 300L)
           .start()
 
       } else if (queuePosition == RecyclerView.NO_POSITION) {
@@ -623,13 +625,14 @@ class PlayerFragment : Fragment() {
     Log.i(LOG_TAG, "applyingThemeAnimated($theme)")
 
     val previousTheme = ThemeManager.getInstance(requireContext()).previousTheme
+    val animationDuration = context?.resources?.getInteger(R.integer.preferredAnimationDuration)?.toLong() ?: 300L
 
     // StatusBar Color
     ValueAnimator.ofArgb(
       previousTheme?.statusBarColor ?: ContextCompat.getColor(requireContext(), R.color.backgroundColor),
       theme.statusBarColor
     ).run {
-      duration = Theme.PREFERRED_ANIMATION_DURATION
+      duration = animationDuration
       addUpdateListener {
         val color = it.animatedValue as Int
 
@@ -644,7 +647,7 @@ class PlayerFragment : Fragment() {
       previousTheme?.primaryBackgroundColor ?: ContextCompat.getColor(requireContext(), R.color.backgroundColor),
       theme.primaryBackgroundColor
     ).run {
-      duration = Theme.PREFERRED_ANIMATION_DURATION
+      duration = animationDuration
       addUpdateListener {
         val color = it.animatedValue as Int
         applyBackgroundColor(color)
@@ -657,7 +660,7 @@ class PlayerFragment : Fragment() {
       previousTheme?.primaryForegroundColor ?: Color.WHITE,
       theme.primaryForegroundColor
     ).run {
-      duration = Theme.PREFERRED_ANIMATION_DURATION
+      duration = animationDuration
       addUpdateListener {
         val color = it.animatedValue as Int
 

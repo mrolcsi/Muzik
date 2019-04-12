@@ -206,12 +206,13 @@ class MiniPlayerFragment : Fragment() {
   private fun applyTheme(theme: Theme) {
 
     val previousTheme = ThemeManager.getInstance(requireContext()).previousTheme
+    val animationDuration = context?.resources?.getInteger(R.integer.preferredAnimationDuration)?.toLong() ?: 300L
 
     ValueAnimator.ofArgb(
       previousTheme?.primaryBackgroundColor ?: ContextCompat.getColor(requireContext(), R.color.backgroundColor),
       theme.primaryBackgroundColor
     ).run {
-      duration = Theme.PREFERRED_ANIMATION_DURATION
+      duration = animationDuration
       addUpdateListener {
         val color = it.animatedValue as Int
         applyBackgroundColor(color)
@@ -224,7 +225,7 @@ class MiniPlayerFragment : Fragment() {
       previousTheme?.primaryForegroundColor ?: Color.WHITE,
       theme.primaryForegroundColor
     ).run {
-      duration = Theme.PREFERRED_ANIMATION_DURATION
+      duration = animationDuration
       addUpdateListener {
         val color = it.animatedValue as Int
 
