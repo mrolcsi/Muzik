@@ -158,13 +158,13 @@ class PlaylistFragment : Fragment() {
   }
 
   private fun applyBackgroundColor(color: Int) {
-    rvPlaylist.setBackgroundColor(color)
+    rvPlaylist?.setBackgroundColor(color)
     mPlaylistAdapter.notifyDataSetChanged()
-    playlistToolbar.setBackgroundColor(color)
+    playlistToolbar?.setBackgroundColor(color)
   }
 
   private fun applyForegroundColor(color: Int) {
-    playlistToolbar.setTitleTextColor(color)
+    playlistToolbar?.setTitleTextColor(color)
     for (i in 0 until playlistToolbar.menu.size()) {
       playlistToolbar.menu[i].icon.setTint(color)
     }
