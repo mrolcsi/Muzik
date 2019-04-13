@@ -138,7 +138,7 @@ class PlayerFragment : Fragment() {
 
   override fun onAttach(context: Context) {
     super.onAttach(context)
-    requireActivity().onBackPressedDispatcher.addCallback(this, OnBackPressedCallback {
+    activity?.onBackPressedDispatcher?.addCallback(this, OnBackPressedCallback {
       // If drawer is open, just close it
       if (drawer_layout.isDrawerOpen(GravityCompat.END)) {
         drawer_layout.closeDrawer(GravityCompat.END)
@@ -201,6 +201,16 @@ class PlayerFragment : Fragment() {
       .from(requireContext())
       .inflateTransition(android.R.transition.move)
       .setDuration(animationDuration)
+
+    if (savedInstanceState != null) {
+      // Re-apply status bar color after rotation
+      activity?.run {
+        ThemeManager.getInstance(this).currentTheme.value?.let { theme ->
+          window?.statusBarColor = theme.statusBarColor
+          applyColorToStatusBarIcons(theme.statusBarColor)
+        }
+      }
+    }
   }
 
   override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -211,24 +221,16 @@ class PlayerFragment : Fragment() {
         Log.d(LOG_TAG, "Got PlayerViewModel: $this")
 
         mediaController.observe(viewLifecycleOwner, Observer { controller ->
-          controller?.let {
-            // Apply MediaController to this Activity
-            MediaControllerCompat.setMediaController(requireActivity(), it)
-
-            // Finish building the UI
-            setupTransportControls(controller)
-          }
+          controller?.let { setupTransportControls(it) }
         })
         currentMediaMetadata.observe(viewLifecycleOwner, Observer { metadata ->
           metadata?.let {
-            updateSongData(metadata)
+            updateSongData(it)
             updatePager()
           }
         })
         currentPlaybackState.observe(viewLifecycleOwner, Observer { state ->
-          state?.let {
-            updateControls(state)
-          }
+          state?.let { updateControls(it) }
         })
         currentQueue.observe(viewLifecycleOwner, Observer {
           // Update Queue
@@ -529,28 +531,28 @@ class PlayerFragment : Fragment() {
     btnNext.isEnabled = playbackState.isSkipToNextEnabled
     btnNext.alpha = if (playbackState.isSkipToNextEnabled) 1f else Theme.DISABLED_ALPHA
 
-    val controller = MediaControllerCompat.getMediaController(requireActivity())
-
-    when (playbackState.isPlaying) {
-      true -> {
-        controller.transportControls.startProgressUpdater()
-        btnPlayPause.setImageResource(android.R.drawable.ic_media_pause)
+    MediaControllerCompat.getMediaController(requireActivity())?.let { controller ->
+      when (playbackState.isPlaying) {
+        true -> {
+          controller.transportControls.startProgressUpdater()
+          btnPlayPause.setImageResource(android.R.drawable.ic_media_pause)
+        }
+        false -> {
+          controller.transportControls.stopProgressUpdater()
+          btnPlayPause.setImageResource(android.R.drawable.ic_media_play)
+        }
       }
-      false -> {
-        controller.transportControls.stopProgressUpdater()
-        btnPlayPause.setImageResource(android.R.drawable.ic_media_play)
+
+      when (controller.shuffleMode) {
+        PlaybackStateCompat.SHUFFLE_MODE_NONE -> btnShuffle.alpha = Theme.DISABLED_ALPHA
+        PlaybackStateCompat.SHUFFLE_MODE_ALL -> btnShuffle.alpha = 1f
       }
-    }
 
-    when (controller.shuffleMode) {
-      PlaybackStateCompat.SHUFFLE_MODE_NONE -> btnShuffle.alpha = Theme.DISABLED_ALPHA
-      PlaybackStateCompat.SHUFFLE_MODE_ALL -> btnShuffle.alpha = 1f
-    }
-
-    when (controller.repeatMode) {
-      PlaybackStateCompat.REPEAT_MODE_NONE -> btnRepeat.setImageDrawable(mRepeatNone)
-      PlaybackStateCompat.REPEAT_MODE_ONE -> btnRepeat.setImageDrawable(mRepeatOne)
-      PlaybackStateCompat.REPEAT_MODE_ALL -> btnRepeat.setImageDrawable(mRepeatAll)
+      when (controller.repeatMode) {
+        PlaybackStateCompat.REPEAT_MODE_NONE -> btnRepeat.setImageDrawable(mRepeatNone)
+        PlaybackStateCompat.REPEAT_MODE_ONE -> btnRepeat.setImageDrawable(mRepeatOne)
+        PlaybackStateCompat.REPEAT_MODE_ALL -> btnRepeat.setImageDrawable(mRepeatAll)
+      }
     }
   }
 
@@ -599,17 +601,21 @@ class PlayerFragment : Fragment() {
         } else {
           rvQueue.smoothScrollToPosition(queuePosition)
         }
-
         // Make view visible
         ViewCompat.animate(rvQueue)
           .alpha(1f)
           .setDuration(context?.resources?.getInteger(R.integer.preferredAnimationDuration)?.toLong() ?: 300L)
           .start()
-
       } else if (queuePosition == RecyclerView.NO_POSITION) {
         // Try again after the adapter settles?
         Log.v(LOG_TAG, "updatePager() DELAY CHANGE")
         rvQueue.postDelayed(300) { updatePager() }
+      } else {
+        // Make view visible
+        ViewCompat.animate(rvQueue)
+          .alpha(1f)
+          .setDuration(context?.resources?.getInteger(R.integer.preferredAnimationDuration)?.toLong() ?: 300L)
+          .start()
       }
     }
   }

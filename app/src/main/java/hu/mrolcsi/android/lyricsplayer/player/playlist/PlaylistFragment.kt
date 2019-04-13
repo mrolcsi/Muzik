@@ -63,16 +63,17 @@ class PlaylistFragment : Fragment() {
         currentMediaMetadata.observe(viewLifecycleOwner, Observer { metadata ->
           metadata?.let {
             // Update active queueId in adapter (notifyDataSetChanged will do the rest)
-            val controller = MediaControllerCompat.getMediaController(requireActivity())
-            mPlaylistAdapter.activeQueueId = controller.playbackState.activeQueueItemId
+            MediaControllerCompat.getMediaController(requireActivity())?.let { controller ->
+              mPlaylistAdapter.activeQueueId = controller.playbackState.activeQueueItemId
 
-            val layoutManager = rvPlaylist.layoutManager as LinearLayoutManager
-            val activePosition = controller.playbackState.activeQueueItemId.toInt()
-            val first = layoutManager.findFirstCompletelyVisibleItemPosition()
-            val last = layoutManager.findLastCompletelyVisibleItemPosition()
+              val layoutManager = rvPlaylist.layoutManager as LinearLayoutManager
+              val activePosition = controller.playbackState.activeQueueItemId.toInt()
+              val first = layoutManager.findFirstCompletelyVisibleItemPosition()
+              val last = layoutManager.findLastCompletelyVisibleItemPosition()
 
-            if (activePosition !in first..last) {
-              layoutManager.scrollToPositionWithOffset(activePosition, 500)
+              if (activePosition !in first..last) {
+                layoutManager.scrollToPositionWithOffset(activePosition, 500)
+              }
             }
           }
         })
