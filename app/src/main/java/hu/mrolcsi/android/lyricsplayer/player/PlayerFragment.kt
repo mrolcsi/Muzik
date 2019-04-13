@@ -207,6 +207,13 @@ class PlayerFragment : Fragment() {
     if (savedInstanceState != null) {
       // Re-apply status bar color after rotation
       activity?.run {
+
+        ViewCompat.animate(rvQueue)
+          .alpha(1f)
+          .setDuration(context?.resources?.getInteger(R.integer.preferredAnimationDuration)?.toLong() ?: 300L)
+          .withEndAction { imgCoverArt?.visibility = View.INVISIBLE }
+          .start()
+
         ThemeManager.getInstance(this).currentTheme.value?.let { theme ->
           window?.statusBarColor = theme.statusBarColor
           applyColorToStatusBarIcons(theme.statusBarColor)
@@ -638,7 +645,9 @@ class PlayerFragment : Fragment() {
         ViewCompat.animate(rvQueue)
           .alpha(1f)
           .setDuration(context?.resources?.getInteger(R.integer.preferredAnimationDuration)?.toLong() ?: 300L)
+          .withEndAction { imgCoverArt?.visibility = View.INVISIBLE }
           .start()
+        imgCoverArt.visibility = View.INVISIBLE
       } else if (queuePosition == RecyclerView.NO_POSITION) {
         // Try again after the adapter settles?
         Log.v(LOG_TAG, "updatePager() DELAY CHANGE")
@@ -648,6 +657,7 @@ class PlayerFragment : Fragment() {
         ViewCompat.animate(rvQueue)
           .alpha(1f)
           .setDuration(context?.resources?.getInteger(R.integer.preferredAnimationDuration)?.toLong() ?: 300L)
+          .withEndAction { imgCoverArt?.visibility = View.INVISIBLE }
           .start()
       }
     }

@@ -13,8 +13,8 @@
     android:elevation="@dimen/action_bar_elevation"
     android:scaleType="centerCrop"
     app:elevation="@dimen/action_bar_elevation"
+    app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintDimensionRatio="1:1"
-    app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent"
     tools:src="@tools:sample/avatars"/>
@@ -24,7 +24,7 @@
     android:layout_width="0dp"
     android:layout_height="wrap_content"
     android:layout_marginTop="8dp"
-    android:layout_marginStart="16dp"
+    android:layout_marginStart="8dp"
     android:layout_marginEnd="16dp"
     android:elevation="@dimen/action_bar_elevation"
     android:maxLines="2"
@@ -33,9 +33,9 @@
     app:elevation="@dimen/action_bar_elevation"
     app:layout_constraintBottom_toTopOf="@+id/tvArtist"
     app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintHorizontal_bias="0.5"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@+id/imgCoverArt"
+    app:layout_constraintStart_toEndOf="@+id/imgCoverArt"
+    app:layout_constraintTop_toTopOf="parent"
+    app:layout_constraintVertical_bias="0.3"
     app:layout_constraintVertical_chainStyle="packed"
     tools:text="Title"/>
 
@@ -44,7 +44,7 @@
     android:layout_width="0dp"
     android:layout_height="wrap_content"
     android:layout_marginTop="8dp"
-    android:layout_marginStart="16dp"
+    android:layout_marginStart="8dp"
     android:layout_marginEnd="16dp"
     android:alpha="0.7"
     android:elevation="@dimen/action_bar_elevation"
@@ -54,8 +54,7 @@
     app:elevation="@dimen/action_bar_elevation"
     app:layout_constraintBottom_toTopOf="@+id/tvAlbum"
     app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintHorizontal_bias="0.5"
-    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintStart_toEndOf="@+id/imgCoverArt"
     app:layout_constraintTop_toBottomOf="@+id/tvTitle"
     tools:text="Artist"/>
 
@@ -65,7 +64,7 @@
     android:layout_height="wrap_content"
     android:layout_marginTop="8dp"
     android:layout_marginBottom="8dp"
-    android:layout_marginStart="16dp"
+    android:layout_marginStart="8dp"
     android:layout_marginEnd="16dp"
     android:alpha="0.7"
     android:elevation="@dimen/action_bar_elevation"
@@ -74,8 +73,7 @@
     app:elevation="@dimen/action_bar_elevation"
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintHorizontal_bias="0.5"
-    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintStart_toEndOf="@+id/imgCoverArt"
     app:layout_constraintTop_toBottomOf="@+id/tvArtist"
     tools:text="Album"/>
 
