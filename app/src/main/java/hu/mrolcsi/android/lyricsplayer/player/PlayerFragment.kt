@@ -282,6 +282,10 @@ class PlayerFragment : Fragment() {
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     setupToolbar()
     setupPager()
+
+    rvQueue.setOnTouchListener { v, event ->
+      mGestureDetector.onTouchEvent(event) || v.onTouchEvent(event)
+    }
   }
 
   override fun onResume() {
@@ -390,11 +394,6 @@ class PlayerFragment : Fragment() {
       }
     })
   }
-
-  // TODO: handle swipe down gesture
-//  override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
-//    return mGestureDetector.onTouchEvent(ev) || super.dispatchTouchEvent(ev)
-//  }
 
   private fun setupTransportControls(controller: MediaControllerCompat) {
     // Enable controls
