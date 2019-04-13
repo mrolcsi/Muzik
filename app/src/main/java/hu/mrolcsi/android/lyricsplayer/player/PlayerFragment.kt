@@ -41,6 +41,7 @@ import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import hu.mrolcsi.android.lyricsplayer.R
+import hu.mrolcsi.android.lyricsplayer.common.OnRepeatTouchListener
 import hu.mrolcsi.android.lyricsplayer.common.glide.GlideApp
 import hu.mrolcsi.android.lyricsplayer.common.pager.PagerSnapHelperVerbose
 import hu.mrolcsi.android.lyricsplayer.common.pager.RVPageScrollState
@@ -56,6 +57,7 @@ import hu.mrolcsi.android.lyricsplayer.extensions.media.isSkipToNextEnabled
 import hu.mrolcsi.android.lyricsplayer.extensions.media.isSkipToPreviousEnabled
 import hu.mrolcsi.android.lyricsplayer.extensions.media.startProgressUpdater
 import hu.mrolcsi.android.lyricsplayer.extensions.media.stopProgressUpdater
+import hu.mrolcsi.android.lyricsplayer.extensions.millisecondsToTimeStamp
 import hu.mrolcsi.android.lyricsplayer.extensions.secondsToTimeStamp
 import hu.mrolcsi.android.lyricsplayer.extensions.toColorHex
 import hu.mrolcsi.android.lyricsplayer.theme.Theme
@@ -424,12 +426,44 @@ class PlayerFragment : Fragment() {
         rvQueue.smoothScrollToPosition(currentPosition - 1)
       }
     }
+    btnPrevious.setOnTouchListener(
+      OnRepeatTouchListener(FAST_FORWARD_INTERVAL, FAST_FORWARD_INTERVAL,
+        View.OnClickListener {
+          MediaControllerCompat.getMediaController(requireActivity())?.run {
+            transportControls.rewind()
+            tvSeekProgress.text = playbackState.position.millisecondsToTimeStamp()
+          }
+        },
+        View.OnClickListener {
+          tvSeekProgress.visibility = View.VISIBLE
+        },
+        View.OnClickListener {
+          tvSeekProgress.visibility = View.GONE
+        }
+      )
+    )
 
     btnNext.setOnClickListener {
       //mediaControllerCompat.transportControls?.skipToNext()
       val currentPosition = mSnapHelper.findSnapPosition(rvQueue.layoutManager)
       rvQueue.smoothScrollToPosition(currentPosition + 1)
     }
+    btnNext.setOnTouchListener(
+      OnRepeatTouchListener(FAST_FORWARD_INTERVAL, FAST_FORWARD_INTERVAL,
+        View.OnClickListener {
+          MediaControllerCompat.getMediaController(requireActivity())?.run {
+            transportControls.fastForward()
+            tvSeekProgress.text = playbackState.position.millisecondsToTimeStamp()
+          }
+        },
+        View.OnClickListener {
+          tvSeekProgress.visibility = View.VISIBLE
+        },
+        View.OnClickListener {
+          tvSeekProgress.visibility = View.GONE
+        }
+      )
+    )
 
     btnPlayPause.setOnClickListener {
       when (controller.playbackState.state) {
@@ -731,5 +765,7 @@ class PlayerFragment : Fragment() {
 
   companion object {
     private const val LOG_TAG = "PlayerFragment"
+
+    private const val FAST_FORWARD_INTERVAL = 500
   }
 }
