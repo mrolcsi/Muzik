@@ -36,7 +36,19 @@ class LibraryFragment : Fragment() {
 
     setupNavBar(requireActivity().findNavController(R.id.library_nav_host))
 
-    ThemeManager.getInstance(requireContext()).currentTheme.observe(this, Observer { applyTheme(it) })
+    ThemeManager.getInstance(requireContext()).currentTheme.observe(viewLifecycleOwner, object : Observer<Theme> {
+
+      private var initialLoad = true
+
+      override fun onChanged(it: Theme) {
+        if (initialLoad) {
+          applyThemeStatic(it)
+          initialLoad = false
+        } else {
+          applyThemeAnimated(it)
+        }
+      }
+    })
   }
 
   override fun onResume() {
@@ -95,8 +107,62 @@ class LibraryFragment : Fragment() {
     }
   }
 
-  private fun applyTheme(theme: Theme) {
-    Log.d(LOG_TAG, "Applying theme...")
+  private fun applyThemeStatic(theme: Theme) {
+    Log.d(LOG_TAG, "Applying theme (static)...")
+
+    theme.primaryBackgroundColor.also { color ->
+      // Status Bar Icons
+      activity?.applyColorToStatusBarIcons(color)
+      // Navigation Bar Icons
+      activity?.applyColorToNavigationBarIcons(color)
+
+      // Status Bar
+      activity?.window?.statusBarColor = color
+      // Navigation Bar
+      activity?.window?.navigationBarColor = color
+      // Toolbar Background
+      libraryToolbar.setBackgroundColor(color)
+    }
+
+    theme.secondaryBackgroundColor.also { color ->
+      // BottomNavigation Background
+      navigation_bar.setBackgroundColor(color)
+    }
+
+    theme.tertiaryBackgroundColor.also { color ->
+      // Window background
+      activity?.window?.decorView?.setBackgroundColor(color)
+    }
+
+    theme.primaryForegroundColor.also { color ->
+      // Toolbar Icon
+      libraryToolbar.navigationIcon?.setColorFilter(color, PorterDuff.Mode.SRC_IN)
+      // Title and Subtitle
+      libraryToolbar.setTitleTextColor(color)
+      libraryToolbar.setSubtitleTextColor(color)
+    }
+
+    theme.secondaryForegroundColor.also { color ->
+      // BottomNavigation Selected Colors
+      val navigationTintList = ColorStateList(
+        arrayOf(
+          intArrayOf(android.R.attr.state_checked),
+          intArrayOf()
+        ),
+        intArrayOf(
+          color,
+          ColorUtils.setAlphaComponent(color, Theme.DISABLED_OPACITY)
+        )
+      )
+      navigation_bar.itemIconTintList = navigationTintList
+      navigation_bar.itemTextColor = navigationTintList
+    }
+
+    (navigation_bar.itemBackground as RippleDrawable).setTint(theme.primaryForegroundColor)
+  }
+
+  private fun applyThemeAnimated(theme: Theme) {
+    Log.d(LOG_TAG, "Applying theme (animated)...")
 
     val previousTheme = ThemeManager.getInstance(requireContext()).previousTheme
     val animationDuration = context?.resources?.getInteger(R.integer.preferredAnimationDuration)?.toLong() ?: 300L
