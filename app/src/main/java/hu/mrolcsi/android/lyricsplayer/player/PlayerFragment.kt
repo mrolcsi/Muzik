@@ -647,7 +647,6 @@ class PlayerFragment : Fragment() {
           .setDuration(context?.resources?.getInteger(R.integer.preferredAnimationDuration)?.toLong() ?: 300L)
           .withEndAction { imgCoverArt?.visibility = View.INVISIBLE }
           .start()
-        imgCoverArt.visibility = View.INVISIBLE
       } else if (queuePosition == RecyclerView.NO_POSITION) {
         // Try again after the adapter settles?
         Log.v(LOG_TAG, "updatePager() DELAY CHANGE")
