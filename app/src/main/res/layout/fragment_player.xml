@@ -22,7 +22,7 @@
     android:layout_height="match_parent"
     android:layout_gravity="end"
     android:fitsSystemWindows="true"
-    android:name="hu.mrolcsi.android.lyricsplayer.player.playlist.PlaylistFragment"
+    android:name="hu.mrolcsi.muzik.player.playlist.PlaylistFragment"
     tools:layout="@layout/fragment_playlist"/>
 
 </androidx.drawerlayout.widget.DrawerLayout>

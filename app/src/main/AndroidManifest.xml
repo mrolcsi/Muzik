@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-  package="hu.mrolcsi.android.lyricsplayer">
+  package="hu.mrolcsi.muzik">
 
   <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
   <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
@@ -13,7 +13,7 @@
     android:supportsRtl="true"
     android:theme="@style/FluxTheme">
 
-    <service android:name=".service.LPPlayerService">
+    <service android:name="hu.mrolcsi.muzik.service.LPPlayerService">
       <intent-filter>
         <action android:name="android.media.browse.MediaBrowserService"/>
       </intent-filter>
@@ -30,7 +30,7 @@
 
     <activity
       android:label="@string/app_name"
-      android:name=".MainActivity"
+      android:name="hu.mrolcsi.muzik.MainActivity"
       android:theme="@style/FluxTheme.Launcher">
 
       <intent-filter>

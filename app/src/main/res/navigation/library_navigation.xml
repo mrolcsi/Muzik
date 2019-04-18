@@ -37,7 +37,7 @@
 
   <fragment android:id="@+id/navigation_artists"
     android:label="@string/artists_title"
-    android:name="hu.mrolcsi.android.lyricsplayer.library.artists.ArtistsFragment"
+    android:name="hu.mrolcsi.muzik.library.artists.ArtistsFragment"
     tools:layout="@layout/fragment_artists">
 
     <action android:id="@+id/action_artists_to_albums"
@@ -52,7 +52,7 @@
 
   <fragment android:id="@+id/navigation_albums"
     android:label="@string/albums_title"
-    android:name="hu.mrolcsi.android.lyricsplayer.library.albums.AlbumsFragment"
+    android:name="hu.mrolcsi.muzik.library.albums.AlbumsFragment"
     tools:layout="@layout/fragment_albums">
 
     <action android:id="@+id/action_albums_to_songs"
@@ -67,7 +67,7 @@
 
   <fragment android:id="@+id/navigation_albumsByArtist"
     android:label="@string/albums_title"
-    android:name="hu.mrolcsi.android.lyricsplayer.library.albums.AlbumsFragment"
+    android:name="hu.mrolcsi.muzik.library.albums.AlbumsFragment"
     tools:layout="@layout/fragment_albums">
 
     <argument android:name="artistKey"
@@ -91,14 +91,14 @@
 
   <fragment android:id="@+id/navigation_songs"
     android:label="@string/songs_title"
-    android:name="hu.mrolcsi.android.lyricsplayer.library.songs.SongsFragment"
+    android:name="hu.mrolcsi.muzik.library.songs.SongsFragment"
     tools:layout="@layout/fragment_songs">
 
   </fragment>
 
   <fragment android:id="@+id/navigation_songsFromAlbum"
     android:label="@string/songs_title"
-    android:name="hu.mrolcsi.android.lyricsplayer.library.songs.SongsFragment"
+    android:name="hu.mrolcsi.muzik.library.songs.SongsFragment"
     tools:layout="@layout/fragment_songs">
 
     <argument android:name="artistKey"

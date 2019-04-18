@@ -51,7 +51,7 @@
     android:layout_width="0dp"
     android:layout_height="wrap_content"
     android:elevation="@dimen/bottom_navigation_elevation"
-    android:name="hu.mrolcsi.android.lyricsplayer.library.MiniPlayerFragment"
+    android:name="hu.mrolcsi.muzik.library.MiniPlayerFragment"
     app:elevation="@dimen/bottom_navigation_elevation"
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toEndOf="parent"

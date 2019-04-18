@@ -9,7 +9,7 @@ apply from: "https://gist.githubusercontent.com/mrolcsi/588d5dd7a309fab501fc/raw
 android {
     compileSdkVersion 28
     defaultConfig {
-        applicationId "hu.mrolcsi.android.lyricsplayer"
+        applicationId "hu.mrolcsi.muzik"
         minSdkVersion 21
         targetSdkVersion 28
         versionCode makeVersionCode()
