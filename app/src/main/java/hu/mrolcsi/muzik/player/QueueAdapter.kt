@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.DiffCallbackRepository
+import hu.mrolcsi.muzik.common.glide.GlideApp
 import hu.mrolcsi.muzik.extensions.media.albumArt
 import hu.mrolcsi.muzik.extensions.media.from
 import hu.mrolcsi.muzik.theme.Theme

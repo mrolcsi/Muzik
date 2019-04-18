@@ -42,6 +42,7 @@ import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.OnRepeatTouchListener
+import hu.mrolcsi.muzik.common.glide.GlideApp
 import hu.mrolcsi.muzik.common.pager.PagerSnapHelperVerbose
 import hu.mrolcsi.muzik.common.pager.RVPageScrollState
 import hu.mrolcsi.muzik.common.pager.RVPagerSnapHelperListenable

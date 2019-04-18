@@ -22,6 +22,7 @@ import androidx.navigation.findNavController
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.OnSwipeTouchListener
+import hu.mrolcsi.muzik.common.glide.GlideApp
 import hu.mrolcsi.muzik.extensions.media.albumArt
 import hu.mrolcsi.muzik.extensions.media.artist
 import hu.mrolcsi.muzik.extensions.media.duration
