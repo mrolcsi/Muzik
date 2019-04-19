@@ -5,12 +5,12 @@ import android.os.AsyncTask
 import android.support.v4.media.MediaBrowserCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import hu.mrolcsi.muzik.extensions.media.albumKey
-import hu.mrolcsi.muzik.extensions.media.artistKey
-import hu.mrolcsi.muzik.extensions.media.trackNumber
 import hu.mrolcsi.muzik.extensions.switchMap
 import hu.mrolcsi.muzik.library.SessionViewModel
 import hu.mrolcsi.muzik.service.LPBrowserService
+import hu.mrolcsi.muzik.service.extensions.media.albumKey
+import hu.mrolcsi.muzik.service.extensions.media.artistKey
+import hu.mrolcsi.muzik.service.extensions.media.trackNumber
 
 class SongsViewModel(app: Application) : SessionViewModel(app) {
 

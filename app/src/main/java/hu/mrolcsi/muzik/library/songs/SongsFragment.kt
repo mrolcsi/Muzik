@@ -17,9 +17,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.extensions.OnItemClickListener
-import hu.mrolcsi.muzik.extensions.media.addQueueItems
-import hu.mrolcsi.muzik.extensions.media.playFromDescription
 import hu.mrolcsi.muzik.service.exoplayer.ExoPlayerHolder
+import hu.mrolcsi.muzik.service.extensions.media.addQueueItems
+import hu.mrolcsi.muzik.service.extensions.media.playFromDescription
 import hu.mrolcsi.muzik.theme.ThemeManager
 import kotlinx.android.synthetic.main.fragment_songs.*
 

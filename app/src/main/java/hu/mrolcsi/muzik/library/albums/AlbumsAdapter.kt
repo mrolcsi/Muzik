@@ -15,8 +15,8 @@ import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.muzik.BuildConfig
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.DiffCallbackRepository
-import hu.mrolcsi.muzik.extensions.media.artist
-import hu.mrolcsi.muzik.extensions.media.artistKey
+import hu.mrolcsi.muzik.service.extensions.media.artist
+import hu.mrolcsi.muzik.service.extensions.media.artistKey
 import hu.mrolcsi.muzik.theme.Theme
 import hu.mrolcsi.muzik.theme.ThemeManager
 

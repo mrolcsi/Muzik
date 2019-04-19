@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package hu.mrolcsi.muzik.extensions.media
+package hu.mrolcsi.muzik.service.extensions.media
 
 import android.support.v4.media.session.PlaybackStateCompat
 

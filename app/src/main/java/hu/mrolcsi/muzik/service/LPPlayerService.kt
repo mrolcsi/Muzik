@@ -24,13 +24,14 @@ import hu.mrolcsi.muzik.MainActivity
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.database.playqueue.PlayQueueDatabase
 import hu.mrolcsi.muzik.database.playqueue.entities.LastPlayed
-import hu.mrolcsi.muzik.extensions.media.addQueueItems
-import hu.mrolcsi.muzik.extensions.media.albumArt
-import hu.mrolcsi.muzik.extensions.media.isSkipToNextEnabled
-import hu.mrolcsi.muzik.extensions.media.prepareFromDescription
-import hu.mrolcsi.muzik.extensions.media.setShuffleMode
 import hu.mrolcsi.muzik.service.exoplayer.ExoPlayerHolder
 import hu.mrolcsi.muzik.service.exoplayer.notification.ExoNotificationManager
+import hu.mrolcsi.muzik.service.extensions.database.toDescription
+import hu.mrolcsi.muzik.service.extensions.media.addQueueItems
+import hu.mrolcsi.muzik.service.extensions.media.albumArt
+import hu.mrolcsi.muzik.service.extensions.media.isSkipToNextEnabled
+import hu.mrolcsi.muzik.service.extensions.media.prepareFromDescription
+import hu.mrolcsi.muzik.service.extensions.media.setShuffleMode
 import hu.mrolcsi.muzik.theme.ThemeManager
 
 class LPPlayerService : LPBrowserService() {
@@ -172,7 +173,7 @@ class LPPlayerService : LPBrowserService() {
           val queue = PlayQueueDatabase.getInstance(applicationContext)
             .getPlayQueueDao()
             .getQueue()
-            .map { it.createDescription() }
+            .map { it.toDescription() }
 
           Log.d(LOG_TAG, "Loaded queue from database: $queue")
 

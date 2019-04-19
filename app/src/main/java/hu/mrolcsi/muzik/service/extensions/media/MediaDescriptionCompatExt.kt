@@ -1,6 +1,6 @@
 @file:Suppress("unused")
 
-package hu.mrolcsi.muzik.extensions.media
+package hu.mrolcsi.muzik.service.extensions.media
 
 import android.graphics.Bitmap
 import android.provider.MediaStore

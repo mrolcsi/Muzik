@@ -14,8 +14,8 @@ import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.DiffCallbackRepository
 import hu.mrolcsi.muzik.common.glide.GlideApp
-import hu.mrolcsi.muzik.extensions.media.albumArt
-import hu.mrolcsi.muzik.extensions.media.from
+import hu.mrolcsi.muzik.service.extensions.media.albumArt
+import hu.mrolcsi.muzik.service.extensions.media.from
 import hu.mrolcsi.muzik.theme.Theme
 import hu.mrolcsi.muzik.theme.ThemeManager
 import kotlinx.android.extensions.LayoutContainer

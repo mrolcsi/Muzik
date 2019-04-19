@@ -20,8 +20,8 @@ import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.database.playqueue.PlayQueueDatabase
 import hu.mrolcsi.muzik.extensions.OnItemClickListener
-import hu.mrolcsi.muzik.extensions.media.isPlaying
 import hu.mrolcsi.muzik.player.PlayerViewModel
+import hu.mrolcsi.muzik.service.extensions.media.isPlaying
 import hu.mrolcsi.muzik.theme.Theme
 import hu.mrolcsi.muzik.theme.ThemeManager
 import kotlinx.android.synthetic.main.fragment_playlist.*

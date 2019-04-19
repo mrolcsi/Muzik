@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/LyricsPlayer-v2.iml" filepath="$PROJECT_DIR$/LyricsPlayer-v2.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/database/database.iml" filepath="$PROJECT_DIR$/database/database.iml" />
       <module fileurl="file://$PROJECT_DIR$/ExoPlayer/extensions/cast/exoplayer-extension-cast.iml" filepath="$PROJECT_DIR$/ExoPlayer/extensions/cast/exoplayer-extension-cast.iml" />
       <module fileurl="file://$PROJECT_DIR$/ExoPlayer/extensions/cronet/exoplayer-extension-cronet.iml" filepath="$PROJECT_DIR$/ExoPlayer/extensions/cronet/exoplayer-extension-cronet.iml" />
       <module fileurl="file://$PROJECT_DIR$/ExoPlayer/extensions/ffmpeg/exoplayer-extension-ffmpeg.iml" filepath="$PROJECT_DIR$/ExoPlayer/extensions/ffmpeg/exoplayer-extension-ffmpeg.iml" />

@@ -11,10 +11,10 @@ import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import hu.mrolcsi.muzik.BuildConfig
 import hu.mrolcsi.muzik.R
-import hu.mrolcsi.muzik.extensions.media.albumArt
-import hu.mrolcsi.muzik.extensions.media.artist
-import hu.mrolcsi.muzik.extensions.media.from
-import hu.mrolcsi.muzik.extensions.media.title
+import hu.mrolcsi.muzik.service.extensions.media.albumArt
+import hu.mrolcsi.muzik.service.extensions.media.artist
+import hu.mrolcsi.muzik.service.extensions.media.from
+import hu.mrolcsi.muzik.service.extensions.media.title
 
 class ExoNotificationManager(
   context: Context,

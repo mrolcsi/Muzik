@@ -9,8 +9,8 @@ import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
-import hu.mrolcsi.muzik.extensions.media.albumArt
 import hu.mrolcsi.muzik.service.LPPlayerService
+import hu.mrolcsi.muzik.service.extensions.media.albumArt
 
 abstract class SessionViewModel(app: Application) : AndroidViewModel(app) {
 

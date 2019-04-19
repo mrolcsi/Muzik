@@ -11,9 +11,9 @@ import android.util.Log
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.Timeline
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
-import hu.mrolcsi.muzik.extensions.media.albumArt
-import hu.mrolcsi.muzik.extensions.media.from
-import hu.mrolcsi.muzik.extensions.media.id
+import hu.mrolcsi.muzik.service.extensions.media.albumArt
+import hu.mrolcsi.muzik.service.extensions.media.from
+import hu.mrolcsi.muzik.service.extensions.media.id
 
 class ExoMetadataProvider(
   private val mediaController: MediaControllerCompat,

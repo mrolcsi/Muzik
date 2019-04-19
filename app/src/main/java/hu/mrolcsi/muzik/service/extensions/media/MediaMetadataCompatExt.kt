@@ -17,7 +17,7 @@
 @file:Suppress("unused")
 @file:SuppressLint("WrongConstant")
 
-package hu.mrolcsi.muzik.extensions.media
+package hu.mrolcsi.muzik.service.extensions.media
 
 import android.annotation.SuppressLint
 import android.graphics.Bitmap

@@ -14,8 +14,8 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.DiffCallbackRepository
-import hu.mrolcsi.muzik.extensions.media.numberOfAlbums
-import hu.mrolcsi.muzik.extensions.media.numberOfTracks
+import hu.mrolcsi.muzik.service.extensions.media.numberOfAlbums
+import hu.mrolcsi.muzik.service.extensions.media.numberOfTracks
 import hu.mrolcsi.muzik.theme.Theme
 import hu.mrolcsi.muzik.theme.ThemeManager
 

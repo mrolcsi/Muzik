@@ -24,9 +24,12 @@ interface PlayQueueDao {
   @Delete
   fun removeEntries(vararg entries: PlayQueueEntry)
 
-  @Query("DELETE FROM play_queue WHERE _id = :position")
-  fun removeEntryAtPosition(position: Int)
+  @Query("DELETE FROM play_queue WHERE _id = :id")
+  fun removeEntry(id: Long)
 
+  /**
+   * Note: range is inclusive.
+   */
   @Query("DELETE FROM play_queue WHERE _id BETWEEN :from AND :to")
   fun removeEntriesInRange(from: Int, to: Int)
 

@@ -1,4 +1,4 @@
-package hu.mrolcsi.muzik.extensions.media
+package hu.mrolcsi.muzik.service.extensions.media
 
 import android.os.Bundle
 import android.support.v4.media.MediaDescriptionCompat
