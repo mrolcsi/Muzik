@@ -16,8 +16,8 @@ import hu.mrolcsi.muzik.common.DiffCallbackRepository
 import hu.mrolcsi.muzik.common.glide.GlideApp
 import hu.mrolcsi.muzik.service.extensions.media.albumArt
 import hu.mrolcsi.muzik.service.extensions.media.from
-import hu.mrolcsi.muzik.theme.Theme
-import hu.mrolcsi.muzik.theme.ThemeManager
+import hu.mrolcsi.muzik.service.theme.Theme
+import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.list_item_queue.*
 import java.util.concurrent.Executors

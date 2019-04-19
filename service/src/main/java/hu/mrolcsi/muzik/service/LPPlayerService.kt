@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.Notification
 import android.app.PendingIntent
 import android.app.Service
+import android.app.TaskStackBuilder
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
@@ -13,15 +14,12 @@ import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
-import androidx.core.app.TaskStackBuilder
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.media.session.MediaButtonReceiver
 import com.google.android.exoplayer2.ExoPlaybackException
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
-import hu.mrolcsi.muzik.MainActivity
-import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.database.playqueue.PlayQueueDatabase
 import hu.mrolcsi.muzik.database.playqueue.entities.LastPlayed
 import hu.mrolcsi.muzik.service.exoplayer.ExoPlayerHolder
@@ -32,7 +30,7 @@ import hu.mrolcsi.muzik.service.extensions.media.albumArt
 import hu.mrolcsi.muzik.service.extensions.media.isSkipToNextEnabled
 import hu.mrolcsi.muzik.service.extensions.media.prepareFromDescription
 import hu.mrolcsi.muzik.service.extensions.media.setShuffleMode
-import hu.mrolcsi.muzik.theme.ThemeManager
+import hu.mrolcsi.muzik.service.theme.ThemeManager
 
 class LPPlayerService : LPBrowserService() {
 
@@ -56,16 +54,11 @@ class LPPlayerService : LPBrowserService() {
 
     Log.i(LOG_TAG, "onCreate()")
 
-    // Build a PendingIntent that can be used to launch the PlayerFragment.
-    val playerActivityPendingIntent = TaskStackBuilder.create(this)
-      // add all of DetailsActivity's parents to the stack,
-      // followed by DetailsActivity itself
-      // TODO: deep link to PlayerFragment?
-      .addNextIntentWithParentStack(Intent(this, MainActivity::class.java))
-      .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)
-
     // Create a MediaSessionCompat
     mMediaSession = MediaSessionCompat(this, LOG_TAG).apply {
+      val playerActivityPendingIntent = TaskStackBuilder.create(this@LPPlayerService)
+        .addNextIntent(Intent(ACTION_OPEN_PLAYER))
+        .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)
       setSessionActivity(playerActivityPendingIntent)
 
       // Set the session's token so that client activities can communicate with it.
@@ -233,6 +226,8 @@ class LPPlayerService : LPBrowserService() {
   }
 
   companion object {
-    const val LOG_TAG = "LPPlayerService"
+    private const val LOG_TAG = "LPPlayerService"
+
+    const val ACTION_OPEN_PLAYER = "hu.mrolcsi.muzik.OPEN_PLAYER"
   }
 }

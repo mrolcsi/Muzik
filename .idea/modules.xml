@@ -26,6 +26,7 @@
       <module fileurl="file://$PROJECT_DIR$/ExoPlayer/library/ui/exoplayer-library-ui.iml" filepath="$PROJECT_DIR$/ExoPlayer/library/ui/exoplayer-library-ui.iml" />
       <module fileurl="file://$PROJECT_DIR$/ExoPlayer/testutils/exoplayer-testutils.iml" filepath="$PROJECT_DIR$/ExoPlayer/testutils/exoplayer-testutils.iml" />
       <module fileurl="file://$PROJECT_DIR$/ExoPlayer/testutils_robolectric/exoplayer-testutils-robolectric.iml" filepath="$PROJECT_DIR$/ExoPlayer/testutils_robolectric/exoplayer-testutils-robolectric.iml" />
+      <module fileurl="file://$PROJECT_DIR$/service/service.iml" filepath="$PROJECT_DIR$/service/service.iml" />
     </modules>
   </component>
 </project>

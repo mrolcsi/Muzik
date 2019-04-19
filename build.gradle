@@ -17,8 +17,12 @@ buildscript {
 
         // Core
         coreKtxVersion = '1.1.0-alpha05'
+        appCompatVersion = '1.1.0-alpha04'
         lifecycleVersion = '2.1.0-alpha04'
         liveDataTestingVersion = '1.1.0'
+
+        // Media
+        mediaVersion = '1.1.0-alpha04'
 
         // Navigation
         navigationVersion = "2.0.0"

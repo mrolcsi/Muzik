@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.player.PlayerViewModel
 import hu.mrolcsi.muzik.service.extensions.media.albumArt
+import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.debug.activity_theme_test.*
 import kotlinx.android.synthetic.debug.list_item_swatch.*

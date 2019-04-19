@@ -16,8 +16,8 @@ import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.DiffCallbackRepository
 import hu.mrolcsi.muzik.service.extensions.media.numberOfAlbums
 import hu.mrolcsi.muzik.service.extensions.media.numberOfTracks
-import hu.mrolcsi.muzik.theme.Theme
-import hu.mrolcsi.muzik.theme.ThemeManager
+import hu.mrolcsi.muzik.service.theme.Theme
+import hu.mrolcsi.muzik.service.theme.ThemeManager
 
 class ArtistsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, ArtistsAdapter.ArtistHolder>(
   DiffCallbackRepository.mediaItemCallback

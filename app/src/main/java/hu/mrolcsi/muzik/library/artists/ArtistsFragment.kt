@@ -10,7 +10,7 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.muzik.R
-import hu.mrolcsi.muzik.theme.ThemeManager
+import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.synthetic.main.fragment_artists.*
 
 class ArtistsFragment : Fragment() {

@@ -17,8 +17,8 @@ import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.DiffCallbackRepository
 import hu.mrolcsi.muzik.service.extensions.media.artist
 import hu.mrolcsi.muzik.service.extensions.media.artistKey
-import hu.mrolcsi.muzik.theme.Theme
-import hu.mrolcsi.muzik.theme.ThemeManager
+import hu.mrolcsi.muzik.service.theme.Theme
+import hu.mrolcsi.muzik.service.theme.ThemeManager
 
 class AlbumsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, AlbumsAdapter.AlbumHolder>(
   DiffCallbackRepository.mediaItemCallback

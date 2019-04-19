@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+  package="hu.mrolcsi.muzik">
+
+  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+
+  <application>
+
+    <activity android:name=".theme.ThemeTestActivity"
+      android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
+
+  </application>
+
+</manifest>

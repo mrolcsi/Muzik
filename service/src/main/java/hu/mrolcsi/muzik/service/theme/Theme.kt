@@ -1,4 +1,4 @@
-package hu.mrolcsi.muzik.theme
+package hu.mrolcsi.muzik.service.theme
 
 import android.content.res.ColorStateList
 import android.graphics.Color
@@ -6,7 +6,6 @@ import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.RippleDrawable
 import androidx.palette.graphics.Palette
-import hu.mrolcsi.muzik.extensions.toColorHex
 import org.json.JSONObject
 
 data class Theme(
@@ -79,6 +78,8 @@ data class Theme(
     json.put(STATUS_BAR_COLOR, statusBarColor)
     return json
   }
+
+  fun Int.toColorHex() = String.format("#%X", this)
 
   companion object {
     const val SUBTITLE_ALPHA = 0.8f

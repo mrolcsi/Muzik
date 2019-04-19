@@ -1,4 +1,4 @@
-package hu.mrolcsi.muzik.theme
+package hu.mrolcsi.muzik.service.theme
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -13,7 +13,7 @@ import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.get
 import androidx.lifecycle.MutableLiveData
 import androidx.palette.graphics.Palette
-import hu.mrolcsi.muzik.R
+import hu.mrolcsi.muzik.service.R
 import org.json.JSONObject
 import java.util.concurrent.Executors
 
@@ -212,7 +212,8 @@ class ThemeManager(private val sharedPrefs: SharedPreferences) {
       if (!Companion::mPlaceholderCoverArt.isInitialized) {
         mPlaceholderCoverArt = BitmapFactory.decodeResource(context.resources, R.drawable.placeholder_cover_art)
       }
-      return instance ?: ThemeManager(PreferenceManager.getDefaultSharedPreferences(context)).also { instance = it }
+      return instance
+        ?: ThemeManager(PreferenceManager.getDefaultSharedPreferences(context)).also { instance = it }
     }
   }
 

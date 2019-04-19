@@ -20,7 +20,7 @@ import hu.mrolcsi.muzik.extensions.OnItemClickListener
 import hu.mrolcsi.muzik.service.exoplayer.ExoPlayerHolder
 import hu.mrolcsi.muzik.service.extensions.media.addQueueItems
 import hu.mrolcsi.muzik.service.extensions.media.playFromDescription
-import hu.mrolcsi.muzik.theme.ThemeManager
+import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.synthetic.main.fragment_songs.*
 
 class SongsFragment : Fragment() {

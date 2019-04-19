@@ -22,8 +22,8 @@ import hu.mrolcsi.muzik.database.playqueue.PlayQueueDatabase
 import hu.mrolcsi.muzik.extensions.OnItemClickListener
 import hu.mrolcsi.muzik.player.PlayerViewModel
 import hu.mrolcsi.muzik.service.extensions.media.isPlaying
-import hu.mrolcsi.muzik.theme.Theme
-import hu.mrolcsi.muzik.theme.ThemeManager
+import hu.mrolcsi.muzik.service.theme.Theme
+import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.synthetic.main.fragment_playlist.*
 
 class PlaylistFragment : Fragment() {

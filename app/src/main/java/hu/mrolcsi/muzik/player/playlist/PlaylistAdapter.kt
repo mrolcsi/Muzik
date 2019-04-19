@@ -12,8 +12,8 @@ import hu.mrolcsi.muzik.common.DiffCallbackRepository
 import hu.mrolcsi.muzik.database.playqueue.entities.PlayQueueEntry
 import hu.mrolcsi.muzik.extensions.OnItemClickListener
 import hu.mrolcsi.muzik.extensions.millisecondsToTimeStamp
-import hu.mrolcsi.muzik.theme.Theme
-import hu.mrolcsi.muzik.theme.ThemeManager
+import hu.mrolcsi.muzik.service.theme.Theme
+import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.list_item_playlist.*
 import kotlin.properties.Delegates

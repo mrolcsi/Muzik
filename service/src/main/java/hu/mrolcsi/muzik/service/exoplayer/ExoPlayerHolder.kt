@@ -37,12 +37,12 @@ import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.util.ErrorMessageProvider
 import com.google.android.exoplayer2.util.Util
-import hu.mrolcsi.muzik.BuildConfig
-import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.database.playqueue.PlayQueueDatabase
 import hu.mrolcsi.muzik.database.playqueue.entities.LastPlayed
 import hu.mrolcsi.muzik.database.playqueue.entities.PlayQueueEntry
 import hu.mrolcsi.muzik.service.BecomingNoisyReceiver
+import hu.mrolcsi.muzik.service.BuildConfig
+import hu.mrolcsi.muzik.service.R
 import hu.mrolcsi.muzik.service.extensions.database.fromDescription
 import hu.mrolcsi.muzik.service.extensions.media.mediaPath
 import java.io.File

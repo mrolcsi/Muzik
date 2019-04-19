@@ -9,8 +9,8 @@ import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
-import hu.mrolcsi.muzik.BuildConfig
-import hu.mrolcsi.muzik.R
+import hu.mrolcsi.muzik.service.BuildConfig
+import hu.mrolcsi.muzik.service.R
 import hu.mrolcsi.muzik.service.extensions.media.albumArt
 import hu.mrolcsi.muzik.service.extensions.media.artist
 import hu.mrolcsi.muzik.service.extensions.media.from

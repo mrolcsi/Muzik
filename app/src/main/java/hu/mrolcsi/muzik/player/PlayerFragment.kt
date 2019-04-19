@@ -52,7 +52,6 @@ import hu.mrolcsi.muzik.extensions.applyColorToNavigationBarIcons
 import hu.mrolcsi.muzik.extensions.applyColorToStatusBarIcons
 import hu.mrolcsi.muzik.extensions.millisecondsToTimeStamp
 import hu.mrolcsi.muzik.extensions.secondsToTimeStamp
-import hu.mrolcsi.muzik.extensions.toColorHex
 import hu.mrolcsi.muzik.service.extensions.media.albumArt
 import hu.mrolcsi.muzik.service.extensions.media.duration
 import hu.mrolcsi.muzik.service.extensions.media.isPlaying
@@ -60,8 +59,8 @@ import hu.mrolcsi.muzik.service.extensions.media.isSkipToNextEnabled
 import hu.mrolcsi.muzik.service.extensions.media.isSkipToPreviousEnabled
 import hu.mrolcsi.muzik.service.extensions.media.startProgressUpdater
 import hu.mrolcsi.muzik.service.extensions.media.stopProgressUpdater
-import hu.mrolcsi.muzik.theme.Theme
-import hu.mrolcsi.muzik.theme.ThemeManager
+import hu.mrolcsi.muzik.service.theme.Theme
+import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.synthetic.main.content_player.*
 import kotlinx.android.synthetic.main.fragment_player.*
 
@@ -260,8 +259,8 @@ class PlayerFragment : Fragment() {
             Log.v(
               LOG_TAG,
               "onThemeChanged(" +
-                  "backgroundColor=${backgroundColor.toColorHex()}, " +
-                  "themeColor=${it.primaryBackgroundColor.toColorHex()}" +
+                  "backgroundColor=${String.format("#%X", backgroundColor)}, " +
+                  "themeColor=${String.format("#%X", it.primaryBackgroundColor)}" +
                   ")"
             )
             if (backgroundColor != it.primaryBackgroundColor) {

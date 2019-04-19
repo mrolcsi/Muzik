@@ -34,8 +34,8 @@ import hu.mrolcsi.muzik.service.extensions.media.isSkipToPreviousEnabled
 import hu.mrolcsi.muzik.service.extensions.media.startProgressUpdater
 import hu.mrolcsi.muzik.service.extensions.media.stopProgressUpdater
 import hu.mrolcsi.muzik.service.extensions.media.title
-import hu.mrolcsi.muzik.theme.Theme
-import hu.mrolcsi.muzik.theme.ThemeManager
+import hu.mrolcsi.muzik.service.theme.Theme
+import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.synthetic.main.fragment_miniplayer.*
 
 class MiniPlayerFragment : Fragment() {

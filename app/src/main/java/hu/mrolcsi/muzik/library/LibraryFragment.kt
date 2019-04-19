@@ -22,8 +22,8 @@ import hu.mrolcsi.muzik.extensions.applyColorToNavigationBarIcons
 import hu.mrolcsi.muzik.extensions.applyColorToStatusBarIcons
 import hu.mrolcsi.muzik.library.albums.AlbumsFragmentArgs
 import hu.mrolcsi.muzik.library.songs.SongsFragmentArgs
-import hu.mrolcsi.muzik.theme.Theme
-import hu.mrolcsi.muzik.theme.ThemeManager
+import hu.mrolcsi.muzik.service.theme.Theme
+import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.synthetic.main.fragment_library.*
 
 class LibraryFragment : Fragment() {
