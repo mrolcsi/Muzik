@@ -1,19 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2006 The Android Open Source Project
-
-     Licensed under the Apache License, Version 2.0 (the "License");
-     you may not use this file except in compliance with the License.
-     You may obtain a copy of the License at
-
-          http://www.apache.org/licenses/LICENSE-2.0
-
-     Unless required by applicable law or agreed to in writing, software
-     distributed under the License is distributed on an "AS IS" BASIS,
-     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-     See the License for the specific language governing permissions and
-     limitations under the License.
--->
-
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:app="http://schemas.android.com/apk/res-auto"
   xmlns:tools="http://schemas.android.com/tools"
@@ -22,48 +7,72 @@
   android:background="?android:attr/selectableItemBackground"
   android:minHeight="?attr/listPreferredItemHeight">
 
+  <ImageView
+    android:id="@+id/imgCoverArt"
+    android:layout_width="?attr/listPreferredItemHeightLarge"
+    android:layout_height="?attr/listPreferredItemHeightLarge"
+    android:layout_marginTop="1dp"
+    android:layout_marginBottom="1dp"
+    android:contentDescription="@string/contentDescription_coverArt"
+    android:scaleType="centerCrop"
+    android:visibility="gone"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintDimensionRatio="1:1"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent"
+    app:layout_constraintVertical_bias="0.0"
+    tools:srcCompat="@tools:sample/avatars"/>
+
   <TextView
     android:id="@+id/tvTrackNumber"
     android:layout_width="?attr/listPreferredItemHeightSmall"
     android:layout_height="wrap_content"
     android:layout_marginTop="16dp"
     android:layout_marginBottom="16dp"
-    android:layout_marginStart="16dp"
+    android:layout_marginStart="8dp"
     android:gravity="center"
     android:textAppearance="?attr/textAppearanceListItem"
     app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="@+id/barrier"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent"
     tools:text="12"/>
 
-  <TextView android:id="@+id/tvTitle"
-    android:layout_width="0dp"
+  <androidx.constraintlayout.widget.Barrier android:id="@+id/barrier"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_marginTop="16dp"
-    android:layout_marginStart="8dp"
-    android:layout_marginEnd="16dp"
-    android:textAppearance="?attr/textAppearanceListItem"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toEndOf="@+id/tvTrackNumber"
-    app:layout_constraintTop_toTopOf="parent"
-    app:layout_goneMarginStart="16dp"
-    tools:text="Title"/>
+    app:barrierDirection="end"
+    app:constraint_referenced_ids="imgCoverArt,tvTrackNumber"/>
 
-  <TextView android:id="@+id/tvSubtitle"
+  <TextView android:id="@+id/tvSongTitle"
     android:layout_width="0dp"
     android:layout_height="wrap_content"
     android:layout_marginTop="8dp"
-    android:layout_marginBottom="16dp"
+    android:layout_marginStart="8dp"
+    android:layout_marginEnd="16dp"
+    android:textAppearance="?attr/textAppearanceListItem"
+    app:layout_constraintBottom_toTopOf="@+id/tvSongArtist"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintHorizontal_bias="0.5"
+    app:layout_constraintStart_toEndOf="@+id/barrier"
+    app:layout_constraintTop_toTopOf="parent"
+    app:layout_constraintVertical_bias="0.0"
+    tools:text="Song Title"/>
+
+  <TextView android:id="@+id/tvSongArtist"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="8dp"
+    android:layout_marginBottom="8dp"
     android:layout_marginStart="8dp"
     android:layout_marginEnd="16dp"
     android:alpha="0.6"
     android:textAppearance="?attr/textAppearanceListItemSecondary"
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toEndOf="@+id/tvTrackNumber"
-    app:layout_constraintTop_toBottomOf="@+id/tvTitle"
-    app:layout_constraintVertical_bias="0.0"
-    app:layout_goneMarginStart="16dp"
-    tools:text="Subtitle"/>
+    app:layout_constraintHorizontal_bias="0.5"
+    app:layout_constraintStart_toEndOf="@+id/barrier"
+    app:layout_constraintTop_toBottomOf="@+id/tvSongTitle"
+    tools:text="Song Artist"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
