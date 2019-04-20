@@ -7,55 +7,69 @@
   android:layout_width="match_parent"
   android:layout_height="match_parent"
   android:animateLayoutChanges="true"
+  android:fitsSystemWindows="true"
+  android:orientation="vertical"
   tools:context=".library.LibraryFragment">
 
-  <androidx.appcompat.widget.Toolbar
-    android:id="@+id/libraryToolbar"
-    android:layout_width="match_parent"
-    android:layout_height="?attr/actionBarSize"
-    android:background="?attr/colorPrimary"
-    android:elevation="@dimen/action_bar_elevation"
-    app:elevation="@dimen/action_bar_elevation"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="parent"/>
-
-  <fragment
-    android:id="@+id/library_nav_host"
+  <androidx.coordinatorlayout.widget.CoordinatorLayout
     android:layout_width="0dp"
     android:layout_height="0dp"
-    android:name="androidx.navigation.fragment.NavHostFragment"
-    app:defaultNavHost="true"
-    app:layout_constraintBottom_toTopOf="@+id/navigation_bar"
-    app:layout_constraintLeft_toLeftOf="parent"
-    app:layout_constraintRight_toRightOf="parent"
-    app:layout_constraintTop_toBottomOf="@+id/libraryToolbar"
-    app:navGraph="@navigation/library_navigation"/>
-
-  <com.google.android.material.bottomnavigation.BottomNavigationView
-    android:id="@+id/navigation_bar"
-    android:layout_width="0dp"
-    android:layout_height="wrap_content"
-    android:background="?attr/colorPrimaryDark"
-    android:elevation="@dimen/bottom_navigation_elevation"
-    app:elevation="@dimen/bottom_navigation_elevation"
-    app:itemIconTint="@drawable/bnv_selector"
-    app:itemTextColor="@drawable/bnv_selector"
+    android:fitsSystemWindows="true"
     app:layout_constraintBottom_toTopOf="@+id/miniPlayer"
-    app:layout_constraintLeft_toLeftOf="parent"
-    app:layout_constraintRight_toRightOf="parent"
-    app:menu="@menu/menu_navigation"/>
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent"
+    tools:context=".MainActivity">
+
+    <com.google.android.material.appbar.AppBarLayout
+      android:id="@+id/app_bar"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+
+      <androidx.appcompat.widget.Toolbar
+        android:id="@+id/libraryToolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        app:layout_scrollFlags="scroll|enterAlways|snap"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <fragment
+      android:id="@+id/library_nav_host"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:paddingBottom="?attr/actionBarSize"
+      android:name="androidx.navigation.fragment.NavHostFragment"
+      app:defaultNavHost="true"
+      app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
+      app:navGraph="@navigation/library_navigation"/>
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+      android:id="@+id/navigation_bar"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_gravity="bottom|end"
+      android:background="?attr/colorPrimaryDark"
+      app:itemIconTint="@drawable/bnv_selector"
+      app:itemTextColor="@drawable/bnv_selector"
+      app:layout_behavior=".common.coordinator.ScrollDownBehavior"
+      app:menu="@menu/menu_navigation"/>
+
+  </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
   <fragment
     android:id="@+id/miniPlayer"
-    android:layout_width="0dp"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:elevation="@dimen/bottom_navigation_elevation"
+    android:fitsSystemWindows="true"
     android:name="hu.mrolcsi.muzik.library.MiniPlayerFragment"
-    app:elevation="@dimen/bottom_navigation_elevation"
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
     tools:layout="@layout/fragment_miniplayer"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
+
