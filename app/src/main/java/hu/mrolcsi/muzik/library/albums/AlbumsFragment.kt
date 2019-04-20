@@ -1,21 +1,20 @@
 package hu.mrolcsi.muzik.library.albums
 
+import android.animation.ValueAnimator
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.navArgs
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.muzik.R
+import hu.mrolcsi.muzik.service.theme.Theme
 import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.synthetic.main.fragment_albums.*
-
-// see: https://stackoverflow.com/a/53999441
 
 class AlbumsFragment : Fragment() {
 
@@ -37,8 +36,7 @@ class AlbumsFragment : Fragment() {
     }
 
     ThemeManager.getInstance(requireContext()).currentTheme.observe(viewLifecycleOwner, Observer {
-      // Tell adapter to reload its views
-      mAlbumsAdapter.notifyDataSetChanged()
+      applyThemeAnimated(it)
     })
   }
 
@@ -47,7 +45,6 @@ class AlbumsFragment : Fragment() {
   }
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-    rvBrowser.layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
     rvBrowser.adapter = mAlbumsAdapter
   }
 
@@ -63,6 +60,25 @@ class AlbumsFragment : Fragment() {
       }
     } else {
       mAlbumsModel.artistFilter.value = null
+    }
+  }
+
+  private fun applyThemeAnimated(theme: Theme) {
+
+    val previousTheme = ThemeManager.getInstance(requireContext()).previousTheme
+    val animationDuration = context?.resources?.getInteger(R.integer.preferredAnimationDuration)?.toLong() ?: 300L
+
+    ValueAnimator.ofArgb(
+      previousTheme?.tertiaryBackgroundColor ?: ContextCompat.getColor(requireContext(), R.color.backgroundColor),
+      theme.tertiaryBackgroundColor
+    ).run {
+      duration = animationDuration
+      addUpdateListener {
+        val color = it.animatedValue as Int
+
+        rvBrowser?.setBackgroundColor(color)
+      }
+      start()
     }
   }
 

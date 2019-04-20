@@ -3,6 +3,7 @@
   package="hu.mrolcsi.muzik">
 
   <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
   <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
 
   <application
@@ -50,7 +51,7 @@
     <activity
       android:name="cat.ereza.customactivityoncrash.activity.DefaultErrorActivity"
       android:process=":error_activity"
-      android:theme="@style/Theme.MaterialComponents.Light"/>
+      android:theme="@style/Theme.MaterialComponents.Light.DarkActionBar"/>
 
   </application>
 

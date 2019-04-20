@@ -1,51 +1,87 @@
 package hu.mrolcsi.muzik.library.albums
 
-import android.content.res.ColorStateList
+import android.graphics.Bitmap
+import android.os.AsyncTask
 import android.support.v4.media.MediaBrowserCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
-import android.widget.Toast
-import androidx.core.graphics.ColorUtils
+import androidx.cardview.widget.CardView
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import hu.mrolcsi.muzik.BuildConfig
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.DiffCallbackRepository
+import hu.mrolcsi.muzik.common.glide.GlideApp
+import hu.mrolcsi.muzik.service.extensions.media.albumArtUri
 import hu.mrolcsi.muzik.service.extensions.media.artist
 import hu.mrolcsi.muzik.service.extensions.media.artistKey
 import hu.mrolcsi.muzik.service.theme.Theme
 import hu.mrolcsi.muzik.service.theme.ThemeManager
+import kotlinx.android.extensions.LayoutContainer
+import kotlinx.android.synthetic.main.list_item_album.*
 
 class AlbumsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, AlbumsAdapter.AlbumHolder>(
   DiffCallbackRepository.mediaItemCallback
 ) {
 
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AlbumHolder {
-    val itemView = LayoutInflater.from(parent.context).inflate(R.layout.list_item_artist, parent, false)
+    val itemView = LayoutInflater.from(parent.context).inflate(R.layout.list_item_album, parent, false)
     return AlbumHolder(itemView)
   }
 
-  override fun onBindViewHolder(holder: AlbumHolder, position: Int) {
-    val item = getItem(position)
+  override fun onBindViewHolder(holder: AlbumHolder, position: Int) = holder.bind(getItem(position))
 
-    with(holder) {
-      // Apply theme
-      ThemeManager.getInstance(holder.itemView.context).currentTheme.value?.let { theme ->
-        itemView.background = Theme.getRippleDrawable(theme.secondaryForegroundColor, theme.tertiaryBackgroundColor)
+  class AlbumHolder(override val containerView: View) : RecyclerView.ViewHolder(containerView), LayoutContainer {
 
-        tvAlbum?.setTextColor(theme.tertiaryForegroundColor)
-        tvArtist?.setTextColor(ColorUtils.setAlphaComponent(theme.tertiaryForegroundColor, Theme.SUBTITLE_OPACITY))
-
-        imgChevronRight?.imageTintList = ColorStateList.valueOf(theme.tertiaryForegroundColor)
+    private val onCoverArtReady = object : RequestListener<Bitmap> {
+      override fun onLoadFailed(
+        e: GlideException?,
+        model: Any?,
+        target: Target<Bitmap>?,
+        isFirstResource: Boolean
+      ): Boolean {
+        return false
       }
 
+      override fun onResourceReady(
+        resource: Bitmap?,
+        model: Any?,
+        target: Target<Bitmap>?,
+        dataSource: DataSource?,
+        isFirstResource: Boolean
+      ): Boolean {
+        resource?.let { bitmap ->
+          AsyncTask.execute {
+            // Generate theme from resource
+            val theme = ThemeManager.getInstance(containerView.context).createFromBitmap(bitmap)
+            containerView.post {
+              applyTheme(theme)
+            }
+          }
+        }
+
+        return false
+      }
+    }
+
+    fun bind(item: MediaBrowserCompat.MediaItem) {
+
       // Set texts
-      tvAlbum?.text = item.description.title
-      tvArtist?.text = item.description.subtitle
+      tvAlbumTitle?.text = item.description.title
+      tvAlbumArtist?.text = item.description.subtitle
+
+      // Load album art
+      GlideApp.with(imgCoverArt)
+        .asBitmap()
+        .load(item.description.albumArtUri)
+        .addListener(onCoverArtReady)
+        .into(imgCoverArt)
 
       // Set onClickListener
       if (item.mediaId == MEDIA_ID_ALL_SONGS) {
@@ -61,27 +97,25 @@ class AlbumsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, AlbumsAdapter.Al
       } else {
         itemView.setOnClickListener {
           with(it.findNavController()) {
-            try {
-              val direction = AlbumsFragmentDirections.actionAlbumsToSongs(
-                null,
-                null,
-                item.mediaId,
-                item.description.title.toString()
-              )
-              navigate(direction)
-            } catch (e: IllegalArgumentException) {
-              Toast.makeText(it.context, "Lost navigation.", Toast.LENGTH_SHORT).show()
-            }
+            val direction = AlbumsFragmentDirections.actionAlbumsToSongs(
+              null,
+              null,
+              item.mediaId,
+              item.description.title.toString()
+            )
+            navigate(direction)
           }
         }
       }
     }
-  }
 
-  class AlbumHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-    val tvAlbum: TextView? = itemView.findViewById(R.id.tvTitle)
-    val tvArtist: TextView? = itemView.findViewById(R.id.tvSubtitle)
-    val imgChevronRight: ImageView? = itemView.findViewById(R.id.imgChevronRight)
+    private fun applyTheme(theme: Theme) {
+      (itemView as CardView).setCardBackgroundColor(theme.primaryBackgroundColor)
+      itemView.foreground = Theme.getRippleDrawable(theme.primaryBackgroundColor, theme.primaryForegroundColor)
+
+      tvAlbumTitle?.setTextColor(theme.primaryForegroundColor)
+      tvAlbumArtist?.setTextColor(theme.primaryForegroundColor)
+    }
   }
 
   companion object {

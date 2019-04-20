@@ -28,8 +28,8 @@ class MainActivity : AppCompatActivity() {
 
     if (savedInstanceState == null) {
       // Initial loading
-      if (!isPermissionGranted(Manifest.permission.READ_EXTERNAL_STORAGE)) {
-        Log.d(LOG_TAG, "No permission yet. Request from user.")
+      if (!isPermissionGranted(Manifest.permission.READ_EXTERNAL_STORAGE) || !isPermissionGranted(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+        Log.d(LOG_TAG, "Missing permission. Request from user.")
         requestStoragePermission()
       } else {
         Log.d(LOG_TAG, "Permission already granted. Loading Library.")
@@ -63,14 +63,16 @@ class MainActivity : AppCompatActivity() {
       groupPermissionHint.visibility = View.VISIBLE
 
       requestPermission(
+        PERMISSION_REQUEST_CODE_EXTERNAL_STORAGE,
         Manifest.permission.READ_EXTERNAL_STORAGE,
-        PERMISSION_REQUEST_CODE_EXTERNAL_STORAGE
+        Manifest.permission.WRITE_EXTERNAL_STORAGE
       )
     } else {
       Log.d(LOG_TAG, "No need to show rationale. Request permission.")
       requestPermission(
+        PERMISSION_REQUEST_CODE_EXTERNAL_STORAGE,
         Manifest.permission.READ_EXTERNAL_STORAGE,
-        PERMISSION_REQUEST_CODE_EXTERNAL_STORAGE
+        Manifest.permission.WRITE_EXTERNAL_STORAGE
       )
     }
   }

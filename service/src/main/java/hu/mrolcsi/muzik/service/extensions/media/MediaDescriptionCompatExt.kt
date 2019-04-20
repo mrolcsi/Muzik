@@ -3,6 +3,7 @@
 package hu.mrolcsi.muzik.service.extensions.media
 
 import android.graphics.Bitmap
+import android.net.Uri
 import android.provider.MediaStore
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
@@ -42,9 +43,9 @@ inline val MediaDescriptionCompat.albumArtist: String?
 inline val MediaDescriptionCompat.numberOfSongs: Int
   get() = this.extras?.getString(MediaStore.Audio.AlbumColumns.NUMBER_OF_SONGS)?.toInt() ?: 0
 
-inline val MediaDescriptionCompat.albumArtUri: String?
-  get() = this.extras?.getString(MediaStore.Audio.AlbumColumns.ALBUM_ART)
-    ?: this.extras?.getString(MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI)
+inline val MediaDescriptionCompat.albumArtUri: Uri
+  // This ensures that the file actually gets loaded
+  get() = Uri.parse("content://media/external/audio/albumart/$id")
 
 inline val MediaDescriptionCompat.albumArt: Bitmap?
   get() = this.extras?.getParcelable(MediaMetadataCompat.METADATA_KEY_ALBUM_ART)
@@ -62,6 +63,9 @@ inline val MediaDescriptionCompat.mediaPath: String?
 inline val MediaDescriptionCompat.songTitle: String?
   get() = this.extras?.getString(MediaStore.Audio.Media.TITLE)
     ?: this.extras?.getString(MediaMetadataCompat.METADATA_KEY_TITLE)
+
+inline val MediaDescriptionCompat.coverArtUri: Uri
+  get() = Uri.parse("content://media/external/audio/media/$id/albumart")
 
 inline val MediaDescriptionCompat.trackNumber: Int
   get() = this.extras?.getString(MediaStore.Audio.Media.TRACK)?.toInt()

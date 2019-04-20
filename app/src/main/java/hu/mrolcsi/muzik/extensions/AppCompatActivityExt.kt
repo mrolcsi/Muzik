@@ -29,8 +29,8 @@ fun AppCompatActivity.isPermissionGranted(permission: String) =
 fun AppCompatActivity.shouldShowPermissionRationale(permission: String) =
   ActivityCompat.shouldShowRequestPermissionRationale(this, permission)
 
-fun AppCompatActivity.requestPermission(permission: String, requestId: Int) =
-  ActivityCompat.requestPermissions(this, arrayOf(permission), requestId)
+fun AppCompatActivity.requestPermission(requestId: Int, vararg permissions: String) =
+  ActivityCompat.requestPermissions(this, permissions, requestId)
 
 fun Activity.applyColorToStatusBarIcons(backgroundColor: Int) {
   if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
