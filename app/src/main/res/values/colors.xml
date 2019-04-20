@@ -8,9 +8,6 @@
   <color name="primaryColor">#2773e7</color>
   <color name="primaryDarkColor">#4c2773e7</color>
 
-  <color name="secondaryColor">#e77327</color>
-  <color name="secondaryColorDark">#4ce77327</color>
-
   <color name="backgroundColor">#0e0e0e</color>
 
   <color name="inactiveColor">#4cffffff</color>

@@ -15,14 +15,14 @@ abstract class LPBrowserService : MediaBrowserServiceCompat() {
   override fun onGetRoot(clientPackageName: String, clientUid: Int, rootHints: Bundle?): BrowserRoot? {
     // (Optional) Control the level of access for the specified package name.
     // You'll need to write your own logic to do this.
-    return if (allowBrowsing(clientPackageName, clientUid)) {
+    return if (allowBrowsing(clientPackageName)) {
       // Returns a root ID that clients can use with onLoadChildren() to retrieve
       // the content hierarchy.
-      MediaBrowserServiceCompat.BrowserRoot(MEDIA_ROOT_ID, null)
+      BrowserRoot(MEDIA_ROOT_ID, null)
     } else {
       // Clients can connect, but this BrowserRoot is an empty hierarchy
       // so onLoadChildren returns nothing. This disables the ability to browse for content.
-      MediaBrowserServiceCompat.BrowserRoot(EMPTY_MEDIA_ROOT_ID, null)
+      BrowserRoot(EMPTY_MEDIA_ROOT_ID, null)
     }
   }
 
@@ -205,7 +205,7 @@ abstract class LPBrowserService : MediaBrowserServiceCompat() {
 
   // --------
 
-  private fun allowBrowsing(clientPackageName: String, clientUid: Int): Boolean {
+  private fun allowBrowsing(clientPackageName: String): Boolean {
     return clientPackageName.startsWith(BuildConfig.APPLICATION_ID)
   }
 
@@ -213,11 +213,12 @@ abstract class LPBrowserService : MediaBrowserServiceCompat() {
     @Suppress("unused")
     private const val LOG_TAG = "LPBrowserService"
 
-    private const val MEDIA_ROOT_ID = LPBrowserService.MEDIA_ARTISTS_ID
-    private const val EMPTY_MEDIA_ROOT_ID = "empty_root_id"
-
     const val MEDIA_ARTISTS_ID = "media_artists"
     const val MEDIA_ALBUMS_ID = "media_albums"
     const val MEDIA_SONGS_ID = "media_songs"
+
+    private const val MEDIA_ROOT_ID = MEDIA_ARTISTS_ID
+
+    private const val EMPTY_MEDIA_ROOT_ID = "empty_root_id"
   }
 }

@@ -79,9 +79,10 @@ data class Theme(
     return json
   }
 
-  fun Int.toColorHex() = String.format("#%X", this)
+  private fun Int.toColorHex() = String.format("#%X", this)
 
   companion object {
+    @Suppress("MemberVisibilityCanBePrivate")
     const val SUBTITLE_ALPHA = 0.8f
     const val SUBTITLE_OPACITY = (255 * SUBTITLE_ALPHA).toInt()
 

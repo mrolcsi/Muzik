@@ -30,8 +30,8 @@ import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.RatingCompat
 import android.text.TextUtils
 import com.google.android.exoplayer2.source.ConcatenatingMediaSource
-import com.google.android.exoplayer2.source.ExtractorMediaSource
 import com.google.android.exoplayer2.source.MediaSource
+import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.upstream.DataSource
 import java.io.File
 
@@ -349,12 +349,12 @@ inline val MediaMetadataCompat.fullDescription: MediaDescriptionCompat
     }
 
 /**
- * Extension method for building an [ExtractorMediaSource] from a [MediaMetadataCompat] object.
+ * Extension method for building an [ProgressiveMediaSource] from a [MediaMetadataCompat] object.
  *
  * For convenience, place the [MediaDescriptionCompat] into the tag so it can be retrieved later.
  */
 fun MediaMetadataCompat.toMediaSource(dataSourceFactory: DataSource.Factory): MediaSource =
-  ExtractorMediaSource.Factory(dataSourceFactory)
+  ProgressiveMediaSource.Factory(dataSourceFactory)
     .setTag(fullDescription)
     .createMediaSource(mediaUri)
 

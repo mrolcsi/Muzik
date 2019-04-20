@@ -1,5 +1,6 @@
 package hu.mrolcsi.muzik.theme
 
+import android.annotation.SuppressLint
 import android.graphics.Color
 import android.os.Bundle
 import android.support.v4.media.session.MediaControllerCompat
@@ -52,17 +53,17 @@ class ThemeTestActivity : AppCompatActivity() {
 
     ThemeManager.getInstance(this).currentTheme.observe(this, Observer { theme ->
       // Source Palette
-      theme.sourcePalette?.let {
-        tvPaletteLightVibrant.setBackgroundColor(it.lightVibrantSwatch?.rgb ?: Color.TRANSPARENT)
-        tvPaletteVibrant.setBackgroundColor(it.vibrantSwatch?.rgb ?: Color.TRANSPARENT)
-        tvPaletteDarkVibrant.setBackgroundColor(it.darkVibrantSwatch?.rgb ?: Color.TRANSPARENT)
-        tvPaletteDominant.setBackgroundColor(it.dominantSwatch?.rgb ?: Color.TRANSPARENT)
-        tvPaletteLightMuted.setBackgroundColor(it.lightMutedSwatch?.rgb ?: Color.TRANSPARENT)
-        tvPaletteMuted.setBackgroundColor(it.mutedSwatch?.rgb ?: Color.TRANSPARENT)
-        tvPaletteDarkMuted.setBackgroundColor(it.darkMutedSwatch?.rgb ?: Color.TRANSPARENT)
+      theme.sourcePalette?.let { palette ->
+        tvPaletteLightVibrant.setBackgroundColor(palette.lightVibrantSwatch?.rgb ?: Color.TRANSPARENT)
+        tvPaletteVibrant.setBackgroundColor(palette.vibrantSwatch?.rgb ?: Color.TRANSPARENT)
+        tvPaletteDarkVibrant.setBackgroundColor(palette.darkVibrantSwatch?.rgb ?: Color.TRANSPARENT)
+        tvPaletteDominant.setBackgroundColor(palette.dominantSwatch?.rgb ?: Color.TRANSPARENT)
+        tvPaletteLightMuted.setBackgroundColor(palette.lightMutedSwatch?.rgb ?: Color.TRANSPARENT)
+        tvPaletteMuted.setBackgroundColor(palette.mutedSwatch?.rgb ?: Color.TRANSPARENT)
+        tvPaletteDarkMuted.setBackgroundColor(palette.darkMutedSwatch?.rgb ?: Color.TRANSPARENT)
 
         // Palette by pixel count
-        val paletteSorted = it.swatches.sortedByDescending { it?.population ?: 0 }
+        val paletteSorted = palette.swatches.sortedByDescending { it?.population ?: 0 }
         mAllColorsAdapter.submitList(paletteSorted)
       }
 
@@ -120,6 +121,7 @@ class ThemeTestActivity : AppCompatActivity() {
       return SwatchHolder(view)
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: SwatchHolder, position: Int) {
       val item = getItem(position)
       holder.tvSwatch.setBackgroundColor(item?.rgb ?: Color.TRANSPARENT)

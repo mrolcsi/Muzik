@@ -48,7 +48,7 @@ class PlayQueueMigrationsTest {
     // Create and validate database with new schema.
     mTestHelper.runMigrationsAndValidate(
       TEST_DB_NAME, 2, true,
-      PlayQueueMigrations.MIGRATION_1_2
+      MIGRATION_1_2
     )
 
     // Get data from db

@@ -35,8 +35,7 @@ abstract class PlayQueueDatabase : RoomDatabase() {
       return Room.databaseBuilder(context, PlayQueueDatabase::class.java, DATABASE_NAME)
         .addMigrations(
           PlayQueueMigrations.MIGRATION_1_2
-        )
-        .build()
+        ).build()
     }
   }
 }

@@ -16,7 +16,7 @@ import hu.mrolcsi.muzik.service.theme.Theme
 import hu.mrolcsi.muzik.service.theme.ThemeManager
 
 class SongsAdapter(
-  private val onItemClickListener: OnItemClickListener<MediaBrowserCompat.MediaItem, SongsAdapter.SongHolder>
+  private val onItemClickListener: OnItemClickListener<MediaBrowserCompat.MediaItem, SongHolder>
 ) : ListAdapter<MediaBrowserCompat.MediaItem, SongsAdapter.SongHolder>(
   DiffCallbackRepository.mediaItemCallback
 ) {
@@ -62,6 +62,7 @@ class SongsAdapter(
   }
 
   companion object {
+    @Suppress("unused")
     private const val LOG_TAG = "SongsAdapter"
   }
 }

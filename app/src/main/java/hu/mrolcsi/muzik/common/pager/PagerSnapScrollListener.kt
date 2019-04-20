@@ -3,13 +3,13 @@ package hu.mrolcsi.muzik.common.pager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
-open class PagerSnapScrollListener(
+class PagerSnapScrollListener(
   private val recyclerView: RecyclerView,
   private val externalListener: RVPagerStateListener, maxPages: Int
 ) : RecyclerView.OnScrollListener() {
 
-  var pageStates: MutableList<VisiblePageState> = ArrayList(maxPages)
-  var pageStatesPool = List(maxPages) {
+  private var pageStates: MutableList<VisiblePageState> = ArrayList(maxPages)
+  private var pageStatesPool = List(maxPages) {
     VisiblePageState(0, recyclerView, 0, 0, 0f)
   }
 

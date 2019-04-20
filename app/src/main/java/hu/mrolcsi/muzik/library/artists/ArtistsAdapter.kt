@@ -82,6 +82,7 @@ class ArtistsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, ArtistsAdapter.
   }
 
   companion object {
+    @Suppress("unused")
     private const val LOG_TAG = "ArtistsAdapter"
   }
 }

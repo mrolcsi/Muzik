@@ -100,7 +100,7 @@ class ThemeManager(private val sharedPrefs: SharedPreferences) {
     return theme
   }
 
-  fun createTheme(sourcePalette: Palette): Theme {
+  private fun createTheme(sourcePalette: Palette): Theme {
 
     val swatches = sourcePalette.swatches.sortedByDescending { it.population }
 

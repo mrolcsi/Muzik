@@ -82,7 +82,7 @@ class ExoNotificationManager(
     setUseStopAction(false)
     setRewindIncrementMs(0)
     setFastForwardIncrementMs(0)
-    setSmallIcon(R.drawable.ic_song)
+    setSmallIcon(R.drawable.ic_notification)
     setPlayIcon(R.drawable.ic_media_play)
     setPauseIcon(R.drawable.ic_media_pause)
     setPreviousIcon(R.drawable.ic_media_previous)

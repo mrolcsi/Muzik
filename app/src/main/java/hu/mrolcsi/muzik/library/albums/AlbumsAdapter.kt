@@ -85,6 +85,7 @@ class AlbumsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, AlbumsAdapter.Al
   }
 
   companion object {
+    @Suppress("unused")
     private const val LOG_TAG = "AlbumsAdapter"
 
     const val MEDIA_ID_ALL_SONGS = BuildConfig.APPLICATION_ID + ".ALL_SONGS"

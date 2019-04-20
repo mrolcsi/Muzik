@@ -3,7 +3,8 @@
   xmlns:app="http://schemas.android.com/apk/res-auto"
   xmlns:tools="http://schemas.android.com/tools"
   android:id="@+id/main_navigation"
-  app:startDestination="@id/navigation_library">
+  app:startDestination="@id/navigation_library"
+  tools:ignore="UnusedNavigation">
 
   <action
     android:id="@+id/action_global_to_player"

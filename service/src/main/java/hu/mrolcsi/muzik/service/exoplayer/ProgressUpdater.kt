@@ -30,6 +30,7 @@ class ProgressUpdater(
   val isEnabled get() = mUpdaterEnabled.get()
 
   companion object {
+    @Suppress("unused")
     private const val LOG_TAG = "ProgressUpdater"
 
     private const val DEFAULT_UPDATE_FREQUENCY: Long = 500 // ms

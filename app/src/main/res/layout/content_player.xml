@@ -13,6 +13,7 @@
     android:id="@+id/imgCoverArt"
     android:layout_width="0dp"
     android:layout_height="0dp"
+    android:contentDescription="@string/contentDescription_coverArt"
     android:scaleType="centerCrop"
     android:transitionName="coverArt"
     app:layout_constraintDimensionRatio="1:1"

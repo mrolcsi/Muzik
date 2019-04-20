@@ -31,6 +31,7 @@
     android:layout_marginTop="8dp"
     android:layout_marginBottom="8dp"
     android:layout_marginStart="8dp"
+    android:contentDescription="@string/notification_nowPlaying"
     android:visibility="gone"
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toStartOf="@+id/tvTitle"

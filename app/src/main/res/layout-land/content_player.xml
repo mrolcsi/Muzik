@@ -14,6 +14,7 @@
     android:layout_width="0dp"
     android:layout_height="0dp"
     android:layout_marginBottom="16dp"
+    android:contentDescription="@string/contentDescription_coverArt"
     android:scaleType="centerCrop"
     android:transitionName="coverArt"
     app:layout_constraintBottom_toTopOf="@+id/sbSongProgress"

@@ -8,8 +8,8 @@ import androidx.recyclerview.widget.RecyclerView
 
 /**
  * A [RecyclerView decorator][RecyclerView.ItemDecoration] which, if applied over a recycler view
- * with a [PagerSnapHelper][android.support.v7.widget.PagerSnapHelper] set up (i.e. that behaves like
- * a full-screen [ViewPager][android.support.v4.view.ViewPager]), allows for easily setting up gaps
+ * with a [PagerSnapHelper][androidx.recyclerview.widget.PagerSnapHelper] set up (i.e. that behaves like
+ * a full-screen [ViewPager][androidx.viewpager.widget.ViewPager]), allows for easily setting up gaps
  * between the RV's items as typically done in a cards carousel, all-the-while keeping the items
  * properly snapped to the screen's center.
  *

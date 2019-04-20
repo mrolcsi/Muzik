@@ -7,7 +7,6 @@ import android.app.Service
 import android.app.TaskStackBuilder
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.BitmapFactory
 import android.os.AsyncTask
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
@@ -33,10 +32,6 @@ import hu.mrolcsi.muzik.service.extensions.media.setShuffleMode
 import hu.mrolcsi.muzik.service.theme.ThemeManager
 
 class LPPlayerService : LPBrowserService() {
-
-  private val mPlaceholderCoverArt by lazy {
-    BitmapFactory.decodeResource(resources, R.drawable.placeholder_cover_art)
-  }
 
   // MediaSession and Player implementations
   private lateinit var mMediaSession: MediaSessionCompat
@@ -65,11 +60,7 @@ class LPPlayerService : LPBrowserService() {
       setSessionToken(sessionToken)
 
       // Enable callbacks from MediaButtons and TransportControls
-      setFlags(
-        MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS
-            or MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS
-            or MediaSessionCompat.FLAG_HANDLES_QUEUE_COMMANDS
-      )
+      setFlags(MediaSessionCompat.FLAG_HANDLES_QUEUE_COMMANDS)
 
       // Connect this session with the ExoPlayer
       mPlayerHolder = ExoPlayerHolder(applicationContext, this).also { exo ->

@@ -30,7 +30,6 @@ import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
 import com.google.android.exoplayer2.ext.mediasession.TimelineQueueEditor
 import com.google.android.exoplayer2.ext.mediasession.TimelineQueueNavigator
 import com.google.android.exoplayer2.source.ConcatenatingMediaSource
-import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.source.ShuffleOrder
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
@@ -514,19 +513,16 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
     context, Util.getUserAgent(context, BuildConfig.APPLICATION_ID)
   )
 
-  private val mQueueMediaSourceFactory = object : TimelineQueueEditor.MediaSourceFactory {
+  private val mQueueMediaSourceFactory = TimelineQueueEditor.MediaSourceFactory { description ->
+    Log.v(LOG_TAG, "createMediaSource($description) called from ${Thread.currentThread()}")
 
-    override fun createMediaSource(description: MediaDescriptionCompat): MediaSource? {
-      Log.v(LOG_TAG, "createMediaSource($description) called from ${Thread.currentThread()}")
+    // Create Metadata from Uri
+    val uri = description.mediaUri ?: Uri.fromFile(File(description.mediaPath))
 
-      // Create Metadata from Uri
-      val uri = description.mediaUri ?: Uri.fromFile(File(description.mediaPath))
+    // NOTE: ExtractorMediaSource.Factory is not reusable!
 
-      // NOTE: ExtractorMediaSource.Factory is not reusable!
-
-      // Create MediaSource from Metadata
-      return ProgressiveMediaSource.Factory(mDataSourceFactory).setTag(description).createMediaSource(uri)
-    }
+    // Create MediaSource from Metadata
+    ProgressiveMediaSource.Factory(mDataSourceFactory).setTag(description).createMediaSource(uri)
   }
 
   private val mQueueEditor = BulkTimelineQueueEditor(

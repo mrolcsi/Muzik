@@ -16,7 +16,7 @@ import hu.mrolcsi.muzik.service.extensions.media.from
 import hu.mrolcsi.muzik.service.extensions.media.id
 
 class ExoMetadataProvider(
-  private val mediaController: MediaControllerCompat,
+  mediaController: MediaControllerCompat,
   metadataExtrasPrefix: String? = null,
   private val placeholderAlbumArt: Bitmap? = null,
   private val onCacheUpdated: (MediaMetadataCompat) -> Unit = {}
