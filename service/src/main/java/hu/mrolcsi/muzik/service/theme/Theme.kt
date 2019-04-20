@@ -82,10 +82,6 @@ data class Theme(
   private fun Int.toColorHex() = String.format("#%X", this)
 
   companion object {
-    @Suppress("MemberVisibilityCanBePrivate")
-    const val SUBTITLE_ALPHA = 0.8f
-    const val SUBTITLE_OPACITY = (255 * SUBTITLE_ALPHA).toInt()
-
     const val DISABLED_ALPHA = 0.5f
     const val DISABLED_OPACITY = (255 * DISABLED_ALPHA).toInt()
 

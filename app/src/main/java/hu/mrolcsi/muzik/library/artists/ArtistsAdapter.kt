@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
-import androidx.core.graphics.ColorUtils
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -37,12 +36,7 @@ class ArtistsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, ArtistsAdapter.
         itemView.background = Theme.getRippleDrawable(theme.secondaryForegroundColor, theme.tertiaryBackgroundColor)
 
         tvArtist?.setTextColor(theme.tertiaryForegroundColor)
-        tvNumOfSongs?.setTextColor(
-          ColorUtils.setAlphaComponent(
-            theme.tertiaryForegroundColor,
-            Theme.SUBTITLE_OPACITY
-          )
-        )
+        tvNumOfSongs?.setTextColor(theme.tertiaryForegroundColor)
         imgChevronRight?.imageTintList = ColorStateList.valueOf(theme.tertiaryForegroundColor)
       }
 
