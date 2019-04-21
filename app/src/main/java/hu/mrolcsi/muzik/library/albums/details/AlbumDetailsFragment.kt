@@ -18,12 +18,9 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.transition.TransitionInflater
-import com.bumptech.glide.load.DataSource
-import com.bumptech.glide.load.engine.GlideException
-import com.bumptech.glide.request.RequestListener
-import com.bumptech.glide.request.target.Target
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.glide.GlideApp
+import hu.mrolcsi.muzik.common.glide.MuzikGlideModule
 import hu.mrolcsi.muzik.extensions.OnItemClickListener
 import hu.mrolcsi.muzik.service.exoplayer.ExoPlayerHolder
 import hu.mrolcsi.muzik.service.extensions.media.addQueueItems
@@ -77,25 +74,12 @@ class AlbumDetailsFragment : Fragment() {
     showTrackNumber = true
   }
 
-  private val onCoverArtReady = object : RequestListener<Bitmap> {
-    override fun onLoadFailed(
-      e: GlideException?,
-      model: Any?,
-      target: Target<Bitmap>?,
-      isFirstResource: Boolean
-    ): Boolean {
+  private val onCoverArtReady = object : MuzikGlideModule.SimpleRequestListener<Bitmap> {
+    override fun onLoadFailed() {
       startPostponedEnterTransition()
-
-      return false
     }
 
-    override fun onResourceReady(
-      resource: Bitmap?,
-      model: Any?,
-      target: Target<Bitmap>?,
-      dataSource: DataSource?,
-      isFirstResource: Boolean
-    ): Boolean {
+    override fun onResourceReady(resource: Bitmap?) {
       startPostponedEnterTransition()
 
       resource?.let { bitmap ->
@@ -107,7 +91,6 @@ class AlbumDetailsFragment : Fragment() {
           }
         }
       }
-      return false
     }
   }
 

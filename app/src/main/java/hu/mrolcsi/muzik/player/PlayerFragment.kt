@@ -36,13 +36,10 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.Transition
 import androidx.transition.TransitionInflater
 import androidx.transition.TransitionListenerAdapter
-import com.bumptech.glide.load.DataSource
-import com.bumptech.glide.load.engine.GlideException
-import com.bumptech.glide.request.RequestListener
-import com.bumptech.glide.request.target.Target
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.OnRepeatTouchListener
 import hu.mrolcsi.muzik.common.glide.GlideApp
+import hu.mrolcsi.muzik.common.glide.MuzikGlideModule
 import hu.mrolcsi.muzik.common.pager.PagerSnapHelperVerbose
 import hu.mrolcsi.muzik.common.pager.RVPageScrollState
 import hu.mrolcsi.muzik.common.pager.RVPagerSnapHelperListenable
@@ -95,19 +92,13 @@ class PlayerFragment : Fragment() {
   private lateinit var mSnapHelper: PagerSnapHelperVerbose
   private var mScrollState: RVPageScrollState = RVPageScrollState.IDLE
 
-  private val mGlideListener = object : RequestListener<Drawable> {
-    override fun onResourceReady(
-      resource: Drawable?, model: Any?, target: Target<Drawable>?, dataSource: DataSource?, isFirstResource: Boolean
-    ): Boolean {
+  private val mGlideListener = object : MuzikGlideModule.SimpleRequestListener<Drawable> {
+    override fun onLoadFailed() {
       startPostponedEnterTransition()
-      return false
     }
 
-    override fun onLoadFailed(
-      e: GlideException?, model: Any?, target: Target<Drawable>?, isFirstResource: Boolean
-    ): Boolean {
+    override fun onResourceReady(resource: Drawable?) {
       startPostponedEnterTransition()
-      return false
     }
   }
 

@@ -12,14 +12,11 @@ import androidx.navigation.findNavController
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.load.DataSource
-import com.bumptech.glide.load.engine.GlideException
-import com.bumptech.glide.request.RequestListener
-import com.bumptech.glide.request.target.Target
 import hu.mrolcsi.muzik.BuildConfig
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.DiffCallbackRepository
 import hu.mrolcsi.muzik.common.glide.GlideApp
+import hu.mrolcsi.muzik.common.glide.MuzikGlideModule
 import hu.mrolcsi.muzik.library.albums.details.AlbumDetailsFragmentArgs
 import hu.mrolcsi.muzik.service.extensions.media.albumArtUri
 import hu.mrolcsi.muzik.service.extensions.media.id
@@ -41,23 +38,10 @@ class AlbumsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, AlbumsAdapter.Al
 
   class AlbumHolder(override val containerView: View) : RecyclerView.ViewHolder(containerView), LayoutContainer {
 
-    private val onCoverArtReady = object : RequestListener<Bitmap> {
-      override fun onLoadFailed(
-        e: GlideException?,
-        model: Any?,
-        target: Target<Bitmap>?,
-        isFirstResource: Boolean
-      ): Boolean {
-        return false
-      }
+    private val onCoverArtReady = object : MuzikGlideModule.SimpleRequestListener<Bitmap> {
+      override fun onLoadFailed() {}
 
-      override fun onResourceReady(
-        resource: Bitmap?,
-        model: Any?,
-        target: Target<Bitmap>?,
-        dataSource: DataSource?,
-        isFirstResource: Boolean
-      ): Boolean {
+      override fun onResourceReady(resource: Bitmap?) {
         resource?.let { bitmap ->
           AsyncTask.execute {
             // Generate theme from resource
@@ -67,8 +51,6 @@ class AlbumsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, AlbumsAdapter.Al
             }
           }
         }
-
-        return false
       }
     }
 

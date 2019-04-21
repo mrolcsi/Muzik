@@ -4,18 +4,22 @@ import android.content.Context
 import android.graphics.Bitmap
 import com.bumptech.glide.GlideBuilder
 import com.bumptech.glide.annotation.GlideModule
+import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.load.engine.cache.InternalCacheDiskCacheFactory
 import com.bumptech.glide.load.engine.cache.LruResourceCache
 import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions
 import com.bumptech.glide.module.AppGlideModule
+import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.RequestOptions
+import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.request.transition.DrawableCrossFadeFactory
 import hu.mrolcsi.muzik.R
 
 
 @GlideModule
-class LPGlideModule : AppGlideModule() {
+class MuzikGlideModule : AppGlideModule() {
 
   // See: https://medium.com/@nuhkocaa/manage-all-your-glides-in-a-single-class-with-glidemodule-on-android-4856ee4983a1
 
@@ -38,6 +42,30 @@ class LPGlideModule : AppGlideModule() {
         .placeholder(null)
         .error(R.drawable.placeholder_cover_art)
     )
+  }
+
+  interface SimpleRequestListener<R> : RequestListener<R> {
+
+    override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<R>?, isFirstResource: Boolean): Boolean {
+      onLoadFailed()
+      return false
+    }
+
+    override fun onResourceReady(
+      resource: R,
+      model: Any?,
+      target: Target<R>?,
+      dataSource: DataSource?,
+      isFirstResource: Boolean
+    ): Boolean {
+      onResourceReady(resource)
+      return false
+    }
+
+    fun onLoadFailed()
+
+    fun onResourceReady(resource: R?)
+
   }
 
   companion object {
