@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -33,7 +32,7 @@ class ArtistsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, ArtistsAdapter.
     with(holder) {
       // Apply theme
       ThemeManager.getInstance(holder.itemView.context).currentTheme.value?.let { theme ->
-        itemView.background = Theme.getRippleDrawable(theme.secondaryForegroundColor, theme.tertiaryBackgroundColor)
+        itemView.background = Theme.getRippleDrawable(theme.tertiaryForegroundColor, theme.tertiaryBackgroundColor)
 
         tvArtist?.setTextColor(theme.tertiaryForegroundColor)
         tvNumOfSongs?.setTextColor(theme.tertiaryForegroundColor)
@@ -54,16 +53,7 @@ class ArtistsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, ArtistsAdapter.
       // Set onClickListener
       itemView.setOnClickListener {
         with(it.findNavController()) {
-          try {
-            val direction = ArtistsFragmentDirections.actionArtistsToAlbums(
-              item.mediaId,
-              item.description.title.toString(),
-              numberOfSongs
-            )
-            navigate(direction)
-          } catch (e: IllegalArgumentException) {
-            Toast.makeText(it.context, "Lost navigation.", Toast.LENGTH_SHORT).show()
-          }
+          // TODO: ArtistDetailsFragment
         }
       }
     }

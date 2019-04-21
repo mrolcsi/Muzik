@@ -58,7 +58,7 @@
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toBottomOf="@+id/tvAlbumTitle"
       app:layout_constraintVertical_bias="0.0"
-      tools:text="Abum Artist"/>
+      tools:text="Album Artist"/>
 
   </androidx.constraintlayout.widget.ConstraintLayout>
 

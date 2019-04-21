@@ -1,6 +1,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
   <string name="app_name">Muzik</string>
   <!-- @formatter:off -->
+  <string name="albumDetails_title">Album Details</string>
   <string name="albums_byArtist_subtitle">by %s</string>
   <string name="albums_showAllSongs">Show all songs</string>
   <string name="albums_title">Albums</string>
@@ -10,6 +11,7 @@
   <string name="artists_numberOfSongs_one" tools:ignore="PluralsCandidate">%d song</string>
   <string name="artists_numberOfSongs_other" tools:ignore="PluralsCandidate">%d songs</string>
   <string name="artists_title">Artists</string>
+  <string name="contentDescription_artistPicture">A picture of the artist</string>
   <string name="contentDescription_coverArt">Cover Art</string>
   <string name="contentDescription_missingPermission">Permission to access storage</string>
   <string name="library_grantAccessToSdCard">Grant Access to SD Card</string>

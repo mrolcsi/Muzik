@@ -23,18 +23,30 @@
                       <LayoutPositions />
                     </value>
                   </entry>
+                  <entry key="navigation_albumDetails">
+                    <value>
+                      <LayoutPositions>
+                        <option name="myPosition">
+                          <Point>
+                            <option name="x" value="256" />
+                            <option name="y" value="368" />
+                          </Point>
+                        </option>
+                      </LayoutPositions>
+                    </value>
+                  </entry>
                   <entry key="navigation_albums">
                     <value>
                       <LayoutPositions>
                         <option name="myPosition">
                           <Point>
-                            <option name="x" value="412" />
+                            <option name="x" value="12" />
                             <option name="y" value="368" />
                           </Point>
                         </option>
                         <option name="myPositions">
                           <map>
-                            <entry key="action_albums_to_songs">
+                            <entry key="action_albums_to_albumDetails">
                               <value>
                                 <LayoutPositions />
                               </value>
@@ -44,49 +56,19 @@
                       </LayoutPositions>
                     </value>
                   </entry>
-                  <entry key="navigation_albumsByArtist">
+                  <entry key="navigation_artistDetails">
                     <value>
                       <LayoutPositions>
                         <option name="myPosition">
                           <Point>
-                            <option name="x" value="412" />
+                            <option name="x" value="256" />
                             <option name="y" value="12" />
                           </Point>
-                        </option>
-                        <option name="myPositions">
-                          <map>
-                            <entry key="action_albums_to_songs">
-                              <value>
-                                <LayoutPositions />
-                              </value>
-                            </entry>
-                          </map>
                         </option>
                       </LayoutPositions>
                     </value>
                   </entry>
                   <entry key="navigation_artists">
-                    <value>
-                      <LayoutPositions>
-                        <option name="myPosition">
-                          <Point>
-                            <option name="x" value="168" />
-                            <option name="y" value="12" />
-                          </Point>
-                        </option>
-                        <option name="myPositions">
-                          <map>
-                            <entry key="action_artists_to_albums">
-                              <value>
-                                <LayoutPositions />
-                              </value>
-                            </entry>
-                          </map>
-                        </option>
-                      </LayoutPositions>
-                    </value>
-                  </entry>
-                  <entry key="navigation_songs">
                     <value>
                       <LayoutPositions>
                         <option name="myPosition">
@@ -98,13 +80,13 @@
                       </LayoutPositions>
                     </value>
                   </entry>
-                  <entry key="navigation_songsFromAlbum">
+                  <entry key="navigation_songs">
                     <value>
                       <LayoutPositions>
                         <option name="myPosition">
                           <Point>
-                            <option name="x" value="656" />
-                            <option name="y" value="54" />
+                            <option name="x" value="500" />
+                            <option name="y" value="12" />
                           </Point>
                         </option>
                       </LayoutPositions>
@@ -128,12 +110,6 @@
                   <entry key="navigation_library">
                     <value>
                       <LayoutPositions>
-                        <option name="myPosition">
-                          <Point>
-                            <option name="x" value="12" />
-                            <option name="y" value="12" />
-                          </Point>
-                        </option>
                         <option name="myPositions">
                           <map>
                             <entry key="action_library_to_player">
@@ -148,14 +124,7 @@
                   </entry>
                   <entry key="navigation_player">
                     <value>
-                      <LayoutPositions>
-                        <option name="myPosition">
-                          <Point>
-                            <option name="x" value="256" />
-                            <option name="y" value="12" />
-                          </Point>
-                        </option>
-                      </LayoutPositions>
+                      <LayoutPositions />
                     </value>
                   </entry>
                 </map>

@@ -6,19 +6,17 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import androidx.navigation.fragment.navArgs
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.service.theme.Theme
 import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.synthetic.main.fragment_albums.*
 
 class AlbumsFragment : Fragment() {
-
-  private val args: AlbumsFragmentArgs by navArgs()
 
   private lateinit var mAlbumsModel: AlbumsViewModel
 
@@ -27,12 +25,15 @@ class AlbumsFragment : Fragment() {
   override fun onActivityCreated(savedInstanceState: Bundle?) {
     super.onActivityCreated(savedInstanceState)
 
+    postponeEnterTransition()
+
     activity?.run {
-      mAlbumsModel = ViewModelProviders.of(this).get(AlbumsViewModel::class.java)
-      mAlbumsModel.albums.observe(viewLifecycleOwner, Observer { albums ->
-        Log.d(LOG_TAG, "Got items from LiveData: $albums")
-        mAlbumsAdapter.submitList(albums)
-      })
+      mAlbumsModel = ViewModelProviders.of(this).get(AlbumsViewModel::class.java).apply {
+        albums.observe(viewLifecycleOwner, Observer { albums ->
+          Log.d(LOG_TAG, "Got items from LiveData: $albums")
+          mAlbumsAdapter.submitList(albums)
+        })
+      }
     }
 
     ThemeManager.getInstance(requireContext()).currentTheme.observe(viewLifecycleOwner, Observer {
@@ -46,20 +47,14 @@ class AlbumsFragment : Fragment() {
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     rvBrowser.adapter = mAlbumsAdapter
-  }
 
-  override fun onResume() {
-    super.onResume()
-
-    if (arguments != null) {
-      if (args.artistName != null) {
-        mAlbumsModel.artistFilter.value =
-          AlbumsViewModel.ArtistInfo(args.artistKey, args.artistName, args.numberOfTracks)
-      } else {
-        mAlbumsModel.artistFilter.value = null
-      }
-    } else {
-      mAlbumsModel.artistFilter.value = null
+    rvBrowser.viewTreeObserver.run {
+      addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+        override fun onGlobalLayout() {
+          removeOnGlobalLayoutListener(this)
+          startPostponedEnterTransition()
+        }
+      })
     }
   }
 

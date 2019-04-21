@@ -16,7 +16,6 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.database.playqueue.PlayQueueDatabase
 import hu.mrolcsi.muzik.extensions.OnItemClickListener
@@ -108,7 +107,6 @@ class PlaylistFragment : Fragment() {
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     rvPlaylist.apply {
-      layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
       adapter = mPlaylistAdapter
       addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
     }

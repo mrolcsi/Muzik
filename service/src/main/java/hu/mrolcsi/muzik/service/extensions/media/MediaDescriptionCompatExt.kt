@@ -37,7 +37,7 @@ inline val MediaDescriptionCompat.album: String?
     ?: this.extras?.getString(MediaMetadataCompat.METADATA_KEY_ALBUM)
 
 inline val MediaDescriptionCompat.albumArtist: String?
-  get() = this.extras?.getString("album_artist")  // should be a constant
+  get() = this.extras?.getString("album_artist")  // MediaStore.Audio.AudioColumns.ALBUM_ARTIST
     ?: this.extras?.getString(MediaMetadataCompat.METADATA_KEY_ALBUM_ARTIST)
 
 inline val MediaDescriptionCompat.numberOfSongs: Int
@@ -49,6 +49,18 @@ inline val MediaDescriptionCompat.albumArtUri: Uri
 
 inline val MediaDescriptionCompat.albumArt: Bitmap?
   get() = this.extras?.getParcelable(MediaMetadataCompat.METADATA_KEY_ALBUM_ART)
+
+inline val MediaDescriptionCompat.albumYear: String?
+  get() {
+    val firstYear = this.extras?.getString(MediaStore.Audio.Albums.FIRST_YEAR)
+    val lastYear = this.extras?.getString(MediaStore.Audio.Albums.LAST_YEAR)
+
+    if (firstYear?.toInt() == 0 || lastYear?.toInt() == 0) return null
+
+    if (firstYear == lastYear) return firstYear
+
+    return "$firstYear - $lastYear"
+  }
 
 // Song related fields
 

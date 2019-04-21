@@ -11,6 +11,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.graphics.ColorUtils
+import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.navigation.NavController
@@ -20,8 +21,6 @@ import androidx.navigation.ui.NavigationUI
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.extensions.applyColorToNavigationBarIcons
 import hu.mrolcsi.muzik.extensions.applyColorToStatusBarIcons
-import hu.mrolcsi.muzik.library.albums.AlbumsFragmentArgs
-import hu.mrolcsi.muzik.library.songs.SongsFragmentArgs
 import hu.mrolcsi.muzik.service.theme.Theme
 import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.synthetic.main.fragment_library.*
@@ -34,7 +33,7 @@ class LibraryFragment : Fragment() {
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     libraryToolbar.setTitle(R.string.library_title)
 
-    setupNavBar(requireActivity().findNavController(R.id.library_nav_host))
+    setupNavBar(requireActivity().findNavController(R.id.libraryNavHost))
 
     ThemeManager.getInstance(requireContext()).currentTheme.observe(viewLifecycleOwner, object : Observer<Theme> {
 
@@ -74,34 +73,22 @@ class LibraryFragment : Fragment() {
     ).build()
 
     NavigationUI.setupWithNavController(libraryToolbar, navController, appBarConfig)
-    NavigationUI.setupWithNavController(navigation_bar, navController)
+    NavigationUI.setupWithNavController(navigationBar, navController)
 
     navController.addOnDestinationChangedListener { _, destination, arguments ->
       when (destination.id) {
-        R.id.navigation_artists -> {
-          libraryToolbar.subtitle = null
+        R.id.navigation_artists, R.id.navigation_albums, R.id.navigation_songs -> {
+          // Nothing for now
         }
-        R.id.navigation_albums -> {
-          libraryToolbar.subtitle = null
-        }
-        R.id.navigation_albumsByArtist -> {
-          if (arguments != null) {
-            val args = AlbumsFragmentArgs.fromBundle(arguments)
-            libraryToolbar.subtitle = getString(R.string.albums_byArtist_subtitle, args.artistName)
-          }
-        }
-        R.id.navigation_songs -> {
-          libraryToolbar.subtitle = null
-        }
-        R.id.navigation_songsFromAlbum -> {
-          if (arguments != null) {
-            val args = SongsFragmentArgs.fromBundle(arguments)
-            if (args.albumKey != null) {
-              libraryToolbar.subtitle = getString(R.string.songs_fromAlbum_subtitle, args.albumTitle)
-            } else if (args.artistKey != null) {
-              libraryToolbar.subtitle = getString(R.string.albums_byArtist_subtitle, args.artistName)
-            }
-          }
+        else -> {
+          // Apply color to back arrow
+          val theme = ThemeManager.getInstance(requireContext()).currentTheme.value
+          val color = theme?.primaryForegroundColor ?: Color.WHITE
+          libraryToolbar.navigationIcon?.setColorFilter(color, PorterDuff.Mode.SRC_IN)
+
+          // Show AppBar, hide NavigationBar
+          appBar.setExpanded(true, true)
+          ViewCompat.animate(navigationBar).translationY(navigationBar.height.toFloat()).start()
         }
       }
     }
@@ -126,7 +113,7 @@ class LibraryFragment : Fragment() {
 
     theme.secondaryBackgroundColor.also { color ->
       // BottomNavigation Background
-      navigation_bar.setBackgroundColor(color)
+      navigationBar.setBackgroundColor(color)
     }
 
     theme.tertiaryBackgroundColor.also { color ->
@@ -137,6 +124,7 @@ class LibraryFragment : Fragment() {
     theme.primaryForegroundColor.also { color ->
       // Toolbar Icon
       libraryToolbar.navigationIcon?.setColorFilter(color, PorterDuff.Mode.SRC_IN)
+      libraryToolbar.overflowIcon?.setColorFilter(color, PorterDuff.Mode.SRC_IN)
       // Title and Subtitle
       libraryToolbar.setTitleTextColor(color)
       libraryToolbar.setSubtitleTextColor(color)
@@ -154,11 +142,11 @@ class LibraryFragment : Fragment() {
           ColorUtils.setAlphaComponent(color, Theme.DISABLED_OPACITY)
         )
       )
-      navigation_bar.itemIconTintList = navigationTintList
-      navigation_bar.itemTextColor = navigationTintList
+      navigationBar.itemIconTintList = navigationTintList
+      navigationBar.itemTextColor = navigationTintList
     }
 
-    (navigation_bar.itemBackground as RippleDrawable).setTint(theme.primaryForegroundColor)
+    (navigationBar.itemBackground as RippleDrawable).setTint(theme.primaryForegroundColor)
   }
 
   private fun applyThemeAnimated(theme: Theme) {
@@ -199,7 +187,7 @@ class LibraryFragment : Fragment() {
         val color = it.animatedValue as Int
 
         // BottomNavigation Background
-        navigation_bar.setBackgroundColor(color)
+        navigationBar.setBackgroundColor(color)
       }
       start()
     }
@@ -254,13 +242,13 @@ class LibraryFragment : Fragment() {
             ColorUtils.setAlphaComponent(color, Theme.DISABLED_OPACITY)
           )
         )
-        navigation_bar.itemIconTintList = navigationTintList
-        navigation_bar.itemTextColor = navigationTintList
+        navigationBar.itemIconTintList = navigationTintList
+        navigationBar.itemTextColor = navigationTintList
       }
       start()
     }
 
-    (navigation_bar.itemBackground as RippleDrawable).setTint(theme.primaryForegroundColor)
+    (navigationBar.itemBackground as RippleDrawable).setTint(theme.primaryForegroundColor)
   }
 
   companion object {

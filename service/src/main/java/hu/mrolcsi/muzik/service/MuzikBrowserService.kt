@@ -10,7 +10,7 @@ import android.support.v4.media.MediaDescriptionCompat
 import androidx.core.content.ContentResolverCompat
 import androidx.media.MediaBrowserServiceCompat
 
-abstract class LPBrowserService : MediaBrowserServiceCompat() {
+abstract class MuzikBrowserService : MediaBrowserServiceCompat() {
 
   override fun onGetRoot(clientPackageName: String, clientUid: Int, rootHints: Bundle?): BrowserRoot? {
     // (Optional) Control the level of access for the specified package name.
@@ -26,6 +26,8 @@ abstract class LPBrowserService : MediaBrowserServiceCompat() {
     }
   }
 
+  //region -- ALL ARTISTS/ALBUMS/SONGS --
+
   override fun onLoadChildren(parentId: String, result: Result<MutableList<MediaBrowserCompat.MediaItem>>) {
     //  Browsing not allowed
     if (parentId == EMPTY_MEDIA_ROOT_ID) {
@@ -38,23 +40,17 @@ abstract class LPBrowserService : MediaBrowserServiceCompat() {
       val mediaItems = emptyList<MediaBrowserCompat.MediaItem>().toMutableList()
 
       when (parentId) {
-        MEDIA_ARTISTS_ID -> {
+        MEDIA_ROOT_ARTISTS -> {
           mediaItems.addAll(gatherArtists(MediaStore.Audio.Artists.INTERNAL_CONTENT_URI))
           mediaItems.addAll(gatherArtists(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI))
-
-          mediaItems.sortBy { it.mediaId }
         }
-        MEDIA_ALBUMS_ID -> {
+        MEDIA_ROOT_ALBUMS -> {
           mediaItems.addAll(gatherAlbums(MediaStore.Audio.Albums.INTERNAL_CONTENT_URI))
           mediaItems.addAll(gatherAlbums(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI))
-
-          mediaItems.sortBy { it.mediaId }
         }
-        MEDIA_SONGS_ID -> {
+        MEDIA_ROOT_SONGS -> {
           mediaItems.addAll(gatherSongs(MediaStore.Audio.Media.INTERNAL_CONTENT_URI))
           mediaItems.addAll(gatherSongs(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI))
-
-          mediaItems.sortBy { it.mediaId }
         }
       }
 
@@ -65,14 +61,18 @@ abstract class LPBrowserService : MediaBrowserServiceCompat() {
     result.detach()
   }
 
-  private fun gatherArtists(uri: Uri): List<MediaBrowserCompat.MediaItem> {
+  private fun gatherArtists(
+    uri: Uri,
+    selection: String? = null,
+    selectionArgs: Array<String>? = null
+  ): List<MediaBrowserCompat.MediaItem> {
     val cursorWithArtists = ContentResolverCompat.query(
       contentResolver,
       uri,
       null,
+      selection,
+      selectionArgs,
       null,
-      null,
-      MediaStore.Audio.ArtistColumns.ARTIST_KEY,
       null
     )
 
@@ -104,14 +104,17 @@ abstract class LPBrowserService : MediaBrowserServiceCompat() {
     return mediaItems
   }
 
-  private fun gatherAlbums(uri: Uri): List<MediaBrowserCompat.MediaItem> {
+  private fun gatherAlbums(
+    uri: Uri, selection: String? = null,
+    selectionArgs: Array<String>? = null
+  ): List<MediaBrowserCompat.MediaItem> {
     val cursorWithAlbums = ContentResolverCompat.query(
       contentResolver,
       uri,
       null,
+      selection,
+      selectionArgs,
       null,
-      null,
-      MediaStore.Audio.AlbumColumns.ALBUM_KEY,
       null
     )
 
@@ -143,14 +146,17 @@ abstract class LPBrowserService : MediaBrowserServiceCompat() {
     return mediaItems
   }
 
-  private fun gatherSongs(uri: Uri): List<MediaBrowserCompat.MediaItem> {
+  private fun gatherSongs(
+    uri: Uri, selection: String? = null,
+    selectionArgs: Array<String>? = null
+  ): List<MediaBrowserCompat.MediaItem> {
     val cursorWithSongs = ContentResolverCompat.query(
       contentResolver,
       uri,
       null,
-      "${MediaStore.Audio.Media.IS_MUSIC} = ?",
-      arrayOf("1"),
-      MediaStore.Audio.Media.TITLE_KEY,
+      selection?.let { "${MediaStore.Audio.Media.IS_MUSIC} = ? AND $it" } ?: "${MediaStore.Audio.Media.IS_MUSIC} = ?",
+      selectionArgs?.let { arrayOf("1").plus(it) } ?: arrayOf("1"),
+      null,
       null
     )
 
@@ -189,6 +195,57 @@ abstract class LPBrowserService : MediaBrowserServiceCompat() {
     return mediaItems
   }
 
+  //endregion
+
+  //region -- ARTIST/ALBUM/SONG BY ID --
+
+  override fun onLoadChildren(
+    parentId: String,
+    result: Result<MutableList<MediaBrowserCompat.MediaItem>>,
+    options: Bundle
+  ) {
+
+    AsyncTask.execute {
+      val mediaItems = emptyList<MediaBrowserCompat.MediaItem>().toMutableList()
+
+      when (parentId) {
+        MEDIA_ROOT_ALBUMS -> {
+          // Load albums by artist
+          val artistId = options.getLong(OPTION_ARTIST_ID)
+          if (artistId > 0) {
+            val selection = "${MediaStore.Audio.AudioColumns.ARTIST_ID} = ?"
+            val selectionArgs = arrayOf(artistId.toString())
+            mediaItems.addAll(gatherAlbums(MediaStore.Audio.Albums.INTERNAL_CONTENT_URI, selection, selectionArgs))
+            mediaItems.addAll(gatherAlbums(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, selection, selectionArgs))
+          }
+        }
+        MEDIA_ROOT_SONGS -> {
+          val artistId = options.getLong(OPTION_ARTIST_ID)
+          if (artistId > 0) {
+            val selection = "${MediaStore.Audio.AudioColumns.ARTIST_ID} = ?"
+            val selectionArgs = arrayOf(artistId.toString())
+            mediaItems.addAll(gatherSongs(MediaStore.Audio.Media.INTERNAL_CONTENT_URI, selection, selectionArgs))
+            mediaItems.addAll(gatherSongs(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, selection, selectionArgs))
+          }
+
+          val albumId = options.getLong(OPTION_ALBUM_ID)
+          if (albumId > 0) {
+            val selection = "${MediaStore.Audio.AudioColumns.ALBUM_ID} = ?"
+            val selectionArgs = arrayOf(albumId.toString())
+            mediaItems.addAll(gatherSongs(MediaStore.Audio.Media.INTERNAL_CONTENT_URI, selection, selectionArgs))
+            mediaItems.addAll(gatherSongs(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, selection, selectionArgs))
+          }
+        }
+      }
+
+      result.sendResult(mediaItems)
+    }
+
+    result.detach()
+  }
+
+  //endregion
+
   /**
    * Put every column into a bundle.
    */
@@ -203,21 +260,23 @@ abstract class LPBrowserService : MediaBrowserServiceCompat() {
     return bundle
   }
 
-  // --------
-
   private fun allowBrowsing(clientPackageName: String): Boolean {
     return clientPackageName.startsWith(BuildConfig.APPLICATION_ID)
   }
 
   companion object {
     @Suppress("unused")
-    private const val LOG_TAG = "LPBrowserService"
+    private const val LOG_TAG = "MuzikBrowserService"
 
-    const val MEDIA_ARTISTS_ID = "media_artists"
-    const val MEDIA_ALBUMS_ID = "media_albums"
-    const val MEDIA_SONGS_ID = "media_songs"
+    const val MEDIA_ROOT_ARTISTS = "media_artists"
+    const val MEDIA_ROOT_ALBUMS = "media_albums"
+    const val MEDIA_ROOT_SONGS = "media_songs"
 
-    private const val MEDIA_ROOT_ID = MEDIA_ARTISTS_ID
+    const val OPTION_ARTIST_ID = "artist_id"
+    const val OPTION_ALBUM_ID = "album_id"
+    const val OPTION_SONG_ID = "song_id"
+
+    private const val MEDIA_ROOT_ID = MEDIA_ROOT_ARTISTS
 
     private const val EMPTY_MEDIA_ROOT_ID = "empty_root_id"
   }

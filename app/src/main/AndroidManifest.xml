@@ -14,7 +14,7 @@
     android:supportsRtl="true"
     android:theme="@style/FluxTheme">
 
-    <service android:name="hu.mrolcsi.muzik.service.LPPlayerService"
+    <service android:name="hu.mrolcsi.muzik.service.MuzikPlayerService"
       android:permission="hu.mrolcsi.muzik.USE_SERVICE">
       <intent-filter>
         <action android:name="android.media.browse.MediaBrowserService"/>

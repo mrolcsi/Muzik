@@ -12,9 +12,7 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import androidx.navigation.fragment.navArgs
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.DividerItemDecoration
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.extensions.OnItemClickListener
 import hu.mrolcsi.muzik.service.exoplayer.ExoPlayerHolder
@@ -24,8 +22,6 @@ import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.synthetic.main.fragment_songs.*
 
 class SongsFragment : Fragment() {
-
-  private val args: SongsFragmentArgs by navArgs()
 
   private lateinit var mSongsModel: SongsViewModel
 
@@ -80,33 +76,9 @@ class SongsFragment : Fragment() {
   }
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-    rvBrowser.layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
-    rvBrowser.adapter = mSongsAdapter
-  }
-
-  override fun onResume() {
-    super.onResume()
-
-    if (arguments != null) {
-      when {
-        args.albumKey != null -> {
-          // List songs from an album
-          mSongsAdapter.showTrackNumber = true
-          mSongsModel.songFilter.value = SongsViewModel.SongFilter(albumKey = args.albumKey)
-        }
-        args.artistKey != null -> {
-          // List all songs by an artist
-          mSongsAdapter.showTrackNumber = false
-          mSongsModel.songFilter.value = SongsViewModel.SongFilter(artistKey = args.artistKey)
-        }
-        else -> {
-          mSongsAdapter.showTrackNumber = false
-          mSongsModel.songFilter.value = SongsViewModel.SongFilter.NO_FILTER
-        }
-      }
-    } else {
-      mSongsAdapter.showTrackNumber = false
-      mSongsModel.songFilter.value = SongsViewModel.SongFilter.NO_FILTER
+    rvSongs.apply {
+      adapter = mSongsAdapter
+      addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
     }
   }
 

@@ -7,7 +7,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import hu.mrolcsi.muzik.extensions.switchMap
 import hu.mrolcsi.muzik.library.SessionViewModel
-import hu.mrolcsi.muzik.service.LPBrowserService
+import hu.mrolcsi.muzik.service.MuzikBrowserService
 import hu.mrolcsi.muzik.service.extensions.media.albumKey
 import hu.mrolcsi.muzik.service.extensions.media.artistKey
 import hu.mrolcsi.muzik.service.extensions.media.trackNumber
@@ -27,7 +27,7 @@ class SongsViewModel(app: Application) : SessionViewModel(app) {
   }
 
   private fun loadSongs() {
-    mMediaBrowser.subscribe(LPBrowserService.MEDIA_SONGS_ID, mSubscriptionCallbacks)
+    mMediaBrowser.subscribe(MuzikBrowserService.MEDIA_ROOT_SONGS, mSubscriptionCallbacks)
     mMediaBrowser.connect()
   }
 

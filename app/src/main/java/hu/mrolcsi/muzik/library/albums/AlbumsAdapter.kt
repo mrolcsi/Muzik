@@ -7,7 +7,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.cardview.widget.CardView
+import androidx.core.view.ViewCompat
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.load.DataSource
@@ -18,9 +20,9 @@ import hu.mrolcsi.muzik.BuildConfig
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.DiffCallbackRepository
 import hu.mrolcsi.muzik.common.glide.GlideApp
+import hu.mrolcsi.muzik.library.albums.details.AlbumDetailsFragmentArgs
 import hu.mrolcsi.muzik.service.extensions.media.albumArtUri
-import hu.mrolcsi.muzik.service.extensions.media.artist
-import hu.mrolcsi.muzik.service.extensions.media.artistKey
+import hu.mrolcsi.muzik.service.extensions.media.id
 import hu.mrolcsi.muzik.service.theme.Theme
 import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.extensions.LayoutContainer
@@ -76,6 +78,8 @@ class AlbumsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, AlbumsAdapter.Al
       tvAlbumTitle?.text = item.description.title
       tvAlbumArtist?.text = item.description.subtitle
 
+      ViewCompat.setTransitionName(imgCoverArt, "coverArt${item.description.id}")
+
       // Load album art
       GlideApp.with(imgCoverArt)
         .asBitmap()
@@ -85,25 +89,20 @@ class AlbumsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, AlbumsAdapter.Al
 
       // Set onClickListener
       if (item.mediaId == MEDIA_ID_ALL_SONGS) {
-        itemView.setOnClickListener {
-          val direction = AlbumsFragmentDirections.actionAlbumsToSongs(
-            item.description.artistKey,
-            item.description.artist,
-            null,
-            null
-          )
-          it.findNavController().navigate(direction)
-        }
+        // TODO
       } else {
         itemView.setOnClickListener {
           with(it.findNavController()) {
-            val direction = AlbumsFragmentDirections.actionAlbumsToSongs(
-              null,
-              null,
-              item.mediaId,
-              item.description.title.toString()
+
+            val extras = FragmentNavigatorExtras(
+              imgCoverArt to "coverArt"
             )
-            navigate(direction)
+
+            val args = AlbumDetailsFragmentArgs(item).toBundle()
+
+            navigate(R.id.navigation_albumDetails, args, null, extras)
+
+            //navigate(AlbumsFragmentDirections.actionAlbumsToAlbumDetails(item), extras)
           }
         }
       }

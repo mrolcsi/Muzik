@@ -13,4 +13,7 @@
   <dimen name="media_button_inset">4dp</dimen>
   <dimen name="media_button_padding">4dp</dimen>
   <dimen name="media_button_corner_radius">4dp</dimen>
+
+  <dimen name="detail_backdrop_height">144dp</dimen>
+  <dimen name="expanded_title_margin_start">152dp</dimen>
 </resources>

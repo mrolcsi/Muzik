@@ -5,7 +5,7 @@ import android.support.v4.media.MediaBrowserCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import hu.mrolcsi.muzik.library.SessionViewModel
-import hu.mrolcsi.muzik.service.LPBrowserService
+import hu.mrolcsi.muzik.service.MuzikBrowserService
 
 class ArtistsViewModel(app: Application) : SessionViewModel(app) {
 
@@ -22,7 +22,7 @@ class ArtistsViewModel(app: Application) : SessionViewModel(app) {
   }
 
   private fun loadArtists() {
-    mMediaBrowser.subscribe(LPBrowserService.MEDIA_ARTISTS_ID, mSubscriptionCallbacks)
+    mMediaBrowser.subscribe(MuzikBrowserService.MEDIA_ROOT_ARTISTS, mSubscriptionCallbacks)
     mMediaBrowser.connect()
   }
 

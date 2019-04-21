@@ -17,8 +17,8 @@ import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.list_item_song.*
 
-class SongsAdapter(
-  private val onItemClickListener: OnItemClickListener<MediaBrowserCompat.MediaItem, SongHolder>
+open class SongsAdapter(
+  protected val onItemClickListener: OnItemClickListener<MediaBrowserCompat.MediaItem, SongHolder>? = null
 ) : ListAdapter<MediaBrowserCompat.MediaItem, SongsAdapter.SongHolder>(
   DiffCallbackRepository.mediaItemCallback
 ) {
@@ -36,16 +36,14 @@ class SongsAdapter(
     with(holder) {
       // Apply theme
       ThemeManager.getInstance(holder.itemView.context).currentTheme.value?.let { theme ->
-        itemView.background = Theme.getRippleDrawable(theme.secondaryForegroundColor, theme.tertiaryBackgroundColor)
-
-        tvSongTitle?.setTextColor(theme.tertiaryForegroundColor)
-        tvSongArtist?.setTextColor(theme.tertiaryForegroundColor)
-        tvTrackNumber?.setTextColor(theme.tertiaryForegroundColor)
+        applyTheme(theme)
       }
 
       // Set onClickListener
-      holder.itemView.setOnClickListener {
-        onItemClickListener.onItemClick(item, holder, position, getItemId(position))
+      onItemClickListener?.run {
+        holder.itemView.setOnClickListener {
+          this.onItemClick(item, holder, position, getItemId(position))
+        }
       }
 
       bind(item, showTrackNumber)
@@ -70,6 +68,14 @@ class SongsAdapter(
       tvTrackNumber?.visibility = if (showTrackNumber and (trackNumber > 0)) View.VISIBLE else View.GONE
       imgCoverArt?.visibility = if (showTrackNumber) View.GONE else View.VISIBLE
       tvTrackNumber?.text = trackNumber.toString()
+    }
+
+    fun applyTheme(theme: Theme) {
+      itemView.background = Theme.getRippleDrawable(theme.tertiaryForegroundColor, theme.tertiaryBackgroundColor)
+
+      tvSongTitle?.setTextColor(theme.tertiaryForegroundColor)
+      tvSongArtist?.setTextColor(theme.tertiaryForegroundColor)
+      tvTrackNumber?.setTextColor(theme.tertiaryForegroundColor)
     }
 
   }

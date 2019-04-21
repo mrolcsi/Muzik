@@ -31,7 +31,7 @@ import hu.mrolcsi.muzik.service.extensions.media.prepareFromDescription
 import hu.mrolcsi.muzik.service.extensions.media.setShuffleMode
 import hu.mrolcsi.muzik.service.theme.ThemeManager
 
-class LPPlayerService : LPBrowserService() {
+class MuzikPlayerService : MuzikBrowserService() {
 
   // MediaSession and Player implementations
   private lateinit var mMediaSession: MediaSessionCompat
@@ -51,7 +51,7 @@ class LPPlayerService : LPBrowserService() {
 
     // Create a MediaSessionCompat
     mMediaSession = MediaSessionCompat(this, LOG_TAG).apply {
-      val playerActivityPendingIntent = TaskStackBuilder.create(this@LPPlayerService)
+      val playerActivityPendingIntent = TaskStackBuilder.create(this@MuzikPlayerService)
         .addNextIntent(Intent(ACTION_OPEN_PLAYER))
         .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)
       setSessionActivity(playerActivityPendingIntent)
@@ -72,7 +72,7 @@ class LPPlayerService : LPBrowserService() {
 
             override fun onNotificationPosted(notificationId: Int, notification: Notification?, ongoing: Boolean) {
               if (exo.getPlayer().playWhenReady && !mIsForeground) {
-                startService(Intent(applicationContext, LPPlayerService::class.java))
+                startService(Intent(applicationContext, MuzikPlayerService::class.java))
                 startForeground(notificationId, notification)
                 mIsForeground = true
               }
@@ -217,7 +217,7 @@ class LPPlayerService : LPBrowserService() {
   }
 
   companion object {
-    private const val LOG_TAG = "LPPlayerService"
+    private const val LOG_TAG = "MuzikPlayerService"
 
     const val ACTION_OPEN_PLAYER = "hu.mrolcsi.muzik.OPEN_PLAYER"
   }
