@@ -54,10 +54,15 @@ class ExoMetadataProvider(
 
   @Synchronized
   private fun fetchBitmap(source: MediaMetadataCompat): MediaMetadataCompat {
-    val albumArt = MediaStore.Images.Media.getBitmap(context.contentResolver, source.albumArtUri)
-    return MediaMetadataCompat.Builder(source)
-      .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, albumArt)
-      .build()
+    return try {
+      val albumArt = MediaStore.Images.Media.getBitmap(context.contentResolver, source.albumArtUri)
+      MediaMetadataCompat.Builder(source)
+        .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, albumArt)
+        .build()
+    } catch (e: NullPointerException) {
+      // MediaStore throws a NullPointerException when the image doesn't exist
+      source
+    }
   }
 
   /**

@@ -50,13 +50,17 @@ class ExoNotificationManager(
         AsyncTask.execute {
           metadata?.let {
             if (it.id > 0) {
-              val bitmap = MediaStore.Images.Media.getBitmap(context.contentResolver, it.albumArtUri)
+              try {
+                val bitmap = MediaStore.Images.Media.getBitmap(context.contentResolver, it.albumArtUri)
 
-              it.mediaId?.let { id ->
-                mBitmapCache.put(id, bitmap)
+                it.mediaId?.let { id ->
+                  mBitmapCache.put(id, bitmap)
+                }
+
+                callback?.onBitmap(bitmap)
+              } catch (e: NullPointerException) {
+                // MediaStore throws a NullPointerException when the image doesn't exist
               }
-
-              callback?.onBitmap(bitmap)
             }
           }
         }

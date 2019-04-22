@@ -49,8 +49,9 @@ import hu.mrolcsi.muzik.extensions.applyColorToNavigationBarIcons
 import hu.mrolcsi.muzik.extensions.applyColorToStatusBarIcons
 import hu.mrolcsi.muzik.extensions.millisecondsToTimeStamp
 import hu.mrolcsi.muzik.extensions.secondsToTimeStamp
-import hu.mrolcsi.muzik.service.extensions.media.albumArt
+import hu.mrolcsi.muzik.service.extensions.media.albumArtUri
 import hu.mrolcsi.muzik.service.extensions.media.duration
+import hu.mrolcsi.muzik.service.extensions.media.id
 import hu.mrolcsi.muzik.service.extensions.media.isPlaying
 import hu.mrolcsi.muzik.service.extensions.media.isSkipToNextEnabled
 import hu.mrolcsi.muzik.service.extensions.media.isSkipToPreviousEnabled
@@ -587,9 +588,10 @@ class PlayerFragment : Fragment() {
   }
 
   private fun updateSongData(metadata: MediaMetadataCompat) {
+    ViewCompat.setTransitionName(imgCoverArt, "coverArt" + metadata.id)
 
     GlideApp.with(this)
-      .load(metadata.albumArt)
+      .load(metadata.albumArtUri)
       .listener(mGlideListener)
       .into(imgCoverArt)
 

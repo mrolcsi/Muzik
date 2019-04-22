@@ -9,6 +9,7 @@ import android.util.LruCache
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.muzik.R
@@ -16,6 +17,7 @@ import hu.mrolcsi.muzik.common.DiffCallbackRepository
 import hu.mrolcsi.muzik.common.glide.GlideApp
 import hu.mrolcsi.muzik.common.glide.MuzikGlideModule
 import hu.mrolcsi.muzik.service.extensions.media.coverArtUri
+import hu.mrolcsi.muzik.service.extensions.media.id
 import hu.mrolcsi.muzik.service.theme.Theme
 import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.extensions.LayoutContainer
@@ -100,6 +102,8 @@ class QueueAdapter : ListAdapter<MediaSessionCompat.QueueItem, QueueAdapter.Queu
     }
 
     fun bind(item: MediaSessionCompat.QueueItem) {
+      ViewCompat.setTransitionName(imgCoverArt, "coverArt" + item.description.id)
+
       val key = item.description.mediaId
 
       val cached = mCache[key]

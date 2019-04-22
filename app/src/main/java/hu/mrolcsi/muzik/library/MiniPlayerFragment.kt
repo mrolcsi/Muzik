@@ -28,6 +28,7 @@ import hu.mrolcsi.muzik.player.PlayerViewModel
 import hu.mrolcsi.muzik.service.extensions.media.albumArtUri
 import hu.mrolcsi.muzik.service.extensions.media.artist
 import hu.mrolcsi.muzik.service.extensions.media.duration
+import hu.mrolcsi.muzik.service.extensions.media.id
 import hu.mrolcsi.muzik.service.extensions.media.isPlaying
 import hu.mrolcsi.muzik.service.extensions.media.isSkipToNextEnabled
 import hu.mrolcsi.muzik.service.extensions.media.isSkipToPreviousEnabled
@@ -95,7 +96,9 @@ class MiniPlayerFragment : Fragment() {
 
     fun openPlayer() {
       val extras = FragmentNavigatorExtras(
-        imgCoverArt to ViewCompat.getTransitionName(imgCoverArt)!!
+        imgCoverArt.apply {
+          ViewCompat.setTransitionName(imgCoverArt, "coverArt" + mPlayerModel.currentMediaMetadata.value?.id)
+        } to ViewCompat.getTransitionName(imgCoverArt)!!
       )
       activity?.findNavController(R.id.main_nav_host)?.navigate(
         R.id.action_library_to_player,
