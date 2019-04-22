@@ -16,4 +16,11 @@ object PlayQueueMigrations {
     }
   }
 
+  var MIGRATION_2_3 = object : Migration(2, 3) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+      // Added 'media_id' column to PlayQueueEntry
+      database.execSQL("ALTER TABLE play_queue ADD COLUMN media_id INTEGER NOT NULL DEFAULT 0")
+    }
+
+  }
 }

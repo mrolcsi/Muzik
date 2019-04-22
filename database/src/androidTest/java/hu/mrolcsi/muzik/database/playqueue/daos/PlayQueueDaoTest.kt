@@ -141,6 +141,7 @@ class PlayQueueDaoTest {
       PlayQueueEntry(
         0,
         "/music/song1.mp3",
+        123,
         "My Favourite Artist",
         "My Favourite Album",
         "My Favourite Song",
@@ -149,6 +150,7 @@ class PlayQueueDaoTest {
       PlayQueueEntry(
         1,
         "/music/song2.mp3",
+        234,
         "Your Favourite Artist",
         "Your Favourite Album",
         "Your Favourite Song",
@@ -157,6 +159,7 @@ class PlayQueueDaoTest {
       PlayQueueEntry(
         2,
         "/music/song3.mp3",
+        345,
         "His Favourite Artist",
         "His Favourite Album",
         "His Favourite Song",
@@ -165,6 +168,7 @@ class PlayQueueDaoTest {
       PlayQueueEntry(
         3,
         "/music/song4.mp3",
+        456,
         "Her Favourite Artist",
         "Her Favourite Album",
         "Her Favourite Song",
@@ -173,6 +177,7 @@ class PlayQueueDaoTest {
       PlayQueueEntry(
         4,
         "/music/song5.mp3",
+        567,
         "Old Favourite Artist",
         "Old Favourite Album",
         "Old Favourite Song",
@@ -181,6 +186,7 @@ class PlayQueueDaoTest {
       PlayQueueEntry(
         5,
         "/music/song6.mp3",
+        678,
         "New Favourite Artist",
         "New Favourite Album",
         "New Favourite Song",
