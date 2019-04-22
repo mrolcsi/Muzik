@@ -10,7 +10,6 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import hu.mrolcsi.muzik.service.MuzikPlayerService
-import hu.mrolcsi.muzik.service.extensions.media.albumArt
 
 abstract class SessionViewModel(app: Application) : AndroidViewModel(app) {
 
@@ -46,7 +45,7 @@ abstract class SessionViewModel(app: Application) : AndroidViewModel(app) {
 
                 // Check if metadata has actually changed
                 // Only post metadata whn it has an albumArt
-                if (metadata.description?.mediaId != mLastMetadata?.description?.mediaId && metadata.albumArt != null) {
+                if (metadata.description?.mediaId != mLastMetadata?.description?.mediaId) {
                   currentMediaMetadata.postValue(metadata)
                   // Save as last received metadata
                   mLastMetadata = metadata

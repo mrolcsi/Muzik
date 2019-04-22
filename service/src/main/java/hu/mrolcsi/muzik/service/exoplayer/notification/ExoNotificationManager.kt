@@ -4,16 +4,19 @@ import android.app.PendingIntent
 import android.content.Context
 import android.graphics.Bitmap
 import android.os.AsyncTask
+import android.provider.MediaStore
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
+import androidx.collection.LruCache
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import hu.mrolcsi.muzik.service.BuildConfig
 import hu.mrolcsi.muzik.service.R
-import hu.mrolcsi.muzik.service.extensions.media.albumArt
+import hu.mrolcsi.muzik.service.extensions.media.artUri
 import hu.mrolcsi.muzik.service.extensions.media.artist
-import hu.mrolcsi.muzik.service.extensions.media.from
+import hu.mrolcsi.muzik.service.extensions.media.id
+import hu.mrolcsi.muzik.service.extensions.media.mediaId
 import hu.mrolcsi.muzik.service.extensions.media.title
 
 class ExoNotificationManager(
@@ -25,7 +28,7 @@ class ExoNotificationManager(
 
   private val mDescriptionAdapter = object : PlayerNotificationManager.MediaDescriptionAdapter {
 
-    private var mLastValidMetadata: MediaMetadataCompat? = null
+    private val mBitmapCache = LruCache<String, Bitmap>(20)
 
     override fun createCurrentContentIntent(player: Player): PendingIntent? = session.controller.sessionActivity
 
@@ -42,20 +45,24 @@ class ExoNotificationManager(
     override fun getCurrentLargeIcon(player: Player, callback: PlayerNotificationManager.BitmapCallback?): Bitmap? {
       val metadata = getSessionMetadata(session)
 
-      metadata?.let {
-        if (metadata.albumArt == null) {
-          AsyncTask.execute {
-            // load bitmap from MetadataRetriever
-            val newMetadata = MediaMetadataCompat.Builder(metadata).from(metadata.description).build()
-            callback?.onBitmap(newMetadata.albumArt)
-            mLastValidMetadata = newMetadata
+      val cachedBitmap = metadata?.mediaId?.let { mBitmapCache[it] }
+      if (cachedBitmap == null) {
+        AsyncTask.execute {
+          metadata?.let {
+            if (it.id > 0) {
+              val bitmap = MediaStore.Images.Media.getBitmap(context.contentResolver, it.artUri)
+
+              it.mediaId?.let { id ->
+                mBitmapCache.put(id, bitmap)
+              }
+
+              callback?.onBitmap(bitmap)
+            }
           }
-        } else {
-          mLastValidMetadata = metadata
         }
       }
 
-      return metadata?.albumArt ?: mLastValidMetadata?.albumArt
+      return cachedBitmap
     }
 
     /**

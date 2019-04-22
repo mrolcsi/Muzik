@@ -25,7 +25,7 @@ import hu.mrolcsi.muzik.common.OnSwipeTouchListener
 import hu.mrolcsi.muzik.common.glide.GlideApp
 import hu.mrolcsi.muzik.extensions.mediaControllerCompat
 import hu.mrolcsi.muzik.player.PlayerViewModel
-import hu.mrolcsi.muzik.service.extensions.media.albumArt
+import hu.mrolcsi.muzik.service.extensions.media.artUri
 import hu.mrolcsi.muzik.service.extensions.media.artist
 import hu.mrolcsi.muzik.service.extensions.media.duration
 import hu.mrolcsi.muzik.service.extensions.media.isPlaying
@@ -194,7 +194,7 @@ class MiniPlayerFragment : Fragment() {
     btnNext.visibility = View.VISIBLE
 
     GlideApp.with(this)
-      .load(metadata.albumArt)
+      .load(metadata.artUri)
       .into(imgCoverArt)
 
     pbSongProgress.max = (metadata.duration / 1000).toInt()

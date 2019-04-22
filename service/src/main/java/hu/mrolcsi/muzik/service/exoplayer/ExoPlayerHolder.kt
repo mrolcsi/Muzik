@@ -1,7 +1,6 @@
 package hu.mrolcsi.muzik.service.exoplayer
 
 import android.content.Context
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
@@ -352,18 +351,6 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
 
   //endregion
 
-  //region -- METADATA PROVIDER --
-
-  private val mMetadataProvider: ExoMetadataProvider = ExoMetadataProvider(
-    mediaController = session.controller,
-    placeholderAlbumArt = BitmapFactory.decodeResource(context.resources, R.drawable.placeholder_cover_art)
-  ) {
-    // Call invalidate on session when the metadata cache was updated.
-    mSessionConnector.invalidateMediaSessionMetadata()
-  }
-
-  //endregion
-
   //region -- QUEUE NAVIGATOR --
 
   private val mQueueNavigator = object : TimelineQueueNavigator(session) {
@@ -569,7 +556,7 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
   private val mSessionConnector =
     MediaSessionConnector(session).apply {
       setPlayer(mPlayer)
-      setMediaMetadataProvider(mMetadataProvider)
+      setMediaMetadataProvider(MediaSessionConnector.DefaultMediaMetadataProvider(session.controller, null))
       setPlaybackPreparer(mPlaybackPreparer)
       setCustomActionProviders(
         mUpdaterActionProvider,

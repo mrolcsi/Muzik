@@ -1,8 +1,7 @@
 package hu.mrolcsi.muzik.player
 
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.support.v4.media.MediaMetadataCompat
+import android.os.AsyncTask
 import android.support.v4.media.session.MediaSessionCompat
 import android.util.Log
 import android.util.LruCache
@@ -14,8 +13,8 @@ import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.DiffCallbackRepository
 import hu.mrolcsi.muzik.common.glide.GlideApp
-import hu.mrolcsi.muzik.service.extensions.media.albumArt
-import hu.mrolcsi.muzik.service.extensions.media.from
+import hu.mrolcsi.muzik.common.glide.MuzikGlideModule
+import hu.mrolcsi.muzik.service.extensions.media.coverArtUri
 import hu.mrolcsi.muzik.service.theme.Theme
 import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.extensions.LayoutContainer
@@ -37,52 +36,35 @@ class QueueAdapter : ListAdapter<MediaSessionCompat.QueueItem, QueueAdapter.Queu
     Log.v(LOG_TAG, "onBindViewHolder($holder, $position")
 
     // Cache items surrounding position
-    val start = Math.max(position - WINDOW_SIZE, 0)
-    val end = Math.min(position + WINDOW_SIZE, itemCount)
-    for (i in start until end) {
-      val item = getItem(i)
-      val key = item.description.mediaId
-
-      if (mCache[key] == null) {
-        mBackgroundExecutor.submit {
-          Log.v(LOG_TAG, "Caching item: $item")
-
-          // Load item into cache
-          val metadata = MediaMetadataCompat.Builder().from(item.description).build()
-          val albumArt = metadata.albumArt
-            ?: BitmapFactory.decodeResource(holder.itemView.resources, R.drawable.placeholder_cover_art)
-          val theme = ThemeManager.getInstance(holder.itemView.context).createFromBitmap(albumArt)
-
-          mCache.put(key, albumArt to theme)
-        }
-      }
-    }
+//    val start = Math.max(position - WINDOW_SIZE, 0)
+//    val end = Math.min(position + WINDOW_SIZE, itemCount)
+//    for (i in start until end) {
+//      val item = getItem(i)
+//      val key = item.description.mediaId
+//
+//      if (mCache[key] == null) {
+//        mBackgroundExecutor.submit {
+//          Log.v(LOG_TAG, "Caching item: $item")
+//
+//          // Load item into cache
+//          val metadata = MediaMetadataCompat.Builder().from(item.description).build()
+//          val albumArt = metadata.albumArt
+//            ?: BitmapFactory.decodeResource(holder.itemView.resources, R.drawable.placeholder_cover_art)
+//          val theme = ThemeManager.getInstance(holder.itemView.context).createFromBitmap(albumArt)
+//
+//          mCache.put(key, albumArt to theme)
+//        }
+//      }
+//    }
 
     holder.bind(getItem(position))
   }
-
-//  override fun getItem(position: Int): MediaSessionCompat.QueueItem {
-//    return if (realItemCount == 0) {
-//      super.getItem(position)
-//    } else {
-//      super.getItem(position % realItemCount)
-//    }
-//  }
-
-//  override fun getItemCount(): Int {
-//    // To enable infinite scrolling
-//    return if (super.getItemCount() == 0) 0 else Int.MAX_VALUE
-//  }
-
-  //val realItemCount get() = super.getItemCount()
 
   override fun getItemId(position: Int): Long {
     return getItem(position).queueId
   }
 
-  fun getItemPositionById(id: Long /*, startingPosition: Int 0= 0*/): Int {
-//    val start = Math.max(0, startingPosition - realItemCount / 2)
-//    val end = Math.min(Int.MAX_VALUE, startingPosition + realItemCount / 2)
+  fun getItemPositionById(id: Long): Int {
     for (i in 0 until itemCount) {
       if (getItemId(i) == id) {
         return i
@@ -95,39 +77,65 @@ class QueueAdapter : ListAdapter<MediaSessionCompat.QueueItem, QueueAdapter.Queu
 
     var usedTheme: Theme? = null
 
-    fun bind(item: MediaSessionCompat.QueueItem) {
-      val key = item.description.mediaId
-
-      val cached = mCache[key]
-      if (cached != null) {
-        Log.v(LOG_TAG, "Cache hit : $key")
-
-        // Load item into cache
-        val metadata = MediaMetadataCompat.Builder().from(item.description).build()
-        val albumArt = metadata.albumArt
-          ?: BitmapFactory.decodeResource(itemView.resources, R.drawable.placeholder_cover_art)
-        val theme = ThemeManager.getInstance(itemView.context).createFromBitmap(albumArt)
-        mCache.put(key, albumArt to theme)
-
-        GlideApp.with(imgCoverArt)
-          .load(cached.first)
-          .into(imgCoverArt)
-        //imgCoverArt.setImageBitmap(cached.first)
-        applyTheme(cached.second)
-      } else {
-        Log.w(LOG_TAG, "Cache miss: $key")
-
-        val metadata = MediaMetadataCompat.Builder().from(item.description).build()
-        val albumArt = metadata.albumArt
-          ?: BitmapFactory.decodeResource(itemView.context.resources, R.drawable.placeholder_cover_art)
-        val theme = ThemeManager.getInstance(itemView.context).createFromBitmap(albumArt)
-
-        GlideApp.with(imgCoverArt)
-          .load(albumArt)
-          .into(imgCoverArt)
-        //imgCoverArt.setImageBitmap(albumArt)
-        applyTheme(theme)
+    private val onCoverArtReady = object : MuzikGlideModule.SimpleRequestListener<Bitmap> {
+      override fun onLoadFailed() {
+        usedTheme = null
       }
+
+      override fun onResourceReady(resource: Bitmap?) {
+        resource?.let { bitmap ->
+          AsyncTask.execute {
+            // Generate theme from resource
+            val theme = ThemeManager.getInstance(containerView.context).createFromBitmap(bitmap).also {
+              usedTheme = it
+            }
+            containerView.post {
+              applyTheme(theme)
+            }
+          }
+        }
+      }
+    }
+
+    fun bind(item: MediaSessionCompat.QueueItem) {
+//      val key = item.description.mediaId
+//
+//      val cached = mCache[key]
+//      if (cached != null) {
+//        Log.v(LOG_TAG, "Cache hit : $key")
+//
+//        // Load item into cache
+//        val metadata = MediaMetadataCompat.Builder().from(item.description).build()
+//        val albumArt = metadata.albumArt
+//          ?: BitmapFactory.decodeResource(itemView.resources, R.drawable.placeholder_cover_art)
+//        val theme = ThemeManager.getInstance(itemView.context).createFromBitmap(albumArt)
+//        mCache.put(key, albumArt to theme)
+//
+//        GlideApp.with(imgCoverArt)
+//          .load(cached.first)
+//          .into(imgCoverArt)
+//        //imgCoverArt.setImageBitmap(cached.first)
+//        applyTheme(cached.second)
+//      } else {
+//        Log.w(LOG_TAG, "Cache miss: $key")
+//
+//        val metadata = MediaMetadataCompat.Builder().from(item.description).build()
+//        val albumArt = metadata.albumArt
+//          ?: BitmapFactory.decodeResource(itemView.context.resources, R.drawable.placeholder_cover_art)
+//        val theme = ThemeManager.getInstance(itemView.context).createFromBitmap(albumArt)
+//
+//        GlideApp.with(imgCoverArt)
+//          .load(albumArt)
+//          .into(imgCoverArt)
+//
+//        applyTheme(theme)
+//      }
+
+      GlideApp.with(imgCoverArt)
+        .asBitmap()
+        .load(item.description.coverArtUri)
+        .addListener(onCoverArtReady)
+        .into(imgCoverArt)
 
       tvTitle.text = item.description.title
       tvArtist.text = item.description.subtitle ?: "Unknown Artist"   // TODO: i18n

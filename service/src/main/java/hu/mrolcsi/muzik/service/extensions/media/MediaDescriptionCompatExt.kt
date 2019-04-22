@@ -44,7 +44,6 @@ inline val MediaDescriptionCompat.numberOfSongs: Int
   get() = this.extras?.getString(MediaStore.Audio.AlbumColumns.NUMBER_OF_SONGS)?.toInt() ?: 0
 
 inline val MediaDescriptionCompat.albumArtUri: Uri
-  // This ensures that the file actually gets loaded
   get() = Uri.parse("content://media/external/audio/albumart/$id")
 
 inline val MediaDescriptionCompat.albumArt: Bitmap?
@@ -79,10 +78,10 @@ inline val MediaDescriptionCompat.songTitle: String?
 inline val MediaDescriptionCompat.coverArtUri: Uri
   get() = Uri.parse("content://media/external/audio/media/$id/albumart")
 
-inline val MediaDescriptionCompat.trackNumber: Int
-  get() = this.extras?.getString(MediaStore.Audio.Media.TRACK)?.toInt()
-    ?: this.extras?.getLong(MediaMetadataCompat.METADATA_KEY_TRACK_NUMBER)?.toInt()
-    ?: -1
+inline val MediaDescriptionCompat.trackNumber: Long
+  get() = this.extras?.getString(MediaStore.Audio.Media.TRACK)?.toLong()
+    ?: this.extras?.getLong(MediaMetadataCompat.METADATA_KEY_TRACK_NUMBER)
+    ?: -1L
 
 inline val MediaDescriptionCompat.duration: Long
   get() = this.extras?.getString(MediaStore.Audio.Media.DURATION)?.toLong()

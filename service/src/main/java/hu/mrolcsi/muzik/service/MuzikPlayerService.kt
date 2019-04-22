@@ -8,10 +8,7 @@ import android.app.TaskStackBuilder
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.AsyncTask
-import android.support.v4.media.MediaMetadataCompat
-import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.MediaSessionCompat
-import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
@@ -25,11 +22,9 @@ import hu.mrolcsi.muzik.service.exoplayer.ExoPlayerHolder
 import hu.mrolcsi.muzik.service.exoplayer.notification.ExoNotificationManager
 import hu.mrolcsi.muzik.service.extensions.database.toDescription
 import hu.mrolcsi.muzik.service.extensions.media.addQueueItems
-import hu.mrolcsi.muzik.service.extensions.media.albumArt
 import hu.mrolcsi.muzik.service.extensions.media.isSkipToNextEnabled
 import hu.mrolcsi.muzik.service.extensions.media.prepareFromDescription
 import hu.mrolcsi.muzik.service.extensions.media.setShuffleMode
-import hu.mrolcsi.muzik.service.theme.ThemeManager
 
 class MuzikPlayerService : MuzikBrowserService() {
 
@@ -133,18 +128,6 @@ class MuzikPlayerService : MuzikBrowserService() {
           }
         })
       }
-
-      // Register basic callbacks
-      controller.registerCallback(object : MediaControllerCompat.Callback() {
-
-        override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {}
-
-        override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
-          metadata?.albumArt?.let {
-            ThemeManager.getInstance(applicationContext).updateFromBitmap(it)
-          }
-        }
-      })
 
       // Check permissions before proceeding
       if (ContextCompat.checkSelfPermission(
