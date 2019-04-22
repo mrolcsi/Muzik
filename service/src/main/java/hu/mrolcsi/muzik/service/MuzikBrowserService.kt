@@ -10,7 +10,11 @@ import android.support.v4.media.MediaDescriptionCompat
 import androidx.core.content.ContentResolverCompat
 import androidx.media.MediaBrowserServiceCompat
 
+@Suppress("ConstantConditionIf")
 abstract class MuzikBrowserService : MediaBrowserServiceCompat() {
+
+  private val useInternal = false
+  private val useExternal = true
 
   override fun onGetRoot(clientPackageName: String, clientUid: Int, rootHints: Bundle?): BrowserRoot? {
     // (Optional) Control the level of access for the specified package name.
@@ -41,16 +45,16 @@ abstract class MuzikBrowserService : MediaBrowserServiceCompat() {
 
       when (parentId) {
         MEDIA_ROOT_ARTISTS -> {
-          mediaItems.addAll(gatherArtists(MediaStore.Audio.Artists.INTERNAL_CONTENT_URI))
-          mediaItems.addAll(gatherArtists(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI))
+          if (useInternal) mediaItems.addAll(gatherArtists(MediaStore.Audio.Artists.INTERNAL_CONTENT_URI))
+          if (useExternal) mediaItems.addAll(gatherArtists(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI))
         }
         MEDIA_ROOT_ALBUMS -> {
-          mediaItems.addAll(gatherAlbums(MediaStore.Audio.Albums.INTERNAL_CONTENT_URI))
-          mediaItems.addAll(gatherAlbums(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI))
+          if (useInternal) mediaItems.addAll(gatherAlbums(MediaStore.Audio.Albums.INTERNAL_CONTENT_URI))
+          if (useExternal) mediaItems.addAll(gatherAlbums(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI))
         }
         MEDIA_ROOT_SONGS -> {
-          mediaItems.addAll(gatherSongs(MediaStore.Audio.Media.INTERNAL_CONTENT_URI))
-          mediaItems.addAll(gatherSongs(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI))
+          if (useInternal) mediaItems.addAll(gatherSongs(MediaStore.Audio.Media.INTERNAL_CONTENT_URI))
+          if (useExternal) mediaItems.addAll(gatherSongs(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI))
         }
       }
 
@@ -215,8 +219,20 @@ abstract class MuzikBrowserService : MediaBrowserServiceCompat() {
           if (artistId > 0) {
             val selection = "${MediaStore.Audio.AudioColumns.ARTIST_ID} = ?"
             val selectionArgs = arrayOf(artistId.toString())
-            mediaItems.addAll(gatherAlbums(MediaStore.Audio.Albums.INTERNAL_CONTENT_URI, selection, selectionArgs))
-            mediaItems.addAll(gatherAlbums(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, selection, selectionArgs))
+            if (useInternal) mediaItems.addAll(
+              gatherAlbums(
+                MediaStore.Audio.Albums.INTERNAL_CONTENT_URI,
+                selection,
+                selectionArgs
+              )
+            )
+            if (useExternal) mediaItems.addAll(
+              gatherAlbums(
+                MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
+                selection,
+                selectionArgs
+              )
+            )
           }
         }
         MEDIA_ROOT_SONGS -> {
@@ -224,16 +240,40 @@ abstract class MuzikBrowserService : MediaBrowserServiceCompat() {
           if (artistId > 0) {
             val selection = "${MediaStore.Audio.AudioColumns.ARTIST_ID} = ?"
             val selectionArgs = arrayOf(artistId.toString())
-            mediaItems.addAll(gatherSongs(MediaStore.Audio.Media.INTERNAL_CONTENT_URI, selection, selectionArgs))
-            mediaItems.addAll(gatherSongs(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, selection, selectionArgs))
+            if (useInternal) mediaItems.addAll(
+              gatherSongs(
+                MediaStore.Audio.Media.INTERNAL_CONTENT_URI,
+                selection,
+                selectionArgs
+              )
+            )
+            if (useExternal) mediaItems.addAll(
+              gatherSongs(
+                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                selection,
+                selectionArgs
+              )
+            )
           }
 
           val albumId = options.getLong(OPTION_ALBUM_ID)
           if (albumId > 0) {
             val selection = "${MediaStore.Audio.AudioColumns.ALBUM_ID} = ?"
             val selectionArgs = arrayOf(albumId.toString())
-            mediaItems.addAll(gatherSongs(MediaStore.Audio.Media.INTERNAL_CONTENT_URI, selection, selectionArgs))
-            mediaItems.addAll(gatherSongs(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, selection, selectionArgs))
+            if (useInternal) mediaItems.addAll(
+              gatherSongs(
+                MediaStore.Audio.Media.INTERNAL_CONTENT_URI,
+                selection,
+                selectionArgs
+              )
+            )
+            if (useExternal) mediaItems.addAll(
+              gatherSongs(
+                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                selection,
+                selectionArgs
+              )
+            )
           }
         }
       }
