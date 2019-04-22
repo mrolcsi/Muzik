@@ -351,6 +351,12 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
 
   //endregion
 
+  //region -- METADATA PROVIDER --
+
+  private val mMetadataProvider: ExoMetadataProvider = ExoMetadataProvider(context, session.controller)
+
+  //endregion
+
   //region -- QUEUE NAVIGATOR --
 
   private val mQueueNavigator = object : TimelineQueueNavigator(session) {
@@ -556,7 +562,7 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
   private val mSessionConnector =
     MediaSessionConnector(session).apply {
       setPlayer(mPlayer)
-      setMediaMetadataProvider(MediaSessionConnector.DefaultMediaMetadataProvider(session.controller, null))
+      setMediaMetadataProvider(mMetadataProvider)
       setPlaybackPreparer(mPlaybackPreparer)
       setCustomActionProviders(
         mUpdaterActionProvider,

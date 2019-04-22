@@ -120,19 +120,12 @@ inline val MediaMetadataCompat.albumArtist: String?
     ?: getString("album_artist")
     ?: description.albumArtist
 
-inline val MediaMetadataCompat.art: Bitmap?
-  get() = getBitmap(MediaMetadataCompat.METADATA_KEY_ART)
-
-inline val MediaMetadataCompat.artUri: Uri
-  get() = getString(MediaMetadataCompat.METADATA_KEY_ART_URI)?.let { Uri.parse(it) }
-    ?: Uri.parse("content://media/external/audio/media/$id/albumart")
-
 inline val MediaMetadataCompat.albumArt: Bitmap?
   get() = getBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART)
 
 inline val MediaMetadataCompat.albumArtUri: Uri?
   get() = this.getString(MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI)?.let { Uri.parse(it) }
-    ?: Uri.parse("content://media/external/audio/albumart/$id")
+    ?: Uri.parse("content://media/external/audio/media/$id/albumart")
 
 inline val MediaMetadataCompat.userRating: RatingCompat?
   get() = getRating(MediaMetadataCompat.METADATA_KEY_USER_RATING)

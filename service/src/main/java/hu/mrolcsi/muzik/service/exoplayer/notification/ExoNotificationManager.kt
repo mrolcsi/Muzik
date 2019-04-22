@@ -13,7 +13,7 @@ import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import hu.mrolcsi.muzik.service.BuildConfig
 import hu.mrolcsi.muzik.service.R
-import hu.mrolcsi.muzik.service.extensions.media.artUri
+import hu.mrolcsi.muzik.service.extensions.media.albumArtUri
 import hu.mrolcsi.muzik.service.extensions.media.artist
 import hu.mrolcsi.muzik.service.extensions.media.id
 import hu.mrolcsi.muzik.service.extensions.media.mediaId
@@ -50,7 +50,7 @@ class ExoNotificationManager(
         AsyncTask.execute {
           metadata?.let {
             if (it.id > 0) {
-              val bitmap = MediaStore.Images.Media.getBitmap(context.contentResolver, it.artUri)
+              val bitmap = MediaStore.Images.Media.getBitmap(context.contentResolver, it.albumArtUri)
 
               it.mediaId?.let { id ->
                 mBitmapCache.put(id, bitmap)

@@ -42,6 +42,7 @@ class ThemeManager(private val sharedPrefs: SharedPreferences) {
     hsl[1] > 0.4
   }
 
+  @Synchronized
   fun updateFromBitmap(bitmap: Bitmap) {
     mThemeWorker.submit {
 
