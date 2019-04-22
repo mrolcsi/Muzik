@@ -2,6 +2,7 @@ package hu.mrolcsi.muzik.player
 
 import android.graphics.Bitmap
 import android.os.AsyncTask
+import android.provider.MediaStore
 import android.support.v4.media.session.MediaSessionCompat
 import android.util.Log
 import android.util.LruCache
@@ -36,26 +37,27 @@ class QueueAdapter : ListAdapter<MediaSessionCompat.QueueItem, QueueAdapter.Queu
     Log.v(LOG_TAG, "onBindViewHolder($holder, $position")
 
     // Cache items surrounding position
-//    val start = Math.max(position - WINDOW_SIZE, 0)
-//    val end = Math.min(position + WINDOW_SIZE, itemCount)
-//    for (i in start until end) {
-//      val item = getItem(i)
-//      val key = item.description.mediaId
-//
-//      if (mCache[key] == null) {
-//        mBackgroundExecutor.submit {
-//          Log.v(LOG_TAG, "Caching item: $item")
-//
-//          // Load item into cache
-//          val metadata = MediaMetadataCompat.Builder().from(item.description).build()
-//          val albumArt = metadata.albumArt
-//            ?: BitmapFactory.decodeResource(holder.itemView.resources, R.drawable.placeholder_cover_art)
-//          val theme = ThemeManager.getInstance(holder.itemView.context).createFromBitmap(albumArt)
-//
-//          mCache.put(key, albumArt to theme)
-//        }
-//      }
-//    }
+    val start = Math.max(position - WINDOW_SIZE, 0)
+    val end = Math.min(position + WINDOW_SIZE, itemCount)
+    for (i in start until end) {
+      val item = getItem(i)
+      val key = item.description.mediaId
+
+      if (mCache[key] == null) {
+        mBackgroundExecutor.submit {
+          Log.v(LOG_TAG, "Caching item: $item")
+
+          // Load item into cache
+          MediaStore.Images.Media.getBitmap(
+            holder.itemView.context.contentResolver,
+            item.description.coverArtUri
+          )?.let {
+            val theme = ThemeManager.getInstance(holder.itemView.context).createFromBitmap(it)
+            mCache.put(key, it to theme)
+          }
+        }
+      }
+    }
 
     holder.bind(getItem(position))
   }
@@ -98,44 +100,23 @@ class QueueAdapter : ListAdapter<MediaSessionCompat.QueueItem, QueueAdapter.Queu
     }
 
     fun bind(item: MediaSessionCompat.QueueItem) {
-//      val key = item.description.mediaId
-//
-//      val cached = mCache[key]
-//      if (cached != null) {
-//        Log.v(LOG_TAG, "Cache hit : $key")
-//
-//        // Load item into cache
-//        val metadata = MediaMetadataCompat.Builder().from(item.description).build()
-//        val albumArt = metadata.albumArt
-//          ?: BitmapFactory.decodeResource(itemView.resources, R.drawable.placeholder_cover_art)
-//        val theme = ThemeManager.getInstance(itemView.context).createFromBitmap(albumArt)
-//        mCache.put(key, albumArt to theme)
-//
-//        GlideApp.with(imgCoverArt)
-//          .load(cached.first)
-//          .into(imgCoverArt)
-//        //imgCoverArt.setImageBitmap(cached.first)
-//        applyTheme(cached.second)
-//      } else {
-//        Log.w(LOG_TAG, "Cache miss: $key")
-//
-//        val metadata = MediaMetadataCompat.Builder().from(item.description).build()
-//        val albumArt = metadata.albumArt
-//          ?: BitmapFactory.decodeResource(itemView.context.resources, R.drawable.placeholder_cover_art)
-//        val theme = ThemeManager.getInstance(itemView.context).createFromBitmap(albumArt)
-//
-//        GlideApp.with(imgCoverArt)
-//          .load(albumArt)
-//          .into(imgCoverArt)
-//
-//        applyTheme(theme)
-//      }
+      val key = item.description.mediaId
 
-      GlideApp.with(imgCoverArt)
-        .asBitmap()
-        .load(item.description.coverArtUri)
-        .addListener(onCoverArtReady)
-        .into(imgCoverArt)
+      val cached = mCache[key]
+      if (cached != null) {
+        GlideApp.with(imgCoverArt)
+          .asBitmap()
+          .load(cached.first)
+          .into(imgCoverArt)
+
+        applyTheme(cached.second)
+      } else {
+        GlideApp.with(imgCoverArt)
+          .asBitmap()
+          .load(item.description.coverArtUri)
+          .addListener(onCoverArtReady)
+          .into(imgCoverArt)
+      }
 
       tvTitle.text = item.description.title
       tvArtist.text = item.description.subtitle ?: "Unknown Artist"   // TODO: i18n

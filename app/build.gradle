@@ -67,10 +67,6 @@ dependencies {
     // Glide
     implementation 'com.github.bumptech.glide:glide:4.9.0'
     kapt 'com.github.bumptech.glide:compiler:4.9.0'
-    implementation("com.github.bumptech.glide:recyclerview-integration:4.9.0") {
-        // Excludes the support library because it's already included by Glide.
-        transitive = false
-    }
 
     // Custom Activity on Crash
     implementation 'cat.ereza:customactivityoncrash:2.2.0'
