@@ -17,6 +17,7 @@ import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.DiffCallbackRepository
 import hu.mrolcsi.muzik.common.glide.GlideApp
 import hu.mrolcsi.muzik.common.glide.MuzikGlideModule
+import hu.mrolcsi.muzik.extensions.startMarquee
 import hu.mrolcsi.muzik.library.albums.details.AlbumDetailsFragmentArgs
 import hu.mrolcsi.muzik.service.extensions.media.albumArtUri
 import hu.mrolcsi.muzik.service.extensions.media.id
@@ -38,6 +39,8 @@ class AlbumsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, AlbumsAdapter.Al
 
   class AlbumHolder(override val containerView: View) : RecyclerView.ViewHolder(containerView), LayoutContainer {
 
+    private val marqueeDelay = containerView.resources.getInteger(R.integer.preferredMarqueeDelay).toLong()
+
     private val onCoverArtReady = object : MuzikGlideModule.SimpleRequestListener<Bitmap> {
       override fun onLoadFailed() {}
 
@@ -57,8 +60,14 @@ class AlbumsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, AlbumsAdapter.Al
     fun bind(item: MediaBrowserCompat.MediaItem) {
 
       // Set texts
-      tvAlbumTitle?.text = item.description.title
-      tvAlbumArtist?.text = item.description.subtitle
+      tvAlbumTitle?.run {
+        text = item.description.title
+        startMarquee(marqueeDelay)
+      }
+      tvAlbumArtist?.run {
+        text = item.description.subtitle
+        startMarquee(marqueeDelay)
+      }
 
       ViewCompat.setTransitionName(imgCoverArt, "coverArt${item.description.id}")
 

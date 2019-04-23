@@ -16,6 +16,7 @@ import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.DiffCallbackRepository
 import hu.mrolcsi.muzik.common.glide.GlideApp
 import hu.mrolcsi.muzik.common.glide.MuzikGlideModule
+import hu.mrolcsi.muzik.extensions.startMarquee
 import hu.mrolcsi.muzik.service.extensions.media.coverArtUri
 import hu.mrolcsi.muzik.service.extensions.media.id
 import hu.mrolcsi.muzik.service.theme.Theme
@@ -79,6 +80,8 @@ class QueueAdapter : ListAdapter<MediaSessionCompat.QueueItem, QueueAdapter.Queu
 
   class QueueItemHolder(override val containerView: View) : RecyclerView.ViewHolder(containerView), LayoutContainer {
 
+    private val marqueeDelay = containerView.resources.getInteger(R.integer.preferredMarqueeDelay).toLong()
+
     var usedTheme: Theme? = null
 
     private val onCoverArtReady = object : MuzikGlideModule.SimpleRequestListener<Bitmap> {
@@ -122,9 +125,20 @@ class QueueAdapter : ListAdapter<MediaSessionCompat.QueueItem, QueueAdapter.Queu
           .into(imgCoverArt)
       }
 
-      tvTitle.text = item.description.title
-      tvArtist.text = item.description.subtitle ?: "Unknown Artist"   // TODO: i18n
-      tvAlbum.text = item.description.description ?: "Unknown Album"      // TODO: i18n
+      tvTitle?.run {
+        text = item.description.title
+        startMarquee(marqueeDelay)
+      }
+
+      tvArtist?.run {
+        text = item.description.subtitle ?: "Unknown Artist"   // TODO: i18n
+        startMarquee(marqueeDelay)
+      }
+
+      tvAlbum?.run {
+        text = item.description.description ?: "Unknown Album"      // TODO: i18n
+        startMarquee(marqueeDelay)
+      }
     }
 
     private fun applyTheme(theme: Theme) {

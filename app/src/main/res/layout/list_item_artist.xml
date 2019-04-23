@@ -7,7 +7,8 @@
   android:background="?android:attr/selectableItemBackground"
   android:minHeight="?attr/listPreferredItemHeight">
 
-  <TextView android:id="@+id/tvTitle"
+  <TextView
+    android:id="@+id/tvArtist"
     android:layout_width="0dp"
     android:layout_height="wrap_content"
     android:layout_marginTop="16dp"
@@ -17,9 +18,10 @@
     app:layout_constraintEnd_toStartOf="@+id/imgChevronRight"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent"
-    tools:text="Title"/>
+    tools:text="Artist"/>
 
-  <TextView android:id="@+id/tvSubtitle"
+  <TextView
+    android:id="@+id/tvNumberOfSongs"
     android:layout_width="0dp"
     android:layout_height="wrap_content"
     android:layout_marginTop="8dp"
@@ -31,9 +33,9 @@
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toStartOf="@+id/imgChevronRight"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@+id/tvTitle"
+    app:layout_constraintTop_toBottomOf="@+id/tvArtist"
     app:layout_constraintVertical_bias="0.0"
-    tools:text="Subtitle"/>
+    tools:text="Number of songs"/>
 
   <ImageView
     android:id="@+id/imgChevronRight"

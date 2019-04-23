@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <integer name="preferredAnimationDuration">200</integer>
   <integer name="albumsColumnCount">2</integer>
+  <integer name="preferredAnimationDuration">200</integer>
+  <integer name="preferredMarqueeDelay">2000</integer>
 </resources>

@@ -26,10 +26,21 @@
     <item name="colorControlHighlight">@android:color/white</item>
     <item name="colorPrimary">@color/primaryColor</item>
     <item name="colorPrimaryDark">@color/primaryDarkColor</item>
+
+    <item name="android:textViewStyle">@style/SingleLineTextView</item>
   </style>
 
   <style name="FluxTheme.Launcher">
     <item name="android:windowBackground">@drawable/launch_screen</item>
+  </style>
+
+  <style name="SingleLineTextView"
+    parent="Widget.AppCompat.TextView">
+    <!-- Also needs `setSelected(true)` from code. -->
+    <item name="android:singleLine">true</item>
+    <item name="android:ellipsize">marquee</item>
+    <item name="android:marqueeRepeatLimit">marquee_forever</item>
+    <item name="android:scrollHorizontally">true</item>
   </style>
 
   <!-- TODO: Light Theme -->

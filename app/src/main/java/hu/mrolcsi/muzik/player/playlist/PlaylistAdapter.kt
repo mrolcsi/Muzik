@@ -1,10 +1,8 @@
 package hu.mrolcsi.muzik.player.playlist
 
-import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.graphics.ColorUtils
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.muzik.R
@@ -12,6 +10,7 @@ import hu.mrolcsi.muzik.common.DiffCallbackRepository
 import hu.mrolcsi.muzik.database.playqueue.entities.PlayQueueEntry
 import hu.mrolcsi.muzik.extensions.OnItemClickListener
 import hu.mrolcsi.muzik.extensions.millisecondsToTimeStamp
+import hu.mrolcsi.muzik.extensions.startMarquee
 import hu.mrolcsi.muzik.service.theme.Theme
 import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.extensions.LayoutContainer
@@ -47,17 +46,7 @@ class PlaylistAdapter(
 
     // Apply theme
     ThemeManager.getInstance(holder.itemView.context).currentTheme.value?.let { theme ->
-      // Apply colors
-      holder.tvTrackNumber.setTextColor(theme.primaryForegroundColor)
-      holder.tvTitle.setTextColor(theme.primaryForegroundColor)
-      holder.tvArtist.setTextColor(theme.primaryForegroundColor)
-      holder.tvDuration.setTextColor(theme.primaryForegroundColor)
-      holder.imgNowPlaying.setColorFilter(theme.primaryForegroundColor)
-
-      holder.itemView.background = Theme.getRippleDrawable(
-        ColorUtils.setAlphaComponent(theme.primaryForegroundColor, Theme.DISABLED_OPACITY),
-        Color.TRANSPARENT
-      )
+      holder.applyTheme(theme)
     }
 
     val item = getItem(position)
@@ -87,11 +76,33 @@ class PlaylistAdapter(
   class PlaylistViewHolder(override val containerView: View) :
     RecyclerView.ViewHolder(containerView), LayoutContainer {
 
+    private val marqueeDelay = containerView.resources.getInteger(R.integer.preferredMarqueeDelay).toLong()
+
     fun bind(item: PlayQueueEntry) {
-      tvTrackNumber.text = (item._id + 1).toString()
-      tvTitle.text = item.title
-      tvArtist.text = item.artist
-      tvDuration.text = item.duration?.millisecondsToTimeStamp()
+      tvTitle?.run {
+        text = item.title
+        startMarquee(marqueeDelay)
+      }
+
+      tvArtist?.run {
+        text = item.artist
+        startMarquee(marqueeDelay)
+      }
+
+      tvTrackNumber?.text = (item._id + 1).toString()
+
+      tvDuration?.text = item.duration?.millisecondsToTimeStamp()
+    }
+
+    fun applyTheme(theme: Theme) {
+      // Apply colors
+      tvTrackNumber?.setTextColor(theme.primaryForegroundColor)
+      tvTitle?.setTextColor(theme.primaryForegroundColor)
+      tvArtist?.setTextColor(theme.primaryForegroundColor)
+      tvDuration?.setTextColor(theme.primaryForegroundColor)
+      imgNowPlaying?.setColorFilter(theme.primaryForegroundColor)
+
+      itemView.background = Theme.getRippleDrawable(theme.primaryForegroundColor, theme.primaryBackgroundColor)
     }
   }
 }

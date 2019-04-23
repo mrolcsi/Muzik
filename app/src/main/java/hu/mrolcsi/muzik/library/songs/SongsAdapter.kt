@@ -10,6 +10,7 @@ import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.DiffCallbackRepository
 import hu.mrolcsi.muzik.common.glide.GlideApp
 import hu.mrolcsi.muzik.extensions.OnItemClickListener
+import hu.mrolcsi.muzik.extensions.startMarquee
 import hu.mrolcsi.muzik.service.extensions.media.coverArtUri
 import hu.mrolcsi.muzik.service.extensions.media.trackNumber
 import hu.mrolcsi.muzik.service.theme.Theme
@@ -52,10 +53,19 @@ open class SongsAdapter(
 
   class SongHolder(override val containerView: View) : RecyclerView.ViewHolder(containerView), LayoutContainer {
 
+    private val marqueeDelay = containerView.resources.getInteger(R.integer.preferredMarqueeDelay).toLong()
+
     fun bind(item: MediaBrowserCompat.MediaItem, showTrackNumber: Boolean) {
+
       // Set texts
-      tvSongTitle?.text = item.description.title
-      tvSongArtist?.text = item.description.subtitle
+      tvSongTitle?.run {
+        text = item.description.title
+        startMarquee(marqueeDelay)
+      }
+      tvSongArtist?.run {
+        text = item.description.subtitle
+        startMarquee(marqueeDelay)
+      }
 
       // Load album art
       GlideApp.with(imgCoverArt)

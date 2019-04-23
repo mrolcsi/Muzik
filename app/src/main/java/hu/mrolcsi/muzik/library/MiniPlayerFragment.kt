@@ -24,6 +24,7 @@ import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.OnSwipeTouchListener
 import hu.mrolcsi.muzik.common.glide.GlideApp
 import hu.mrolcsi.muzik.extensions.mediaControllerCompat
+import hu.mrolcsi.muzik.extensions.startMarquee
 import hu.mrolcsi.muzik.player.PlayerViewModel
 import hu.mrolcsi.muzik.service.extensions.media.albumArtUri
 import hu.mrolcsi.muzik.service.extensions.media.artist
@@ -93,6 +94,12 @@ class MiniPlayerFragment : Fragment() {
   }
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+
+    val marqueeDelay = requireContext().resources.getInteger(R.integer.preferredMarqueeDelay).toLong()
+
+    // Enable marquee
+    tvTitle.startMarquee(marqueeDelay)
+    tvArtist.startMarquee(marqueeDelay)
 
     fun openPlayer() {
       val extras = FragmentNavigatorExtras(
