@@ -14,7 +14,6 @@ import androidx.core.view.get
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.database.playqueue.PlayQueueDatabase
@@ -108,7 +107,7 @@ class PlaylistFragment : Fragment() {
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     rvPlaylist.apply {
       adapter = mPlaylistAdapter
-      addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
+      //addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
     }
 
     // TODO: Dynamic title

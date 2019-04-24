@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import androidx.recyclerview.widget.DividerItemDecoration
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.synthetic.main.fragment_artists.*
@@ -39,7 +38,7 @@ class ArtistsFragment : Fragment() {
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     rvArtists.apply {
       adapter = mArtistAdapter
-      addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
+      //addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
     }
   }
 }

@@ -28,6 +28,8 @@
     <item name="colorPrimaryDark">@color/primaryDarkColor</item>
 
     <item name="android:textViewStyle">@style/SingleLineTextView</item>
+
+    <item name="android:listDivider">@drawable/list_divider</item>
   </style>
 
   <style name="FluxTheme.Launcher">
