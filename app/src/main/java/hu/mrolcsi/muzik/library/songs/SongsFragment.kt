@@ -12,6 +12,7 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.DividerItemDecoration
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.extensions.OnItemClickListener
 import hu.mrolcsi.muzik.service.exoplayer.ExoPlayerHolder
@@ -77,9 +78,9 @@ class SongsFragment : Fragment() {
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     rvSongs.apply {
       adapter = mSongsAdapter
-//      addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL).apply {
-//        setDrawable(resources.getDrawable(R.drawable.list_divider_inset, context.theme))
-//      })
+      addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL).apply {
+        setDrawable(resources.getDrawable(R.drawable.list_divider_inset, context.theme))
+      })
     }
   }
 
