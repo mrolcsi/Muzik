@@ -1,5 +1,6 @@
 package hu.mrolcsi.muzik.player.playlist
 
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -7,6 +8,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.DiffCallbackRepository
+import hu.mrolcsi.muzik.common.glide.GlideApp
 import hu.mrolcsi.muzik.database.playqueue.entities.PlayQueueEntry
 import hu.mrolcsi.muzik.extensions.OnItemClickListener
 import hu.mrolcsi.muzik.extensions.millisecondsToTimeStamp
@@ -60,7 +62,6 @@ class PlaylistAdapter(
       }
     }
     holder.imgNowPlaying.visibility = if (item._id == activeQueueId) View.VISIBLE else View.GONE
-    holder.tvTrackNumber.visibility = if (item._id != activeQueueId) View.VISIBLE else View.GONE
 
     holder.itemView.setOnClickListener {
       // Show Now Playing indicator
@@ -76,29 +77,32 @@ class PlaylistAdapter(
   class PlaylistViewHolder(override val containerView: View) :
     RecyclerView.ViewHolder(containerView), LayoutContainer {
 
+    private val coverArtUri = "content://media/external/audio/media/%d/albumart"
+
     private val marqueeDelay = containerView.resources.getInteger(R.integer.preferredMarqueeDelay).toLong()
 
     fun bind(item: PlayQueueEntry) {
-      tvTitle?.run {
+      tvSongTitle?.run {
         text = item.title
         startMarquee(marqueeDelay)
       }
 
-      tvArtist?.run {
+      tvSongArtist?.run {
         text = item.artist
         startMarquee(marqueeDelay)
       }
 
-      tvTrackNumber?.text = (item._id + 1).toString()
-
       tvDuration?.text = item.duration?.millisecondsToTimeStamp()
+
+      GlideApp.with(imgCoverArt)
+        .load(Uri.parse(String.format(coverArtUri, item.mediaId)))
+        .into(imgCoverArt)
     }
 
     fun applyTheme(theme: Theme) {
       // Apply colors
-      tvTrackNumber?.setTextColor(theme.primaryForegroundColor)
-      tvTitle?.setTextColor(theme.primaryForegroundColor)
-      tvArtist?.setTextColor(theme.primaryForegroundColor)
+      tvSongTitle?.setTextColor(theme.primaryForegroundColor)
+      tvSongArtist?.setTextColor(theme.primaryForegroundColor)
       tvDuration?.setTextColor(theme.primaryForegroundColor)
       imgNowPlaying?.setColorFilter(theme.primaryForegroundColor)
 
