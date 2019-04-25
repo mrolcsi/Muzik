@@ -36,6 +36,10 @@ class ArtistsFragment : Fragment() {
       mArtistAdapter.notifyDataSetChanged()
 
       mDivider.setTint(it.tertiaryForegroundColor)
+
+      // Apply colors to FastScroller
+      fastScroller.setBarColor(it.tertiaryForegroundColor)
+      fastScroller.setHandleColor(it.tertiaryForegroundColor)
     })
   }
 
@@ -47,6 +51,9 @@ class ArtistsFragment : Fragment() {
     rvArtists.apply {
       adapter = mArtistAdapter
       addItemDecoration(mDivider)
+
+      fastScroller.setRecyclerView(this)
+      this.addOnScrollListener(fastScroller.onScrollListener)
     }
   }
 }

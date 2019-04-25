@@ -76,7 +76,12 @@ class SongsFragment : Fragment() {
       // Tell adapter to reload its views
       mSongsAdapter.notifyDataSetChanged()
 
+      // Apply colors to dividers
       mDivider.setTint(it.tertiaryForegroundColor)
+
+      // Apply colors to FastScroller
+      fastScroller.setBarColor(it.tertiaryForegroundColor)
+      fastScroller.setHandleColor(it.tertiaryForegroundColor)
     })
   }
 
@@ -88,6 +93,9 @@ class SongsFragment : Fragment() {
     rvSongs.apply {
       adapter = mSongsAdapter
       addItemDecoration(mDivider)
+
+      fastScroller.setRecyclerView(this)
+      this.addOnScrollListener(fastScroller.onScrollListener)
     }
   }
 
