@@ -4,17 +4,22 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import androidx.recyclerview.widget.DividerItemDecoration
 import hu.mrolcsi.muzik.R
+import hu.mrolcsi.muzik.common.ColoredDividerItemDecoration
 import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.synthetic.main.fragment_artists.*
 
 class ArtistsFragment : Fragment() {
 
   private val mArtistAdapter = ArtistsAdapter()
+
+  private val mDivider by lazy {
+    ColoredDividerItemDecoration(requireContext(), LinearLayout.VERTICAL)
+  }
 
   override fun onActivityCreated(savedInstanceState: Bundle?) {
     super.onActivityCreated(savedInstanceState)
@@ -29,6 +34,8 @@ class ArtistsFragment : Fragment() {
     ThemeManager.getInstance(requireContext()).currentTheme.observe(viewLifecycleOwner, Observer {
       // Tell adapter to reload its views
       mArtistAdapter.notifyDataSetChanged()
+
+      mDivider.setTint(it.tertiaryForegroundColor)
     })
   }
 
@@ -39,7 +46,7 @@ class ArtistsFragment : Fragment() {
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     rvArtists.apply {
       adapter = mArtistAdapter
-      addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
+      addItemDecoration(mDivider)
     }
   }
 }

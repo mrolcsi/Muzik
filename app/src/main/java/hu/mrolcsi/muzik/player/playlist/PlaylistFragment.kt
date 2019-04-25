@@ -9,14 +9,15 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.get
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import hu.mrolcsi.muzik.R
+import hu.mrolcsi.muzik.common.ColoredDividerItemDecoration
 import hu.mrolcsi.muzik.database.playqueue.PlayQueueDatabase
 import hu.mrolcsi.muzik.extensions.OnItemClickListener
 import hu.mrolcsi.muzik.player.PlayerViewModel
@@ -36,6 +37,12 @@ class PlaylistFragment : Fragment() {
       controller.transportControls.skipToQueueItem(id)
       controller.transportControls.play()
     })
+
+  private val mDivider by lazy {
+    ColoredDividerItemDecoration(requireContext(), LinearLayout.VERTICAL).apply {
+      setDrawable(resources.getDrawable(R.drawable.list_divider_inset, requireContext().theme))
+    }
+  }
 
   override fun onActivityCreated(savedInstanceState: Bundle?) {
     super.onActivityCreated(savedInstanceState)
@@ -108,9 +115,7 @@ class PlaylistFragment : Fragment() {
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     rvPlaylist.apply {
       adapter = mPlaylistAdapter
-      addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL).apply {
-        setDrawable(resources.getDrawable(R.drawable.list_divider_inset, context.theme))
-      })
+      addItemDecoration(mDivider)
     }
 
     // TODO: Dynamic title
@@ -168,6 +173,7 @@ class PlaylistFragment : Fragment() {
     for (i in 0 until playlistToolbar.menu.size()) {
       playlistToolbar.menu[i].icon.setTint(color)
     }
+    mDivider.setTint(color)
   }
 
   companion object {

@@ -11,14 +11,15 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.navArgs
-import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.transition.TransitionInflater
 import hu.mrolcsi.muzik.R
+import hu.mrolcsi.muzik.common.ColoredDividerItemDecoration
 import hu.mrolcsi.muzik.common.glide.GlideApp
 import hu.mrolcsi.muzik.common.glide.MuzikGlideModule
 import hu.mrolcsi.muzik.extensions.OnItemClickListener
@@ -72,6 +73,10 @@ class AlbumDetailsFragment : Fragment() {
     }
   ).apply {
     showTrackNumber = true
+  }
+
+  private val mDivider by lazy {
+    ColoredDividerItemDecoration(requireContext(), LinearLayout.VERTICAL)
   }
 
   private val onCoverArtReady = object : MuzikGlideModule.SimpleRequestListener<Bitmap> {
@@ -149,7 +154,7 @@ class AlbumDetailsFragment : Fragment() {
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     rvSongs.apply {
       adapter = mSongsAdapter
-      addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
+      addItemDecoration(mDivider)
     }
   }
 
@@ -229,6 +234,19 @@ class AlbumDetailsFragment : Fragment() {
 
         // Window background
         view?.setBackgroundColor(color)
+      }
+      start()
+    }
+
+    ValueAnimator.ofArgb(
+      currentTheme?.tertiaryForegroundColor ?: Color.WHITE,
+      theme.tertiaryForegroundColor
+    ).run {
+      duration = animationDuration
+      addUpdateListener {
+        val color = it.animatedValue as Int
+
+        mDivider.setTint(color)
       }
       start()
     }

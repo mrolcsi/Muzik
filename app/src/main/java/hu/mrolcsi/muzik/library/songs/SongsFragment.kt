@@ -8,12 +8,13 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import androidx.recyclerview.widget.DividerItemDecoration
 import hu.mrolcsi.muzik.R
+import hu.mrolcsi.muzik.common.ColoredDividerItemDecoration
 import hu.mrolcsi.muzik.extensions.OnItemClickListener
 import hu.mrolcsi.muzik.service.exoplayer.ExoPlayerHolder
 import hu.mrolcsi.muzik.service.extensions.media.addQueueItems
@@ -26,6 +27,12 @@ class SongsFragment : Fragment() {
   private lateinit var mSongsModel: SongsViewModel
 
   private lateinit var mVisibleSongs: List<MediaBrowserCompat.MediaItem>
+
+  private val mDivider by lazy {
+    ColoredDividerItemDecoration(requireContext(), LinearLayout.VERTICAL).apply {
+      setDrawable(resources.getDrawable(R.drawable.list_divider_inset, requireContext().theme))
+    }
+  }
 
   private val mSongsAdapter = SongsAdapter(OnItemClickListener { item, holder, position, id ->
     Log.d(LOG_TAG, "onItemClicked($item, $holder, $position, $id)")
@@ -68,6 +75,8 @@ class SongsFragment : Fragment() {
     ThemeManager.getInstance(requireContext()).currentTheme.observe(viewLifecycleOwner, Observer {
       // Tell adapter to reload its views
       mSongsAdapter.notifyDataSetChanged()
+
+      mDivider.setTint(it.tertiaryForegroundColor)
     })
   }
 
@@ -78,9 +87,7 @@ class SongsFragment : Fragment() {
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     rvSongs.apply {
       adapter = mSongsAdapter
-      addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL).apply {
-        setDrawable(resources.getDrawable(R.drawable.list_divider_inset, context.theme))
-      })
+      addItemDecoration(mDivider)
     }
   }
 
