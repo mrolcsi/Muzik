@@ -15,6 +15,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.ColoredDividerItemDecoration
+import hu.mrolcsi.muzik.common.fastscroller.AutoHidingFastScrollerTouchListener
 import hu.mrolcsi.muzik.extensions.OnItemClickListener
 import hu.mrolcsi.muzik.service.exoplayer.ExoPlayerHolder
 import hu.mrolcsi.muzik.service.extensions.media.addQueueItems
@@ -95,7 +96,9 @@ class SongsFragment : Fragment() {
       addItemDecoration(mDivider)
 
       fastScroller.setRecyclerView(this)
-      this.addOnScrollListener(fastScroller.onScrollListener)
+      fastScroller.setOnTouchListener(AutoHidingFastScrollerTouchListener(fastScroller).also {
+        addOnScrollListener(it.autoHideOnScrollListener)
+      })
     }
   }
 
