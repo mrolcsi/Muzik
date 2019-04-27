@@ -35,5 +35,9 @@
   <string name="playlist_title">Playlist</string>
   <string name="songs_fromAlbum_subtitle">from %s</string>
   <string name="songs_title">Songs</string>
+  <string name="sortBy">Sort By</string>
+  <string name="sortBy_artist">Sort by Artist</string>
+  <string name="sortBy_dateAdded">Sort By Date Added</string>
+  <string name="sortBy_title">Sort by Title</string>
   <!-- @formatter:on -->
 </resources>

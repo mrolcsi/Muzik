@@ -1,20 +1,18 @@
 package hu.mrolcsi.muzik.library.albums
 
 import android.app.Application
-import android.provider.MediaStore
+import android.os.AsyncTask
 import android.support.v4.media.MediaBrowserCompat
-import android.support.v4.media.MediaDescriptionCompat
 import android.util.Log
-import androidx.core.os.bundleOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import hu.mrolcsi.muzik.R
+import hu.mrolcsi.muzik.extensions.switchMap
 import hu.mrolcsi.muzik.library.SessionViewModel
 import hu.mrolcsi.muzik.service.MuzikBrowserService
+import hu.mrolcsi.muzik.service.extensions.media.albumKey
+import hu.mrolcsi.muzik.service.extensions.media.artistKey
 
 class AlbumsViewModel(app: Application) : SessionViewModel(app) {
-
-  // TODO: do filtering through Transformation.map?
 
   private val mSubscriptionCallbacks = object : MediaBrowserCompat.SubscriptionCallback() {
     override fun onChildrenLoaded(parentId: String, children: MutableList<MediaBrowserCompat.MediaItem>) {
@@ -34,46 +32,30 @@ class AlbumsViewModel(app: Application) : SessionViewModel(app) {
     mMediaBrowser.connect()
   }
 
-  val albums: LiveData<List<MediaBrowserCompat.MediaItem>>
-    get() = mAllAlbums
+  val sorting = MutableLiveData<Sorting>(Sorting.BY_TITLE)
 
-  private fun filterByArtist(
-    allAlbums: List<MediaBrowserCompat.MediaItem>,
-    info: ArtistInfo
-  ): MutableList<MediaBrowserCompat.MediaItem> {
-    val albumsByArtist = allAlbums.filter {
-      it.description.extras?.getString(MediaStore.Audio.Albums.ARTIST) == info.artistName
-    }.toMutableList()
-    // Add "All songs" as first item
-    val allSongsItem = MediaBrowserCompat.MediaItem(
-      MediaDescriptionCompat.Builder()
-        .setMediaId(AlbumsAdapter.MEDIA_ID_ALL_SONGS)
-        .setTitle(getApplication<Application>().getString(R.string.albums_showAllSongs))
-        .setSubtitle(
-          getApplication<Application>().resources.getQuantityString(
-            R.plurals.artists_numberOfSongs,
-            info.numberOfTracks,
-            info.numberOfTracks
-          )
-        )
-        .setExtras(
-          bundleOf(
-            MediaStore.Audio.ArtistColumns.ARTIST_KEY to info.artistKey,
-            MediaStore.Audio.ArtistColumns.ARTIST to info.artistName
-          )
-        )
-        .build(),
-      MediaBrowserCompat.MediaItem.FLAG_BROWSABLE
-    )
-    albumsByArtist.add(0, allSongsItem)
-    return albumsByArtist
-  }
+  val albums: LiveData<List<MediaBrowserCompat.MediaItem>>
+    get() = sorting.switchMap { sortBy ->
+      when (sortBy) {
+        null -> mAllAlbums
+        Sorting.BY_ARTIST -> mAllAlbums.switchMap { albums ->
+          val sortedAlbums = MutableLiveData<List<MediaBrowserCompat.MediaItem>>()
+          AsyncTask.execute {
+            sortedAlbums.postValue(albums.sortedBy { it.description.artistKey })
+          }
+          sortedAlbums
+        }
+        Sorting.BY_TITLE -> mAllAlbums.switchMap { albums ->
+          val sortedAlbums = MutableLiveData<List<MediaBrowserCompat.MediaItem>>()
+          AsyncTask.execute {
+            sortedAlbums.postValue(albums.sortedBy { it.description.albumKey })
+          }
+          sortedAlbums
+        }
+        else -> throw IllegalArgumentException("$sortBy cannot be used with albums.")
+      }
+    }
 
   override fun getLogTag(): String = "AlbumsViewModel"
 
-  data class ArtistInfo(
-    val artistKey: String?,
-    val artistName: String?,
-    val numberOfTracks: Int
-  )
 }

@@ -1,17 +1,23 @@
 package hu.mrolcsi.muzik.library.albums
 
 import android.animation.ValueAnimator
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import androidx.core.content.ContextCompat
+import androidx.core.view.forEach
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import hu.mrolcsi.muzik.R
+import hu.mrolcsi.muzik.library.SessionViewModel
 import hu.mrolcsi.muzik.service.theme.Theme
 import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.synthetic.main.fragment_albums.*
@@ -25,12 +31,16 @@ class AlbumsFragment : Fragment() {
   override fun onActivityCreated(savedInstanceState: Bundle?) {
     super.onActivityCreated(savedInstanceState)
 
+    setHasOptionsMenu(true)
+
     postponeEnterTransition()
 
     activity?.run {
       mAlbumsModel = ViewModelProviders.of(this).get(AlbumsViewModel::class.java).apply {
         albums.observe(viewLifecycleOwner, Observer { albums ->
           Log.d(LOG_TAG, "Got items from LiveData: $albums")
+
+          // Clear adapter first
           mAlbumsAdapter.submitList(albums)
         })
       }
@@ -46,15 +56,53 @@ class AlbumsFragment : Fragment() {
   }
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-    rvBrowser.adapter = mAlbumsAdapter
+    rvBrowser.run {
+      rvBrowser.adapter = mAlbumsAdapter
 
-    rvBrowser.viewTreeObserver.run {
-      addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+      viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
         override fun onGlobalLayout() {
-          removeOnGlobalLayoutListener(this)
+          viewTreeObserver.removeOnGlobalLayoutListener(this)
           startPostponedEnterTransition()
         }
       })
+    }
+  }
+
+  override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+    super.onCreateOptionsMenu(menu, inflater)
+    inflater.inflate(R.menu.menu_albums, menu)
+
+    // Apply theme to items
+    val color = ThemeManager.getInstance(requireContext()).currentTheme.value?.primaryForegroundColor ?: Color.WHITE
+    menu.forEach {
+      it.icon.setTint(color)
+    }
+  }
+
+  override fun onPrepareOptionsMenu(menu: Menu) {
+    super.onPrepareOptionsMenu(menu)
+
+    when (mAlbumsModel.sorting.value) {
+      SessionViewModel.Sorting.BY_ARTIST -> menu.findItem(R.id.menuSortByArtist).isChecked = true
+      SessionViewModel.Sorting.BY_TITLE -> menu.findItem(R.id.menuSortByTitle).isChecked = true
+      else -> {
+        // nothing
+      }
+    }
+  }
+
+  override fun onOptionsItemSelected(item: MenuItem): Boolean {
+    item.isChecked = true
+    return when (item.itemId) {
+      R.id.menuSortByArtist -> {
+        mAlbumsModel.sorting.value = SessionViewModel.Sorting.BY_ARTIST
+        true
+      }
+      R.id.menuSortByTitle -> {
+        mAlbumsModel.sorting.value = SessionViewModel.Sorting.BY_TITLE
+        true
+      }
+      else -> super.onOptionsItemSelected(item)
     }
   }
 

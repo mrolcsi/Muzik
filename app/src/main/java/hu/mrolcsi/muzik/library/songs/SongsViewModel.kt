@@ -8,9 +8,9 @@ import androidx.lifecycle.MutableLiveData
 import hu.mrolcsi.muzik.extensions.switchMap
 import hu.mrolcsi.muzik.library.SessionViewModel
 import hu.mrolcsi.muzik.service.MuzikBrowserService
-import hu.mrolcsi.muzik.service.extensions.media.albumKey
 import hu.mrolcsi.muzik.service.extensions.media.artistKey
-import hu.mrolcsi.muzik.service.extensions.media.trackNumber
+import hu.mrolcsi.muzik.service.extensions.media.dateAdded
+import hu.mrolcsi.muzik.service.extensions.media.titleKey
 
 class SongsViewModel(app: Application) : SessionViewModel(app) {
 
@@ -31,62 +31,38 @@ class SongsViewModel(app: Application) : SessionViewModel(app) {
     mMediaBrowser.connect()
   }
 
+  val sorting = MutableLiveData<Sorting>(Sorting.BY_TITLE)
+
   fun getSongs(): LiveData<List<MediaBrowserCompat.MediaItem>> {
     // Switch by album
-    return songFilter.switchMap { filter ->
-      when (filter.albumKey) {
-        null -> when (filter.artistKey) {
-          null -> mAllSongs
-          else -> mAllSongs.switchMap { allSongs ->
-            val songsByArtist = MutableLiveData<List<MediaBrowserCompat.MediaItem>>()
-            AsyncTask.execute {
-              songsByArtist.postValue(filterByArtist(allSongs, filter.artistKey))
-            }
-            songsByArtist
-          }
-        }
-        else -> mAllSongs.switchMap { allSongs ->
-          val songsFromAlbum = MutableLiveData<List<MediaBrowserCompat.MediaItem>>()
+    return sorting.switchMap { sortBy ->
+      when (sortBy) {
+        null -> mAllSongs
+        Sorting.BY_ARTIST -> mAllSongs.switchMap { songs ->
+          val sortedSongs = MutableLiveData<List<MediaBrowserCompat.MediaItem>>()
           AsyncTask.execute {
-            songsFromAlbum.postValue(filterByAlbum(allSongs, filter.albumKey))
+            sortedSongs.postValue(songs.sortedBy { it.description.artistKey })
           }
-          songsFromAlbum
+          sortedSongs
+        }
+        Sorting.BY_TITLE -> mAllSongs.switchMap { songs ->
+          val sortedSongs = MutableLiveData<List<MediaBrowserCompat.MediaItem>>()
+          AsyncTask.execute {
+            sortedSongs.postValue(songs.sortedBy { it.description.titleKey })
+          }
+          sortedSongs
+        }
+        Sorting.BY_DATE -> mAllSongs.switchMap { songs ->
+          val sortedSongs = MutableLiveData<List<MediaBrowserCompat.MediaItem>>()
+          AsyncTask.execute {
+            sortedSongs.postValue(songs.sortedByDescending { it.description.dateAdded })
+          }
+          sortedSongs
         }
       }
     }
   }
 
-  val songFilter = MutableLiveData<SongFilter>().apply { value = SongFilter() }
-
-  private fun filterByAlbum(
-    allSongs: List<MediaBrowserCompat.MediaItem>,
-    albumKey: String?
-  ): List<MediaBrowserCompat.MediaItem> {
-    return allSongs.filter { item ->
-      item.description.albumKey == albumKey
-    }.sortedBy { item ->
-      item.description.trackNumber
-    }
-  }
-
-  private fun filterByArtist(
-    allSongs: List<MediaBrowserCompat.MediaItem>,
-    artistKey: String?
-  ): List<MediaBrowserCompat.MediaItem> {
-    return allSongs.filter { item ->
-      item.description.artistKey == artistKey
-    }
-  }
-
   override fun getLogTag(): String = "SongsViewModel"
 
-  data class SongFilter(
-    val artistKey: String? = null,
-    val albumKey: String? = null
-  ) {
-
-    companion object {
-      val NO_FILTER = SongFilter()
-    }
-  }
 }

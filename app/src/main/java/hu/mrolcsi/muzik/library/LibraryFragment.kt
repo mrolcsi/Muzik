@@ -10,8 +10,10 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.ViewCompat
+import androidx.core.view.forEach
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.navigation.NavController
@@ -52,6 +54,8 @@ class LibraryFragment : Fragment() {
 
   override fun onResume() {
     super.onResume()
+
+    (activity as AppCompatActivity?)?.setSupportActionBar(libraryToolbar)
 
     // Apply StatusBar and NavigationBar colors again
     val themeManager = ThemeManager.getInstance(requireContext())
@@ -122,9 +126,11 @@ class LibraryFragment : Fragment() {
     }
 
     theme.primaryForegroundColor.also { color ->
-      // Toolbar Icon
+      // Toolbar Icons
       libraryToolbar.navigationIcon?.setColorFilter(color, PorterDuff.Mode.SRC_IN)
       libraryToolbar.overflowIcon?.setColorFilter(color, PorterDuff.Mode.SRC_IN)
+      libraryToolbar.menu.forEach { it.icon.setTint(color) }
+
       // Title and Subtitle
       libraryToolbar.setTitleTextColor(color)
       libraryToolbar.setSubtitleTextColor(color)
@@ -214,8 +220,10 @@ class LibraryFragment : Fragment() {
       addUpdateListener {
         val color = it.animatedValue as Int
 
-        // Toolbar Icon
+        // Toolbar Icons
         libraryToolbar.navigationIcon?.setColorFilter(color, PorterDuff.Mode.SRC_IN)
+        libraryToolbar.menu.forEach { it.icon.setTint(color) }
+
         // Title and Subtitle
         libraryToolbar.setTitleTextColor(color)
         libraryToolbar.setSubtitleTextColor(color)
