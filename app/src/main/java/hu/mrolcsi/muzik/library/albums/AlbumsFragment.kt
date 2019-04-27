@@ -17,6 +17,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import hu.mrolcsi.muzik.R
+import hu.mrolcsi.muzik.common.fastscroller.AutoHidingFastScrollerTouchListener
 import hu.mrolcsi.muzik.library.SessionViewModel
 import hu.mrolcsi.muzik.service.theme.Theme
 import hu.mrolcsi.muzik.service.theme.ThemeManager
@@ -56,14 +57,19 @@ class AlbumsFragment : Fragment() {
   }
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-    rvBrowser.run {
-      rvBrowser.adapter = mAlbumsAdapter
+    rvAlbums.run {
+      rvAlbums.adapter = mAlbumsAdapter
 
       viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
         override fun onGlobalLayout() {
           viewTreeObserver.removeOnGlobalLayoutListener(this)
           startPostponedEnterTransition()
         }
+      })
+
+      fastScroller.setRecyclerView(this)
+      fastScroller.setOnTouchListener(AutoHidingFastScrollerTouchListener(fastScroller).also {
+        addOnScrollListener(it.autoHideOnScrollListener)
       })
     }
   }
@@ -119,7 +125,22 @@ class AlbumsFragment : Fragment() {
       addUpdateListener {
         val color = it.animatedValue as Int
 
-        rvBrowser?.setBackgroundColor(color)
+        rvAlbums?.setBackgroundColor(color)
+      }
+      start()
+    }
+
+    ValueAnimator.ofArgb(
+      previousTheme?.tertiaryForegroundColor ?: Color.WHITE,
+      theme.tertiaryForegroundColor
+    ).run {
+      duration = animationDuration
+      addUpdateListener {
+        val color = it.animatedValue as Int
+
+        // Apply colors to FastScroller
+        fastScroller.setBarColor(color)
+        fastScroller.setHandleColor(color)
       }
       start()
     }
