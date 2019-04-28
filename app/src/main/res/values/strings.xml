@@ -14,6 +14,9 @@
   <string name="contentDescription_artistPicture">A picture of the artist</string>
   <string name="contentDescription_coverArt">Cover Art</string>
   <string name="contentDescription_missingPermission">Permission to access storage</string>
+  <string name="dateAdded_new">New</string>
+  <string name="dateAdded_old">Old</string>
+  <string name="dateAdded_recent">Recent</string>
   <string name="library_grantAccessToSdCard">Grant Access to SD Card</string>
   <string name="library_readExternalStorage_rationale">The app needs your permission to access your music collection. Please grant access by clicking on the button below, then answering \'Grant\'.</string>
   <string name="library_title">Library</string>

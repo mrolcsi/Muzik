@@ -23,6 +23,16 @@
     android:layout_height="0dp"
     app:layout_constraintBottom_toBottomOf="@+id/rvArtists"
     app:layout_constraintEnd_toEndOf="@id/rvArtists"
-    app:layout_constraintTop_toTopOf="@id/rvArtists"/>
+    app:layout_constraintTop_toTopOf="@id/rvArtists"
+    app:rfs_handleBackground="@drawable/fast_scroller_handle_rounded"/>
+
+  <hu.mrolcsi.muzik.common.fastscroller.SimpleSectionIndicator
+    android:id="@+id/sectionIndicator"
+    android:layout_width="wrap_content"
+    android:layout_height="@dimen/list_item_height"
+    app:layout_constraintEnd_toStartOf="@+id/fastScroller"
+    app:layout_constraintTop_toTopOf="@id/fastScroller"
+    app:rfs_backgroundColor="@android:color/white"
+    app:rfs_textColor="@android:color/black"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

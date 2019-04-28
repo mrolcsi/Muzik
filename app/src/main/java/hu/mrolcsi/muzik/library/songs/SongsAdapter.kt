@@ -1,13 +1,13 @@
 package hu.mrolcsi.muzik.library.songs
 
+import android.content.Context
 import android.support.v4.media.MediaBrowserCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.muzik.R
-import hu.mrolcsi.muzik.common.DiffCallbackRepository
+import hu.mrolcsi.muzik.common.MediaItemListAdapter
 import hu.mrolcsi.muzik.common.glide.GlideApp
 import hu.mrolcsi.muzik.extensions.OnItemClickListener
 import hu.mrolcsi.muzik.extensions.startMarquee
@@ -19,10 +19,9 @@ import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.list_item_song.*
 
 open class SongsAdapter(
+  context: Context,
   protected val onItemClickListener: OnItemClickListener<MediaBrowserCompat.MediaItem, SongHolder>? = null
-) : ListAdapter<MediaBrowserCompat.MediaItem, SongsAdapter.SongHolder>(
-  DiffCallbackRepository.mediaItemCallback
-) {
+) : MediaItemListAdapter<SongsAdapter.SongHolder>(context) {
 
   var showTrackNumber: Boolean = false
 

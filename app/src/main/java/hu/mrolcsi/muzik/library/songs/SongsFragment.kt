@@ -21,6 +21,7 @@ import androidx.lifecycle.ViewModelProviders
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.ColoredDividerItemDecoration
 import hu.mrolcsi.muzik.common.fastscroller.AutoHidingFastScrollerTouchListener
+import hu.mrolcsi.muzik.common.fastscroller.SimpleSectionIndicator
 import hu.mrolcsi.muzik.extensions.OnItemClickListener
 import hu.mrolcsi.muzik.library.SessionViewModel
 import hu.mrolcsi.muzik.service.exoplayer.ExoPlayerHolder
@@ -41,32 +42,34 @@ class SongsFragment : Fragment() {
     }
   }
 
-  private val mSongsAdapter = SongsAdapter(OnItemClickListener { item, holder, position, id ->
-    Log.d(LOG_TAG, "onItemClicked($item, $holder, $position, $id)")
+  private val mSongsAdapter by lazy {
+    SongsAdapter(requireContext(), OnItemClickListener { item, holder, position, id ->
+      Log.d(LOG_TAG, "onItemClicked($item, $holder, $position, $id)")
 
-    val controller = MediaControllerCompat.getMediaController(requireActivity())
+      val controller = MediaControllerCompat.getMediaController(requireActivity())
 
-    // Immediately start the song that was clicked on
-    controller.transportControls.playFromDescription(
-      item.description,
-      bundleOf(ExoPlayerHolder.EXTRA_DESIRED_QUEUE_POSITION to position)
-    )
+      // Immediately start the song that was clicked on
+      controller.transportControls.playFromDescription(
+        item.description,
+        bundleOf(ExoPlayerHolder.EXTRA_DESIRED_QUEUE_POSITION to position)
+      )
 
-    AsyncTask.execute {
-      Log.d(LOG_TAG, "onItemClicked() Collecting descriptions...")
+      AsyncTask.execute {
+        Log.d(LOG_TAG, "onItemClicked() Collecting descriptions...")
 
-      // Add songs to queue
-      val descriptions = mVisibleSongs.filterIndexed { index, _ ->
-        index != position
-      }.map {
-        it.description
+        // Add songs to queue
+        val descriptions = mVisibleSongs.filterIndexed { index, _ ->
+          index != position
+        }.map {
+          it.description
+        }
+
+        Log.d(LOG_TAG, "onItemClicked() Sending items to queue...")
+
+        controller.addQueueItems(descriptions)
       }
-
-      Log.d(LOG_TAG, "onItemClicked() Sending items to queue...")
-
-      controller.addQueueItems(descriptions)
-    }
-  })
+    })
+  }
 
   override fun onActivityCreated(savedInstanceState: Bundle?) {
     super.onActivityCreated(savedInstanceState)
@@ -74,11 +77,22 @@ class SongsFragment : Fragment() {
     setHasOptionsMenu(true)
 
     activity?.run {
-      mSongsModel = ViewModelProviders.of(this).get(SongsViewModel::class.java)
-      mSongsModel.getSongs().observe(viewLifecycleOwner, Observer { songs ->
-        mSongsAdapter.submitList(songs)
-        mVisibleSongs = songs
-      })
+      mSongsModel = ViewModelProviders.of(this).get(SongsViewModel::class.java).apply {
+        getSongs().observe(viewLifecycleOwner, Observer { songs ->
+          mSongsAdapter.submitList(songs)
+          mVisibleSongs = songs
+        })
+        sorting.observe(viewLifecycleOwner, Observer {
+          // Update adapter
+          mSongsAdapter.sorting = it
+
+          if (it == SessionViewModel.Sorting.BY_DATE) {
+            sectionIndicator.setIndicatorTextSize(18)
+          } else {
+            sectionIndicator.setIndicatorTextSize(SimpleSectionIndicator.DEFAULT_TEXT_SIZE)
+          }
+        })
+      }
     }
 
     ThemeManager.getInstance(requireContext()).currentTheme.observe(viewLifecycleOwner, Observer {
@@ -90,7 +104,13 @@ class SongsFragment : Fragment() {
 
       // Apply colors to FastScroller
       fastScroller.setBarColor(it.tertiaryForegroundColor)
-      fastScroller.setHandleColor(it.tertiaryForegroundColor)
+      fastScroller.setHandleBackground(requireContext().getDrawable(R.drawable.fast_scroller_handle_rounded)?.apply {
+        setTint(it.tertiaryForegroundColor)
+      })
+
+      // Apply colors to SectionIndicator
+      sectionIndicator.setIndicatorBackgroundColor(it.tertiaryForegroundColor)
+      sectionIndicator.setIndicatorTextColor(it.tertiaryBackgroundColor)
     })
   }
 
@@ -107,6 +127,8 @@ class SongsFragment : Fragment() {
       fastScroller.setOnTouchListener(AutoHidingFastScrollerTouchListener(fastScroller).also {
         addOnScrollListener(it.autoHideOnScrollListener)
       })
+
+      fastScroller.sectionIndicator = sectionIndicator
     }
   }
 

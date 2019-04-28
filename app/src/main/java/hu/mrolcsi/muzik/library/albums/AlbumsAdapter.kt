@@ -1,20 +1,21 @@
 package hu.mrolcsi.muzik.library.albums
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.os.AsyncTask
 import android.support.v4.media.MediaBrowserCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.SectionIndexer
 import androidx.cardview.widget.CardView
 import androidx.core.view.ViewCompat
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.FragmentNavigatorExtras
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.muzik.BuildConfig
 import hu.mrolcsi.muzik.R
-import hu.mrolcsi.muzik.common.DiffCallbackRepository
+import hu.mrolcsi.muzik.common.MediaItemListAdapter
 import hu.mrolcsi.muzik.common.glide.GlideApp
 import hu.mrolcsi.muzik.common.glide.MuzikGlideModule
 import hu.mrolcsi.muzik.extensions.startMarquee
@@ -26,9 +27,9 @@ import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.list_item_album.*
 
-class AlbumsAdapter : ListAdapter<MediaBrowserCompat.MediaItem, AlbumsAdapter.AlbumHolder>(
-  DiffCallbackRepository.mediaItemCallback
-) {
+class AlbumsAdapter(context: Context) :
+  MediaItemListAdapter<AlbumsAdapter.AlbumHolder>(context),
+  SectionIndexer {
 
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AlbumHolder {
     val itemView = LayoutInflater.from(parent.context).inflate(R.layout.list_item_album, parent, false)

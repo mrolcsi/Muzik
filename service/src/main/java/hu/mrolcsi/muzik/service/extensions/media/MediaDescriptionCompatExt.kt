@@ -53,7 +53,7 @@ inline val MediaDescriptionCompat.coverArtUri: Uri
   get() = Uri.parse("content://media/external/audio/media/$id/albumart")
 
 inline val MediaDescriptionCompat.dateAdded: Long
-  get() = this.extras?.getString(MediaStore.Audio.Media.DATE_ADDED)?.toLong()
+  get() = this.extras?.getString(MediaStore.Audio.Media.DATE_ADDED)?.toLong()?.times(1000)
     ?: -1
 
 inline val MediaDescriptionCompat.duration: Long

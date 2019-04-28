@@ -1,5 +1,7 @@
 package hu.mrolcsi.muzik.extensions
 
+import android.provider.MediaStore.UNKNOWN_STRING
+
 private const val TIME_FORMAT_SHORT = "%02d:%02d"
 private const val TIME_FORMAT_LONG = "%02d:%02d:%02d"
 
@@ -51,3 +53,33 @@ fun Long.millisecondsToTimeStamp(): String {
     String.format(TIME_FORMAT_SHORT, minutes, seconds)
   }
 }
+
+fun String.toKeyString(): String {
+  // Copied from MediaStore.Audio.keyFor(String)
+  var key = this
+
+  if (this == UNKNOWN_STRING) {
+    return "\u0001"
+  }
+
+  key = key.trim { it <= ' ' }.toLowerCase()
+  if (key.startsWith("the ")) {
+    key = key.substring(4)
+  }
+  if (key.startsWith("an ")) {
+    key = key.substring(3)
+  }
+  if (key.startsWith("a ")) {
+    key = key.substring(2)
+  }
+  if (key.endsWith(", the") || key.endsWith(",the") ||
+    key.endsWith(", an") || key.endsWith(",an") ||
+    key.endsWith(", a") || key.endsWith(",a")
+  ) {
+    key = key.substring(0, key.lastIndexOf(','))
+  }
+  key = key.replace("[\\[\\]()\"'.,?!]".toRegex(), "").trim { it <= ' ' }
+  return key
+}
+
+fun CharSequence.toKeyString(): String = this.toString().toKeyString()

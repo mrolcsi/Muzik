@@ -27,7 +27,7 @@ class AlbumsFragment : Fragment() {
 
   private lateinit var mAlbumsModel: AlbumsViewModel
 
-  private var mAlbumsAdapter: AlbumsAdapter = AlbumsAdapter()
+  private val mAlbumsAdapter by lazy { AlbumsAdapter(requireContext()) }
 
   override fun onActivityCreated(savedInstanceState: Bundle?) {
     super.onActivityCreated(savedInstanceState)
@@ -41,8 +41,13 @@ class AlbumsFragment : Fragment() {
         albums.observe(viewLifecycleOwner, Observer { albums ->
           Log.d(LOG_TAG, "Got items from LiveData: $albums")
 
-          // Clear adapter first
           mAlbumsAdapter.submitList(albums)
+          rvAlbums.scrollToPosition(0)
+        })
+
+        sorting.observe(viewLifecycleOwner, Observer {
+          // Update adapter
+          mAlbumsAdapter.sorting = it
         })
       }
     }
@@ -71,6 +76,8 @@ class AlbumsFragment : Fragment() {
       fastScroller.setOnTouchListener(AutoHidingFastScrollerTouchListener(fastScroller).also {
         addOnScrollListener(it.autoHideOnScrollListener)
       })
+
+      fastScroller.sectionIndicator = sectionIndicator
     }
   }
 
@@ -126,6 +133,8 @@ class AlbumsFragment : Fragment() {
         val color = it.animatedValue as Int
 
         rvAlbums?.setBackgroundColor(color)
+
+        sectionIndicator.setIndicatorTextColor(color)
       }
       start()
     }
@@ -140,7 +149,11 @@ class AlbumsFragment : Fragment() {
 
         // Apply colors to FastScroller
         fastScroller.setBarColor(color)
-        fastScroller.setHandleColor(color)
+        fastScroller.setHandleBackground(requireContext().getDrawable(R.drawable.fast_scroller_handle_rounded)?.apply {
+          setTint(color)
+        })
+
+        sectionIndicator.setIndicatorBackgroundColor(color)
       }
       start()
     }

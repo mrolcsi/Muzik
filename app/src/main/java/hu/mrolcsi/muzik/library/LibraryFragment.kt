@@ -88,7 +88,9 @@ class LibraryFragment : Fragment() {
           // Apply color to back arrow
           val theme = ThemeManager.getInstance(requireContext()).currentTheme.value
           val color = theme?.primaryForegroundColor ?: Color.WHITE
+
           libraryToolbar.navigationIcon?.setColorFilter(color, PorterDuff.Mode.SRC_IN)
+          libraryToolbar.overflowIcon?.setColorFilter(color, PorterDuff.Mode.SRC_IN)
 
           // Show AppBar, hide NavigationBar
           appBar.setExpanded(true, true)
@@ -222,7 +224,8 @@ class LibraryFragment : Fragment() {
 
         // Toolbar Icons
         libraryToolbar.navigationIcon?.setColorFilter(color, PorterDuff.Mode.SRC_IN)
-        libraryToolbar.menu.forEach { it.icon.setTint(color) }
+        libraryToolbar.overflowIcon?.setColorFilter(color, PorterDuff.Mode.SRC_IN)
+        libraryToolbar.menu.forEach { item -> item.icon.setTint(color) }
 
         // Title and Subtitle
         libraryToolbar.setTitleTextColor(color)

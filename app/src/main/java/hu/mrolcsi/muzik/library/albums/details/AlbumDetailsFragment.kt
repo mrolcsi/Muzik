@@ -42,8 +42,8 @@ class AlbumDetailsFragment : Fragment() {
 
   private lateinit var mModel: AlbumDetailsViewModel
 
-  private val mSongsAdapter = AlbumSongsAdapter(
-    OnItemClickListener { item, holder, position, id ->
+  private val mSongsAdapter by lazy {
+    AlbumSongsAdapter(requireContext(), OnItemClickListener { item, holder, position, id ->
       Log.d(LOG_TAG, "onItemClicked($item, $holder, $position, $id)")
 
       val controller = MediaControllerCompat.getMediaController(requireActivity())
@@ -71,8 +71,9 @@ class AlbumDetailsFragment : Fragment() {
         }
       }
     }
-  ).apply {
-    showTrackNumber = true
+    ).apply {
+      showTrackNumber = true
+    }
   }
 
   private val mDivider by lazy {

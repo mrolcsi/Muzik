@@ -26,4 +26,13 @@
     app:layout_constraintEnd_toEndOf="@id/rvSongs"
     app:layout_constraintTop_toTopOf="@id/rvSongs"/>
 
+  <hu.mrolcsi.muzik.common.fastscroller.SimpleSectionIndicator
+    android:id="@+id/sectionIndicator"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    app:layout_constraintEnd_toStartOf="@+id/fastScroller"
+    app:layout_constraintTop_toTopOf="@id/fastScroller"
+    app:rfs_backgroundColor="@android:color/white"
+    app:rfs_textColor="@android:color/black"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

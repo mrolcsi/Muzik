@@ -16,7 +16,7 @@ import kotlinx.android.synthetic.main.fragment_artists.*
 
 class ArtistsFragment : Fragment() {
 
-  private val mArtistAdapter = ArtistsAdapter()
+  private val mArtistAdapter by lazy { ArtistsAdapter(requireContext()) }
 
   private val mDivider by lazy {
     ColoredDividerItemDecoration(requireContext(), LinearLayout.VERTICAL)
@@ -40,7 +40,13 @@ class ArtistsFragment : Fragment() {
 
       // Apply colors to FastScroller
       fastScroller.setBarColor(it.tertiaryForegroundColor)
-      fastScroller.setHandleColor(it.tertiaryForegroundColor)
+      fastScroller.setHandleBackground(requireContext().getDrawable(R.drawable.fast_scroller_handle_rounded)?.apply {
+        setTint(it.tertiaryForegroundColor)
+      })
+
+      // Apply colors to SectionIndicator
+      sectionIndicator.setIndicatorBackgroundColor(it.tertiaryForegroundColor)
+      sectionIndicator.setIndicatorTextColor(it.tertiaryBackgroundColor)
     })
   }
 
@@ -58,6 +64,7 @@ class ArtistsFragment : Fragment() {
         addOnScrollListener(it.autoHideOnScrollListener)
       })
 
+      fastScroller.sectionIndicator = sectionIndicator
     }
   }
 }
