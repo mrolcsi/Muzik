@@ -40,6 +40,7 @@ class MuzikGlideModule : AppGlideModule() {
       RequestOptions()
         .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
         .placeholder(null)
+        .override(ALBUM_THUMBNAIL_SIZE, ALBUM_THUMBNAIL_SIZE)
         .error(R.drawable.placeholder_cover_art)
     )
   }
@@ -70,5 +71,7 @@ class MuzikGlideModule : AppGlideModule() {
 
   companion object {
     private const val MEMORY_CACHE_SIZE = 1024 * 1024 * 20 // 20mb
+
+    private const val ALBUM_THUMBNAIL_SIZE = 500
   }
 }
