@@ -11,7 +11,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.core.content.ContextCompat
-import androidx.core.view.get
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -20,6 +19,7 @@ import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.ColoredDividerItemDecoration
 import hu.mrolcsi.muzik.database.playqueue.PlayQueueDatabase
 import hu.mrolcsi.muzik.extensions.OnItemClickListener
+import hu.mrolcsi.muzik.extensions.applyForegroundColor
 import hu.mrolcsi.muzik.player.PlayerViewModel
 import hu.mrolcsi.muzik.service.extensions.media.isPlaying
 import hu.mrolcsi.muzik.service.theme.Theme
@@ -169,10 +169,7 @@ class PlaylistFragment : Fragment() {
   }
 
   private fun applyForegroundColor(color: Int) {
-    playlistToolbar?.setTitleTextColor(color)
-    for (i in 0 until playlistToolbar.menu.size()) {
-      playlistToolbar.menu[i].icon.setTint(color)
-    }
+    playlistToolbar.applyForegroundColor(color)
     mDivider.setTint(color)
   }
 

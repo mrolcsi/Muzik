@@ -23,6 +23,7 @@ import hu.mrolcsi.muzik.common.ColoredDividerItemDecoration
 import hu.mrolcsi.muzik.common.fastscroller.AutoHidingFastScrollerTouchListener
 import hu.mrolcsi.muzik.common.fastscroller.SimpleSectionIndicator
 import hu.mrolcsi.muzik.extensions.OnItemClickListener
+import hu.mrolcsi.muzik.extensions.applyForegroundColor
 import hu.mrolcsi.muzik.library.SessionViewModel
 import hu.mrolcsi.muzik.service.exoplayer.ExoPlayerHolder
 import hu.mrolcsi.muzik.service.extensions.media.addQueueItems
@@ -103,10 +104,7 @@ class SongsFragment : Fragment() {
       mDivider.setTint(it.tertiaryForegroundColor)
 
       // Apply colors to FastScroller
-      fastScroller.setBarColor(it.tertiaryForegroundColor)
-      fastScroller.setHandleBackground(requireContext().getDrawable(R.drawable.fast_scroller_handle_rounded)?.apply {
-        setTint(it.tertiaryForegroundColor)
-      })
+      fastScroller.applyForegroundColor(requireContext(), it.tertiaryForegroundColor)
 
       // Apply colors to SectionIndicator
       sectionIndicator.setIndicatorBackgroundColor(it.tertiaryForegroundColor)

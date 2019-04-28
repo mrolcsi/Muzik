@@ -26,7 +26,6 @@ import androidx.core.graphics.ColorUtils
 import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.doOnNextLayout
-import androidx.core.view.forEach
 import androidx.core.view.postDelayed
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -45,8 +44,9 @@ import hu.mrolcsi.muzik.common.pager.RVPageScrollState
 import hu.mrolcsi.muzik.common.pager.RVPagerSnapHelperListenable
 import hu.mrolcsi.muzik.common.pager.RVPagerStateListener
 import hu.mrolcsi.muzik.common.pager.VisiblePageState
-import hu.mrolcsi.muzik.extensions.applyColorToNavigationBarIcons
-import hu.mrolcsi.muzik.extensions.applyColorToStatusBarIcons
+import hu.mrolcsi.muzik.extensions.applyForegroundColor
+import hu.mrolcsi.muzik.extensions.applyNavigationBarColor
+import hu.mrolcsi.muzik.extensions.applyStatusBarColor
 import hu.mrolcsi.muzik.extensions.millisecondsToTimeStamp
 import hu.mrolcsi.muzik.extensions.secondsToTimeStamp
 import hu.mrolcsi.muzik.service.extensions.media.albumArtUri
@@ -160,8 +160,7 @@ class PlayerFragment : Fragment() {
 
           context?.let {
             ThemeManager.getInstance(it).currentTheme.value?.let { theme ->
-              activity?.window?.statusBarColor = theme.statusBarColor
-              activity?.applyColorToStatusBarIcons(theme.statusBarColor)
+              activity?.applyStatusBarColor(theme.statusBarColor)
             }
           }
         }
@@ -178,8 +177,7 @@ class PlayerFragment : Fragment() {
 
           context?.let {
             ThemeManager.getInstance(requireContext()).currentTheme.value?.let { theme ->
-              activity?.window?.statusBarColor = theme.primaryBackgroundColor
-              activity?.applyColorToStatusBarIcons(theme.primaryBackgroundColor)
+              activity?.applyStatusBarColor(theme.primaryBackgroundColor)
             }
           }
         }
@@ -206,8 +204,7 @@ class PlayerFragment : Fragment() {
           .start()
 
         ThemeManager.getInstance(this).currentTheme.value?.let { theme ->
-          window?.statusBarColor = theme.statusBarColor
-          applyColorToStatusBarIcons(theme.statusBarColor)
+          applyStatusBarColor(theme.statusBarColor)
         }
       }
     }
@@ -302,23 +299,24 @@ class PlayerFragment : Fragment() {
   //endregion
 
   private fun setupToolbar() {
-    ThemeManager.getInstance(requireContext()).currentTheme.value?.let { theme ->
-      playerToolbar.menu?.forEach { item ->
-        item.icon.setColorFilter(theme.primaryForegroundColor, PorterDuff.Mode.SRC_IN)
+    playerToolbar.run {
+      // Apply Theme
+      val theme = ThemeManager.getInstance(requireContext()).currentTheme.value
+      val color = theme?.primaryForegroundColor ?: Color.WHITE
+      playerToolbar.applyForegroundColor(color)
+
+      setNavigationOnClickListener {
+        activity?.onBackPressed()
       }
-    }
 
-    playerToolbar.setNavigationOnClickListener {
-      activity?.onBackPressed()
-    }
-
-    playerToolbar.setOnMenuItemClickListener { item ->
-      when (item?.itemId) {
-        R.id.menuPlaylist -> {
-          drawer_layout.openDrawer(GravityCompat.END)
-          true
+      setOnMenuItemClickListener { item ->
+        when (item?.itemId) {
+          R.id.menuPlaylist -> {
+            drawer_layout.openDrawer(GravityCompat.END)
+            true
+          }
+          else -> super.onOptionsItemSelected(item)
         }
-        else -> super.onOptionsItemSelected(item)
       }
     }
   }
@@ -370,8 +368,7 @@ class PlayerFragment : Fragment() {
                 ratio
               )
 
-              activity?.window?.statusBarColor = statusBarColor
-              activity?.applyColorToStatusBarIcons(statusBarColor)
+              activity?.applyStatusBarColor(statusBarColor)
             }
           }
         }
@@ -676,8 +673,7 @@ class PlayerFragment : Fragment() {
       addUpdateListener {
         val color = it.animatedValue as Int
 
-        activity?.window?.statusBarColor = color
-        activity?.applyColorToStatusBarIcons(color)
+        activity?.applyStatusBarColor(color)
       }
       start()
     }
@@ -711,13 +707,8 @@ class PlayerFragment : Fragment() {
   }
 
   private fun applyForegroundColor(color: Int) {
-    // Toolbar Icons
-    with(playerToolbar) {
-      navigationIcon?.setColorFilter(color, PorterDuff.Mode.SRC_IN)
-      menu.forEach { item ->
-        item.icon.setColorFilter(color, PorterDuff.Mode.SRC_IN)
-      }
-    }
+    // Toolbar
+    playerToolbar.applyForegroundColor(color)
 
     // Texts
     tvElapsedTime.setTextColor(color)
@@ -747,7 +738,7 @@ class PlayerFragment : Fragment() {
 
     // Navigation Bar
     activity?.window?.navigationBarColor = color
-    activity?.applyColorToNavigationBarIcons(color)
+    activity?.applyNavigationBarColor(color)
 
     // Seek Progress background
     tvSeekProgress.setBackgroundColor(ColorUtils.setAlphaComponent(color, Theme.DISABLED_OPACITY))

@@ -18,6 +18,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.fastscroller.AutoHidingFastScrollerTouchListener
+import hu.mrolcsi.muzik.extensions.applyForegroundColor
 import hu.mrolcsi.muzik.library.SessionViewModel
 import hu.mrolcsi.muzik.service.theme.Theme
 import hu.mrolcsi.muzik.service.theme.ThemeManager
@@ -134,7 +135,7 @@ class AlbumsFragment : Fragment() {
 
         rvAlbums?.setBackgroundColor(color)
 
-        sectionIndicator.setIndicatorTextColor(color)
+        sectionIndicator?.setIndicatorTextColor(color)
       }
       start()
     }
@@ -147,12 +148,10 @@ class AlbumsFragment : Fragment() {
       addUpdateListener {
         val color = it.animatedValue as Int
 
-        // Apply colors to FastScroller
-        fastScroller.setBarColor(color)
-        fastScroller.setHandleBackground(requireContext().getDrawable(R.drawable.fast_scroller_handle_rounded)?.apply {
-          setTint(color)
-        })
+        // Apply color to FastScroller
+        fastScroller.applyForegroundColor(requireContext(), color)
 
+        // Apply color to Section Indicator
         sectionIndicator.setIndicatorBackgroundColor(color)
       }
       start()
