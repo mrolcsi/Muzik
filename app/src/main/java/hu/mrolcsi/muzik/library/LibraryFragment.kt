@@ -8,13 +8,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
+import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.extensions.applyForegroundColor
 import hu.mrolcsi.muzik.extensions.applyNavigationBarColor
 import hu.mrolcsi.muzik.extensions.applyStatusBarColor
@@ -26,12 +26,12 @@ import kotlinx.android.synthetic.main.fragment_library.*
 class LibraryFragment : Fragment() {
 
   override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
-    inflater.inflate(hu.mrolcsi.muzik.R.layout.fragment_library, container, false)
+    inflater.inflate(R.layout.fragment_library, container, false)
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-    libraryToolbar.setTitle(hu.mrolcsi.muzik.R.string.library_title)
+    libraryToolbar.setTitle(R.string.library_title)
 
-    setupNavBar(requireActivity().findNavController(hu.mrolcsi.muzik.R.id.libraryNavHost))
+    setupNavigation(requireActivity().findNavController(R.id.libraryNavHost))
 
     ThemeManager.getInstance(requireContext()).currentTheme.observe(viewLifecycleOwner, object : Observer<Theme> {
 
@@ -65,19 +65,19 @@ class LibraryFragment : Fragment() {
     )
   }
 
-  private fun setupNavBar(navController: NavController) {
-    val appBarConfig = AppBarConfiguration.Builder(
-      hu.mrolcsi.muzik.R.id.navigation_artists,
-      hu.mrolcsi.muzik.R.id.navigation_albums,
-      hu.mrolcsi.muzik.R.id.navigation_songs
-    ).build()
-
+  private fun setupNavigation(navController: NavController) {
+    val topLevelDestinations = setOf(
+      R.id.navigation_pager,
+      R.id.navigation_artists,
+      R.id.navigation_albums,
+      R.id.navigation_songs
+    )
+    val appBarConfig = AppBarConfiguration.Builder(topLevelDestinations).build()
     NavigationUI.setupWithNavController(libraryToolbar, navController, appBarConfig)
-    NavigationUI.setupWithNavController(navigationBar, navController)
 
     navController.addOnDestinationChangedListener { _, destination, _ ->
-      when (destination.id) {
-        hu.mrolcsi.muzik.R.id.navigation_artists, hu.mrolcsi.muzik.R.id.navigation_albums, hu.mrolcsi.muzik.R.id.navigation_songs -> {
+      when {
+        destination.id in topLevelDestinations -> {
           // Nothing for now
         }
         else -> {
@@ -89,7 +89,6 @@ class LibraryFragment : Fragment() {
 
           // Show AppBar, hide NavigationBar
           appBar.setExpanded(true, true)
-          ViewCompat.animate(navigationBar).translationY(navigationBar.height.toFloat()).start()
         }
       }
     }
@@ -109,11 +108,6 @@ class LibraryFragment : Fragment() {
       libraryToolbar.setBackgroundColor(color)
     }
 
-    theme.secondaryBackgroundColor.also { color ->
-      // BottomNavigation Background
-      navigationBar.setBackgroundColor(color)
-    }
-
     theme.tertiaryBackgroundColor.also { color ->
       // Window background
       activity?.window?.decorView?.setBackgroundColor(color)
@@ -124,10 +118,6 @@ class LibraryFragment : Fragment() {
       libraryToolbar.applyForegroundColor(color)
     }
 
-    theme.secondaryForegroundColor.also { color ->
-      // Bottom Navigation
-      navigationBar.applyForegroundColor(color)
-    }
   }
 
   private fun applyThemeAnimated(theme: Theme) {
@@ -135,7 +125,7 @@ class LibraryFragment : Fragment() {
 
     val previousTheme = ThemeManager.getInstance(requireContext()).previousTheme
     val animationDuration =
-      context?.resources?.getInteger(hu.mrolcsi.muzik.R.integer.preferredAnimationDuration)?.toLong() ?: 300L
+      context?.resources?.getInteger(R.integer.preferredAnimationDuration)?.toLong() ?: 300L
 
     ValueAnimator.ofArgb(
       previousTheme?.primaryBackgroundColor ?: Color.BLACK,
@@ -153,20 +143,6 @@ class LibraryFragment : Fragment() {
 
         // Toolbar Background
         libraryToolbar.setBackgroundColor(color)
-      }
-      start()
-    }
-
-    ValueAnimator.ofArgb(
-      previousTheme?.secondaryBackgroundColor ?: Color.BLACK,
-      theme.secondaryBackgroundColor
-    ).run {
-      duration = animationDuration
-      addUpdateListener {
-        val color = it.animatedValue as Int
-
-        // BottomNavigation Background
-        navigationBar.setBackgroundColor(color)
       }
       start()
     }
@@ -194,20 +170,6 @@ class LibraryFragment : Fragment() {
         val color = it.animatedValue as Int
 
         libraryToolbar.applyForegroundColor(color)
-      }
-      start()
-    }
-
-    ValueAnimator.ofArgb(
-      previousTheme?.secondaryForegroundColor ?: Color.WHITE,
-      theme.secondaryForegroundColor
-    ).run {
-      duration = animationDuration
-      addUpdateListener {
-        val color = it.animatedValue as Int
-
-        // Bottom Navigation
-        navigationBar.applyForegroundColor(color)
       }
       start()
     }

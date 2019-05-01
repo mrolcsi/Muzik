@@ -42,23 +42,10 @@
       android:id="@+id/libraryNavHost"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
-      android:paddingBottom="?attr/actionBarSize"
       android:name="androidx.navigation.fragment.NavHostFragment"
       app:defaultNavHost="true"
       app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
       app:navGraph="@navigation/library_navigation"/>
-
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-      android:id="@+id/navigationBar"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:layout_gravity="bottom|end"
-      android:background="?attr/colorPrimaryDark"
-      app:itemIconTint="@drawable/bnv_selector"
-      app:itemTextColor="@drawable/bnv_selector"
-      app:layout_behavior=".common.coordinator.BottomNavigationBehavior"
-      app:layout_scrollFlags="scroll|enterAlways|snap"
-      app:menu="@menu/menu_navigation"/>
 
   </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
