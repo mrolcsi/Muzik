@@ -5,6 +5,7 @@
   <string name="albums_byArtist_subtitle">by %s</string>
   <string name="albums_showAllSongs">Show all songs</string>
   <string name="albums_title">Albums</string>
+  <string name="artistDetails_title">Artist Details</string>
   <string name="artists_item_subtitle">%1$s, %2$s</string>
   <string name="artists_numberOfAlbums_one" tools:ignore="PluralsCandidate">%d album</string>
   <string name="artists_numberOfAlbums_other" tools:ignore="PluralsCandidate">%d albums</string>

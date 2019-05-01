@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.MediaItemListAdapter
 import hu.mrolcsi.muzik.extensions.startMarquee
+import hu.mrolcsi.muzik.library.artists.details.ArtistDetailsFragmentArgs
 import hu.mrolcsi.muzik.service.extensions.media.numberOfAlbums
 import hu.mrolcsi.muzik.service.extensions.media.numberOfTracks
 import hu.mrolcsi.muzik.service.theme.Theme
@@ -41,9 +42,10 @@ class ArtistsAdapter(context: Context) :
 
       // Set onClickListener
       itemView.setOnClickListener {
-        with(it.findNavController()) {
-          // TODO: ArtistDetailsFragment
-        }
+        it.findNavController().navigate(
+          R.id.navigation_artistDetails,
+          ArtistDetailsFragmentArgs(item).toBundle()
+        )
       }
     }
   }

@@ -15,9 +15,27 @@
   <fragment android:id="@+id/navigation_artists"
     android:label="@string/artists_title"
     android:name="hu.mrolcsi.muzik.library.artists.ArtistsFragment"
-    tools:layout="@layout/fragment_artists"/>
+    tools:layout="@layout/fragment_artists">
 
-  <fragment android:id="@+id/navigation_artistDetails"/>
+    <action android:id="@+id/action_artists_to_artistDetails"
+      app:destination="@id/navigation_artistDetails"
+      app:enterAnim="@anim/slide_in_left"
+      app:exitAnim="@anim/slide_out_left"
+      app:popEnterAnim="@anim/slide_in_right"
+      app:popExitAnim="@anim/slide_out_right"/>
+
+  </fragment>
+
+  <fragment
+    android:id="@+id/navigation_artistDetails"
+    android:label="@string/artistDetails_title"
+    android:name="hu.mrolcsi.muzik.library.artists.details.ArtistDetailsFragment"
+    tools:layout="@layout/fragment_artist_details">
+
+    <argument android:name="artistItem"
+      app:argType="android.support.v4.media.MediaBrowserCompat$MediaItem"/>
+
+  </fragment>
 
   <fragment android:id="@+id/navigation_albums"
     android:label="@string/albums_title"

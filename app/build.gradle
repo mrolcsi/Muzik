@@ -38,6 +38,7 @@ dependencies {
     // Modules
     implementation project(':database')
     implementation project(':service')
+    implementation project(':discogs')
 
     // Kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$rootProject.kotlinVersion"
