@@ -84,18 +84,12 @@ class AlbumsAdapter(context: Context) :
         // TODO
       } else {
         itemView.setOnClickListener {
-          with(it.findNavController()) {
-
-            val extras = FragmentNavigatorExtras(
-              imgCoverArt to "coverArt"
-            )
-
-            val args = AlbumDetailsFragmentArgs(item).toBundle()
-
-            navigate(R.id.navigation_albumDetails, args, null, extras)
-
-            //navigate(AlbumsFragmentDirections.actionAlbumsToAlbumDetails(item), extras)
-          }
+          it.findNavController().navigate(
+            R.id.action_albums_to_albumDetails,
+            AlbumDetailsFragmentArgs(item).toBundle(),
+            null,
+            FragmentNavigatorExtras(imgCoverArt to "coverArt")
+          )
         }
       }
     }

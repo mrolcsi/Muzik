@@ -43,7 +43,7 @@ class ArtistsAdapter(context: Context) :
       // Set onClickListener
       itemView.setOnClickListener {
         it.findNavController().navigate(
-          R.id.navigation_artistDetails,
+          R.id.action_artists_to_artistDetails,
           ArtistDetailsFragmentArgs(item).toBundle()
         )
       }

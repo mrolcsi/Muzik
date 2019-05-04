@@ -43,7 +43,6 @@ class AlbumsFragment : Fragment() {
           Log.d(LOG_TAG, "Got items from LiveData: $albums")
 
           mAlbumsAdapter.submitList(albums)
-          rvAlbums.scrollToPosition(0)
         })
 
         sorting.observe(viewLifecycleOwner, Observer {
