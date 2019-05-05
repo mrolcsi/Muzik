@@ -31,6 +31,7 @@ import hu.mrolcsi.muzik.service.extensions.media.albumYear
 import hu.mrolcsi.muzik.service.extensions.media.artist
 import hu.mrolcsi.muzik.service.extensions.media.numberOfSongs
 import hu.mrolcsi.muzik.service.extensions.media.playFromDescription
+import hu.mrolcsi.muzik.service.extensions.media.trackNumber
 import hu.mrolcsi.muzik.service.theme.Theme
 import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.synthetic.main.album_details_header.*
@@ -51,7 +52,9 @@ class AlbumDetailsFragment : Fragment() {
       // Immediately start the song that was clicked on
       controller.transportControls.playFromDescription(
         item.description,
-        bundleOf(ExoPlayerHolder.EXTRA_DESIRED_QUEUE_POSITION to position)
+        bundleOf(
+          ExoPlayerHolder.EXTRA_DESIRED_QUEUE_POSITION to (position - item.description.trackNumber / 1000).toInt()
+        )
       )
 
       AsyncTask.execute {
