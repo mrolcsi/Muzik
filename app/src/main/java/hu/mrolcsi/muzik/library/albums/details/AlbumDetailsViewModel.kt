@@ -1,8 +1,10 @@
 package hu.mrolcsi.muzik.library.albums.details
 
 import android.app.Application
+import android.os.AsyncTask
 import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
+import android.support.v4.media.MediaDescriptionCompat
 import android.util.Log
 import androidx.core.os.bundleOf
 import androidx.lifecycle.MutableLiveData
@@ -11,6 +13,8 @@ import androidx.lifecycle.ViewModelProvider
 import hu.mrolcsi.muzik.library.SessionViewModel
 import hu.mrolcsi.muzik.service.MuzikBrowserService
 import hu.mrolcsi.muzik.service.extensions.media.id
+import hu.mrolcsi.muzik.service.extensions.media.titleKey
+import hu.mrolcsi.muzik.service.extensions.media.trackNumber
 
 class AlbumDetailsViewModel(
   app: Application,
@@ -24,7 +28,32 @@ class AlbumDetailsViewModel(
       options: Bundle
     ) {
       Log.d(getLogTag(), "Items loaded from MediaBrowser: $children")
-      songsFromAlbum.postValue(children)
+
+      AsyncTask.execute {
+        if (children.isNotEmpty()) {
+          // Sort by track number and title
+          children.sortedBy { it.description.titleKey }.sortedBy { it.description.trackNumber }
+
+          if (children.last().description.trackNumber > 1000) {
+            // Add disc number indicators
+            val numDiscs = children.last().description.trackNumber / 1000
+            if (numDiscs > 0) {
+              for (i in 1..numDiscs) {
+                val index = children.indexOfFirst { it.description.trackNumber > 1000 }
+                val item = MediaBrowserCompat.MediaItem(
+                  MediaDescriptionCompat.Builder()
+                    .setMediaId("disc/$i")
+                    .setTitle(i.toString())
+                    .build(),
+                  MediaBrowserCompat.MediaItem.FLAG_BROWSABLE
+                )
+                children.add(index, item)
+              }
+            }
+          }
+        }
+        songsFromAlbum.postValue(children)
+      }
     }
   }
 

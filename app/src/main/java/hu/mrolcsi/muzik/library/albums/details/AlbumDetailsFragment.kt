@@ -59,8 +59,8 @@ class AlbumDetailsFragment : Fragment() {
           Log.d(LOG_TAG, "onItemClicked() Collecting descriptions...")
 
           // Add songs to queue
-          val descriptions = items.filterIndexed { index, _ ->
-            index != position
+          val descriptions = items.filterIndexed { index, item ->
+            item.isPlayable && index != position
           }.map {
             it.description
           }

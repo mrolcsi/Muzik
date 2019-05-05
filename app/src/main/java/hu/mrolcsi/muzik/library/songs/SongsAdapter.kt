@@ -50,11 +50,11 @@ open class SongsAdapter(
     }
   }
 
-  class SongHolder(override val containerView: View) : RecyclerView.ViewHolder(containerView), LayoutContainer {
+  open class SongHolder(override val containerView: View) : RecyclerView.ViewHolder(containerView), LayoutContainer {
 
-    private val marqueeDelay = containerView.resources.getInteger(R.integer.preferredMarqueeDelay).toLong()
+    private val marqueeDelay by lazy { containerView.resources.getInteger(R.integer.preferredMarqueeDelay).toLong() }
 
-    fun bind(item: MediaBrowserCompat.MediaItem, showTrackNumber: Boolean) {
+    open fun bind(item: MediaBrowserCompat.MediaItem, showTrackNumber: Boolean) {
 
       // Set texts
       tvSongTitle?.run {
@@ -73,13 +73,13 @@ open class SongsAdapter(
         .into(imgCoverArt)
 
       // Set track number
-      val trackNumber = item.description.trackNumber
+      val trackNumber = item.description.trackNumber % 1000
       tvTrackNumber?.visibility = if (showTrackNumber and (trackNumber > 0)) View.VISIBLE else View.GONE
       imgCoverArt?.visibility = if (showTrackNumber) View.GONE else View.VISIBLE
       tvTrackNumber?.text = trackNumber.toString()
     }
 
-    fun applyTheme(theme: Theme) {
+    open fun applyTheme(theme: Theme) {
       itemView.background = Theme.getRippleDrawable(theme.tertiaryForegroundColor, theme.tertiaryBackgroundColor)
 
       tvSongTitle?.setTextColor(theme.tertiaryForegroundColor)
