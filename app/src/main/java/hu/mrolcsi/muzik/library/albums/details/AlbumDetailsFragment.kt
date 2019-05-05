@@ -226,8 +226,8 @@ class AlbumDetailsFragment : Fragment() {
     }
 
     ValueAnimator.ofArgb(
-      currentTheme?.tertiaryBackgroundColor ?: Color.BLACK,
-      theme.tertiaryBackgroundColor
+      currentTheme?.secondaryBackgroundColor ?: Color.BLACK,
+      theme.secondaryBackgroundColor
     ).run {
       duration = animationDuration
       addUpdateListener {
@@ -240,8 +240,8 @@ class AlbumDetailsFragment : Fragment() {
     }
 
     ValueAnimator.ofArgb(
-      currentTheme?.tertiaryForegroundColor ?: Color.WHITE,
-      theme.tertiaryForegroundColor
+      currentTheme?.secondaryForegroundColor ?: Color.WHITE,
+      theme.secondaryForegroundColor
     ).run {
       duration = animationDuration
       addUpdateListener {

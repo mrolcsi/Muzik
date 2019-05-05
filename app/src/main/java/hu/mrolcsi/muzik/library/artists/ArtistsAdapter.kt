@@ -72,12 +72,12 @@ class ArtistsAdapter(context: Context) :
     }
 
     fun applyTheme(theme: Theme) {
-      itemView.background = Theme.getRippleDrawable(theme.tertiaryForegroundColor, theme.tertiaryBackgroundColor)
+      itemView.background = Theme.getRippleDrawable(theme.secondaryForegroundColor, theme.secondaryBackgroundColor)
 
-      tvArtist?.setTextColor(theme.tertiaryForegroundColor)
-      tvNumberOfSongs?.setTextColor(theme.tertiaryForegroundColor)
-      tvNumberOfSongs?.setTextColor(theme.tertiaryForegroundColor)
-      imgChevronRight?.imageTintList = ColorStateList.valueOf(theme.tertiaryForegroundColor)
+      tvArtist?.setTextColor(theme.secondaryForegroundColor)
+      tvNumberOfSongs?.setTextColor(theme.secondaryForegroundColor)
+      tvNumberOfSongs?.setTextColor(theme.secondaryForegroundColor)
+      imgChevronRight?.imageTintList = ColorStateList.valueOf(theme.secondaryForegroundColor)
     }
   }
 

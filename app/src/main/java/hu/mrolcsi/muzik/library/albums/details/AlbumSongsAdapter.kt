@@ -77,9 +77,9 @@ class AlbumSongsAdapter(
     }
 
     override fun applyTheme(theme: Theme) {
-      imgDisc.drawable.setTint(theme.tertiaryForegroundColor)
-      tvDiscNumber.setTextColor(theme.tertiaryForegroundColor)
-      divider.background.setTint(theme.tertiaryForegroundColor)
+      imgDisc.drawable.setTint(theme.secondaryForegroundColor)
+      tvDiscNumber.setTextColor(theme.secondaryForegroundColor)
+      divider.background.setTint(theme.secondaryForegroundColor)
     }
   }
 }

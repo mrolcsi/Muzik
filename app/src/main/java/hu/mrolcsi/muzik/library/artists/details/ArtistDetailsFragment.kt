@@ -76,12 +76,12 @@ class ArtistDetailsFragment : Fragment() {
     imgProtectionScrim.setImageDrawable(
       GradientDrawable(
         GradientDrawable.Orientation.TOP_BOTTOM,
-        intArrayOf(Color.TRANSPARENT, theme.tertiaryBackgroundColor)
+        intArrayOf(Color.TRANSPARENT, theme.secondaryBackgroundColor)
       )
     )
 
     collapsingToolbar.setCollapsedTitleTextColor(theme.primaryForegroundColor)
-    collapsingToolbar.setExpandedTitleColor(theme.tertiaryForegroundColor)
+    collapsingToolbar.setExpandedTitleColor(theme.secondaryForegroundColor)
 
   }
 

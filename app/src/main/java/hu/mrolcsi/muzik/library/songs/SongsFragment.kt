@@ -101,14 +101,14 @@ class SongsFragment : Fragment() {
       mSongsAdapter.notifyDataSetChanged()
 
       // Apply colors to dividers
-      mDivider.setTint(it.tertiaryForegroundColor)
+      mDivider.setTint(it.secondaryForegroundColor)
 
       // Apply colors to FastScroller
-      fastScroller.applyForegroundColor(requireContext(), it.tertiaryForegroundColor)
+      fastScroller.applyForegroundColor(requireContext(), it.secondaryForegroundColor)
 
       // Apply colors to SectionIndicator
-      sectionIndicator.setIndicatorBackgroundColor(it.tertiaryForegroundColor)
-      sectionIndicator.setIndicatorTextColor(it.tertiaryBackgroundColor)
+      sectionIndicator.setIndicatorBackgroundColor(it.secondaryForegroundColor)
+      sectionIndicator.setIndicatorTextColor(it.secondaryBackgroundColor)
     })
   }
 

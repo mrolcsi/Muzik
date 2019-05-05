@@ -125,8 +125,8 @@ class AlbumsFragment : Fragment() {
     val animationDuration = context?.resources?.getInteger(R.integer.preferredAnimationDuration)?.toLong() ?: 300L
 
     ValueAnimator.ofArgb(
-      previousTheme?.tertiaryBackgroundColor ?: ContextCompat.getColor(requireContext(), R.color.backgroundColor),
-      theme.tertiaryBackgroundColor
+      previousTheme?.secondaryBackgroundColor ?: ContextCompat.getColor(requireContext(), R.color.backgroundColor),
+      theme.secondaryBackgroundColor
     ).run {
       duration = animationDuration
       addUpdateListener {
@@ -140,8 +140,8 @@ class AlbumsFragment : Fragment() {
     }
 
     ValueAnimator.ofArgb(
-      previousTheme?.tertiaryForegroundColor ?: Color.WHITE,
-      theme.tertiaryForegroundColor
+      previousTheme?.secondaryForegroundColor ?: Color.WHITE,
+      theme.secondaryForegroundColor
     ).run {
       duration = animationDuration
       addUpdateListener {

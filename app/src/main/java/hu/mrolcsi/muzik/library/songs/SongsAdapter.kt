@@ -80,11 +80,11 @@ open class SongsAdapter(
     }
 
     open fun applyTheme(theme: Theme) {
-      itemView.background = Theme.getRippleDrawable(theme.tertiaryForegroundColor, theme.tertiaryBackgroundColor)
+      itemView.background = Theme.getRippleDrawable(theme.secondaryForegroundColor, theme.secondaryBackgroundColor)
 
-      tvSongTitle?.setTextColor(theme.tertiaryForegroundColor)
-      tvSongArtist?.setTextColor(theme.tertiaryForegroundColor)
-      tvTrackNumber?.setTextColor(theme.tertiaryForegroundColor)
+      tvSongTitle?.setTextColor(theme.secondaryForegroundColor)
+      tvSongArtist?.setTextColor(theme.secondaryForegroundColor)
+      tvTrackNumber?.setTextColor(theme.secondaryForegroundColor)
     }
 
   }

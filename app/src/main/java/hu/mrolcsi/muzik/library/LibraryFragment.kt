@@ -108,7 +108,7 @@ class LibraryFragment : Fragment() {
       libraryToolbar.setBackgroundColor(color)
     }
 
-    theme.tertiaryBackgroundColor.also { color ->
+    theme.secondaryBackgroundColor.also { color ->
       // Window background
       activity?.window?.decorView?.setBackgroundColor(color)
     }
@@ -148,8 +148,8 @@ class LibraryFragment : Fragment() {
     }
 
     ValueAnimator.ofArgb(
-      previousTheme?.tertiaryBackgroundColor ?: Color.BLACK,
-      theme.tertiaryBackgroundColor
+      previousTheme?.secondaryBackgroundColor ?: Color.BLACK,
+      theme.secondaryBackgroundColor
     ).run {
       duration = animationDuration
       addUpdateListener {

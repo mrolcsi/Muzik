@@ -37,12 +37,12 @@ class ArtistsFragment : Fragment() {
       // Tell adapter to reload its views
       mArtistAdapter.notifyDataSetChanged()
 
-      mDivider.setTint(it.tertiaryForegroundColor)
+      mDivider.setTint(it.secondaryForegroundColor)
 
-      fastScroller.applyForegroundColor(requireContext(), it.tertiaryForegroundColor)
+      fastScroller.applyForegroundColor(requireContext(), it.secondaryForegroundColor)
 
-      sectionIndicator.setIndicatorBackgroundColor(it.tertiaryForegroundColor)
-      sectionIndicator.setIndicatorTextColor(it.tertiaryBackgroundColor)
+      sectionIndicator.setIndicatorBackgroundColor(it.secondaryForegroundColor)
+      sectionIndicator.setIndicatorTextColor(it.secondaryBackgroundColor)
     })
   }
 
