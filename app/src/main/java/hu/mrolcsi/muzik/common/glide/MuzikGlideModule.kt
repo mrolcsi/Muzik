@@ -51,6 +51,8 @@ class MuzikGlideModule : AppGlideModule() {
       return false
     }
 
+    fun onLoadFailed() {}
+
     override fun onResourceReady(
       resource: R,
       model: Any?,
@@ -62,9 +64,7 @@ class MuzikGlideModule : AppGlideModule() {
       return false
     }
 
-    fun onLoadFailed()
-
-    fun onResourceReady(resource: R?)
+    fun onResourceReady(resource: R?) {}
 
   }
 

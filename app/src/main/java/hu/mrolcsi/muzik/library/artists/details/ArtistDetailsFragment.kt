@@ -1,5 +1,6 @@
 package hu.mrolcsi.muzik.library.artists.details
 
+import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
@@ -13,6 +14,7 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.navArgs
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.glide.GlideApp
+import hu.mrolcsi.muzik.common.glide.MuzikGlideModule
 import hu.mrolcsi.muzik.service.theme.Theme
 import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.synthetic.main.artist_details_header.*
@@ -38,6 +40,11 @@ class ArtistDetailsFragment : Fragment() {
             GlideApp.with(this@ArtistDetailsFragment)
               .asBitmap()
               .load(uri)
+              .addListener(object : MuzikGlideModule.SimpleRequestListener<Bitmap> {
+                override fun onResourceReady(resource: Bitmap?) {
+                  appBar.setExpanded(true, true)
+                }
+              })
               .into(imgArtist)
           })
         }

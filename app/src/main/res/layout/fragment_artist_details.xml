@@ -14,7 +14,9 @@
     android:layout_height="wrap_content"
     android:fitsSystemWindows="true"
     android:stateListAnimator="@animator/appbar_elevation"
-    android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+    android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+    app:expanded="false"
+    tools:expanded="true">
 
     <com.google.android.material.appbar.CollapsingToolbarLayout
       android:id="@+id/collapsingToolbar"
