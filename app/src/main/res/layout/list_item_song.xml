@@ -59,6 +59,7 @@
     app:layout_constraintStart_toEndOf="@+id/barrier"
     app:layout_constraintTop_toTopOf="parent"
     app:layout_constraintVertical_chainStyle="packed"
+    app:layout_goneMarginBottom="8dp"
     tools:text="Song Title"/>
 
   <TextView

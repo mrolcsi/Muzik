@@ -27,6 +27,7 @@
   <string name="mediaControl_play">Play</string>
   <string name="mediaControl_playPause">Play/Pause</string>
   <string name="mediaControl_previous">Previous</string>
+  <string name="mediaControl_shuffleAll">Shuffle all</string>
   <string name="notification_nowPlaying_description">Shows the currently playing song in Lyrics Player</string>
   <string name="player_noSongLoaded">No song loaded.</string>
   <string name="player_repeatAll">Repeating all songs.</string>

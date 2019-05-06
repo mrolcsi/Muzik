@@ -57,6 +57,7 @@ class ArtistDetailsFragment : Fragment() {
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     // TODO: Albums and Songs
+    // https://stackoverflow.com/questions/33456216/android-layout-horizontal-recyclerview-inside-a-vertical-recyclerview-inside-a
 
     ThemeManager.getInstance(requireContext()).currentTheme.observe(viewLifecycleOwner, object : Observer<Theme> {
       private var initialLoad = true

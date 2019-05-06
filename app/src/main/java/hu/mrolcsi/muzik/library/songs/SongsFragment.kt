@@ -5,6 +5,7 @@ import android.os.AsyncTask
 import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.session.MediaControllerCompat
+import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
@@ -26,8 +27,11 @@ import hu.mrolcsi.muzik.extensions.OnItemClickListener
 import hu.mrolcsi.muzik.extensions.applyForegroundColor
 import hu.mrolcsi.muzik.library.SortingMode
 import hu.mrolcsi.muzik.service.exoplayer.ExoPlayerHolder
+import hu.mrolcsi.muzik.service.extensions.media.MediaType
 import hu.mrolcsi.muzik.service.extensions.media.addQueueItems
+import hu.mrolcsi.muzik.service.extensions.media.clearQueue
 import hu.mrolcsi.muzik.service.extensions.media.playFromDescription
+import hu.mrolcsi.muzik.service.extensions.media.type
 import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.synthetic.main.fragment_songs.*
 
@@ -49,25 +53,40 @@ class SongsFragment : Fragment() {
 
       val controller = MediaControllerCompat.getMediaController(requireActivity())
 
-      // Immediately start the song that was clicked on
-      controller.transportControls.playFromDescription(
-        item.description,
-        bundleOf(ExoPlayerHolder.EXTRA_DESIRED_QUEUE_POSITION to position)
-      )
+      if (item.description.type == MediaType.MEDIA_OTHER) {
+        // Shuffle All
+        controller.transportControls.setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_ALL)
+        controller.clearQueue()
 
-      AsyncTask.execute {
-        Log.d(LOG_TAG, "onItemClicked() Collecting descriptions...")
+        val description = mVisibleSongs
+          .filter { it.isPlayable }
+          .map { it.description }
 
-        // Add songs to queue
-        val descriptions = mVisibleSongs.filterIndexed { index, _ ->
-          index != position
-        }.map {
-          it.description
+        controller.addQueueItems(description)
+        controller.transportControls.play()
+
+      } else {
+        // Immediately start the song that was clicked on
+        controller.transportControls.setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_NONE)
+        controller.transportControls.playFromDescription(
+          item.description,
+          bundleOf(ExoPlayerHolder.EXTRA_DESIRED_QUEUE_POSITION to position - 1)
+        )
+
+        AsyncTask.execute {
+          Log.d(LOG_TAG, "onItemClicked() Collecting descriptions...")
+
+          // Add songs to queue
+          val descriptions = mVisibleSongs.filterIndexed { index, item ->
+            item.isPlayable && index != position
+          }.map {
+            it.description
+          }
+
+          Log.d(LOG_TAG, "onItemClicked() Sending items to queue...")
+
+          controller.addQueueItems(descriptions)
         }
-
-        Log.d(LOG_TAG, "onItemClicked() Sending items to queue...")
-
-        controller.addQueueItems(descriptions)
       }
     })
   }
@@ -79,7 +98,7 @@ class SongsFragment : Fragment() {
 
     activity?.run {
       mSongsModel = ViewModelProviders.of(this).get(SongsViewModel::class.java).apply {
-        getSongs().observe(viewLifecycleOwner, Observer { songs ->
+        songs.observe(viewLifecycleOwner, Observer { songs ->
           mSongsAdapter.submitList(songs)
           mVisibleSongs = songs
         })

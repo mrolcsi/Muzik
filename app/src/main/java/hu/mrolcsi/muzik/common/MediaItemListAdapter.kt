@@ -1,6 +1,7 @@
 package hu.mrolcsi.muzik.common
 
 import android.content.Context
+import android.os.AsyncTask
 import android.support.v4.media.MediaBrowserCompat
 import android.widget.SectionIndexer
 import androidx.recyclerview.widget.ListAdapter
@@ -11,6 +12,7 @@ import hu.mrolcsi.muzik.library.SortingMode
 import hu.mrolcsi.muzik.service.extensions.media.artist
 import hu.mrolcsi.muzik.service.extensions.media.dateAdded
 import java.util.*
+import java.util.concurrent.CopyOnWriteArraySet
 import kotlin.properties.Delegates
 
 abstract class MediaItemListAdapter<VH : RecyclerView.ViewHolder>(private val context: Context) :
@@ -19,16 +21,22 @@ abstract class MediaItemListAdapter<VH : RecyclerView.ViewHolder>(private val co
 
   @SortingMode var sorting: Int by Delegates.observable(SortingMode.SORT_BY_TITLE) { _, old, new ->
     if (old != new) {
-      // Update sections
+      // Update sections (async)
+      updateSections(new)
+    }
+  }
+
+  private fun updateSections(@SortingMode sorting: Int) {
+    AsyncTask.execute {
       for (i in 0 until itemCount) {
-        sectionsCache += getSectionForItem(getItem(i), new)
+        sectionsCache += getSectionForItem(getItem(i), sorting)
       }
     }
   }
 
-  private val sectionsCache = mutableSetOf<String>()
+  private val sectionsCache = CopyOnWriteArraySet<String>()
 
-  override fun getSections(): Array<String> = sectionsCache.toTypedArray()
+  override fun getSections(): Array<String> = sectionsCache.sorted().toTypedArray()
 
   override fun getSectionForPosition(position: Int): Int {
     val item = getItem(Math.min(position, itemCount - 1))
@@ -44,7 +52,7 @@ abstract class MediaItemListAdapter<VH : RecyclerView.ViewHolder>(private val co
     return 0
   }
 
-  private fun getSectionForItem(
+  protected open fun getSectionForItem(
     item: MediaBrowserCompat.MediaItem,
     @SortingMode sorting: Int = this.sorting
   ): String {
