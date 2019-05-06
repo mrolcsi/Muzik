@@ -7,7 +7,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.extensions.toKeyString
-import hu.mrolcsi.muzik.library.SessionViewModel
+import hu.mrolcsi.muzik.library.SortingMode
 import hu.mrolcsi.muzik.service.extensions.media.artist
 import hu.mrolcsi.muzik.service.extensions.media.dateAdded
 import java.util.*
@@ -17,7 +17,7 @@ abstract class MediaItemListAdapter<VH : RecyclerView.ViewHolder>(private val co
   ListAdapter<MediaBrowserCompat.MediaItem, VH>(DiffCallbackRepository.mediaItemCallback),
   SectionIndexer {
 
-  var sorting: SessionViewModel.Sorting by Delegates.observable(SessionViewModel.Sorting.BY_TITLE) { _, old, new ->
+  @SortingMode var sorting: Int by Delegates.observable(SortingMode.SORT_BY_TITLE) { _, old, new ->
     if (old != new) {
       // Update sections
       for (i in 0 until itemCount) {
@@ -46,12 +46,12 @@ abstract class MediaItemListAdapter<VH : RecyclerView.ViewHolder>(private val co
 
   private fun getSectionForItem(
     item: MediaBrowserCompat.MediaItem,
-    sorting: SessionViewModel.Sorting = this.sorting
+    @SortingMode sorting: Int = this.sorting
   ): String {
     return when (sorting) {
-      SessionViewModel.Sorting.BY_ARTIST -> item.description.artist?.toKeyString()?.first()?.toUpperCase().toString()
-      SessionViewModel.Sorting.BY_TITLE -> item.description.title?.toString()?.toKeyString()?.first()?.toUpperCase().toString()
-      SessionViewModel.Sorting.BY_DATE -> {
+      SortingMode.SORT_BY_ARTIST -> item.description.artist?.toKeyString()?.first()?.toUpperCase().toString()
+      SortingMode.SORT_BY_TITLE -> item.description.title?.toString()?.toKeyString()?.first()?.toUpperCase().toString()
+      SortingMode.SORT_BY_DATE -> {
         val newThreshold = Calendar.getInstance().timeInMillis - WEEK_IN_MILLISECONDS
         val recentThreshold = Calendar.getInstance().timeInMillis - MONTH_IN_MILLISECONDS
         when {
@@ -60,6 +60,7 @@ abstract class MediaItemListAdapter<VH : RecyclerView.ViewHolder>(private val co
           else -> context.getString(R.string.dateAdded_old)
         }
       }
+      else -> throw IllegalArgumentException("unknown sorting constant.")
     }
   }
 

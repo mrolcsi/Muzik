@@ -40,7 +40,6 @@ import hu.mrolcsi.muzik.common.OnRepeatTouchListener
 import hu.mrolcsi.muzik.common.glide.GlideApp
 import hu.mrolcsi.muzik.common.glide.MuzikGlideModule
 import hu.mrolcsi.muzik.common.pager.PagerSnapHelperVerbose
-import hu.mrolcsi.muzik.common.pager.RVPageScrollState
 import hu.mrolcsi.muzik.common.pager.RVPagerSnapHelperListenable
 import hu.mrolcsi.muzik.common.pager.RVPagerStateListener
 import hu.mrolcsi.muzik.common.pager.VisiblePageState
@@ -91,7 +90,7 @@ class PlayerFragment : Fragment() {
     setHasStableIds(true)
   }
   private lateinit var mSnapHelper: PagerSnapHelperVerbose
-  private var mScrollState: RVPageScrollState = RVPageScrollState.IDLE
+  private var mScrollState = RecyclerView.SCROLL_STATE_IDLE
 
   private val mGlideListener = object : MuzikGlideModule.SimpleRequestListener<Drawable> {
     override fun onLoadFailed() {
@@ -374,10 +373,10 @@ class PlayerFragment : Fragment() {
         }
       }
 
-      override fun onScrollStateChanged(state: RVPageScrollState) {
+      override fun onScrollStateChanged(state: Int) {
         mScrollState = state
 
-        if (state == RVPageScrollState.IDLE) {
+        if (state == RecyclerView.SCROLL_STATE_IDLE) {
           val controller = MediaControllerCompat.getMediaController(requireActivity())
           // check if item position is different from the now playing position
           val queueId = controller.playbackState.activeQueueItemId
@@ -623,7 +622,7 @@ class PlayerFragment : Fragment() {
           "ScrollState=$mScrollState"
     )
 
-    if (mScrollState == RVPageScrollState.IDLE) {
+    if (mScrollState == RecyclerView.SCROLL_STATE_IDLE) {
       if (queuePosition > RecyclerView.NO_POSITION && visibleId != queueId) {
         if (Math.abs(queuePosition - visiblePosition) > 1) {
           rvQueue.scrollToPosition(queuePosition)

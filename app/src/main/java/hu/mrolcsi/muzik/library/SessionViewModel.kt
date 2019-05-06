@@ -85,10 +85,4 @@ abstract class SessionViewModel(app: Application) : AndroidViewModel(app) {
   }
 
   abstract fun getLogTag(): String
-
-  enum class Sorting {
-    BY_ARTIST,
-    BY_TITLE,
-    BY_DATE
-  }
 }

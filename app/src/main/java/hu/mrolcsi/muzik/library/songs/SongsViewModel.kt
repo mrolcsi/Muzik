@@ -7,6 +7,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import hu.mrolcsi.muzik.extensions.switchMap
 import hu.mrolcsi.muzik.library.SessionViewModel
+import hu.mrolcsi.muzik.library.SortingMode
 import hu.mrolcsi.muzik.service.MuzikBrowserService
 import hu.mrolcsi.muzik.service.extensions.media.artistKey
 import hu.mrolcsi.muzik.service.extensions.media.dateAdded
@@ -31,34 +32,35 @@ class SongsViewModel(app: Application) : SessionViewModel(app) {
     mMediaBrowser.connect()
   }
 
-  val sorting = MutableLiveData<Sorting>(Sorting.BY_TITLE)
+  val sorting = MutableLiveData<@SortingMode Int>(SortingMode.SORT_BY_TITLE)
 
   fun getSongs(): LiveData<List<MediaBrowserCompat.MediaItem>> {
     // Switch by album
     return sorting.switchMap { sortBy ->
       when (sortBy) {
         null -> mAllSongs
-        Sorting.BY_ARTIST -> mAllSongs.switchMap { songs ->
+        SortingMode.SORT_BY_ARTIST -> mAllSongs.switchMap { songs ->
           val sortedSongs = MutableLiveData<List<MediaBrowserCompat.MediaItem>>()
           AsyncTask.execute {
             sortedSongs.postValue(songs.sortedBy { it.description.artistKey })
           }
           sortedSongs
         }
-        Sorting.BY_TITLE -> mAllSongs.switchMap { songs ->
+        SortingMode.SORT_BY_TITLE -> mAllSongs.switchMap { songs ->
           val sortedSongs = MutableLiveData<List<MediaBrowserCompat.MediaItem>>()
           AsyncTask.execute {
             sortedSongs.postValue(songs.sortedBy { it.description.titleKey })
           }
           sortedSongs
         }
-        Sorting.BY_DATE -> mAllSongs.switchMap { songs ->
+        SortingMode.SORT_BY_DATE -> mAllSongs.switchMap { songs ->
           val sortedSongs = MutableLiveData<List<MediaBrowserCompat.MediaItem>>()
           AsyncTask.execute {
             sortedSongs.postValue(songs.sortedByDescending { it.description.dateAdded })
           }
           sortedSongs
         }
+        else -> throw IllegalArgumentException("unknown sorting constant.")
       }
     }
   }

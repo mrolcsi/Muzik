@@ -9,6 +9,7 @@ import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaDescriptionCompat
 import androidx.core.content.ContentResolverCompat
 import androidx.media.MediaBrowserServiceCompat
+import hu.mrolcsi.muzik.service.extensions.media.MediaType
 
 @Suppress("ConstantConditionIf")
 abstract class MuzikBrowserService : MediaBrowserServiceCompat() {
@@ -93,7 +94,9 @@ abstract class MuzikBrowserService : MediaBrowserServiceCompat() {
         val description = MediaDescriptionCompat.Builder()
           .setMediaId(it.getString(indexArtistKey))      // Artist Key
           .setTitle(it.getString(indexArtistName))        // Artist Name
-          .setExtras(createExtras(cursorWithArtists))
+          .setExtras(createExtras(cursorWithArtists).apply {
+            putInt(MediaType.MEDIA_TYPE_KEY, MediaType.MEDIA_ARTIST)
+          })
           .build()
 
         mediaItems.add(
@@ -135,7 +138,9 @@ abstract class MuzikBrowserService : MediaBrowserServiceCompat() {
           .setMediaId(it.getString(indexAlbumKey))    // Album key
           .setTitle(it.getString(indexAlbumTitle))      // Album title
           .setSubtitle(it.getString(indexAlbumArtist))   // Album artist
-          .setExtras(createExtras(cursorWithAlbums))
+          .setExtras(createExtras(cursorWithAlbums).apply {
+            putInt(MediaType.MEDIA_TYPE_KEY, MediaType.MEDIA_ALBUM)
+          })
           .build()
 
         mediaItems.add(
@@ -184,7 +189,9 @@ abstract class MuzikBrowserService : MediaBrowserServiceCompat() {
           .setTitle(it.getString(indexTitle))      // Song title
           .setSubtitle(it.getString(indexArtist))   // Song artist
           .setDescription(it.getString(indexAlbum))   // Song album
-          .setExtras(createExtras(cursorWithSongs))
+          .setExtras(createExtras(cursorWithSongs).apply {
+            putInt(MediaType.MEDIA_TYPE_KEY, MediaType.MEDIA_SONG)
+          })
           .build()
 
         mediaItems.add(

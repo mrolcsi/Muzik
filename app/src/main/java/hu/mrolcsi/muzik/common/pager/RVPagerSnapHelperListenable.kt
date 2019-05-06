@@ -15,7 +15,7 @@ data class VisiblePageState(
 
 interface RVPagerStateListener {
   fun onPageScroll(pagesState: List<VisiblePageState>) {}
-  fun onScrollStateChanged(state: RVPageScrollState) {}
+  fun onScrollStateChanged(@ScrollState state: Int) {}
   fun onPageSelected(index: Int) {}
 }
 

@@ -8,6 +8,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import hu.mrolcsi.muzik.extensions.switchMap
 import hu.mrolcsi.muzik.library.SessionViewModel
+import hu.mrolcsi.muzik.library.SortingMode
 import hu.mrolcsi.muzik.service.MuzikBrowserService
 import hu.mrolcsi.muzik.service.extensions.media.albumKey
 import hu.mrolcsi.muzik.service.extensions.media.artistKey
@@ -32,20 +33,20 @@ class AlbumsViewModel(app: Application) : SessionViewModel(app) {
     mMediaBrowser.connect()
   }
 
-  val sorting = MutableLiveData<Sorting>(Sorting.BY_TITLE)
+  val sorting = MutableLiveData<@SortingMode Int>(SortingMode.SORT_BY_TITLE)
 
   val albums: LiveData<List<MediaBrowserCompat.MediaItem>>
     get() = sorting.switchMap { sortBy ->
       when (sortBy) {
         null -> mAllAlbums
-        Sorting.BY_ARTIST -> mAllAlbums.switchMap { albums ->
+        SortingMode.SORT_BY_ARTIST -> mAllAlbums.switchMap { albums ->
           val sortedAlbums = MutableLiveData<List<MediaBrowserCompat.MediaItem>>()
           AsyncTask.execute {
             sortedAlbums.postValue(albums.sortedBy { it.description.artistKey })
           }
           sortedAlbums
         }
-        Sorting.BY_TITLE -> mAllAlbums.switchMap { albums ->
+        SortingMode.SORT_BY_TITLE -> mAllAlbums.switchMap { albums ->
           val sortedAlbums = MutableLiveData<List<MediaBrowserCompat.MediaItem>>()
           AsyncTask.execute {
             sortedAlbums.postValue(albums.sortedBy { it.description.albumKey })

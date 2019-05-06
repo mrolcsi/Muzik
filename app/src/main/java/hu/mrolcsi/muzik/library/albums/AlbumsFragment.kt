@@ -19,7 +19,7 @@ import androidx.lifecycle.ViewModelProviders
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.fastscroller.AutoHidingFastScrollerTouchListener
 import hu.mrolcsi.muzik.extensions.applyForegroundColor
-import hu.mrolcsi.muzik.library.SessionViewModel
+import hu.mrolcsi.muzik.library.SortingMode
 import hu.mrolcsi.muzik.service.theme.Theme
 import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.synthetic.main.fragment_albums.*
@@ -96,8 +96,8 @@ class AlbumsFragment : Fragment() {
     super.onPrepareOptionsMenu(menu)
 
     when (mAlbumsModel.sorting.value) {
-      SessionViewModel.Sorting.BY_ARTIST -> menu.findItem(R.id.menuSortByArtist).isChecked = true
-      SessionViewModel.Sorting.BY_TITLE -> menu.findItem(R.id.menuSortByTitle).isChecked = true
+      SortingMode.SORT_BY_ARTIST -> menu.findItem(R.id.menuSortByArtist).isChecked = true
+      SortingMode.SORT_BY_TITLE -> menu.findItem(R.id.menuSortByTitle).isChecked = true
       else -> {
         // nothing
       }
@@ -108,11 +108,11 @@ class AlbumsFragment : Fragment() {
     item.isChecked = true
     return when (item.itemId) {
       R.id.menuSortByArtist -> {
-        mAlbumsModel.sorting.value = SessionViewModel.Sorting.BY_ARTIST
+        mAlbumsModel.sorting.value = SortingMode.SORT_BY_ARTIST
         true
       }
       R.id.menuSortByTitle -> {
-        mAlbumsModel.sorting.value = SessionViewModel.Sorting.BY_TITLE
+        mAlbumsModel.sorting.value = SortingMode.SORT_BY_TITLE
         true
       }
       else -> super.onOptionsItemSelected(item)

@@ -24,7 +24,7 @@ import hu.mrolcsi.muzik.common.fastscroller.AutoHidingFastScrollerTouchListener
 import hu.mrolcsi.muzik.common.fastscroller.SimpleSectionIndicator
 import hu.mrolcsi.muzik.extensions.OnItemClickListener
 import hu.mrolcsi.muzik.extensions.applyForegroundColor
-import hu.mrolcsi.muzik.library.SessionViewModel
+import hu.mrolcsi.muzik.library.SortingMode
 import hu.mrolcsi.muzik.service.exoplayer.ExoPlayerHolder
 import hu.mrolcsi.muzik.service.extensions.media.addQueueItems
 import hu.mrolcsi.muzik.service.extensions.media.playFromDescription
@@ -87,7 +87,7 @@ class SongsFragment : Fragment() {
           // Update adapter
           mSongsAdapter.sorting = it
 
-          if (it == SessionViewModel.Sorting.BY_DATE) {
+          if (it == SortingMode.SORT_BY_DATE) {
             sectionIndicator.setIndicatorTextSize(18)
           } else {
             sectionIndicator.setIndicatorTextSize(SimpleSectionIndicator.DEFAULT_TEXT_SIZE)
@@ -145,9 +145,9 @@ class SongsFragment : Fragment() {
     super.onPrepareOptionsMenu(menu)
 
     when (mSongsModel.sorting.value) {
-      SessionViewModel.Sorting.BY_ARTIST -> menu.findItem(R.id.menuSortByArtist).isChecked = true
-      SessionViewModel.Sorting.BY_TITLE -> menu.findItem(R.id.menuSortByTitle).isChecked = true
-      SessionViewModel.Sorting.BY_DATE -> menu.findItem(R.id.menuSortByDate).isChecked = true
+      SortingMode.SORT_BY_ARTIST -> menu.findItem(R.id.menuSortByArtist).isChecked = true
+      SortingMode.SORT_BY_TITLE -> menu.findItem(R.id.menuSortByTitle).isChecked = true
+      SortingMode.SORT_BY_DATE -> menu.findItem(R.id.menuSortByDate).isChecked = true
       else -> {
         // nothing
       }
@@ -158,15 +158,15 @@ class SongsFragment : Fragment() {
     item.isChecked = true
     return when (item.itemId) {
       R.id.menuSortByArtist -> {
-        mSongsModel.sorting.value = SessionViewModel.Sorting.BY_ARTIST
+        mSongsModel.sorting.value = SortingMode.SORT_BY_ARTIST
         true
       }
       R.id.menuSortByTitle -> {
-        mSongsModel.sorting.value = SessionViewModel.Sorting.BY_TITLE
+        mSongsModel.sorting.value = SortingMode.SORT_BY_TITLE
         true
       }
       R.id.menuSortByDate -> {
-        mSongsModel.sorting.value = SessionViewModel.Sorting.BY_DATE
+        mSongsModel.sorting.value = SortingMode.SORT_BY_DATE
         true
       }
       else -> super.onOptionsItemSelected(item)

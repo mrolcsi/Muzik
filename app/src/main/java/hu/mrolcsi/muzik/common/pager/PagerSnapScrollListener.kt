@@ -52,6 +52,6 @@ class PagerSnapScrollListener(
   }
 
   override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-    externalListener.onScrollStateChanged(RVPageScrollState.values()[newState])
+    externalListener.onScrollStateChanged(newState)
   }
 }

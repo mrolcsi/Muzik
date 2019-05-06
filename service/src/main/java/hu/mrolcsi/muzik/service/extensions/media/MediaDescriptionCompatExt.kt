@@ -7,8 +7,14 @@ import android.net.Uri
 import android.provider.MediaStore
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
+import hu.mrolcsi.muzik.service.extensions.media.MediaType.Companion.MEDIA_TYPE_KEY
+import hu.mrolcsi.muzik.service.extensions.media.MediaType.Companion.MEDIA_UNKNOWN
 
 // Try to get ContentProvider columns first. If null, use MediaMetadata keys.
+
+@MediaType
+inline val MediaDescriptionCompat.type: Int
+  get() = this.extras?.getInt(MEDIA_TYPE_KEY) ?: MEDIA_UNKNOWN
 
 inline val MediaDescriptionCompat.album: String?
   get() = description?.toString()

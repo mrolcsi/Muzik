@@ -12,6 +12,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import hu.mrolcsi.muzik.library.SessionViewModel
 import hu.mrolcsi.muzik.service.MuzikBrowserService
+import hu.mrolcsi.muzik.service.extensions.media.MediaType
 import hu.mrolcsi.muzik.service.extensions.media.id
 import hu.mrolcsi.muzik.service.extensions.media.titleKey
 import hu.mrolcsi.muzik.service.extensions.media.trackNumber
@@ -44,6 +45,7 @@ class AlbumDetailsViewModel(
                   MediaDescriptionCompat.Builder()
                     .setMediaId("disc/$i")
                     .setTitle(i.toString())
+                    .setExtras(bundleOf(MediaType.MEDIA_TYPE_KEY to MediaType.MEDIA_OTHER))
                     .build(),
                   MediaBrowserCompat.MediaItem.FLAG_BROWSABLE
                 )
