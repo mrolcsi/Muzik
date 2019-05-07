@@ -30,6 +30,7 @@ import androidx.core.view.postDelayed
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.Transition
@@ -130,13 +131,14 @@ class PlayerFragment : Fragment() {
 
   override fun onAttach(context: Context) {
     super.onAttach(context)
-    activity?.onBackPressedDispatcher?.addCallback(this, OnBackPressedCallback {
-      // If drawer is open, just close it
-      if (drawer_layout.isDrawerOpen(GravityCompat.END)) {
-        drawer_layout.closeDrawer(GravityCompat.END)
-        true
-      } else {
-        false
+    activity?.onBackPressedDispatcher?.addCallback(this, object : OnBackPressedCallback(true) {
+      override fun handleOnBackPressed() {
+        // If drawer is open, just close it
+        if (drawer_layout.isDrawerOpen(GravityCompat.END)) {
+          drawer_layout.closeDrawer(GravityCompat.END)
+        } else {
+          findNavController().navigateUp()
+        }
       }
     })
   }
