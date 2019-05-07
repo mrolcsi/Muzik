@@ -19,19 +19,16 @@ class ArtistsViewModel(app: Application) : SessionViewModel(app) {
     }
   }
 
-  private val mArtists: MutableLiveData<List<MediaBrowserCompat.MediaItem>> = MutableLiveData()
-
-  init {
-    loadArtists()
+  private val mArtists by lazy {
+    MutableLiveData<List<MediaBrowserCompat.MediaItem>>().apply {
+      loadArtists()
+    }
   }
+
+  val artists: LiveData<List<MediaBrowserCompat.MediaItem>> get() = mArtists
 
   private fun loadArtists() {
     mMediaBrowser.subscribe(MuzikBrowserService.MEDIA_ROOT_ARTISTS, mSubscriptionCallbacks)
-    mMediaBrowser.connect()
-  }
-
-  fun getArtists(): LiveData<List<MediaBrowserCompat.MediaItem>> {
-    return mArtists
   }
 
   override fun getLogTag(): String = "ArtistsViewModel"

@@ -37,7 +37,7 @@ import kotlinx.android.synthetic.main.fragment_songs.*
 
 class SongsFragment : Fragment() {
 
-  private lateinit var mSongsModel: SongsViewModel
+  private lateinit var mModel: SongsViewModel
 
   private lateinit var mVisibleSongs: List<MediaBrowserCompat.MediaItem>
 
@@ -97,7 +97,7 @@ class SongsFragment : Fragment() {
     setHasOptionsMenu(true)
 
     activity?.run {
-      mSongsModel = ViewModelProviders.of(this).get(SongsViewModel::class.java).apply {
+      mModel = ViewModelProviders.of(this).get(SongsViewModel::class.java).apply {
         songs.observe(viewLifecycleOwner, Observer { songs ->
           mSongsAdapter.submitList(songs)
           mVisibleSongs = songs
@@ -163,7 +163,7 @@ class SongsFragment : Fragment() {
   override fun onPrepareOptionsMenu(menu: Menu) {
     super.onPrepareOptionsMenu(menu)
 
-    when (mSongsModel.sorting.value) {
+    when (mModel.sorting.value) {
       SortingMode.SORT_BY_ARTIST -> menu.findItem(R.id.menuSortByArtist).isChecked = true
       SortingMode.SORT_BY_TITLE -> menu.findItem(R.id.menuSortByTitle).isChecked = true
       SortingMode.SORT_BY_DATE -> menu.findItem(R.id.menuSortByDate).isChecked = true
@@ -177,19 +177,29 @@ class SongsFragment : Fragment() {
     item.isChecked = true
     return when (item.itemId) {
       R.id.menuSortByArtist -> {
-        mSongsModel.sorting.value = SortingMode.SORT_BY_ARTIST
+        mModel.sorting.value = SortingMode.SORT_BY_ARTIST
         true
       }
       R.id.menuSortByTitle -> {
-        mSongsModel.sorting.value = SortingMode.SORT_BY_TITLE
+        mModel.sorting.value = SortingMode.SORT_BY_TITLE
         true
       }
       R.id.menuSortByDate -> {
-        mSongsModel.sorting.value = SortingMode.SORT_BY_DATE
+        mModel.sorting.value = SortingMode.SORT_BY_DATE
         true
       }
       else -> super.onOptionsItemSelected(item)
     }
+  }
+
+  override fun onStart() {
+    super.onStart()
+    mModel.connect()
+  }
+
+  override fun onStop() {
+    super.onStop()
+    mModel.disconnect()
   }
 
   companion object {

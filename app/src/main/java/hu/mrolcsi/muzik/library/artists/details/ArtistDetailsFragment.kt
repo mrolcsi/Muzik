@@ -8,23 +8,39 @@ import android.support.v4.media.MediaBrowserCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.navArgs
+import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.muzik.R
+import hu.mrolcsi.muzik.common.ColoredDividerItemDecoration
 import hu.mrolcsi.muzik.common.glide.GlideApp
 import hu.mrolcsi.muzik.common.glide.MuzikGlideModule
+import hu.mrolcsi.muzik.library.albums.AlbumsAdapter
+import hu.mrolcsi.muzik.library.songs.SongsAdapter
 import hu.mrolcsi.muzik.service.theme.Theme
 import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.synthetic.main.artist_details_header.*
 import kotlinx.android.synthetic.main.fragment_artist_details.*
+import kotlinx.android.synthetic.main.shuffle_all.*
 
 class ArtistDetailsFragment : Fragment() {
 
   private val args: ArtistDetailsFragmentArgs by navArgs()
 
   private lateinit var mModel: ArtistDetailsViewModel
+
+  private val mAlbumsAdapter by lazy { AlbumsAdapter(requireContext(), RecyclerView.HORIZONTAL) }
+
+  private val mSongsAdapter by lazy { SongsAdapter(requireContext()) }
+
+  private val mDivider by lazy {
+    ColoredDividerItemDecoration(requireContext(), LinearLayout.VERTICAL).apply {
+      setDrawable(resources.getDrawable(R.drawable.list_divider_inset, requireContext().theme))
+    }
+  }
 
   override fun onActivityCreated(savedInstanceState: Bundle?) {
     super.onActivityCreated(savedInstanceState)
@@ -35,6 +51,9 @@ class ArtistDetailsFragment : Fragment() {
         .apply {
 
           loadHeader(artistItem)
+
+          artistAlbums.observe(viewLifecycleOwner, Observer(mAlbumsAdapter::submitList))
+          artistSongs.observe(viewLifecycleOwner, Observer(mSongsAdapter::submitList))
 
           artistPicture.observe(viewLifecycleOwner, Observer { uri ->
             GlideApp.with(this@ArtistDetailsFragment)
@@ -59,10 +78,24 @@ class ArtistDetailsFragment : Fragment() {
     // TODO: Albums and Songs
     // https://stackoverflow.com/questions/33456216/android-layout-horizontal-recyclerview-inside-a-vertical-recyclerview-inside-a
 
+    rvAlbums.apply {
+      adapter = mAlbumsAdapter
+      isNestedScrollingEnabled = false
+    }
+
+    rvSongs.apply {
+      adapter = mSongsAdapter
+      isNestedScrollingEnabled = true
+      addItemDecoration(mDivider)
+    }
+
+
     ThemeManager.getInstance(requireContext()).currentTheme.observe(viewLifecycleOwner, object : Observer<Theme> {
       private var initialLoad = true
 
       override fun onChanged(it: Theme) {
+        mSongsAdapter.notifyDataSetChanged()
+
         if (initialLoad) {
           applyThemeStatic(it)
           initialLoad = false
@@ -71,6 +104,16 @@ class ArtistDetailsFragment : Fragment() {
         }
       }
     })
+  }
+
+  override fun onStart() {
+    super.onStart()
+    mModel.connect()
+  }
+
+  override fun onStop() {
+    super.onStop()
+    mModel.disconnect()
   }
 
   private fun loadHeader(artistItem: MediaBrowserCompat.MediaItem) {
@@ -91,6 +134,16 @@ class ArtistDetailsFragment : Fragment() {
     collapsingToolbar.setCollapsedTitleTextColor(theme.primaryForegroundColor)
     collapsingToolbar.setExpandedTitleColor(theme.secondaryForegroundColor)
 
+    imgShuffleAll.drawable.setTint(theme.secondaryForegroundColor)
+    lblShuffleAll.setTextColor(theme.secondaryForegroundColor)
+
+    mDivider.setTint(theme.secondaryForegroundColor)
+
+    lblAlbums.setTextColor(theme.secondaryForegroundColor)
+    dividerAlbums.background.setTint(theme.secondaryForegroundColor)
+
+    lblSongs.setTextColor(theme.secondaryForegroundColor)
+    dividerSongs.background.setTint(theme.secondaryForegroundColor)
   }
 
   private fun applyThemeAnimated(theme: Theme) {

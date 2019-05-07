@@ -16,6 +16,7 @@ import androidx.core.view.forEach
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.fastscroller.AutoHidingFastScrollerTouchListener
 import hu.mrolcsi.muzik.extensions.applyForegroundColor
@@ -26,9 +27,9 @@ import kotlinx.android.synthetic.main.fragment_albums.*
 
 class AlbumsFragment : Fragment() {
 
-  private lateinit var mAlbumsModel: AlbumsViewModel
+  private lateinit var mModel: AlbumsViewModel
 
-  private val mAlbumsAdapter by lazy { AlbumsAdapter(requireContext()) }
+  private val mAlbumsAdapter by lazy { AlbumsAdapter(requireContext(), RecyclerView.VERTICAL) }
 
   override fun onActivityCreated(savedInstanceState: Bundle?) {
     super.onActivityCreated(savedInstanceState)
@@ -38,7 +39,7 @@ class AlbumsFragment : Fragment() {
     postponeEnterTransition()
 
     activity?.run {
-      mAlbumsModel = ViewModelProviders.of(this).get(AlbumsViewModel::class.java).apply {
+      mModel = ViewModelProviders.of(this).get(AlbumsViewModel::class.java).apply {
         albums.observe(viewLifecycleOwner, Observer { albums ->
           Log.d(LOG_TAG, "Got items from LiveData: $albums")
 
@@ -95,7 +96,7 @@ class AlbumsFragment : Fragment() {
   override fun onPrepareOptionsMenu(menu: Menu) {
     super.onPrepareOptionsMenu(menu)
 
-    when (mAlbumsModel.sorting.value) {
+    when (mModel.sorting.value) {
       SortingMode.SORT_BY_ARTIST -> menu.findItem(R.id.menuSortByArtist).isChecked = true
       SortingMode.SORT_BY_TITLE -> menu.findItem(R.id.menuSortByTitle).isChecked = true
       else -> {
@@ -108,15 +109,25 @@ class AlbumsFragment : Fragment() {
     item.isChecked = true
     return when (item.itemId) {
       R.id.menuSortByArtist -> {
-        mAlbumsModel.sorting.value = SortingMode.SORT_BY_ARTIST
+        mModel.sorting.value = SortingMode.SORT_BY_ARTIST
         true
       }
       R.id.menuSortByTitle -> {
-        mAlbumsModel.sorting.value = SortingMode.SORT_BY_TITLE
+        mModel.sorting.value = SortingMode.SORT_BY_TITLE
         true
       }
       else -> super.onOptionsItemSelected(item)
     }
+  }
+
+  override fun onStart() {
+    super.onStart()
+    mModel.connect()
+  }
+
+  override fun onStop() {
+    super.onStop()
+    mModel.disconnect()
   }
 
   private fun applyThemeAnimated(theme: Theme) {

@@ -30,7 +30,6 @@ class AlbumsViewModel(app: Application) : SessionViewModel(app) {
 
   private fun loadAlbums() {
     mMediaBrowser.subscribe(MuzikBrowserService.MEDIA_ROOT_ALBUMS, mSubscriptionCallbacks)
-    mMediaBrowser.connect()
   }
 
   val sorting = MutableLiveData<@SortingMode Int>(SortingMode.SORT_BY_TITLE)

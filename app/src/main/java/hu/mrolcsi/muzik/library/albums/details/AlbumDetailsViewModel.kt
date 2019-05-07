@@ -71,7 +71,6 @@ class AlbumDetailsViewModel(
       bundleOf(MuzikBrowserService.OPTION_ALBUM_ID to albumItem.description.id),
       mSubscriptionCallback
     )
-    mMediaBrowser.connect()
   }
 
   override fun getLogTag() = LOG_TAG

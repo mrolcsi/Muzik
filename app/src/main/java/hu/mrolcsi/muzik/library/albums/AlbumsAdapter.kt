@@ -25,14 +25,18 @@ import hu.mrolcsi.muzik.service.extensions.media.id
 import hu.mrolcsi.muzik.service.theme.Theme
 import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.extensions.LayoutContainer
-import kotlinx.android.synthetic.main.list_item_album.*
+import kotlinx.android.synthetic.main.list_item_album_content.*
 
-class AlbumsAdapter(context: Context) :
+class AlbumsAdapter(context: Context, @RecyclerView.Orientation private val orientation: Int) :
   MediaItemListAdapter<AlbumsAdapter.AlbumHolder>(context),
   SectionIndexer {
 
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AlbumHolder {
-    val itemView = LayoutInflater.from(parent.context).inflate(R.layout.list_item_album, parent, false)
+    val itemView = if (orientation == RecyclerView.HORIZONTAL) {
+      LayoutInflater.from(parent.context).inflate(R.layout.list_item_album_horizontal, parent, false)
+    } else {
+      LayoutInflater.from(parent.context).inflate(R.layout.list_item_album_vertical, parent, false)
+    }
     return AlbumHolder(itemView)
   }
 

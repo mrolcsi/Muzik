@@ -17,6 +17,8 @@ import kotlinx.android.synthetic.main.fragment_artists.*
 
 class ArtistsFragment : Fragment() {
 
+  private lateinit var mModel: ArtistsViewModel
+
   private val mArtistAdapter by lazy { ArtistsAdapter(requireContext()) }
 
   private val mDivider by lazy {
@@ -27,10 +29,11 @@ class ArtistsFragment : Fragment() {
     super.onActivityCreated(savedInstanceState)
 
     activity?.run {
-      val model = ViewModelProviders.of(this).get(ArtistsViewModel::class.java)
-      model.getArtists().observe(viewLifecycleOwner, Observer { artists ->
-        mArtistAdapter.submitList(artists)
-      })
+      mModel = ViewModelProviders.of(this).get(ArtistsViewModel::class.java).apply {
+        artists.observe(viewLifecycleOwner, Observer { artists ->
+          mArtistAdapter.submitList(artists)
+        })
+      }
     }
 
     ThemeManager.getInstance(requireContext()).currentTheme.observe(viewLifecycleOwner, Observer {
@@ -62,5 +65,15 @@ class ArtistsFragment : Fragment() {
 
       fastScroller.sectionIndicator = sectionIndicator
     }
+  }
+
+  override fun onStart() {
+    super.onStart()
+    mModel.connect()
+  }
+
+  override fun onStop() {
+    super.onStop()
+    mModel.disconnect()
   }
 }

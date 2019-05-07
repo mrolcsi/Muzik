@@ -162,6 +162,16 @@ class AlbumDetailsFragment : Fragment() {
     }
   }
 
+  override fun onStart() {
+    super.onStart()
+    mModel.connect()
+  }
+
+  override fun onStop() {
+    super.onStop()
+    mModel.disconnect()
+  }
+
   private fun loadHeader(albumItem: MediaBrowserCompat.MediaItem) {
 
     albumDetailsToolbar.title = albumItem.description.album

@@ -24,7 +24,7 @@
       android:layout_height="match_parent"
       android:fitsSystemWindows="true"
       app:contentScrim="?attr/colorPrimary"
-      app:layout_scrollFlags="scroll|snap|exitUntilCollapsed"
+      app:layout_scrollFlags="scroll|exitUntilCollapsed"
       app:scrimAnimationDuration="@integer/preferredAnimationDuration">
 
       <include
@@ -46,6 +46,75 @@
 
   </com.google.android.material.appbar.AppBarLayout>
 
-  <!-- TODO: Albums and Songs -->
+  <androidx.core.widget.NestedScrollView
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="?attr/actionBarSize"
+    app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
+
+    <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="vertical">
+
+      <!-- Shuffle All Item -->
+
+      <include layout="@layout/shuffle_all"/>
+
+      <TextView
+        android:id="@+id/lblAlbums"
+        android:textStyle="bold"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="20dp"
+        android:text="@string/albums_title"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"/>
+
+      <View
+        android:id="@+id/dividerAlbums"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="4dp"
+        android:background="?android:attr/listDivider"/>
+
+      <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvAlbums"
+        android:layout_width="match_parent"
+        android:layout_height="@android:dimen/thumbnail_height"
+        android:orientation="horizontal"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        tools:listitem="@layout/list_item_album_horizontal"/>
+
+      <TextView
+        android:id="@+id/lblSongs"
+        android:textStyle="bold"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="20dp"
+        android:text="@string/songs_title"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"/>
+
+      <View
+        android:id="@+id/dividerSongs"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="4dp"
+        android:background="?android:attr/listDivider"/>
+
+      <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvSongs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        tools:listitem="@layout/list_item_song"/>
+
+    </LinearLayout>
+
+  </androidx.core.widget.NestedScrollView>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
