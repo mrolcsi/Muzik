@@ -45,14 +45,15 @@ dependencies {
 
     // Core libraries
     implementation "androidx.core:core-ktx:$rootProject.coreKtxVersion"
-    implementation "androidx.appcompat:appcompat:$rootProject.appCompatVersion"
+    implementation "androidx.appcompat:appcompat:1.1.0-alpha04"
     implementation "androidx.lifecycle:lifecycle-extensions:$rootProject.lifecycleVersion"
+    implementation 'androidx.fragment:fragment-ktx:1.1.0-alpha07'
     implementation 'androidx.vectordrawable:vectordrawable:1.1.0-alpha01'
 
     // Views and Layouts
-    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
-    implementation 'androidx.recyclerview:recyclerview:1.0.0'
-    implementation 'com.google.android.material:material:1.0.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-alpha5'
+    implementation 'androidx.recyclerview:recyclerview:1.1.0-alpha04'
+    implementation 'com.google.android.material:material:1.1.0-alpha06'
     implementation 'androidx.cardview:cardview:1.0.0'
     // https://github.com/danoz73/RecyclerViewFastScroller/tree/master/recyclerviewfastscroller
     implementation 'xyz.danoz:recyclerviewfastscroller:0.1.3'
@@ -80,7 +81,7 @@ dependencies {
     // Testing
     androidTestImplementation "androidx.arch.core:core-testing:$rootProject.coreTestingVersion"
     androidTestImplementation "androidx.test.ext:junit:$rootProject.junitExtVersion"
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0-alpha03'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0-beta01'
     androidTestImplementation "androidx.test:runner:$rootProject.testRunnerVersion"
     testImplementation "junit:junit:$rootProject.junitVersion"
 
