@@ -7,12 +7,12 @@ import android.os.AsyncTask
 import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.session.MediaControllerCompat
+import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -23,15 +23,12 @@ import hu.mrolcsi.muzik.common.ColoredDividerItemDecoration
 import hu.mrolcsi.muzik.common.glide.GlideApp
 import hu.mrolcsi.muzik.common.glide.MuzikGlideModule
 import hu.mrolcsi.muzik.extensions.OnItemClickListener
-import hu.mrolcsi.muzik.service.exoplayer.ExoPlayerHolder
-import hu.mrolcsi.muzik.service.extensions.media.addQueueItems
 import hu.mrolcsi.muzik.service.extensions.media.album
 import hu.mrolcsi.muzik.service.extensions.media.albumArtUri
 import hu.mrolcsi.muzik.service.extensions.media.albumYear
 import hu.mrolcsi.muzik.service.extensions.media.artist
 import hu.mrolcsi.muzik.service.extensions.media.numberOfSongs
-import hu.mrolcsi.muzik.service.extensions.media.playFromDescription
-import hu.mrolcsi.muzik.service.extensions.media.trackNumber
+import hu.mrolcsi.muzik.service.extensions.media.playFromMediaItems
 import hu.mrolcsi.muzik.service.theme.Theme
 import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.synthetic.main.album_details_header.*
@@ -49,32 +46,11 @@ class AlbumDetailsFragment : Fragment() {
 
       val controller = MediaControllerCompat.getMediaController(requireActivity())
 
-      // Immediately start the song that was clicked on
-      controller.transportControls.playFromDescription(
-        item.description,
-        bundleOf(
-          ExoPlayerHolder.EXTRA_DESIRED_QUEUE_POSITION to (position - item.description.trackNumber / 1000).toInt()
-        )
-      )
-
-      AsyncTask.execute {
-        mModel.songsFromAlbum.value?.let { items ->
-          Log.d(LOG_TAG, "onItemClicked() Collecting descriptions...")
-
-          // Add songs to queue
-          val descriptions = items.filterIndexed { index, item ->
-            item.isPlayable && index != position
-          }.map {
-            it.description
-          }
-
-          Log.d(LOG_TAG, "onItemClicked() Sending items to queue...")
-
-          controller.addQueueItems(descriptions)
-        }
+      mModel.songsFromAlbum.value?.let { items ->
+        controller.transportControls.setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_NONE)
+        controller.playFromMediaItems(items, position)
       }
-    }
-    ).apply {
+    }).apply {
       showTrackNumber = true
     }
   }

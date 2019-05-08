@@ -2,8 +2,10 @@ package hu.mrolcsi.muzik.extensions
 
 import android.os.AsyncTask
 import androidx.annotation.MainThread
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.Observer
 import androidx.lifecycle.Transformations
 
 /**
@@ -128,3 +130,13 @@ fun <T, R> LiveData<T>.mapAsync(mapFunction: (T) -> R): LiveData<R> {
 @MainThread
 fun <T, R> LiveData<T>.switchMap(switchMapFunction: (T) -> LiveData<R>): LiveData<R> =
   Transformations.switchMap(this, switchMapFunction)
+
+@MainThread
+fun <T> LiveData<T>.observeOnce(lifecycleOwner: LifecycleOwner, observer: Observer<T>) {
+  observe(lifecycleOwner, object : Observer<T> {
+    override fun onChanged(t: T?) {
+      observer.onChanged(t)
+      removeObserver(this)
+    }
+  })
+}

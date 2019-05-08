@@ -14,7 +14,6 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import androidx.core.content.ContextCompat
-import androidx.core.os.bundleOf
 import androidx.media.session.MediaButtonReceiver
 import com.google.android.exoplayer2.ExoPlaybackException
 import com.google.android.exoplayer2.Player
@@ -24,10 +23,9 @@ import hu.mrolcsi.muzik.database.playqueue.entities.LastPlayed
 import hu.mrolcsi.muzik.service.exoplayer.ExoPlayerHolder
 import hu.mrolcsi.muzik.service.exoplayer.notification.ExoNotificationManager
 import hu.mrolcsi.muzik.service.extensions.database.toDescription
-import hu.mrolcsi.muzik.service.extensions.media.addQueueItems
 import hu.mrolcsi.muzik.service.extensions.media.albumArt
 import hu.mrolcsi.muzik.service.extensions.media.isSkipToNextEnabled
-import hu.mrolcsi.muzik.service.extensions.media.prepareFromDescription
+import hu.mrolcsi.muzik.service.extensions.media.prepareFromDescriptions
 import hu.mrolcsi.muzik.service.extensions.media.setShuffleMode
 import hu.mrolcsi.muzik.service.theme.ThemeManager
 
@@ -169,17 +167,8 @@ class MuzikPlayerService : MuzikBrowserService() {
 
             mLastPlayed?.let { lastPlayed ->
               // Load last played songs (starting with last played position)
-              val queuePosition =
-                if (lastPlayed.queuePosition in 0 until queue.size) lastPlayed.queuePosition else 0
-              controller.transportControls.prepareFromDescription(
-                queue[queuePosition],
-                bundleOf(ExoPlayerHolder.EXTRA_DESIRED_QUEUE_POSITION to queuePosition)
-              )
-              queue.filterIndexed { index, _ ->
-                index != queuePosition
-              }.also {
-                controller.addQueueItems(it)
-              }
+              val queuePosition = if (lastPlayed.queuePosition in 0 until queue.size) lastPlayed.queuePosition else 0
+              controller.prepareFromDescriptions(queue, queuePosition)
 
               controller.transportControls.setRepeatMode(lastPlayed.repeatMode)
               controller.transportControls.setShuffleMode(lastPlayed.shuffleMode, lastPlayed.shuffleSeed)

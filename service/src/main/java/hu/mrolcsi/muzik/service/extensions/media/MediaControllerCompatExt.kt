@@ -1,6 +1,8 @@
 package hu.mrolcsi.muzik.service.extensions.media
 
+import android.os.AsyncTask
 import android.os.Bundle
+import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
@@ -8,11 +10,11 @@ import androidx.core.os.bundleOf
 import com.google.android.exoplayer2.ext.mediasession.TimelineQueueEditor
 import hu.mrolcsi.muzik.service.exoplayer.BulkTimelineQueueEditor
 import hu.mrolcsi.muzik.service.exoplayer.ExoPlayerHolder
-import hu.mrolcsi.muzik.service.exoplayer.ExoPlayerHolder.Companion.ACTION_PLAY_FROM_DESCRIPTION
 import hu.mrolcsi.muzik.service.exoplayer.ExoPlayerHolder.Companion.ACTION_PREPARE_FROM_DESCRIPTION
 import hu.mrolcsi.muzik.service.exoplayer.ExoPlayerHolder.Companion.ACTION_START_UPDATER
 import hu.mrolcsi.muzik.service.exoplayer.ExoPlayerHolder.Companion.ACTION_STOP_UPDATER
 import hu.mrolcsi.muzik.service.exoplayer.ExoPlayerHolder.Companion.ARGUMENT_DESCRIPTION
+import hu.mrolcsi.muzik.service.exoplayer.ExoPlayerHolder.Companion.EXTRA_DESIRED_QUEUE_POSITION
 
 @Suppress("unused")
 private const val LOG_TAG = "MediaControllerExt"
@@ -24,32 +26,60 @@ fun MediaControllerCompat.TransportControls.startProgressUpdater() =
 fun MediaControllerCompat.TransportControls.stopProgressUpdater() =
   this.sendCustomAction(ACTION_STOP_UPDATER, null)
 
-fun MediaControllerCompat.TransportControls.prepareFromDescription(
-  description: MediaDescriptionCompat,
-  extras: Bundle?
+fun MediaControllerCompat.prepareFromDescriptions(
+  descriptions: List<MediaDescriptionCompat>, startingPosition: Int = 0
 ) {
-  // Gather parameters
+  // Load starting item immediately
   val args = Bundle().apply {
-    putParcelable(ARGUMENT_DESCRIPTION, description)
+    putParcelable(ARGUMENT_DESCRIPTION, descriptions[startingPosition])
+    putInt(EXTRA_DESIRED_QUEUE_POSITION, startingPosition)
   }
-  if (extras != null) args.putAll(extras)
 
   // Send action to Service
-  this.sendCustomAction(ACTION_PREPARE_FROM_DESCRIPTION, args)
+  this.transportControls.sendCustomAction(ACTION_PREPARE_FROM_DESCRIPTION, args)
+
+  // Add every other song in the background
+  AsyncTask.execute {
+    this.addQueueItems(
+      descriptions.filterIndexed { index, _ -> index != startingPosition }
+    )
+  }
 }
 
-fun MediaControllerCompat.TransportControls.playFromDescription(
-  description: MediaDescriptionCompat,
-  extras: Bundle?
+fun MediaControllerCompat.playFromDescriptions(
+  descriptions: List<MediaDescriptionCompat>,
+  startingPosition: Int = 0
 ) {
-  // Gather parameters
-  val args = Bundle().apply {
-    putBoolean(ACTION_PLAY_FROM_DESCRIPTION, true)
-  }
-  if (extras != null) args.putAll(extras)
+  transportControls.stop()
+  prepareFromDescriptions(descriptions, startingPosition)
+  transportControls.play()
+}
 
-  // Call prepare
-  prepareFromDescription(description, args)
+fun MediaControllerCompat.prepareFromMediaItems(
+  items: List<MediaBrowserCompat.MediaItem>,
+  startingPosition: Int = 0
+) {
+  // Load starting item
+  AsyncTask.execute {
+    val first = items[startingPosition]
+    val playableItems = items.filter { it.isPlayable }
+
+    val queuePosition = playableItems.indexOf(first)
+
+    prepareFromDescriptions(
+      playableItems.map { it.description },
+      queuePosition
+    )
+  }
+}
+
+fun MediaControllerCompat.playFromMediaItems(
+  items: List<MediaBrowserCompat.MediaItem>,
+  startingPosition: Int = 0
+) {
+  transportControls.stop()
+  prepareFromMediaItems(items, startingPosition)
+  transportControls.play()
 }
 
 fun MediaControllerCompat.clearQueue() =
@@ -71,25 +101,6 @@ fun MediaControllerCompat.addQueueItems(descriptions: Collection<MediaDescriptio
     }
     //Log.d(LOG_TAG, "addQueueItems() Bundle: ${TooLargeTool.bundleBreakdown(params)}")
     this.sendCommand(BulkTimelineQueueEditor.COMMAND_ADD_QUEUE_ITEMS, params, null)
-  }
-}
-
-fun MediaControllerCompat.addQueueItems(descriptions: Collection<MediaDescriptionCompat>, index: Int) {
-  // Split collection into chunks if too large
-  if (descriptions.size > MAX_PARCELABLE_SIZE) {
-    descriptions.chunked(MAX_PARCELABLE_SIZE).forEachIndexed { i, list ->
-      addQueueItems(list, index + i * MAX_PARCELABLE_SIZE)
-    }
-  } else {
-    // Put parameters into a bundle
-    val params = Bundle().apply {
-      putParcelableArrayList(
-        BulkTimelineQueueEditor.COMMAND_ARGUMENT_MEDIA_DESCRIPTIONS,
-        ArrayList(descriptions)
-      )
-      putInt(BulkTimelineQueueEditor.COMMAND_ARGUMENT_INDEX, index)
-    }
-    this.sendCommand(BulkTimelineQueueEditor.COMMAND_ADD_QUEUE_ITEMS_AT, params, null)
   }
 }
 

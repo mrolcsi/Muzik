@@ -1,9 +1,7 @@
 package hu.mrolcsi.muzik.library.songs
 
 import android.graphics.Color
-import android.os.AsyncTask
 import android.os.Bundle
-import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
@@ -14,7 +12,6 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
-import androidx.core.os.bundleOf
 import androidx.core.view.forEach
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -25,12 +22,12 @@ import hu.mrolcsi.muzik.common.fastscroller.AutoHidingFastScrollerTouchListener
 import hu.mrolcsi.muzik.common.fastscroller.SimpleSectionIndicator
 import hu.mrolcsi.muzik.extensions.OnItemClickListener
 import hu.mrolcsi.muzik.extensions.applyForegroundColor
+import hu.mrolcsi.muzik.extensions.observeOnce
 import hu.mrolcsi.muzik.library.SortingMode
-import hu.mrolcsi.muzik.service.exoplayer.ExoPlayerHolder
 import hu.mrolcsi.muzik.service.extensions.media.MediaType
 import hu.mrolcsi.muzik.service.extensions.media.addQueueItems
 import hu.mrolcsi.muzik.service.extensions.media.clearQueue
-import hu.mrolcsi.muzik.service.extensions.media.playFromDescription
+import hu.mrolcsi.muzik.service.extensions.media.playFromMediaItems
 import hu.mrolcsi.muzik.service.extensions.media.type
 import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.synthetic.main.fragment_songs.*
@@ -39,7 +36,7 @@ class SongsFragment : Fragment() {
 
   private lateinit var mModel: SongsViewModel
 
-  private lateinit var mVisibleSongs: List<MediaBrowserCompat.MediaItem>
+  //private lateinit var mVisibleItems: List<MediaBrowserCompat.MediaItem>
 
   private val mDivider by lazy {
     ColoredDividerItemDecoration(requireContext(), LinearLayout.VERTICAL).apply {
@@ -55,38 +52,18 @@ class SongsFragment : Fragment() {
 
       if (item.description.type == MediaType.MEDIA_OTHER) {
         // Shuffle All
-        controller.transportControls.setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_ALL)
-        controller.clearQueue()
-
-        val description = mVisibleSongs
-          .filter { it.isPlayable }
-          .map { it.description }
-
-        controller.addQueueItems(description)
-        controller.transportControls.play()
-
+        mModel.songDescriptions.observeOnce(viewLifecycleOwner, Observer { descriptions ->
+          controller.clearQueue()
+          controller.transportControls.setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_ALL)
+          controller.addQueueItems(descriptions)
+          controller.transportControls.play()
+        })
       } else {
         // Immediately start the song that was clicked on
-        controller.transportControls.setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_NONE)
-        controller.transportControls.playFromDescription(
-          item.description,
-          bundleOf(ExoPlayerHolder.EXTRA_DESIRED_QUEUE_POSITION to position - 1)
-        )
-
-        AsyncTask.execute {
-          Log.d(LOG_TAG, "onItemClicked() Collecting descriptions...")
-
-          // Add songs to queue
-          val descriptions = mVisibleSongs.filterIndexed { index, item ->
-            item.isPlayable && index != position
-          }.map {
-            it.description
-          }
-
-          Log.d(LOG_TAG, "onItemClicked() Sending items to queue...")
-
-          controller.addQueueItems(descriptions)
-        }
+        mModel.songs.observeOnce(viewLifecycleOwner, Observer { items ->
+          controller.playFromMediaItems(items, position)
+          controller.transportControls.setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_NONE)
+        })
       }
     })
   }
@@ -100,7 +77,7 @@ class SongsFragment : Fragment() {
       mModel = ViewModelProviders.of(this).get(SongsViewModel::class.java).apply {
         songs.observe(viewLifecycleOwner, Observer { songs ->
           mSongsAdapter.submitList(songs)
-          mVisibleSongs = songs
+          //mVisibleItems = songs
         })
         sorting.observe(viewLifecycleOwner, Observer {
           // Update adapter

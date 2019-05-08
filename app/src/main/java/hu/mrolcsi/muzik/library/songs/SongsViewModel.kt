@@ -49,37 +49,44 @@ class SongsViewModel(app: Application) : SessionViewModel(app) {
   val sorting = MutableLiveData<@SortingMode Int>(SortingMode.SORT_BY_TITLE)
 
   val songs: LiveData<List<MediaBrowserCompat.MediaItem>>
-    get() {
-      return sorting.switchMap { sortBy ->
-        when (sortBy) {
-          SortingMode.SORT_BY_ARTIST -> mAllSongs.switchMap { songs ->
-            val sortedSongs = MutableLiveData<List<MediaBrowserCompat.MediaItem>>()
-            AsyncTask.execute {
-              val items = songs.sortedBy { it.description.artistKey }.toMutableList()
-              items.add(0, mShuffleItem)
-              sortedSongs.postValue(items)
-            }
-            sortedSongs
+    get() = sorting.switchMap { sortBy ->
+      when (sortBy) {
+        SortingMode.SORT_BY_ARTIST -> mAllSongs.switchMap { songs ->
+          val sortedSongs = MutableLiveData<List<MediaBrowserCompat.MediaItem>>()
+          AsyncTask.execute {
+            val items = songs.sortedBy { it.description.artistKey }.toMutableList()
+            items.add(0, mShuffleItem)
+            sortedSongs.postValue(items)
           }
-          SortingMode.SORT_BY_TITLE -> mAllSongs.switchMap { songs ->
-            val sortedSongs = MutableLiveData<List<MediaBrowserCompat.MediaItem>>()
-            AsyncTask.execute {
-              val items = songs.sortedBy { it.description.titleKey }.toMutableList()
-              items.add(0, mShuffleItem)
-              sortedSongs.postValue(items)
-            }
-            sortedSongs
+          sortedSongs
+        }
+        SortingMode.SORT_BY_TITLE -> mAllSongs.switchMap { songs ->
+          val sortedSongs = MutableLiveData<List<MediaBrowserCompat.MediaItem>>()
+          AsyncTask.execute {
+            val items = songs.sortedBy { it.description.titleKey }.toMutableList()
+            items.add(0, mShuffleItem)
+            sortedSongs.postValue(items)
           }
-          SortingMode.SORT_BY_DATE -> mAllSongs.switchMap { songs ->
-            val sortedSongs = MutableLiveData<List<MediaBrowserCompat.MediaItem>>()
-            AsyncTask.execute {
-              val items = songs.sortedByDescending { it.description.dateAdded }.toMutableList()
-              items.add(0, mShuffleItem)
-              sortedSongs.postValue(items)
-            }
-            sortedSongs
+          sortedSongs
+        }
+        SortingMode.SORT_BY_DATE -> mAllSongs.switchMap { songs ->
+          val sortedSongs = MutableLiveData<List<MediaBrowserCompat.MediaItem>>()
+          AsyncTask.execute {
+            val items = songs.sortedByDescending { it.description.dateAdded }.toMutableList()
+            items.add(0, mShuffleItem)
+            sortedSongs.postValue(items)
           }
-          else -> throw IllegalArgumentException("unknown sorting constant.")
+          sortedSongs
+        }
+        else -> throw IllegalArgumentException("unknown sorting constant.")
+      }
+    }
+
+  val songDescriptions: LiveData<List<MediaDescriptionCompat>>
+    get() = songs.switchMap { items ->
+      MutableLiveData<List<MediaDescriptionCompat>>().apply {
+        AsyncTask.execute {
+          postValue(items.filter { it.isPlayable }.map { it.description })
         }
       }
     }
