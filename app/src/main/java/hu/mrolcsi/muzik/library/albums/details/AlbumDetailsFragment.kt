@@ -23,12 +23,17 @@ import hu.mrolcsi.muzik.common.ColoredDividerItemDecoration
 import hu.mrolcsi.muzik.common.glide.GlideApp
 import hu.mrolcsi.muzik.common.glide.MuzikGlideModule
 import hu.mrolcsi.muzik.extensions.OnItemClickListener
+import hu.mrolcsi.muzik.extensions.observeOnce
+import hu.mrolcsi.muzik.service.extensions.media.MediaType
+import hu.mrolcsi.muzik.service.extensions.media.addQueueItems
 import hu.mrolcsi.muzik.service.extensions.media.album
 import hu.mrolcsi.muzik.service.extensions.media.albumArtUri
 import hu.mrolcsi.muzik.service.extensions.media.albumYear
 import hu.mrolcsi.muzik.service.extensions.media.artist
+import hu.mrolcsi.muzik.service.extensions.media.clearQueue
 import hu.mrolcsi.muzik.service.extensions.media.numberOfSongs
 import hu.mrolcsi.muzik.service.extensions.media.playFromMediaItems
+import hu.mrolcsi.muzik.service.extensions.media.type
 import hu.mrolcsi.muzik.service.theme.Theme
 import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.synthetic.main.album_details_header.*
@@ -46,9 +51,19 @@ class AlbumDetailsFragment : Fragment() {
 
       val controller = MediaControllerCompat.getMediaController(requireActivity())
 
-      mModel.songsFromAlbum.value?.let { items ->
-        controller.transportControls.setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_NONE)
-        controller.playFromMediaItems(items, position)
+      if (item.description.type == MediaType.MEDIA_OTHER) {
+        // Shuffle All
+        mModel.songDescriptions.observeOnce(viewLifecycleOwner, Observer { descriptions ->
+          controller.clearQueue()
+          controller.transportControls.setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_ALL)
+          controller.addQueueItems(descriptions)
+          controller.transportControls.play()
+        })
+      } else {
+        mModel.songsFromAlbum.value?.let { items ->
+          controller.transportControls.setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_NONE)
+          controller.playFromMediaItems(items, position)
+        }
       }
     }).apply {
       showTrackNumber = true

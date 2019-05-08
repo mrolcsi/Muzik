@@ -1,15 +1,19 @@
 package hu.mrolcsi.muzik.library.albums.details
 
 import android.app.Application
+import android.graphics.BitmapFactory
 import android.os.AsyncTask
 import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaDescriptionCompat
 import android.util.Log
 import androidx.core.os.bundleOf
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import hu.mrolcsi.muzik.R
+import hu.mrolcsi.muzik.extensions.switchMap
 import hu.mrolcsi.muzik.library.SessionViewModel
 import hu.mrolcsi.muzik.service.MuzikBrowserService
 import hu.mrolcsi.muzik.service.extensions.media.MediaType
@@ -21,6 +25,16 @@ class AlbumDetailsViewModel(
   app: Application,
   val albumItem: MediaBrowserCompat.MediaItem
 ) : SessionViewModel(app) {
+
+  private val mShuffleItem = MediaBrowserCompat.MediaItem(
+    MediaDescriptionCompat.Builder()
+      .setMediaId("shuffle/all")
+      .setTitle(app.getString(R.string.mediaControl_shuffleAll))
+      .setIconBitmap(BitmapFactory.decodeResource(app.resources, R.drawable.ic_shuffle))
+      .setExtras(bundleOf(MediaType.MEDIA_TYPE_KEY to MediaType.MEDIA_OTHER))
+      .build(),
+    0
+  )
 
   private val mSubscriptionCallback = object : MediaBrowserCompat.SubscriptionCallback() {
     override fun onChildrenLoaded(
@@ -53,6 +67,9 @@ class AlbumDetailsViewModel(
               }
             }
           }
+
+          // Add Shuffle All item
+          children.add(0, mShuffleItem)
         }
         songsFromAlbum.postValue(children)
       }
@@ -64,6 +81,15 @@ class AlbumDetailsViewModel(
       loadSongsFromAlbum()
     }
   }
+
+  val songDescriptions: LiveData<List<MediaDescriptionCompat>>
+    get() = songsFromAlbum.switchMap { songs ->
+      MutableLiveData<List<MediaDescriptionCompat>>().apply {
+        AsyncTask.execute {
+          postValue(songs.filter { it.isPlayable }.map { it.description })
+        }
+      }
+    }
 
   private fun loadSongsFromAlbum() {
     mMediaBrowser.subscribe(

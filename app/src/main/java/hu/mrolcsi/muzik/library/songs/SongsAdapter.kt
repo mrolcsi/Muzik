@@ -81,6 +81,9 @@ open class SongsAdapter(
       }
 
       if (item.description.iconBitmap != null) {
+        // Make icon visible
+        imgCoverArt.visibility = View.VISIBLE
+
         // Load icon
         GlideApp.with(imgCoverArt)
           .asDrawable()
@@ -102,18 +105,18 @@ open class SongsAdapter(
               return true
             }
           }).into(imgCoverArt)
+      } else if (showTrackNumber) {
+        // Set track number
+        val trackNumber = item.description.trackNumber % 1000
+        tvTrackNumber?.visibility = if (showTrackNumber and (trackNumber > 0)) View.VISIBLE else View.GONE
+        imgCoverArt?.visibility = if (showTrackNumber) View.GONE else View.VISIBLE
+        tvTrackNumber?.text = trackNumber.toString()
       } else {
         // Load album art
         GlideApp.with(imgCoverArt)
           .load(item.description.coverArtUri)
           .into(imgCoverArt)
       }
-
-      // Set track number
-      val trackNumber = item.description.trackNumber % 1000
-      tvTrackNumber?.visibility = if (showTrackNumber and (trackNumber > 0)) View.VISIBLE else View.GONE
-      imgCoverArt?.visibility = if (showTrackNumber) View.GONE else View.VISIBLE
-      tvTrackNumber?.text = trackNumber.toString()
     }
 
     open fun applyTheme(theme: Theme) {
