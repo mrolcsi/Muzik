@@ -379,14 +379,16 @@ class PlayerFragment : Fragment() {
         mScrollState = state
 
         if (state == RecyclerView.SCROLL_STATE_IDLE) {
-          val controller = MediaControllerCompat.getMediaController(requireActivity())
-          // check if item position is different from the now playing position
-          val queueId = controller.playbackState.activeQueueItemId
-          val pagerPosition = mSnapHelper.findSnapPosition(rvQueue.layoutManager)
-          val itemId = mQueueAdapter.getItemId(pagerPosition)
+          activity?.let {
+            val controller = MediaControllerCompat.getMediaController(it)
+            // check if item position is different from the now playing position
+            val queueId = controller.playbackState.activeQueueItemId
+            val pagerPosition = mSnapHelper.findSnapPosition(rvQueue.layoutManager)
+            val itemId = mQueueAdapter.getItemId(pagerPosition)
 
-          if (queueId != itemId) {
-            controller.transportControls.skipToQueueItem(itemId)
+            if (queueId != itemId) {
+              controller.transportControls.skipToQueueItem(itemId)
+            }
           }
         }
       }
