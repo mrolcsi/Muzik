@@ -52,7 +52,20 @@ class ArtistDetailsFragment : Fragment() {
 
           loadHeader(artistItem)
 
-          artistAlbums.observe(viewLifecycleOwner, Observer(mAlbumsAdapter::submitList))
+          artistAlbums.observe(viewLifecycleOwner, Observer {
+            // Hide Albums section when list is empty
+            if (it.isEmpty()) {
+              lblAlbums?.visibility = View.GONE
+              dividerAlbums?.visibility = View.GONE
+              rvAlbums?.visibility = View.GONE
+            } else {
+              lblAlbums?.visibility = View.VISIBLE
+              dividerAlbums?.visibility = View.VISIBLE
+              rvAlbums?.visibility = View.VISIBLE
+            }
+
+            mAlbumsAdapter.submitList(it)
+          })
           artistSongs.observe(viewLifecycleOwner, Observer(mSongsAdapter::submitList))
 
           artistPicture.observe(viewLifecycleOwner, Observer { uri ->
