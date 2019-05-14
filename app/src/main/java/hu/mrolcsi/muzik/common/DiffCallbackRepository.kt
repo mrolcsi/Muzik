@@ -1,5 +1,7 @@
 package hu.mrolcsi.muzik.common
 
+import android.annotation.SuppressLint
+import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.session.MediaSessionCompat
 import androidx.recyclerview.widget.DiffUtil
@@ -7,19 +9,40 @@ import hu.mrolcsi.muzik.database.playqueue.entities.PlayQueueEntry
 
 object DiffCallbackRepository {
 
+  private fun Bundle.isEqualTo(that: Bundle): Boolean {
+    if (this.size() != that.size())
+      return false
+
+    if (!this.keySet().containsAll(that.keySet()))
+      return false
+
+    for (key in this.keySet()) {
+      val valueOne = this.get(key)
+      val valueTwo = that.get(key)
+      if (valueOne is Bundle && valueTwo is Bundle) {
+        if (!this.isEqualTo(valueTwo)) return false
+      } else if (valueOne != valueTwo) return false
+    }
+
+    return true
+  }
+
   val mediaItemCallback = object : DiffUtil.ItemCallback<MediaBrowserCompat.MediaItem>() {
     override fun areItemsTheSame(
       oldItem: MediaBrowserCompat.MediaItem,
       newItem: MediaBrowserCompat.MediaItem
     ): Boolean {
-      return oldItem == newItem
+      return oldItem.mediaId == newItem.mediaId
     }
 
+    @SuppressLint("DiffUtilEquals")
     override fun areContentsTheSame(
       oldItem: MediaBrowserCompat.MediaItem,
       newItem: MediaBrowserCompat.MediaItem
     ): Boolean {
-      return oldItem.description.mediaId == newItem.description.mediaId
+      // The 'extras' are only equal when both are null.
+      return if (oldItem.description.extras == newItem.description.extras) true
+      else oldItem.description.extras!!.isEqualTo(newItem.description.extras!!)
     }
   }
 
@@ -31,11 +54,14 @@ object DiffCallbackRepository {
       return oldItem.queueId == newItem.queueId
     }
 
+    @SuppressLint("DiffUtilEquals")
     override fun areContentsTheSame(
       oldItem: MediaSessionCompat.QueueItem,
       newItem: MediaSessionCompat.QueueItem
     ): Boolean {
-      return oldItem.description.mediaId == newItem.description.mediaId
+      // The 'extras' are only equal when both are null.
+      return if (oldItem.description.extras == newItem.description.extras) true
+      else oldItem.description.extras!!.isEqualTo(newItem.description.extras!!)
     }
 
   }
