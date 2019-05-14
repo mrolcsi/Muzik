@@ -52,6 +52,7 @@ import hu.mrolcsi.muzik.extensions.secondsToTimeStamp
 import hu.mrolcsi.muzik.service.extensions.media.albumArtUri
 import hu.mrolcsi.muzik.service.extensions.media.duration
 import hu.mrolcsi.muzik.service.extensions.media.id
+import hu.mrolcsi.muzik.service.extensions.media.isPaused
 import hu.mrolcsi.muzik.service.extensions.media.isPlaying
 import hu.mrolcsi.muzik.service.extensions.media.isSkipToNextEnabled
 import hu.mrolcsi.muzik.service.extensions.media.isSkipToPreviousEnabled
@@ -563,14 +564,14 @@ class PlayerFragment : Fragment() {
     btnNext.alpha = if (playbackState.isSkipToNextEnabled) 1f else Theme.DISABLED_ALPHA
 
     MediaControllerCompat.getMediaController(requireActivity())?.let { controller ->
-      when (playbackState.isPlaying) {
-        true -> {
-          controller.transportControls.startProgressUpdater()
-          btnPlayPause.setImageResource(android.R.drawable.ic_media_pause)
-        }
-        false -> {
+      when {
+        playbackState.isPaused -> {
           controller.transportControls.stopProgressUpdater()
           btnPlayPause.setImageResource(android.R.drawable.ic_media_play)
+        }
+        playbackState.isPlaying -> {
+          controller.transportControls.startProgressUpdater()
+          btnPlayPause.setImageResource(android.R.drawable.ic_media_pause)
         }
       }
 
