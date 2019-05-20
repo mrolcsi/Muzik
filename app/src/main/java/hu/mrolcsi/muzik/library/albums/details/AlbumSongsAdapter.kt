@@ -73,7 +73,8 @@ class AlbumSongsAdapter(
     SongHolder(containerView), LayoutContainer {
 
     fun bind(item: MediaBrowserCompat.MediaItem) {
-      tvDiscNumber.text = item.description.title
+      tvDiscNumber.text =
+        itemView.context.getString(R.string.albumDetails_disc, item.description.title)
     }
 
     override fun applyTheme(theme: Theme) {

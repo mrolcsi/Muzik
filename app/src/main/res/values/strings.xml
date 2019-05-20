@@ -45,5 +45,6 @@
   <string name="sortBy_artist">Sort by Artist</string>
   <string name="sortBy_dateAdded">Sort By Date Added</string>
   <string name="sortBy_title">Sort by Title</string>
+  <string name="albumDetails_disc">Disc %s</string>
   <!-- @formatter:on -->
 </resources>

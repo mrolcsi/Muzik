@@ -1,20 +1,24 @@
 package hu.mrolcsi.muzik.library.artists.details
 
 import android.app.Application
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.AsyncTask
 import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
+import android.support.v4.media.MediaDescriptionCompat
 import android.util.Log
 import androidx.core.os.bundleOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.discogs.DiscogsService
 import hu.mrolcsi.muzik.discogs.models.search.SearchResponse
 import hu.mrolcsi.muzik.library.SessionViewModel
 import hu.mrolcsi.muzik.service.MuzikBrowserService
+import hu.mrolcsi.muzik.service.extensions.media.MediaType
 import hu.mrolcsi.muzik.service.extensions.media.id
 import hu.mrolcsi.muzik.service.extensions.media.titleKey
 import retrofit2.Call
@@ -25,6 +29,16 @@ class ArtistDetailsViewModel(
   app: Application,
   val artistItem: MediaBrowserCompat.MediaItem
 ) : SessionViewModel(app) {
+
+  private val mShuffleItem = MediaBrowserCompat.MediaItem(
+    MediaDescriptionCompat.Builder()
+      .setMediaId("shuffle/all")
+      .setTitle(app.getString(R.string.mediaControl_shuffleAll))
+      .setIconBitmap(BitmapFactory.decodeResource(app.resources, R.drawable.ic_shuffle))
+      .setExtras(bundleOf(MediaType.MEDIA_TYPE_KEY to MediaType.MEDIA_OTHER))
+      .build(),
+    0
+  )
 
   private val albumsCallback = object : MediaBrowserCompat.SubscriptionCallback() {
     override fun onChildrenLoaded(
@@ -51,9 +65,9 @@ class ArtistDetailsViewModel(
       Log.d(getLogTag(), "Songs loaded from MediaBrowser: $children")
 
       AsyncTask.execute {
-        (artistSongs as MutableLiveData).postValue(
-          children.sortedBy { it.description.titleKey }
-        )
+        val songs = children.sortedBy { it.description.titleKey }.toMutableList()
+        songs.add(0, mShuffleItem)
+        (artistSongs as MutableLiveData).postValue(songs)
       }
     }
   }

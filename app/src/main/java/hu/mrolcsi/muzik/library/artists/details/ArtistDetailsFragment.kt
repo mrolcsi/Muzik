@@ -24,7 +24,7 @@ import hu.mrolcsi.muzik.service.theme.Theme
 import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.synthetic.main.artist_details_header.*
 import kotlinx.android.synthetic.main.fragment_artist_details.*
-import kotlinx.android.synthetic.main.shuffle_all.*
+import kotlinx.android.synthetic.main.fragment_artist_details_content.*
 
 class ArtistDetailsFragment : Fragment() {
 
@@ -54,15 +54,7 @@ class ArtistDetailsFragment : Fragment() {
 
           artistAlbums.observe(viewLifecycleOwner, Observer {
             // Hide Albums section when list is empty
-            if (it.isEmpty()) {
-              lblAlbums?.visibility = View.GONE
-              dividerAlbums?.visibility = View.GONE
-              rvAlbums?.visibility = View.GONE
-            } else {
-              lblAlbums?.visibility = View.VISIBLE
-              dividerAlbums?.visibility = View.VISIBLE
-              rvAlbums?.visibility = View.VISIBLE
-            }
+            albumsHeader?.visibility = if (it.isEmpty()) View.GONE else View.VISIBLE
 
             mAlbumsAdapter.submitList(it)
           })
@@ -147,14 +139,13 @@ class ArtistDetailsFragment : Fragment() {
     collapsingToolbar.setCollapsedTitleTextColor(theme.primaryForegroundColor)
     collapsingToolbar.setExpandedTitleColor(theme.secondaryForegroundColor)
 
-    imgShuffleAll.drawable.setTint(theme.secondaryForegroundColor)
-    lblShuffleAll.setTextColor(theme.secondaryForegroundColor)
-
     mDivider.setTint(theme.secondaryForegroundColor)
 
+    imgAlbums.drawable.setTint(theme.secondaryForegroundColor)
     lblAlbums.setTextColor(theme.secondaryForegroundColor)
     dividerAlbums.background.setTint(theme.secondaryForegroundColor)
 
+    imgSongs.drawable.setTint(theme.secondaryForegroundColor)
     lblSongs.setTextColor(theme.secondaryForegroundColor)
     dividerSongs.background.setTint(theme.secondaryForegroundColor)
   }

@@ -80,42 +80,45 @@ open class SongsAdapter(
         startMarquee(marqueeDelay)
       }
 
-      if (item.description.iconBitmap != null) {
-        // Make icon visible
-        imgCoverArt.visibility = View.VISIBLE
+      when {
+        item.description.iconBitmap != null -> {
+          // Make icon visible
+          imgCoverArt.visibility = View.VISIBLE
+          tvTrackNumber.visibility = View.GONE
 
-        // Load icon
-        GlideApp.with(imgCoverArt)
-          .asDrawable()
-          .load(item.description.iconBitmap)
-          .addListener(object : MuzikGlideModule.SimpleRequestListener<Drawable> {
-            override fun onResourceReady(
-              resource: Drawable,
-              model: Any?,
-              target: Target<Drawable>?,
-              dataSource: DataSource?,
-              isFirstResource: Boolean
-            ): Boolean {
-              lastTheme?.secondaryForegroundColor?.let { resource.setTint(it) }
-              target?.getSize { width, height ->
-                // Add artificial padding using an InsetDrawable
-                val drawable = InsetDrawable(resource, width / 3, height / 3, width / 3, height / 3)
-                target.onResourceReady(drawable, null)
+          // Load icon
+          GlideApp.with(imgCoverArt)
+            .asDrawable()
+            .load(item.description.iconBitmap)
+            .addListener(object : MuzikGlideModule.SimpleRequestListener<Drawable> {
+              override fun onResourceReady(
+                resource: Drawable,
+                model: Any?,
+                target: Target<Drawable>?,
+                dataSource: DataSource?,
+                isFirstResource: Boolean
+              ): Boolean {
+                lastTheme?.secondaryForegroundColor?.let { resource.setTint(it) }
+                target?.getSize { width, height ->
+                  // Add artificial padding using an InsetDrawable
+                  val drawable = InsetDrawable(resource, width / 3, height / 3, width / 3, height / 3)
+                  target.onResourceReady(drawable, null)
+                }
+                return true
               }
-              return true
-            }
-          }).into(imgCoverArt)
-      } else if (showTrackNumber) {
-        // Set track number
-        val trackNumber = item.description.trackNumber % 1000
-        tvTrackNumber?.visibility = if (showTrackNumber and (trackNumber > 0)) View.VISIBLE else View.GONE
-        imgCoverArt?.visibility = if (showTrackNumber) View.GONE else View.VISIBLE
-        tvTrackNumber?.text = trackNumber.toString()
-      } else {
-        // Load album art
-        GlideApp.with(imgCoverArt)
-          .load(item.description.coverArtUri)
-          .into(imgCoverArt)
+            }).into(imgCoverArt)
+        }
+        showTrackNumber -> {
+          // Set track number
+          val trackNumber = item.description.trackNumber % 1000
+          tvTrackNumber?.visibility = if (showTrackNumber and (trackNumber > 0)) View.VISIBLE else View.GONE
+          imgCoverArt?.visibility = if (showTrackNumber) View.GONE else View.VISIBLE
+          tvTrackNumber?.text = trackNumber.toString()
+        }
+        else -> // Load album art
+          GlideApp.with(imgCoverArt)
+            .load(item.description.coverArtUri)
+            .into(imgCoverArt)
       }
     }
 

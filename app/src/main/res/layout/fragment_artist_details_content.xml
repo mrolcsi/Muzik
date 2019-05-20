@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:layout_width="match_parent"
+  android:layout_height="wrap_content"
+  android:paddingTop="8dp"
+  tools:layout_height="match_parent">
+
+  <ImageView
+    android:id="@+id/imgAlbums"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="20dp"
+    android:layout_marginTop="8dp"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent"
+    app:srcCompat="@drawable/ic_album"
+    tools:ignore="ContentDescription"
+    tools:tint="@android:color/white" />
+
+  <TextView
+    android:id="@+id/lblAlbums"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="8dp"
+    android:text="@string/albums_title"
+    android:textAppearance="@style/TextAppearance.AppCompat.Small"
+    android:textStyle="bold"
+    app:layout_constraintBottom_toBottomOf="@+id/imgAlbums"
+    app:layout_constraintStart_toEndOf="@+id/imgAlbums"
+    app:layout_constraintTop_toTopOf="@+id/imgAlbums" />
+
+  <View
+    android:id="@+id/dividerAlbums"
+    android:layout_width="match_parent"
+    android:layout_height="1dp"
+    android:layout_marginTop="8dp"
+    android:background="?android:attr/listDivider"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/imgAlbums" />
+
+  <androidx.constraintlayout.widget.Group
+    android:id="@+id/albumsHeader"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    app:constraint_referenced_ids="imgAlbums,lblAlbums,dividerAlbums"
+    tools:layout_editor_absoluteY="8dp" />
+
+  <androidx.recyclerview.widget.RecyclerView
+    android:id="@+id/rvAlbums"
+    android:layout_width="match_parent"
+    android:layout_height="@android:dimen/thumbnail_height"
+    android:orientation="horizontal"
+    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/dividerAlbums"
+    tools:listitem="@layout/list_item_album_horizontal" />
+
+  <ImageView
+    android:id="@+id/imgSongs"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="20dp"
+    android:layout_marginTop="16dp"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/rvAlbums"
+    app:srcCompat="@drawable/ic_song"
+    tools:ignore="ContentDescription"
+    tools:tint="@android:color/white" />
+
+  <TextView
+    android:id="@+id/lblSongs"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="8dp"
+    android:text="@string/songs_title"
+    android:textAppearance="@style/TextAppearance.AppCompat.Small"
+    android:textStyle="bold"
+    app:layout_constraintBottom_toBottomOf="@+id/imgSongs"
+    app:layout_constraintStart_toEndOf="@+id/imgSongs"
+    app:layout_constraintTop_toTopOf="@+id/imgSongs" />
+
+  <View
+    android:id="@+id/dividerSongs"
+    android:layout_width="match_parent"
+    android:layout_height="1dp"
+    android:layout_marginTop="8dp"
+    android:background="?android:attr/listDivider"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/imgSongs" />
+
+  <androidx.recyclerview.widget.RecyclerView
+    android:id="@+id/rvSongs"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/dividerSongs"
+    tools:layout_height="0dp"
+    tools:listitem="@layout/list_item_song" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
