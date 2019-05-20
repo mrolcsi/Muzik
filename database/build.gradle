@@ -37,9 +37,9 @@ dependencies {
     androidTestImplementation "com.jraska.livedata:testing-ktx:$rootProject.liveDataTestingVersion"
 
     // Room
-    api 'androidx.room:room-runtime:2.1.0-alpha07'
-    kapt 'androidx.room:room-compiler:2.1.0-alpha07'
-    androidTestImplementation 'androidx.room:room-testing:2.1.0-alpha07'
+    api 'androidx.room:room-runtime:2.1.0-beta01'
+    kapt 'androidx.room:room-compiler:2.1.0-beta01'
+    androidTestImplementation 'androidx.room:room-testing:2.1.0-beta01'
 
     // Testing
     androidTestImplementation "androidx.arch.core:core-testing:$rootProject.coreTestingVersion"
