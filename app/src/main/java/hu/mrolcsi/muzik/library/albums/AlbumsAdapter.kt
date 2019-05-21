@@ -89,7 +89,7 @@ class AlbumsAdapter(context: Context, @RecyclerView.Orientation private val orie
       } else {
         itemView.setOnClickListener {
           it.findNavController().navigate(
-            R.id.action_albums_to_albumDetails,
+            R.id.navigation_albumDetails,
             AlbumDetailsFragmentArgs(item).toBundle(),
             null,
             FragmentNavigatorExtras(imgCoverArt to "coverArt")

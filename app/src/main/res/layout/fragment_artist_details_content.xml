@@ -42,10 +42,10 @@
     app:layout_constraintTop_toBottomOf="@+id/imgAlbums" />
 
   <androidx.constraintlayout.widget.Group
-    android:id="@+id/albumsHeader"
+    android:id="@+id/albumsGroup"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    app:constraint_referenced_ids="imgAlbums,lblAlbums,dividerAlbums"
+    app:constraint_referenced_ids="imgAlbums,lblAlbums,dividerAlbums,rvAlbums"
     tools:layout_editor_absoluteY="8dp" />
 
   <androidx.recyclerview.widget.RecyclerView

@@ -1,10 +1,13 @@
 package hu.mrolcsi.muzik.library.artists.details
 
+import android.animation.ValueAnimator
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
+import android.support.v4.media.session.MediaControllerCompat
+import android.support.v4.media.session.PlaybackStateCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,8 +21,15 @@ import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.ColoredDividerItemDecoration
 import hu.mrolcsi.muzik.common.glide.GlideApp
 import hu.mrolcsi.muzik.common.glide.MuzikGlideModule
+import hu.mrolcsi.muzik.extensions.OnItemClickListener
+import hu.mrolcsi.muzik.extensions.observeOnce
 import hu.mrolcsi.muzik.library.albums.AlbumsAdapter
 import hu.mrolcsi.muzik.library.songs.SongsAdapter
+import hu.mrolcsi.muzik.service.extensions.media.MediaType
+import hu.mrolcsi.muzik.service.extensions.media.addQueueItems
+import hu.mrolcsi.muzik.service.extensions.media.clearQueue
+import hu.mrolcsi.muzik.service.extensions.media.playFromMediaItems
+import hu.mrolcsi.muzik.service.extensions.media.type
 import hu.mrolcsi.muzik.service.theme.Theme
 import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.synthetic.main.artist_details_header.*
@@ -34,7 +44,26 @@ class ArtistDetailsFragment : Fragment() {
 
   private val mAlbumsAdapter by lazy { AlbumsAdapter(requireContext(), RecyclerView.HORIZONTAL) }
 
-  private val mSongsAdapter by lazy { SongsAdapter(requireContext()) }
+  private val mSongsAdapter by lazy {
+    SongsAdapter(requireContext(), OnItemClickListener { item, _, position, _ ->
+      val controller = MediaControllerCompat.getMediaController(requireActivity())
+
+      if (item.description.type == MediaType.MEDIA_OTHER) {
+        // Shuffle All
+        mModel.songDescriptions.observeOnce(viewLifecycleOwner, Observer { descriptions ->
+          controller.clearQueue()
+          controller.transportControls.setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_ALL)
+          controller.addQueueItems(descriptions)
+          controller.transportControls.play()
+        })
+      } else {
+        mModel.artistSongs.value?.let { items ->
+          controller.transportControls.setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_NONE)
+          controller.playFromMediaItems(items, position)
+        }
+      }
+    })
+  }
 
   private val mDivider by lazy {
     ColoredDividerItemDecoration(requireContext(), LinearLayout.VERTICAL).apply {
@@ -54,7 +83,7 @@ class ArtistDetailsFragment : Fragment() {
 
           artistAlbums.observe(viewLifecycleOwner, Observer {
             // Hide Albums section when list is empty
-            albumsHeader?.visibility = if (it.isEmpty()) View.GONE else View.VISIBLE
+            albumsGroup?.visibility = if (it.isEmpty()) View.GONE else View.VISIBLE
 
             mAlbumsAdapter.submitList(it)
           })
@@ -80,8 +109,6 @@ class ArtistDetailsFragment : Fragment() {
   }
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-    // TODO: Albums and Songs
-    // https://stackoverflow.com/questions/33456216/android-layout-horizontal-recyclerview-inside-a-vertical-recyclerview-inside-a
 
     rvAlbums.apply {
       adapter = mAlbumsAdapter
@@ -125,33 +152,101 @@ class ArtistDetailsFragment : Fragment() {
     collapsingToolbar.title = artistItem.description.title
   }
 
-  private fun applyThemeStatic(theme: Theme) {
-    appBar.setBackgroundColor(theme.primaryBackgroundColor)
-    collapsingToolbar.setContentScrimColor(theme.primaryBackgroundColor)
+  private fun applyPrimaryBackgroundColor(color: Int) {
+    appBar.setBackgroundColor(color)
+    collapsingToolbar.setContentScrimColor(color)
+  }
 
+  private fun applyPrimaryForegroundColor(color: Int) {
+    collapsingToolbar.setCollapsedTitleTextColor(color)
+  }
+
+  private fun applySecondaryBackgroundColor(color: Int) {
     imgProtectionScrim.setImageDrawable(
       GradientDrawable(
         GradientDrawable.Orientation.TOP_BOTTOM,
-        intArrayOf(Color.TRANSPARENT, theme.secondaryBackgroundColor)
+        intArrayOf(Color.TRANSPARENT, color)
       )
     )
+  }
 
-    collapsingToolbar.setCollapsedTitleTextColor(theme.primaryForegroundColor)
-    collapsingToolbar.setExpandedTitleColor(theme.secondaryForegroundColor)
+  private fun applySecondaryForegroundColor(color: Int) {
+    collapsingToolbar.setExpandedTitleColor(color)
 
-    mDivider.setTint(theme.secondaryForegroundColor)
+    mDivider.setTint(color)
 
-    imgAlbums.drawable.setTint(theme.secondaryForegroundColor)
-    lblAlbums.setTextColor(theme.secondaryForegroundColor)
-    dividerAlbums.background.setTint(theme.secondaryForegroundColor)
+    imgAlbums.drawable.setTint(color)
+    lblAlbums.setTextColor(color)
+    dividerAlbums.background.setTint(color)
 
-    imgSongs.drawable.setTint(theme.secondaryForegroundColor)
-    lblSongs.setTextColor(theme.secondaryForegroundColor)
-    dividerSongs.background.setTint(theme.secondaryForegroundColor)
+    imgSongs.drawable.setTint(color)
+    lblSongs.setTextColor(color)
+    dividerSongs.background.setTint(color)
+  }
+
+  private fun applyThemeStatic(theme: Theme) {
+    applyPrimaryBackgroundColor(theme.primaryBackgroundColor)
+    applyPrimaryForegroundColor(theme.primaryForegroundColor)
+    applySecondaryBackgroundColor(theme.secondaryBackgroundColor)
+    applySecondaryForegroundColor(theme.secondaryForegroundColor)
   }
 
   private fun applyThemeAnimated(theme: Theme) {
-    // TODO: proper animation
-    applyThemeStatic(theme)
+
+    val currentTheme = ThemeManager.getInstance(requireContext()).currentTheme.value
+
+    val animationDuration = context?.resources?.getInteger(R.integer.preferredAnimationDuration)?.toLong() ?: 300L
+
+    ValueAnimator.ofArgb(
+      currentTheme?.primaryBackgroundColor ?: Color.BLACK,
+      theme.primaryBackgroundColor
+    ).run {
+      duration = animationDuration
+      addUpdateListener {
+        val color = it.animatedValue as Int
+
+        applyPrimaryBackgroundColor(color)
+      }
+      start()
+    }
+
+    ValueAnimator.ofArgb(
+      currentTheme?.primaryForegroundColor ?: Color.WHITE,
+      theme.primaryForegroundColor
+    ).run {
+      duration = animationDuration
+      addUpdateListener {
+        val color = it.animatedValue as Int
+
+        applyPrimaryForegroundColor(color)
+      }
+      start()
+    }
+
+    ValueAnimator.ofArgb(
+      currentTheme?.secondaryBackgroundColor ?: Color.BLACK,
+      theme.secondaryBackgroundColor
+    ).run {
+      duration = animationDuration
+      addUpdateListener {
+        val color = it.animatedValue as Int
+
+        applySecondaryBackgroundColor(color)
+      }
+      start()
+    }
+
+    ValueAnimator.ofArgb(
+      currentTheme?.secondaryForegroundColor ?: Color.WHITE,
+      theme.secondaryForegroundColor
+    ).run {
+      duration = animationDuration
+      addUpdateListener {
+        val color = it.animatedValue as Int
+
+        applySecondaryForegroundColor(color)
+      }
+      start()
+    }
   }
 }

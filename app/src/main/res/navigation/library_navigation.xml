@@ -10,23 +10,7 @@
   <fragment android:id="@+id/navigation_pager"
     android:label="@string/library_title"
     android:name="hu.mrolcsi.muzik.library.pager.LibraryPagerFragment"
-    tools:layout="@layout/fragment_library_pager">
-
-    <action android:id="@+id/action_artists_to_artistDetails"
-      app:destination="@id/navigation_artistDetails"
-      app:enterAnim="@anim/grow_fade_in_center"
-      app:exitAnim="@anim/nav_default_exit_anim"
-      app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-      app:popExitAnim="@anim/nav_default_pop_exit_anim"/>
-
-    <action android:id="@+id/action_albums_to_albumDetails"
-      app:destination="@id/navigation_albumDetails"
-      app:enterAnim="@anim/grow_fade_in_center"
-      app:exitAnim="@anim/nav_default_exit_anim"
-      app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-      app:popExitAnim="@anim/nav_default_pop_exit_anim"/>
-
-  </fragment>
+    tools:layout="@layout/fragment_library_pager" />
 
   <fragment android:id="@+id/navigation_artists"
     android:label="@string/artists_title"

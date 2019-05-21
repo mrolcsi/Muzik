@@ -16,6 +16,7 @@ import androidx.lifecycle.ViewModelProvider
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.discogs.DiscogsService
 import hu.mrolcsi.muzik.discogs.models.search.SearchResponse
+import hu.mrolcsi.muzik.extensions.switchMap
 import hu.mrolcsi.muzik.library.SessionViewModel
 import hu.mrolcsi.muzik.service.MuzikBrowserService
 import hu.mrolcsi.muzik.service.extensions.media.MediaType
@@ -89,6 +90,15 @@ class ArtistDetailsViewModel(
       loadSongsByArtist()
     }
   }
+
+  val songDescriptions: LiveData<List<MediaDescriptionCompat>>
+    get() = artistSongs.switchMap { songs ->
+      MutableLiveData<List<MediaDescriptionCompat>>().apply {
+        AsyncTask.execute {
+          postValue(songs.filter { it.isPlayable }.map { it.description })
+        }
+      }
+    }
 
   private fun fetchArtistPicture() {
     artistItem.description.title?.let { artist ->
