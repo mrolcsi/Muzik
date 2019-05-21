@@ -122,6 +122,13 @@ fun MediaControllerCompat.moveQueueItem(from: Int, to: Int) {
   sendCommand(TimelineQueueEditor.COMMAND_MOVE_QUEUE_ITEM, params, null)
 }
 
+fun MediaControllerCompat.setQueueTitle(title: CharSequence) {
+  val params = bundleOf(
+    ExoPlayerHolder.EXTRA_QUEUE_TITLE to title
+  )
+  sendCommand(ExoPlayerHolder.ACTION_SET_QUEUE_TITLE, params, null)
+}
+
 fun MediaControllerCompat.TransportControls.setShuffleMode(@PlaybackStateCompat.ShuffleMode shuffleMode: Int, seed: Long) {
   val bundle = Bundle().apply {
     putInt(ExoPlayerHolder.EXTRA_SHUFFLE_MODE, shuffleMode)

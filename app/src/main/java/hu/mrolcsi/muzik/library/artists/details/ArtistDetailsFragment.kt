@@ -27,8 +27,10 @@ import hu.mrolcsi.muzik.library.albums.AlbumsAdapter
 import hu.mrolcsi.muzik.library.songs.SongsAdapter
 import hu.mrolcsi.muzik.service.extensions.media.MediaType
 import hu.mrolcsi.muzik.service.extensions.media.addQueueItems
+import hu.mrolcsi.muzik.service.extensions.media.artist
 import hu.mrolcsi.muzik.service.extensions.media.clearQueue
 import hu.mrolcsi.muzik.service.extensions.media.playFromMediaItems
+import hu.mrolcsi.muzik.service.extensions.media.setQueueTitle
 import hu.mrolcsi.muzik.service.extensions.media.type
 import hu.mrolcsi.muzik.service.theme.Theme
 import hu.mrolcsi.muzik.service.theme.ThemeManager
@@ -47,6 +49,8 @@ class ArtistDetailsFragment : Fragment() {
   private val mSongsAdapter by lazy {
     SongsAdapter(requireContext(), OnItemClickListener { item, _, position, _ ->
       val controller = MediaControllerCompat.getMediaController(requireActivity())
+
+      mModel.artistItem.description.artist?.let { controller.setQueueTitle(it) }
 
       if (item.description.type == MediaType.MEDIA_OTHER) {
         // Shuffle All

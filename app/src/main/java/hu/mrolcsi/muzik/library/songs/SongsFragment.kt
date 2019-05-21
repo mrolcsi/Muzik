@@ -28,6 +28,7 @@ import hu.mrolcsi.muzik.service.extensions.media.MediaType
 import hu.mrolcsi.muzik.service.extensions.media.addQueueItems
 import hu.mrolcsi.muzik.service.extensions.media.clearQueue
 import hu.mrolcsi.muzik.service.extensions.media.playFromMediaItems
+import hu.mrolcsi.muzik.service.extensions.media.setQueueTitle
 import hu.mrolcsi.muzik.service.extensions.media.type
 import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.synthetic.main.fragment_songs.*
@@ -35,8 +36,6 @@ import kotlinx.android.synthetic.main.fragment_songs.*
 class SongsFragment : Fragment() {
 
   private lateinit var mModel: SongsViewModel
-
-  //private lateinit var mVisibleItems: List<MediaBrowserCompat.MediaItem>
 
   private val mDivider by lazy {
     ColoredDividerItemDecoration(requireContext(), LinearLayout.VERTICAL).apply {
@@ -49,6 +48,8 @@ class SongsFragment : Fragment() {
       Log.d(LOG_TAG, "onItemClicked($item, $holder, $position, $id)")
 
       val controller = MediaControllerCompat.getMediaController(requireActivity())
+
+      controller.setQueueTitle(getString(R.string.playlist_allSongs))
 
       if (item.description.type == MediaType.MEDIA_OTHER) {
         // Shuffle All

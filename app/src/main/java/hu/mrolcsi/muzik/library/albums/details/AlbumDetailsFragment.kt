@@ -33,6 +33,7 @@ import hu.mrolcsi.muzik.service.extensions.media.artist
 import hu.mrolcsi.muzik.service.extensions.media.clearQueue
 import hu.mrolcsi.muzik.service.extensions.media.numberOfSongs
 import hu.mrolcsi.muzik.service.extensions.media.playFromMediaItems
+import hu.mrolcsi.muzik.service.extensions.media.setQueueTitle
 import hu.mrolcsi.muzik.service.extensions.media.type
 import hu.mrolcsi.muzik.service.theme.Theme
 import hu.mrolcsi.muzik.service.theme.ThemeManager
@@ -50,6 +51,8 @@ class AlbumDetailsFragment : Fragment() {
       Log.d(LOG_TAG, "onItemClicked($item, $holder, $position, $id)")
 
       val controller = MediaControllerCompat.getMediaController(requireActivity())
+
+      mModel.albumItem.description.album?.let { controller.setQueueTitle(it) }
 
       if (item.description.type == MediaType.MEDIA_OTHER) {
         // Shuffle All

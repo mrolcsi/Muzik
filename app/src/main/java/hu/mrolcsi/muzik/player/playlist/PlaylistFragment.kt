@@ -20,6 +20,7 @@ import hu.mrolcsi.muzik.common.ColoredDividerItemDecoration
 import hu.mrolcsi.muzik.database.playqueue.PlayQueueDatabase
 import hu.mrolcsi.muzik.extensions.OnItemClickListener
 import hu.mrolcsi.muzik.extensions.applyForegroundColor
+import hu.mrolcsi.muzik.extensions.mediaControllerCompat
 import hu.mrolcsi.muzik.player.PlayerViewModel
 import hu.mrolcsi.muzik.service.extensions.media.isPlaying
 import hu.mrolcsi.muzik.service.theme.Theme
@@ -82,6 +83,10 @@ class PlaylistFragment : Fragment() {
               }
             }
           }
+        })
+
+        currentQueue.observe(viewLifecycleOwner, Observer {
+          playlistToolbar.title = mediaControllerCompat?.queueTitle
         })
       }
     }

@@ -558,8 +558,22 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
   // Last Played Settings
   private val mLastPlayed = LastPlayed()
 
+  // Custom command receiver
+  private val mCustomCommandReceiver =
+    MediaSessionConnector.CommandReceiver { _, _, command, extras, _ ->
+      when (command) {
+        ACTION_SET_QUEUE_TITLE -> {
+          extras.getCharSequence(EXTRA_QUEUE_TITLE)?.let {
+            mSessionConnector.mediaSession.setQueueTitle(it)
+          }
+          true
+        }
+        else -> false
+      }
+    }
+
   // Connect this holder to the session
-  private val mSessionConnector =
+  private val mSessionConnector: MediaSessionConnector =
     MediaSessionConnector(session).apply {
       setPlayer(mPlayer)
       setMediaMetadataProvider(mMetadataProvider)
@@ -573,6 +587,7 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
       setQueueNavigator(mQueueNavigator)
       setQueueEditor(mQueueEditor)
       setErrorMessageProvider(mErrorMessageProvider)
+      registerCustomCommandReceiver(mCustomCommandReceiver)
     }
 
   /**
@@ -609,6 +624,9 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
     const val ACTION_SET_SHUFFLE_MODE = "ACTION_SET_SHUFFLE_MODE"
     const val EXTRA_SHUFFLE_MODE = "EXTRA_SHUFFLE_MODE"
     const val EXTRA_SHUFFLE_SEED = "EXTRA_SHUFFLE_SEED"
+
+    const val ACTION_SET_QUEUE_TITLE = "ACTION_SET_QUEUE_TITLE"
+    const val EXTRA_QUEUE_TITLE = "EXTRA_QUEUE_TITLE"
   }
 
 }
