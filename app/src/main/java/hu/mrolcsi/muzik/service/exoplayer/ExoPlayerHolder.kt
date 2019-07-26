@@ -67,7 +67,7 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
 
         // Prepare player if needed (like after an error)
         if (player.playbackState == Player.STATE_IDLE || player.playbackState == Player.STATE_ENDED) {
-          mPlaybackPreparer.onPrepare()
+          mPlaybackPreparer.onPrepare(playWhenReady)
         }
 
         // Start updater if it is enabled (Gets cancelled in onStop())
@@ -227,12 +227,12 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
 
     override fun getSupportedPrepareActions(): Long = MediaSessionConnector.PlaybackPreparer.ACTIONS
 
-    override fun onPrepareFromMediaId(mediaId: String?, extras: Bundle?) {
+    override fun onPrepareFromMediaId(mediaId: String?, playWhenReady: Boolean, extras: Bundle?) {
       // Assuming mediaId is a path
-      onPrepareFromUri(Uri.fromFile(File(mediaId)), extras)
+      onPrepareFromUri(Uri.fromFile(File(mediaId)), playWhenReady, extras)
     }
 
-    override fun onPrepareFromUri(uri: Uri, extras: Bundle?) {
+    override fun onPrepareFromUri(uri: Uri, playWhenReady: Boolean, extras: Bundle?) {
       Log.v(LOG_TAG, "onPrepareFromUri($uri, $extras) called from ${Thread.currentThread()}")
 
       mBackgroundHandler.post {
@@ -245,12 +245,12 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
         val mediaSource = ProgressiveMediaSource.Factory(mDataSourceFactory).createMediaSource(uri)
         mQueueDataSource.addMediaSource(0, mediaSource, mMainHandler) {
           // Call prepare() on the main thread
-          onPrepare()
+          onPrepare(playWhenReady)
         }
       }
     }
 
-    override fun onPrepareFromSearch(query: String?, extras: Bundle?) {}
+    override fun onPrepareFromSearch(query: String?, playWhenReady: Boolean, extras: Bundle?) {}
 
     fun onPrepareFromDescription(description: MediaDescriptionCompat, extras: Bundle?) {
       mBackgroundHandler.post {
@@ -272,7 +272,7 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
       }
     }
 
-    override fun onPrepare() {
+    override fun onPrepare(playWhenReady: Boolean) {
       Log.v(LOG_TAG, "onPrepare() called from ${Thread.currentThread()}")
       mPlayer.prepare(mQueueDataSource, false, true)
     }
@@ -405,7 +405,7 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
         mMainHandler.post {
           val playerState = mPlayer.playbackState
           if (playerState == Player.STATE_IDLE || playerState == Player.STATE_ENDED) {
-            mPlaybackPreparer.onPrepare()
+            mPlaybackPreparer.onPrepare(false)
           }
         }
 
@@ -441,7 +441,7 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
         mMainHandler.post {
           val playerState = mPlayer.playbackState
           if (playerState == Player.STATE_IDLE || playerState == Player.STATE_ENDED) {
-            mPlaybackPreparer.onPrepare()
+            mPlaybackPreparer.onPrepare(false)
           }
         }
 
