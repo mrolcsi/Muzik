@@ -1,5 +1,6 @@
 package hu.mrolcsi.muzik.discogs
 
+import hu.mrolcsi.muzik.BuildConfig
 import hu.mrolcsi.muzik.discogs.models.search.SearchResponse
 import retrofit2.Call
 import retrofit2.Retrofit

@@ -16,7 +16,7 @@ import com.google.android.exoplayer2.ext.mediasession.TimelineQueueEditor.EXTRA_
 import com.google.android.exoplayer2.ext.mediasession.TimelineQueueEditor.EXTRA_TO_INDEX
 import com.google.android.exoplayer2.source.ConcatenatingMediaSource
 import com.google.android.exoplayer2.util.Util
-import hu.mrolcsi.muzik.service.BuildConfig
+import hu.mrolcsi.muzik.BuildConfig
 import hu.mrolcsi.muzik.service.exoplayer.BulkTimelineQueueEditor.OnQueueChangedCallback
 
 /**

@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-  <string name="error_outOfMemory">An Out of Memory error occurred. The song might be too big.</string>
-  <string name="error_renderer">An error occurred while playing the song. The song might be corrupted.</string>
-  <string name="error_source">An error occurred while loading the song. Probably an unsupported format.</string>
-  <string name="error_unexpected">An unexpected error occurred.</string>
-  <string name="notification_nowPlaying">Now Playing</string>
-</resources>

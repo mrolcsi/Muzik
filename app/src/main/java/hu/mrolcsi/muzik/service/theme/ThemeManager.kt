@@ -13,7 +13,7 @@ import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.get
 import androidx.lifecycle.MutableLiveData
 import androidx.palette.graphics.Palette
-import hu.mrolcsi.muzik.service.R
+import hu.mrolcsi.muzik.R
 import org.json.JSONObject
 import java.util.concurrent.Executors
 

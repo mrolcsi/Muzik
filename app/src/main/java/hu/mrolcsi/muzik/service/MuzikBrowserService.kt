@@ -9,6 +9,7 @@ import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaDescriptionCompat
 import androidx.core.content.ContentResolverCompat
 import androidx.media.MediaBrowserServiceCompat
+import hu.mrolcsi.muzik.BuildConfig
 import hu.mrolcsi.muzik.service.extensions.media.MediaType
 
 @Suppress("ConstantConditionIf")

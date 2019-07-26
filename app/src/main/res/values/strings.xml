@@ -1,6 +1,5 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
   <string name="app_name">Muzik</string>
-  <!-- @formatter:off -->
   <string name="albumDetails_disc">Disc %s</string>
   <string name="albumDetails_title">Album Details</string>
   <string name="albums_byArtist_subtitle">by %s</string>
@@ -20,6 +19,10 @@
   <string name="dateAdded_new">New</string>
   <string name="dateAdded_old">Old</string>
   <string name="dateAdded_recent">Recent</string>
+  <string name="error_outOfMemory">An Out of Memory error occurred. The song might be too big.</string>
+  <string name="error_renderer">An error occurred while playing the song. The song might be corrupted.</string>
+  <string name="error_source">An error occurred while loading the song. Probably an unsupported format.</string>
+  <string name="error_unexpected">An unexpected error occurred.</string>
   <string name="library_grantAccessToSdCard">Grant Access to SD Card</string>
   <string name="library_readExternalStorage_rationale">The app needs your permission to access your music collection. Please grant access by clicking on the button below, then answering \'Grant\'.</string>
   <string name="library_title">Library</string>
@@ -29,6 +32,7 @@
   <string name="mediaControl_playPause">Play/Pause</string>
   <string name="mediaControl_previous">Previous</string>
   <string name="mediaControl_shuffleAll">Shuffle all</string>
+  <string name="notification_nowPlaying">Now Playing</string>
   <string name="notification_nowPlaying_description">Shows the currently playing song in Lyrics Player</string>
   <string name="player_noSongLoaded">No song loaded.</string>
   <string name="player_repeatAll">Repeating all songs.</string>
@@ -47,5 +51,4 @@
   <string name="sortBy_artist">Sort by Artist</string>
   <string name="sortBy_dateAdded">Sort By Date Added</string>
   <string name="sortBy_title">Sort by Title</string>
-  <!-- @formatter:on -->
 </resources>
