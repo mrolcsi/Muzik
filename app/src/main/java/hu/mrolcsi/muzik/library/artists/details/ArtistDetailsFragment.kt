@@ -12,11 +12,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.RecyclerView
+import dagger.android.support.DaggerFragment
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.ColoredDividerItemDecoration
 import hu.mrolcsi.muzik.common.glide.GlideApp
@@ -37,12 +36,13 @@ import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.synthetic.main.artist_details_header.*
 import kotlinx.android.synthetic.main.fragment_artist_details.*
 import kotlinx.android.synthetic.main.fragment_artist_details_content.*
+import javax.inject.Inject
 
-class ArtistDetailsFragment : Fragment() {
+class ArtistDetailsFragment : DaggerFragment() {
 
   private val args: ArtistDetailsFragmentArgs by navArgs()
 
-  private lateinit var mModel: ArtistDetailsViewModel
+  @Inject lateinit var viewModel: ArtistDetailsViewModel
 
   private val mAlbumsAdapter by lazy { AlbumsAdapter(requireContext(), RecyclerView.HORIZONTAL) }
 
@@ -50,18 +50,18 @@ class ArtistDetailsFragment : Fragment() {
     SongsAdapter(requireContext(), OnItemClickListener { item, _, position, _ ->
       val controller = MediaControllerCompat.getMediaController(requireActivity())
 
-      mModel.artistItem.description.artist?.let { controller.setQueueTitle(it) }
+      viewModel.artistItem?.description?.artist?.let { controller.setQueueTitle(it) }
 
       if (item.description.type == MediaType.MEDIA_OTHER) {
         // Shuffle All
-        mModel.songDescriptions.observeOnce(viewLifecycleOwner, Observer { descriptions ->
+        viewModel.songDescriptions.observeOnce(viewLifecycleOwner, Observer { descriptions ->
           controller.clearQueue()
           controller.transportControls.setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_ALL)
           controller.addQueueItems(descriptions)
           controller.transportControls.play()
         })
       } else {
-        mModel.artistSongs.value?.let { items ->
+        viewModel.artistSongs.value?.let { items ->
           controller.transportControls.setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_NONE)
           controller.playFromMediaItems(items, position)
         }
@@ -78,33 +78,31 @@ class ArtistDetailsFragment : Fragment() {
   override fun onActivityCreated(savedInstanceState: Bundle?) {
     super.onActivityCreated(savedInstanceState)
 
-    activity?.let { activity ->
-      mModel = ViewModelProviders.of(this, ArtistDetailsViewModel.Factory(activity.application, args.artistItem))
-        .get(ArtistDetailsViewModel::class.java)
-        .apply {
+    viewModel.apply {
 
-          loadHeader(artistItem)
+      artistItem = args.artistItem
 
-          artistAlbums.observe(viewLifecycleOwner, Observer {
-            // Hide Albums section when list is empty
-            albumsGroup?.visibility = if (it.isEmpty()) View.GONE else View.VISIBLE
+      artistItem?.let { loadHeader(it) }
 
-            mAlbumsAdapter.submitList(it)
+      artistAlbums.observe(viewLifecycleOwner, Observer {
+        // Hide Albums section when list is empty
+        albumsGroup?.visibility = if (it.isEmpty()) View.GONE else View.VISIBLE
+
+        mAlbumsAdapter.submitList(it)
+      })
+      artistSongs.observe(viewLifecycleOwner, Observer(mSongsAdapter::submitList))
+
+      artistPicture.observe(viewLifecycleOwner, Observer { uri ->
+        GlideApp.with(this@ArtistDetailsFragment)
+          .asBitmap()
+          .load(uri)
+          .addListener(object : MuzikGlideModule.SimpleRequestListener<Bitmap> {
+            override fun onResourceReady(resource: Bitmap?) {
+              appBar.setExpanded(true, true)
+            }
           })
-          artistSongs.observe(viewLifecycleOwner, Observer(mSongsAdapter::submitList))
-
-          artistPicture.observe(viewLifecycleOwner, Observer { uri ->
-            GlideApp.with(this@ArtistDetailsFragment)
-              .asBitmap()
-              .load(uri)
-              .addListener(object : MuzikGlideModule.SimpleRequestListener<Bitmap> {
-                override fun onResourceReady(resource: Bitmap?) {
-                  appBar.setExpanded(true, true)
-                }
-              })
-              .into(imgArtist)
-          })
-        }
+          .into(imgArtist)
+      })
     }
   }
 
@@ -144,12 +142,12 @@ class ArtistDetailsFragment : Fragment() {
 
   override fun onStart() {
     super.onStart()
-    mModel.connect()
+    viewModel.connect()
   }
 
   override fun onStop() {
     super.onStop()
-    mModel.disconnect()
+    viewModel.disconnect()
   }
 
   private fun loadHeader(artistItem: MediaBrowserCompat.MediaItem) {

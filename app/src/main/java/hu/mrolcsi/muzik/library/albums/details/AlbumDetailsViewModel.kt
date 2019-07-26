@@ -14,7 +14,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.extensions.switchMap
-import hu.mrolcsi.muzik.library.SessionViewModel
+import hu.mrolcsi.muzik.library.SessionViewModelBase
 import hu.mrolcsi.muzik.service.MuzikBrowserService
 import hu.mrolcsi.muzik.service.extensions.media.MediaType
 import hu.mrolcsi.muzik.service.extensions.media.id
@@ -24,7 +24,7 @@ import hu.mrolcsi.muzik.service.extensions.media.trackNumber
 class AlbumDetailsViewModel(
   app: Application,
   val albumItem: MediaBrowserCompat.MediaItem
-) : SessionViewModel(app) {
+) : SessionViewModelBase(app) {
 
   private val mShuffleItem = MediaBrowserCompat.MediaItem(
     MediaDescriptionCompat.Builder()

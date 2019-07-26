@@ -5,11 +5,11 @@ import android.os.AsyncTask
 import android.support.v4.media.MediaBrowserCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import hu.mrolcsi.muzik.library.SessionViewModel
+import hu.mrolcsi.muzik.library.SessionViewModelBase
 import hu.mrolcsi.muzik.service.MuzikBrowserService
 import hu.mrolcsi.muzik.service.extensions.media.artistKey
 
-class ArtistsViewModel(app: Application) : SessionViewModel(app) {
+class ArtistsViewModel(app: Application) : SessionViewModelBase(app) {
 
   private val mSubscriptionCallbacks = object : MediaBrowserCompat.SubscriptionCallback() {
     override fun onChildrenLoaded(parentId: String, children: MutableList<MediaBrowserCompat.MediaItem>) {

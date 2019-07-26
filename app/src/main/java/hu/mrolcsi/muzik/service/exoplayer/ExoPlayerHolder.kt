@@ -215,6 +215,7 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
   private var mDesiredQueuePosition: Int = -1
 
   private val mPlaybackPreparer = object : MediaSessionConnector.PlaybackPreparer {
+
     override fun onCommand(
       player: Player?,
       controlDispatcher: ControlDispatcher?,

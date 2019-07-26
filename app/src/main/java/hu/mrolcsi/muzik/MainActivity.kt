@@ -13,12 +13,12 @@ import androidx.navigation.fragment.NavHostFragment
 import hu.mrolcsi.muzik.extensions.isPermissionGranted
 import hu.mrolcsi.muzik.extensions.requestPermission
 import hu.mrolcsi.muzik.extensions.shouldShowPermissionRationale
-import hu.mrolcsi.muzik.player.PlayerViewModel
+import hu.mrolcsi.muzik.player.PlayerViewModelImpl
 import kotlinx.android.synthetic.main.content_permission.*
 
 class MainActivity : AppCompatActivity() {
 
-  private lateinit var mPlayerModel: PlayerViewModel
+  private lateinit var mPlayerModel: PlayerViewModelImpl
 
   override fun onCreate(savedInstanceState: Bundle?) {
     setTheme(R.style.FluxTheme)
@@ -37,7 +37,7 @@ class MainActivity : AppCompatActivity() {
       }
     }
 
-    mPlayerModel = ViewModelProviders.of(this).get(PlayerViewModel::class.java).apply {
+    mPlayerModel = ViewModelProviders.of(this).get(PlayerViewModelImpl::class.java).apply {
       mediaController.observe(this@MainActivity, Observer { controller ->
         // Set mediaController to the Activity
         MediaControllerCompat.setMediaController(this@MainActivity, controller)

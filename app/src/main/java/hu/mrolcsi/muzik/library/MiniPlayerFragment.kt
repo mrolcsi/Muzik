@@ -25,7 +25,7 @@ import hu.mrolcsi.muzik.common.OnSwipeTouchListener
 import hu.mrolcsi.muzik.common.glide.GlideApp
 import hu.mrolcsi.muzik.extensions.mediaControllerCompat
 import hu.mrolcsi.muzik.extensions.startMarquee
-import hu.mrolcsi.muzik.player.PlayerViewModel
+import hu.mrolcsi.muzik.player.PlayerViewModelImpl
 import hu.mrolcsi.muzik.service.extensions.media.albumArtUri
 import hu.mrolcsi.muzik.service.extensions.media.artist
 import hu.mrolcsi.muzik.service.extensions.media.duration
@@ -42,7 +42,7 @@ import kotlinx.android.synthetic.main.fragment_miniplayer.*
 
 class MiniPlayerFragment : Fragment() {
 
-  private lateinit var mPlayerModel: PlayerViewModel
+  private lateinit var mPlayerModel: PlayerViewModelImpl
 
   // Prepare drawables (separate for each button)
   private val mPreviousBackground by lazy {
@@ -68,7 +68,7 @@ class MiniPlayerFragment : Fragment() {
     super.onActivityCreated(savedInstanceState)
 
     activity?.run {
-      mPlayerModel = ViewModelProviders.of(this).get(PlayerViewModel::class.java).apply {
+      mPlayerModel = ViewModelProviders.of(this).get(PlayerViewModelImpl::class.java).apply {
 
         mediaController.observe(viewLifecycleOwner, Observer { controller ->
           controller?.let { setupControls(controller) }

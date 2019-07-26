@@ -65,7 +65,7 @@ import kotlinx.android.synthetic.main.fragment_player.*
 
 class PlayerFragment : Fragment() {
 
-  private lateinit var mPlayerModel: PlayerViewModel
+  private lateinit var mPlayerModel: PlayerViewModelImpl
 
   private var mUserIsSeeking = false
 
@@ -216,7 +216,7 @@ class PlayerFragment : Fragment() {
     super.onActivityCreated(savedInstanceState)
 
     activity?.run {
-      mPlayerModel = ViewModelProviders.of(this).get(PlayerViewModel::class.java).apply {
+      mPlayerModel = ViewModelProviders.of(this).get(PlayerViewModelImpl::class.java).apply {
         Log.d(LOG_TAG, "Got PlayerViewModel: $this")
 
         mediaController.observe(viewLifecycleOwner, Observer { controller ->

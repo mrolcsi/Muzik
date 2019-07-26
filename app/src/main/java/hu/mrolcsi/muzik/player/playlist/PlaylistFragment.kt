@@ -21,7 +21,7 @@ import hu.mrolcsi.muzik.database.playqueue.PlayQueueDatabase
 import hu.mrolcsi.muzik.extensions.OnItemClickListener
 import hu.mrolcsi.muzik.extensions.applyForegroundColor
 import hu.mrolcsi.muzik.extensions.mediaControllerCompat
-import hu.mrolcsi.muzik.player.PlayerViewModel
+import hu.mrolcsi.muzik.player.PlayerViewModelImpl
 import hu.mrolcsi.muzik.service.extensions.media.isPlaying
 import hu.mrolcsi.muzik.service.theme.Theme
 import hu.mrolcsi.muzik.service.theme.ThemeManager
@@ -29,7 +29,7 @@ import kotlinx.android.synthetic.main.fragment_playlist.*
 
 class PlaylistFragment : Fragment() {
 
-  private lateinit var mPlayerModel: PlayerViewModel
+  private lateinit var mPlayerModel: PlayerViewModelImpl
 
   private val mPlaylistAdapter =
     PlaylistAdapter(OnItemClickListener { _, _, _, id ->
@@ -49,7 +49,7 @@ class PlaylistFragment : Fragment() {
     super.onActivityCreated(savedInstanceState)
 
     activity?.run {
-      mPlayerModel = ViewModelProviders.of(this).get(PlayerViewModel::class.java).apply {
+      mPlayerModel = ViewModelProviders.of(this).get(PlayerViewModelImpl::class.java).apply {
         Log.d(LOG_TAG, "Got PlayerViewModel: $this")
 
 

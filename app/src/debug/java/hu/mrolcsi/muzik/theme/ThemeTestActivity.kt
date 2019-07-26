@@ -7,14 +7,13 @@ import android.support.v4.media.session.MediaControllerCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import dagger.android.support.DaggerAppCompatActivity
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.player.PlayerViewModel
 import hu.mrolcsi.muzik.service.extensions.media.albumArt
@@ -23,10 +22,11 @@ import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.debug.activity_theme_test.*
 import kotlinx.android.synthetic.debug.list_item_swatch.*
 import top.defaults.checkerboarddrawable.CheckerboardDrawable
+import javax.inject.Inject
 
-class ThemeTestActivity : AppCompatActivity() {
+class ThemeTestActivity : DaggerAppCompatActivity() {
 
-  private lateinit var mModel: PlayerViewModel
+  @Inject lateinit var viewModel: PlayerViewModel
 
   // Adapters
   private val mAllColorsAdapter = PaletteAdapter()
@@ -37,7 +37,7 @@ class ThemeTestActivity : AppCompatActivity() {
 
     root.background = CheckerboardDrawable.create()
 
-    mModel = ViewModelProviders.of(this).get(PlayerViewModel::class.java).apply {
+    viewModel.apply {
       mediaController.observe(this@ThemeTestActivity, Observer {
         MediaControllerCompat.setMediaController(this@ThemeTestActivity, it)
 
@@ -97,13 +97,13 @@ class ThemeTestActivity : AppCompatActivity() {
   override fun onStart() {
     super.onStart()
 
-    mModel.connect()
+    viewModel.connect()
   }
 
   override fun onStop() {
     super.onStop()
 
-    mModel.disconnect()
+    viewModel.disconnect()
   }
 
   private class PaletteAdapter : ListAdapter<Palette.Swatch?, PaletteAdapter.SwatchHolder>(

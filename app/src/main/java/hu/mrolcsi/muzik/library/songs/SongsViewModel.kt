@@ -10,7 +10,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.extensions.switchMap
-import hu.mrolcsi.muzik.library.SessionViewModel
+import hu.mrolcsi.muzik.library.SessionViewModelBase
 import hu.mrolcsi.muzik.library.SortingMode
 import hu.mrolcsi.muzik.service.MuzikBrowserService
 import hu.mrolcsi.muzik.service.extensions.media.MediaType
@@ -18,7 +18,7 @@ import hu.mrolcsi.muzik.service.extensions.media.artistKey
 import hu.mrolcsi.muzik.service.extensions.media.dateAdded
 import hu.mrolcsi.muzik.service.extensions.media.titleKey
 
-class SongsViewModel(app: Application) : SessionViewModel(app) {
+class SongsViewModel(app: Application) : SessionViewModelBase(app) {
 
   private val mShuffleItem = MediaBrowserCompat.MediaItem(
     MediaDescriptionCompat.Builder()

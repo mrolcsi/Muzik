@@ -7,13 +7,13 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import hu.mrolcsi.muzik.extensions.switchMap
-import hu.mrolcsi.muzik.library.SessionViewModel
+import hu.mrolcsi.muzik.library.SessionViewModelBase
 import hu.mrolcsi.muzik.library.SortingMode
 import hu.mrolcsi.muzik.service.MuzikBrowserService
 import hu.mrolcsi.muzik.service.extensions.media.albumKey
 import hu.mrolcsi.muzik.service.extensions.media.artistKey
 
-class AlbumsViewModel(app: Application) : SessionViewModel(app) {
+class AlbumsViewModel(app: Application) : SessionViewModelBase(app) {
 
   private val mSubscriptionCallbacks = object : MediaBrowserCompat.SubscriptionCallback() {
     override fun onChildrenLoaded(parentId: String, children: MutableList<MediaBrowserCompat.MediaItem>) {
