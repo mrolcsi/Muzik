@@ -15,16 +15,17 @@ import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.ViewCompat
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.FragmentNavigatorExtras
+import dagger.android.support.DaggerFragment
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.OnSwipeTouchListener
 import hu.mrolcsi.muzik.common.glide.GlideApp
 import hu.mrolcsi.muzik.extensions.mediaControllerCompat
 import hu.mrolcsi.muzik.extensions.startMarquee
+import hu.mrolcsi.muzik.player.PlayerViewModel
 import hu.mrolcsi.muzik.player.PlayerViewModelImpl
 import hu.mrolcsi.muzik.service.extensions.media.albumArtUri
 import hu.mrolcsi.muzik.service.extensions.media.artist
@@ -39,10 +40,11 @@ import hu.mrolcsi.muzik.service.extensions.media.title
 import hu.mrolcsi.muzik.service.theme.Theme
 import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.synthetic.main.fragment_miniplayer.*
+import javax.inject.Inject
 
-class MiniPlayerFragment : Fragment() {
+class MiniPlayerFragment : DaggerFragment() {
 
-  private lateinit var mPlayerModel: PlayerViewModelImpl
+  @Inject lateinit var mPlayerModel: PlayerViewModel
 
   // Prepare drawables (separate for each button)
   private val mPreviousBackground by lazy {

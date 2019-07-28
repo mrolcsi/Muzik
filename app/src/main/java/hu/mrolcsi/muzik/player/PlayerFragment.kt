@@ -27,15 +27,14 @@ import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.doOnNextLayout
 import androidx.core.view.postDelayed
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.Transition
 import androidx.transition.TransitionInflater
 import androidx.transition.TransitionListenerAdapter
+import dagger.android.support.DaggerFragment
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.OnRepeatTouchListener
 import hu.mrolcsi.muzik.common.glide.GlideApp
@@ -62,10 +61,12 @@ import hu.mrolcsi.muzik.service.theme.Theme
 import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.synthetic.main.content_player.*
 import kotlinx.android.synthetic.main.fragment_player.*
+import javax.inject.Inject
+import kotlin.math.abs
 
-class PlayerFragment : Fragment() {
+class PlayerFragment : DaggerFragment() {
 
-  private lateinit var mPlayerModel: PlayerViewModelImpl
+  @Inject lateinit var viewModel: PlayerViewModel
 
   private var mUserIsSeeking = false
 
@@ -114,8 +115,8 @@ class PlayerFragment : Fragment() {
       override fun onFling(e1: MotionEvent, e2: MotionEvent, velocityX: Float, velocityY: Float): Boolean {
         val diffY = e2.y - e1.y
         val diffX = e2.x - e1.x
-        if (Math.abs(diffX) < Math.abs(diffY)) {
-          if (Math.abs(diffY) > SWIPE_THRESHOLD && Math.abs(velocityY) > SWIPE_VELOCITY_THRESHOLD) {
+        if (abs(diffX) < abs(diffY)) {
+          if (abs(diffY) > SWIPE_THRESHOLD && abs(velocityY) > SWIPE_VELOCITY_THRESHOLD) {
             if (diffY > 0) {
               // onSwipeDown
               activity?.onBackPressed()
@@ -216,7 +217,7 @@ class PlayerFragment : Fragment() {
     super.onActivityCreated(savedInstanceState)
 
     activity?.run {
-      mPlayerModel = ViewModelProviders.of(this).get(PlayerViewModelImpl::class.java).apply {
+      viewModel.apply {
         Log.d(LOG_TAG, "Got PlayerViewModel: $this")
 
         mediaController.observe(viewLifecycleOwner, Observer { controller ->
@@ -263,7 +264,7 @@ class PlayerFragment : Fragment() {
                 ?.playbackState?.activeQueueItemId ?: -1
               val activePosition = mQueueAdapter.getItemPositionById(activeId/*, visiblePosition*/)
 
-              if (Math.abs(visiblePosition - activePosition) > 1) {
+              if (abs(visiblePosition - activePosition) > 1) {
                 applyThemeAnimated(it)
               } else {
                 applyThemeStatic(it)
@@ -629,7 +630,7 @@ class PlayerFragment : Fragment() {
 
     if (mScrollState == RecyclerView.SCROLL_STATE_IDLE) {
       if (queuePosition > RecyclerView.NO_POSITION && visibleId != queueId) {
-        if (Math.abs(queuePosition - visiblePosition) > 1) {
+        if (abs(queuePosition - visiblePosition) > 1) {
           rvQueue.scrollToPosition(queuePosition)
         } else {
           rvQueue.smoothScrollToPosition(queuePosition)

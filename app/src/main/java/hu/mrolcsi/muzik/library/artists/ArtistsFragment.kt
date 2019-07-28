@@ -5,21 +5,21 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import dagger.android.support.DaggerFragment
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.ColoredDividerItemDecoration
 import hu.mrolcsi.muzik.common.fastscroller.AutoHidingFastScrollerTouchListener
 import hu.mrolcsi.muzik.extensions.applyForegroundColor
 import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.synthetic.main.fragment_artists.*
+import javax.inject.Inject
 
-class ArtistsFragment : Fragment() {
+class ArtistsFragment : DaggerFragment() {
 
-  private lateinit var mModel: ArtistsViewModel
+  @Inject lateinit var viewModel: ArtistsViewModel
 
-  private val mArtistAdapter by lazy { ArtistsAdapter(requireContext()) }
+  private val artistAdapter by lazy { ArtistsAdapter(requireContext()) }
 
   private val mDivider by lazy {
     ColoredDividerItemDecoration(requireContext(), LinearLayout.VERTICAL)
@@ -28,17 +28,15 @@ class ArtistsFragment : Fragment() {
   override fun onActivityCreated(savedInstanceState: Bundle?) {
     super.onActivityCreated(savedInstanceState)
 
-    activity?.run {
-      mModel = ViewModelProviders.of(this).get(ArtistsViewModel::class.java).apply {
-        artists.observe(viewLifecycleOwner, Observer { artists ->
-          mArtistAdapter.submitList(artists)
-        })
-      }
+    viewModel.apply {
+      artists.observe(viewLifecycleOwner, Observer { artists ->
+        artistAdapter.submitList(artists)
+      })
     }
 
     ThemeManager.getInstance(requireContext()).currentTheme.observe(viewLifecycleOwner, Observer {
       // Tell adapter to reload its views
-      mArtistAdapter.notifyDataSetChanged()
+      artistAdapter.notifyDataSetChanged()
 
       mDivider.setTint(it.secondaryForegroundColor)
 
@@ -55,7 +53,7 @@ class ArtistsFragment : Fragment() {
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     rvArtists.apply {
-      adapter = mArtistAdapter
+      adapter = artistAdapter
       addItemDecoration(mDivider)
 
       fastScroller.setRecyclerView(this)
@@ -65,15 +63,5 @@ class ArtistsFragment : Fragment() {
 
       fastScroller.sectionIndicator = sectionIndicator
     }
-  }
-
-  override fun onStart() {
-    super.onStart()
-    mModel.connect()
-  }
-
-  override fun onStop() {
-    super.onStop()
-    mModel.disconnect()
   }
 }

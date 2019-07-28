@@ -7,13 +7,30 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import hu.mrolcsi.muzik.media.MediaRepository
+import hu.mrolcsi.muzik.media.MediaRepositoryImpl
+import hu.mrolcsi.muzik.media.MediaService
+import hu.mrolcsi.muzik.media.MediaServiceImpl
 import javax.inject.Provider
 import javax.inject.Singleton
 
-@Module
+@Module(includes = [AppModule.DelegateBindings::class])
 class AppModule(private val app: Application) {
+
+  @Module
+  interface DelegateBindings {
+
+    @Binds
+    @Singleton
+    fun provideMediaService(delegate: MediaServiceImpl): MediaService
+
+    @Binds
+    @Singleton
+    fun provideMediaRepository(delegate: MediaRepositoryImpl): MediaRepository
+  }
 
   @Provides
   @Singleton

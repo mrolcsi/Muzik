@@ -11,6 +11,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import hu.mrolcsi.muzik.service.MuzikPlayerService
 
+@Deprecated("Use MediaService and MediaRepository")
 abstract class SessionViewModelBase constructor(
   app: Application
 ) : AndroidViewModel(app), SessionViewModel {
