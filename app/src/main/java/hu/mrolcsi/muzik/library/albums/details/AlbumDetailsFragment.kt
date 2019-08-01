@@ -20,10 +20,11 @@ import androidx.navigation.fragment.navArgs
 import androidx.transition.TransitionInflater
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.ColoredDividerItemDecoration
+import hu.mrolcsi.muzik.common.MediaItemListAdapter
 import hu.mrolcsi.muzik.common.glide.GlideApp
 import hu.mrolcsi.muzik.common.glide.MuzikGlideModule
-import hu.mrolcsi.muzik.extensions.OnItemClickListener
 import hu.mrolcsi.muzik.extensions.observeOnce
+import hu.mrolcsi.muzik.library.songs.SongHolder
 import hu.mrolcsi.muzik.service.extensions.media.MediaType
 import hu.mrolcsi.muzik.service.extensions.media.addQueueItems
 import hu.mrolcsi.muzik.service.extensions.media.album
@@ -44,32 +45,39 @@ class AlbumDetailsFragment : Fragment() {
 
   private val args: AlbumDetailsFragmentArgs by navArgs()
 
-  private lateinit var mModel: AlbumDetailsViewModel
+  private lateinit var viewModel: AlbumDetailsViewModel
 
   private val mSongsAdapter by lazy {
-    AlbumSongsAdapter(requireContext(), OnItemClickListener { item, holder, position, id ->
-      Log.d(LOG_TAG, "onItemClicked($item, $holder, $position, $id)")
+    MediaItemListAdapter(requireContext()) { parent, _ ->
+      SongHolder(
+        LayoutInflater
+          .from(parent.context)
+          .inflate(R.layout.list_item_song, parent, false),
+        true
+      ).apply {
+        itemView.setOnClickListener {
+          model?.let {
+            val controller = MediaControllerCompat.getMediaController(requireActivity())
 
-      val controller = MediaControllerCompat.getMediaController(requireActivity())
+            viewModel.albumItem.description.album?.let { controller.setQueueTitle(it) }
 
-      mModel.albumItem.description.album?.let { controller.setQueueTitle(it) }
-
-      if (item.description.type == MediaType.MEDIA_OTHER) {
-        // Shuffle All
-        mModel.songDescriptions.observeOnce(viewLifecycleOwner, Observer { descriptions ->
-          controller.clearQueue()
-          controller.transportControls.setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_ALL)
-          controller.addQueueItems(descriptions)
-          controller.transportControls.play()
-        })
-      } else {
-        mModel.songsFromAlbum.value?.let { items ->
-          controller.transportControls.setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_NONE)
-          controller.playFromMediaItems(items, position)
+            if (model?.description?.type == MediaType.MEDIA_OTHER) {
+              // Shuffle All
+              viewModel.songDescriptions.observeOnce(viewLifecycleOwner, Observer { descriptions ->
+                controller.clearQueue()
+                controller.transportControls.setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_ALL)
+                controller.addQueueItems(descriptions)
+                controller.transportControls.play()
+              })
+            } else {
+              viewModel.songsFromAlbum.value?.let { items ->
+                controller.transportControls.setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_NONE)
+                controller.playFromMediaItems(items, adapterPosition)
+              }
+            }
+          }
         }
       }
-    }).apply {
-      showTrackNumber = true
     }
   }
 
@@ -131,7 +139,7 @@ class AlbumDetailsFragment : Fragment() {
     super.onActivityCreated(savedInstanceState)
 
     activity?.let { activity ->
-      mModel = ViewModelProviders.of(this, AlbumDetailsViewModel.Factory(activity.application, args.albumItem))
+      viewModel = ViewModelProviders.of(this, AlbumDetailsViewModel.Factory(activity.application, args.albumItem))
         .get(AlbumDetailsViewModel::class.java)
         .apply {
 
@@ -158,12 +166,12 @@ class AlbumDetailsFragment : Fragment() {
 
   override fun onStart() {
     super.onStart()
-    mModel.connect()
+    viewModel.connect()
   }
 
   override fun onStop() {
     super.onStop()
-    mModel.disconnect()
+    viewModel.disconnect()
   }
 
   private fun loadHeader(albumItem: MediaBrowserCompat.MediaItem) {
@@ -258,8 +266,6 @@ class AlbumDetailsFragment : Fragment() {
       }
       start()
     }
-
-    mSongsAdapter.theme = theme
   }
 
   companion object {

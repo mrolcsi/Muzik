@@ -1,10 +1,6 @@
 package hu.mrolcsi.muzik.library.artists
 
 import android.support.v4.media.MediaBrowserCompat
-import androidx.lifecycle.LiveData
+import hu.mrolcsi.muzik.common.viewmodel.ListViewModel
 
-interface ArtistsViewModel {
-
-  val artists: LiveData<List<MediaBrowserCompat.MediaItem>>
-
-}
+interface ArtistsViewModel : ListViewModel<MediaBrowserCompat.MediaItem>

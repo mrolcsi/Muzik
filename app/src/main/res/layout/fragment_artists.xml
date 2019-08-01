@@ -1,30 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-  xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:app="http://schemas.android.com/apk/res-auto"
   xmlns:tools="http://schemas.android.com/tools"
-  android:layout_width="match_parent"
-  android:layout_height="match_parent">
+  android:layout_width="0dp"
+  android:layout_height="0dp">
 
-  <androidx.recyclerview.widget.RecyclerView
-    android:id="@+id/rvArtists"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+  <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+    android:id="@+id/swipeRefreshLayout"
+    android:layout_width="0dp"
+    android:layout_height="0dp"
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="parent"
-    tools:listitem="@layout/list_item_artist"/>
+    app:layout_constraintTop_toTopOf="parent">
+
+    <androidx.recyclerview.widget.RecyclerView
+      android:id="@+id/rvArtists"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+      tools:listitem="@layout/list_item_artist" />
+  </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
   <xyz.danoz.recyclerviewfastscroller.vertical.VerticalRecyclerViewFastScroller
     android:id="@+id/fastScroller"
     android:layout_width="@dimen/fast_scroller_width"
     android:layout_height="0dp"
-    app:layout_constraintBottom_toBottomOf="@+id/rvArtists"
-    app:layout_constraintEnd_toEndOf="@id/rvArtists"
-    app:layout_constraintTop_toTopOf="@id/rvArtists"
-    app:rfs_handleBackground="@drawable/fast_scroller_handle_rounded"/>
+    app:layout_constraintBottom_toBottomOf="@+id/swipeRefreshLayout"
+    app:layout_constraintEnd_toEndOf="@id/swipeRefreshLayout"
+    app:layout_constraintTop_toTopOf="@id/swipeRefreshLayout"
+    app:rfs_handleBackground="@drawable/fast_scroller_handle_rounded" />
 
   <hu.mrolcsi.muzik.common.fastscroller.SimpleSectionIndicator
     android:id="@+id/sectionIndicator"
@@ -33,6 +38,6 @@
     app:layout_constraintEnd_toStartOf="@+id/fastScroller"
     app:layout_constraintTop_toTopOf="@id/fastScroller"
     app:rfs_backgroundColor="@android:color/white"
-    app:rfs_textColor="@android:color/black"/>
+    app:rfs_textColor="@android:color/black" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

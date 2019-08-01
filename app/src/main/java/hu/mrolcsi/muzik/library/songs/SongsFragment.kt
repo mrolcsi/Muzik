@@ -4,7 +4,6 @@ import android.graphics.Color
 import android.os.Bundle
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -18,9 +17,9 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.ColoredDividerItemDecoration
+import hu.mrolcsi.muzik.common.MediaItemListAdapter
 import hu.mrolcsi.muzik.common.fastscroller.AutoHidingFastScrollerTouchListener
 import hu.mrolcsi.muzik.common.fastscroller.SimpleSectionIndicator
-import hu.mrolcsi.muzik.extensions.OnItemClickListener
 import hu.mrolcsi.muzik.extensions.applyForegroundColor
 import hu.mrolcsi.muzik.extensions.observeOnce
 import hu.mrolcsi.muzik.library.SortingMode
@@ -35,38 +34,47 @@ import kotlinx.android.synthetic.main.fragment_songs.*
 
 class SongsFragment : Fragment() {
 
-  private lateinit var mModel: SongsViewModel
+  private lateinit var viewModel: SongsViewModel
 
-  private val mDivider by lazy {
+  private val divider by lazy {
     ColoredDividerItemDecoration(requireContext(), LinearLayout.VERTICAL).apply {
       setDrawable(resources.getDrawable(R.drawable.list_divider_inset, requireContext().theme))
     }
   }
 
-  private val mSongsAdapter by lazy {
-    SongsAdapter(requireContext(), OnItemClickListener { item, holder, position, id ->
-      Log.d(LOG_TAG, "onItemClicked($item, $holder, $position, $id)")
+  private val songsAdapter by lazy {
+    MediaItemListAdapter(requireContext()) { parent, _ ->
+      SongHolder(
+        LayoutInflater
+          .from(parent.context)
+          .inflate(R.layout.list_item_song, parent, false),
+        false
+      ).apply {
+        itemView.setOnClickListener {
+          model?.let {
+            val controller = MediaControllerCompat.getMediaController(requireActivity())
 
-      val controller = MediaControllerCompat.getMediaController(requireActivity())
+            controller.setQueueTitle(getString(R.string.playlist_allSongs))
 
-      controller.setQueueTitle(getString(R.string.playlist_allSongs))
-
-      if (item.description.type == MediaType.MEDIA_OTHER) {
-        // Shuffle All
-        mModel.songDescriptions.observeOnce(viewLifecycleOwner, Observer { descriptions ->
-          controller.clearQueue()
-          controller.transportControls.setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_ALL)
-          controller.addQueueItems(descriptions)
-          controller.transportControls.play()
-        })
-      } else {
-        // Immediately start the song that was clicked on
-        mModel.songs.observeOnce(viewLifecycleOwner, Observer { items ->
-          controller.playFromMediaItems(items, position)
-          controller.transportControls.setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_NONE)
-        })
+            if (it.description.type == MediaType.MEDIA_OTHER) {
+              // Shuffle All
+              viewModel.songDescriptions.observeOnce(viewLifecycleOwner, Observer { descriptions ->
+                controller.clearQueue()
+                controller.transportControls.setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_ALL)
+                controller.addQueueItems(descriptions)
+                controller.transportControls.play()
+              })
+            } else {
+              // Immediately start the song that was clicked on
+              viewModel.songs.observeOnce(viewLifecycleOwner, Observer { items ->
+                controller.playFromMediaItems(items, adapterPosition)
+                controller.transportControls.setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_NONE)
+              })
+            }
+          }
+        }
       }
-    })
+    }
   }
 
   override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -75,14 +83,14 @@ class SongsFragment : Fragment() {
     setHasOptionsMenu(true)
 
     activity?.run {
-      mModel = ViewModelProviders.of(this).get(SongsViewModel::class.java).apply {
+      viewModel = ViewModelProviders.of(this).get(SongsViewModel::class.java).apply {
         songs.observe(viewLifecycleOwner, Observer { songs ->
-          mSongsAdapter.submitList(songs)
+          songsAdapter.submitList(songs)
           //mVisibleItems = songs
         })
         sorting.observe(viewLifecycleOwner, Observer {
           // Update adapter
-          mSongsAdapter.sorting = it
+          songsAdapter.sorting = it
 
           if (it == SortingMode.SORT_BY_DATE) {
             sectionIndicator.setIndicatorTextSize(18)
@@ -95,10 +103,10 @@ class SongsFragment : Fragment() {
 
     ThemeManager.getInstance(requireContext()).currentTheme.observe(viewLifecycleOwner, Observer {
       // Tell adapter to reload its views
-      mSongsAdapter.notifyDataSetChanged()
+      songsAdapter.notifyDataSetChanged()
 
       // Apply colors to dividers
-      mDivider.setTint(it.secondaryForegroundColor)
+      divider.setTint(it.secondaryForegroundColor)
 
       // Apply colors to FastScroller
       fastScroller.applyForegroundColor(requireContext(), it.secondaryForegroundColor)
@@ -115,8 +123,8 @@ class SongsFragment : Fragment() {
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     rvSongs.apply {
-      adapter = mSongsAdapter
-      addItemDecoration(mDivider)
+      adapter = songsAdapter
+      addItemDecoration(divider)
 
       fastScroller.setRecyclerView(this)
       fastScroller.setOnTouchListener(AutoHidingFastScrollerTouchListener(fastScroller).also {
@@ -141,7 +149,7 @@ class SongsFragment : Fragment() {
   override fun onPrepareOptionsMenu(menu: Menu) {
     super.onPrepareOptionsMenu(menu)
 
-    when (mModel.sorting.value) {
+    when (viewModel.sorting.value) {
       SortingMode.SORT_BY_ARTIST -> menu.findItem(R.id.menuSortByArtist).isChecked = true
       SortingMode.SORT_BY_TITLE -> menu.findItem(R.id.menuSortByTitle).isChecked = true
       SortingMode.SORT_BY_DATE -> menu.findItem(R.id.menuSortByDate).isChecked = true
@@ -155,15 +163,15 @@ class SongsFragment : Fragment() {
     item.isChecked = true
     return when (item.itemId) {
       R.id.menuSortByArtist -> {
-        mModel.sorting.value = SortingMode.SORT_BY_ARTIST
+        viewModel.sorting.value = SortingMode.SORT_BY_ARTIST
         true
       }
       R.id.menuSortByTitle -> {
-        mModel.sorting.value = SortingMode.SORT_BY_TITLE
+        viewModel.sorting.value = SortingMode.SORT_BY_TITLE
         true
       }
       R.id.menuSortByDate -> {
-        mModel.sorting.value = SortingMode.SORT_BY_DATE
+        viewModel.sorting.value = SortingMode.SORT_BY_DATE
         true
       }
       else -> super.onOptionsItemSelected(item)
@@ -172,15 +180,11 @@ class SongsFragment : Fragment() {
 
   override fun onStart() {
     super.onStart()
-    mModel.connect()
+    viewModel.connect()
   }
 
   override fun onStop() {
     super.onStop()
-    mModel.disconnect()
-  }
-
-  companion object {
-    private const val LOG_TAG = "SongsFragment"
+    viewModel.disconnect()
   }
 }

@@ -13,7 +13,7 @@ import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.muzik.R
-import hu.mrolcsi.muzik.common.DiffCallbackRepository
+import hu.mrolcsi.muzik.common.DiffCallbacks
 import hu.mrolcsi.muzik.common.glide.GlideApp
 import hu.mrolcsi.muzik.common.glide.MuzikGlideModule
 import hu.mrolcsi.muzik.extensions.startMarquee
@@ -26,7 +26,7 @@ import kotlinx.android.synthetic.main.list_item_queue.*
 import java.util.concurrent.Executors
 
 class QueueAdapter : ListAdapter<MediaSessionCompat.QueueItem, QueueAdapter.QueueItemHolder>(
-  DiffCallbackRepository.queueItemCallback
+  DiffCallbacks.queueItemCallback
 ) {
 
   private val mBackgroundExecutor = Executors.newSingleThreadExecutor()

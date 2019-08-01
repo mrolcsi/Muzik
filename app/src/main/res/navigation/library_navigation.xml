@@ -1,55 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
-<navigation
-  xmlns:android="http://schemas.android.com/apk/res/android"
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:app="http://schemas.android.com/apk/res-auto"
   xmlns:tools="http://schemas.android.com/tools"
   android:id="@+id/library_navigation"
   android:label="Album Details"
   app:startDestination="@id/navigation_pager">
 
-  <fragment android:id="@+id/navigation_pager"
-    android:label="@string/library_title"
+  <fragment
+    android:id="@+id/navigation_pager"
     android:name="hu.mrolcsi.muzik.library.pager.LibraryPagerFragment"
+    android:label="@string/library_title"
     tools:layout="@layout/fragment_library_pager" />
 
-  <fragment android:id="@+id/navigation_artists"
-    android:label="@string/artists_title"
+  <fragment
+    android:id="@+id/navigation_artists"
     android:name="hu.mrolcsi.muzik.library.artists.ArtistsFragment"
+    android:label="@string/artists_title"
     tools:layout="@layout/fragment_artists">
 
+    <action
+      android:id="@+id/action_artists_toArtistDetails"
+      app:destination="@id/navigation_artistDetails"
+      app:enterAnim="@anim/slide_out_left"
+      app:exitAnim="@anim/slide_out_left"
+      app:popEnterAnim="@anim/slide_in_left"
+      app:popExitAnim="@anim/slide_out_right" />
   </fragment>
 
   <fragment
     android:id="@+id/navigation_artistDetails"
-    android:label="@string/artistDetails_title"
     android:name="hu.mrolcsi.muzik.library.artists.details.ArtistDetailsFragment"
+    android:label="@string/artistDetails_title"
     tools:layout="@layout/fragment_artist_details">
 
-    <argument android:name="artistItem"
-      app:argType="android.support.v4.media.MediaBrowserCompat$MediaItem"/>
+    <argument
+      android:name="artistItem"
+      app:argType="android.support.v4.media.MediaBrowserCompat$MediaItem" />
+
+    <action
+      android:id="@+id/action_artistDetails_toAlbumDetails"
+      app:destination="@id/navigation_albumDetails"
+      app:enterAnim="@anim/slide_out_left"
+      app:exitAnim="@anim/slide_out_left"
+      app:popEnterAnim="@anim/slide_in_left"
+      app:popExitAnim="@anim/slide_out_right" />
 
   </fragment>
 
-  <fragment android:id="@+id/navigation_albums"
-    android:label="@string/albums_title"
+  <fragment
+    android:id="@+id/navigation_albums"
     android:name="hu.mrolcsi.muzik.library.albums.AlbumsFragment"
+    android:label="@string/albums_title"
     tools:layout="@layout/fragment_albums">
 
+    <action
+      android:id="@+id/action_albums_toAlbumDetails"
+      app:destination="@id/navigation_albumDetails"
+      app:enterAnim="@anim/slide_out_left"
+      app:exitAnim="@anim/slide_out_left"
+      app:popEnterAnim="@anim/slide_in_left"
+      app:popExitAnim="@anim/slide_out_right" />
+
   </fragment>
 
-  <fragment android:id="@+id/navigation_albumDetails"
-    android:label="@string/albumDetails_title"
+  <fragment
+    android:id="@+id/navigation_albumDetails"
     android:name="hu.mrolcsi.muzik.library.albums.details.AlbumDetailsFragment"
+    android:label="@string/albumDetails_title"
     tools:layout="@layout/fragment_album_details">
 
-    <argument android:name="albumItem"
-      app:argType="android.support.v4.media.MediaBrowserCompat$MediaItem"/>
+    <argument
+      android:name="albumItem"
+      app:argType="android.support.v4.media.MediaBrowserCompat$MediaItem" />
 
   </fragment>
 
-  <fragment android:id="@+id/navigation_songs"
-    android:label="@string/songs_title"
+  <fragment
+    android:id="@+id/navigation_songs"
     android:name="hu.mrolcsi.muzik.library.songs.SongsFragment"
+    android:label="@string/songs_title"
     tools:layout="@layout/fragment_songs">
 
   </fragment>

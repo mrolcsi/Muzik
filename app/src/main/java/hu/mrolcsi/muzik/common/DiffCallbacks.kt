@@ -7,7 +7,7 @@ import android.support.v4.media.session.MediaSessionCompat
 import androidx.recyclerview.widget.DiffUtil
 import hu.mrolcsi.muzik.database.playqueue.entities.PlayQueueEntry
 
-object DiffCallbackRepository {
+object DiffCallbacks {
 
   private fun Bundle.isEqualTo(that: Bundle): Boolean {
     if (this.size() != that.size())

@@ -6,11 +6,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.lifecycle.Observer
+import androidx.navigation.fragment.findNavController
 import dagger.android.support.DaggerFragment
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.ColoredDividerItemDecoration
+import hu.mrolcsi.muzik.common.MediaItemListAdapter
 import hu.mrolcsi.muzik.common.fastscroller.AutoHidingFastScrollerTouchListener
 import hu.mrolcsi.muzik.extensions.applyForegroundColor
+import hu.mrolcsi.muzik.library.artists.details.ArtistDetailsFragmentArgs
 import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.synthetic.main.fragment_artists.*
 import javax.inject.Inject
@@ -19,7 +22,24 @@ class ArtistsFragment : DaggerFragment() {
 
   @Inject lateinit var viewModel: ArtistsViewModel
 
-  private val artistAdapter by lazy { ArtistsAdapter(requireContext()) }
+  private val artistAdapter by lazy {
+    MediaItemListAdapter(requireContext()) { parent, _ ->
+      ArtistHolder(
+        LayoutInflater
+          .from(parent.context)
+          .inflate(R.layout.list_item_artist, parent, false)
+      ).apply {
+        itemView.setOnClickListener {
+          model?.let {
+            findNavController().navigate(
+              R.id.navigation_artistDetails,
+              ArtistDetailsFragmentArgs(it).toBundle()
+            )
+          }
+        }
+      }
+    }
+  }
 
   private val mDivider by lazy {
     ColoredDividerItemDecoration(requireContext(), LinearLayout.VERTICAL)
@@ -29,7 +49,7 @@ class ArtistsFragment : DaggerFragment() {
     super.onActivityCreated(savedInstanceState)
 
     viewModel.apply {
-      artists.observe(viewLifecycleOwner, Observer { artists ->
+      items.observe(viewLifecycleOwner, Observer { artists ->
         artistAdapter.submitList(artists)
       })
     }

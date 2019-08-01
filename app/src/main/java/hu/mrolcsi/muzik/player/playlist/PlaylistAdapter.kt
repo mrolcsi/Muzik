@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.muzik.R
-import hu.mrolcsi.muzik.common.DiffCallbackRepository
+import hu.mrolcsi.muzik.common.DiffCallbacks
 import hu.mrolcsi.muzik.common.glide.GlideApp
 import hu.mrolcsi.muzik.database.playqueue.entities.PlayQueueEntry
 import hu.mrolcsi.muzik.extensions.OnItemClickListener
@@ -22,7 +22,7 @@ import kotlin.properties.Delegates
 class PlaylistAdapter(
   private val onItemClickListener: OnItemClickListener<PlayQueueEntry, PlaylistViewHolder>
 ) : ListAdapter<PlayQueueEntry, PlaylistAdapter.PlaylistViewHolder>(
-  DiffCallbackRepository.playQueueEntryCallback
+  DiffCallbacks.playQueueEntryCallback
 ) {
 
   var activeQueueId by Delegates.observable(-1L) { _, old, new ->

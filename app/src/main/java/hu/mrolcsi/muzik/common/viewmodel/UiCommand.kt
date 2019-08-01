@@ -1,11 +1,14 @@
 package hu.mrolcsi.muzik.common.viewmodel
 
+import android.content.Context
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import javax.inject.Inject
 
-typealias UiCommand = FragmentActivity.() -> Unit
+typealias UiCommand = Context.() -> Unit
 
 fun once(command: UiCommand): UiCommand {
   var active = true
@@ -19,6 +22,8 @@ fun once(command: UiCommand): UiCommand {
 
 interface UiCommandSource {
   val uiCommand: LiveData<UiCommand>
+
+  fun sendUiCommand(command: UiCommand)
 }
 
 class ExecuteOnceUiCommandSource @Inject constructor() : UiCommandSource {
@@ -31,4 +36,14 @@ class ExecuteOnceUiCommandSource @Inject constructor() : UiCommandSource {
       super.setValue(once(value))
     }
   }
+
+  override fun sendUiCommand(command: UiCommand) {
+    uiCommand.value = command
+  }
 }
+
+fun Fragment.observeAndRunUiCommands(commands: LiveData<UiCommand>) =
+  commands.observe(viewLifecycleOwner, Observer { it?.invoke(requireContext()) })
+
+fun FragmentActivity.observeAndRunUiCommands(commands: LiveData<UiCommand>) =
+  commands.observe(this, Observer { it?.invoke(this) })

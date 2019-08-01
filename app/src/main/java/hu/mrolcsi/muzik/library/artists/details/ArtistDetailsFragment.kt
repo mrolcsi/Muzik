@@ -14,16 +14,15 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.navArgs
-import androidx.recyclerview.widget.RecyclerView
 import dagger.android.support.DaggerFragment
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.ColoredDividerItemDecoration
+import hu.mrolcsi.muzik.common.MediaItemListAdapter
 import hu.mrolcsi.muzik.common.glide.GlideApp
 import hu.mrolcsi.muzik.common.glide.MuzikGlideModule
-import hu.mrolcsi.muzik.extensions.OnItemClickListener
 import hu.mrolcsi.muzik.extensions.observeOnce
-import hu.mrolcsi.muzik.library.albums.AlbumsAdapter
-import hu.mrolcsi.muzik.library.songs.SongsAdapter
+import hu.mrolcsi.muzik.library.albums.AlbumHolder
+import hu.mrolcsi.muzik.library.songs.SongHolder
 import hu.mrolcsi.muzik.service.extensions.media.MediaType
 import hu.mrolcsi.muzik.service.extensions.media.addQueueItems
 import hu.mrolcsi.muzik.service.extensions.media.artist
@@ -44,32 +43,49 @@ class ArtistDetailsFragment : DaggerFragment() {
 
   @Inject lateinit var viewModel: ArtistDetailsViewModel
 
-  private val mAlbumsAdapter by lazy { AlbumsAdapter(requireContext(), RecyclerView.HORIZONTAL) }
-
-  private val mSongsAdapter by lazy {
-    SongsAdapter(requireContext(), OnItemClickListener { item, _, position, _ ->
-      val controller = MediaControllerCompat.getMediaController(requireActivity())
-
-      viewModel.artistItem?.description?.artist?.let { controller.setQueueTitle(it) }
-
-      if (item.description.type == MediaType.MEDIA_OTHER) {
-        // Shuffle All
-        viewModel.songDescriptions.observeOnce(viewLifecycleOwner, Observer { descriptions ->
-          controller.clearQueue()
-          controller.transportControls.setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_ALL)
-          controller.addQueueItems(descriptions)
-          controller.transportControls.play()
-        })
-      } else {
-        viewModel.artistSongs.value?.let { items ->
-          controller.transportControls.setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_NONE)
-          controller.playFromMediaItems(items, position)
-        }
+  private val albumsAdapter by lazy {
+    MediaItemListAdapter(requireContext()) { parent, _ ->
+      AlbumHolder(
+        LayoutInflater
+          .from(parent.context)
+          .inflate(R.layout.list_item_album_horizontal, parent, false)
+      ).apply {
+        // TODO: onClickListener()
       }
-    })
+    }
   }
 
-  private val mDivider by lazy {
+  private val mSongsAdapter by lazy {
+    MediaItemListAdapter(requireContext()) { parent, _ ->
+      SongHolder(
+        LayoutInflater
+          .from(parent.context)
+          .inflate(R.layout.list_item_album_horizontal, parent, false),
+        false
+      ).apply {
+        val controller = MediaControllerCompat.getMediaController(requireActivity())
+
+        viewModel.artistItem?.description?.artist?.let { controller.setQueueTitle(it) }
+
+        if (model?.description?.type == MediaType.MEDIA_OTHER) {
+          // Shuffle All
+          viewModel.songDescriptions.observeOnce(viewLifecycleOwner, Observer { descriptions ->
+            controller.clearQueue()
+            controller.transportControls.setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_ALL)
+            controller.addQueueItems(descriptions)
+            controller.transportControls.play()
+          })
+        } else {
+          viewModel.artistSongs.value?.let { items ->
+            controller.transportControls.setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_NONE)
+            controller.playFromMediaItems(items, adapterPosition)
+          }
+        }
+      }
+    }
+  }
+
+  private val divider by lazy {
     ColoredDividerItemDecoration(requireContext(), LinearLayout.VERTICAL).apply {
       setDrawable(resources.getDrawable(R.drawable.list_divider_inset, requireContext().theme))
     }
@@ -88,7 +104,7 @@ class ArtistDetailsFragment : DaggerFragment() {
         // Hide Albums section when list is empty
         albumsGroup?.visibility = if (it.isEmpty()) View.GONE else View.VISIBLE
 
-        mAlbumsAdapter.submitList(it)
+        albumsAdapter.submitList(it)
       })
       artistSongs.observe(viewLifecycleOwner, Observer(mSongsAdapter::submitList))
 
@@ -113,14 +129,14 @@ class ArtistDetailsFragment : DaggerFragment() {
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 
     rvAlbums.apply {
-      adapter = mAlbumsAdapter
+      adapter = albumsAdapter
       isNestedScrollingEnabled = false
     }
 
     rvSongs.apply {
       adapter = mSongsAdapter
       isNestedScrollingEnabled = true
-      addItemDecoration(mDivider)
+      addItemDecoration(divider)
     }
 
 
@@ -175,7 +191,7 @@ class ArtistDetailsFragment : DaggerFragment() {
   private fun applySecondaryForegroundColor(color: Int) {
     collapsingToolbar.setExpandedTitleColor(color)
 
-    mDivider.setTint(color)
+    divider.setTint(color)
 
     imgAlbums.drawable.setTint(color)
     lblAlbums.setTextColor(color)

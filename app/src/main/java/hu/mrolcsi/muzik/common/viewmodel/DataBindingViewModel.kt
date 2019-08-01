@@ -1,14 +1,10 @@
 package hu.mrolcsi.muzik.common.viewmodel
 
-import android.app.Activity
-import android.content.Intent
 import androidx.databinding.Observable
 import com.afollestad.materialdialogs.MaterialDialog
 import kotlin.properties.ObservableProperty
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
-
-fun containsNullOrBlank(vararg strings: String?) = strings.any { it.isNullOrBlank() }
 
 open class DataBindingViewModel(
   private val observable: ObservableImpl,
@@ -76,19 +72,7 @@ open class DataBindingViewModel(
 
   fun notifyPropertyChanged(fieldId: Int) = observable.notifyPropertyChanged(this, fieldId)
 
-  fun finishActivity() = setUiCommand { finish() }
-
-  fun startActivity(intent: Activity.() -> Intent) =
-    setUiCommand { startActivity(intent()) }
-
-  fun startActivityForResult(requestCode: Int, intent: Activity.() -> Intent) =
-    setUiCommand { startActivityForResult(intent(), requestCode) }
-
-  fun setUiCommand(command: UiCommand) {
-    uiCommandSource.uiCommand.value = command
-  }
-
-  open fun showError(throwable: Throwable) = setUiCommand {
+  open fun showError(throwable: Throwable) = sendUiCommand {
     MaterialDialog(this)
       .show {
         positiveButton(android.R.string.ok)

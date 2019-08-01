@@ -20,7 +20,7 @@
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent"
     app:spanCount="@integer/albumsColumnCount"
-    tools:listitem="@layout/list_item_album"/>
+    tools:listitem="@layout/list_item_album_vertical" />
 
   <xyz.danoz.recyclerviewfastscroller.vertical.VerticalRecyclerViewFastScroller
     android:id="@+id/fastScroller"

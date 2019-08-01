@@ -4,19 +4,23 @@ import android.content.Context
 import android.os.AsyncTask
 import android.support.v4.media.MediaBrowserCompat
 import android.widget.SectionIndexer
-import androidx.recyclerview.widget.ListAdapter
-import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.muzik.R
+import hu.mrolcsi.muzik.common.view.MVVMListAdapter
+import hu.mrolcsi.muzik.common.view.MVVMViewHolder
+import hu.mrolcsi.muzik.common.view.ViewHolderFactory
 import hu.mrolcsi.muzik.extensions.toKeyString
 import hu.mrolcsi.muzik.library.SortingMode
 import hu.mrolcsi.muzik.service.extensions.media.artist
 import hu.mrolcsi.muzik.service.extensions.media.dateAdded
 import java.util.*
 import java.util.concurrent.CopyOnWriteArraySet
+import kotlin.math.min
 import kotlin.properties.Delegates
 
-abstract class MediaItemListAdapter<VH : RecyclerView.ViewHolder>(private val context: Context) :
-  ListAdapter<MediaBrowserCompat.MediaItem, VH>(DiffCallbackRepository.mediaItemCallback),
+open class MediaItemListAdapter<VH : MVVMViewHolder<MediaBrowserCompat.MediaItem>>(
+  private val context: Context,
+  viewHolderFactory: ViewHolderFactory<VH>
+) : MVVMListAdapter<MediaBrowserCompat.MediaItem, VH>(DiffCallbacks.mediaItemCallback, viewHolderFactory),
   SectionIndexer {
 
   @SortingMode var sorting: Int by Delegates.observable(SortingMode.SORT_BY_TITLE) { _, old, new ->
@@ -39,7 +43,7 @@ abstract class MediaItemListAdapter<VH : RecyclerView.ViewHolder>(private val co
   override fun getSections(): Array<String> = sectionsCache.sorted().toTypedArray()
 
   override fun getSectionForPosition(position: Int): Int {
-    val item = getItem(Math.min(position, itemCount - 1))
+    val item = getItem(min(position, itemCount - 1))
     return sections.indexOf(getSectionForItem(item))
   }
 
@@ -52,7 +56,7 @@ abstract class MediaItemListAdapter<VH : RecyclerView.ViewHolder>(private val co
     return 0
   }
 
-  protected open fun getSectionForItem(
+  fun getSectionForItem(
     item: MediaBrowserCompat.MediaItem,
     @SortingMode sorting: Int = this.sorting
   ): String {

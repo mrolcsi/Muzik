@@ -16,20 +16,43 @@ import androidx.core.view.forEach
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import androidx.recyclerview.widget.RecyclerView
+import androidx.navigation.fragment.FragmentNavigatorExtras
+import androidx.navigation.fragment.findNavController
 import hu.mrolcsi.muzik.R
+import hu.mrolcsi.muzik.common.MediaItemListAdapter
 import hu.mrolcsi.muzik.common.fastscroller.AutoHidingFastScrollerTouchListener
 import hu.mrolcsi.muzik.extensions.applyForegroundColor
 import hu.mrolcsi.muzik.library.SortingMode
+import hu.mrolcsi.muzik.library.albums.details.AlbumDetailsFragmentArgs
 import hu.mrolcsi.muzik.service.theme.Theme
 import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.synthetic.main.fragment_albums.*
+import kotlinx.android.synthetic.main.list_item_album_content.view.*
 
 class AlbumsFragment : Fragment() {
 
-  private lateinit var mModel: AlbumsViewModel
+  private lateinit var viewModel: AlbumsViewModel
 
-  private val mAlbumsAdapter by lazy { AlbumsAdapter(requireContext(), RecyclerView.VERTICAL) }
+  private val albumsAdapter by lazy {
+    MediaItemListAdapter(requireContext()) { parent, _ ->
+      AlbumHolder(
+        LayoutInflater
+          .from(parent.context)
+          .inflate(R.layout.list_item_album_vertical, parent, false)
+      ).apply {
+        itemView.setOnClickListener { view ->
+          model?.let {
+            findNavController().navigate(
+              R.id.navigation_albumDetails,
+              AlbumDetailsFragmentArgs(it).toBundle(),
+              null,
+              FragmentNavigatorExtras(view.imgCoverArt to "coverArt")
+            )
+          }
+        }
+      }
+    }
+  }
 
   override fun onActivityCreated(savedInstanceState: Bundle?) {
     super.onActivityCreated(savedInstanceState)
@@ -39,16 +62,16 @@ class AlbumsFragment : Fragment() {
     postponeEnterTransition()
 
     activity?.run {
-      mModel = ViewModelProviders.of(this).get(AlbumsViewModel::class.java).apply {
+      viewModel = ViewModelProviders.of(this).get(AlbumsViewModel::class.java).apply {
         albums.observe(viewLifecycleOwner, Observer { albums ->
           Log.d(LOG_TAG, "Got items from LiveData: $albums")
 
-          mAlbumsAdapter.submitList(albums)
+          albumsAdapter.submitList(albums)
         })
 
         sorting.observe(viewLifecycleOwner, Observer {
           // Update adapter
-          mAlbumsAdapter.sorting = it
+          albumsAdapter.sorting = it
         })
       }
     }
@@ -64,7 +87,7 @@ class AlbumsFragment : Fragment() {
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     rvAlbums.run {
-      rvAlbums.adapter = mAlbumsAdapter
+      rvAlbums.adapter = albumsAdapter
 
       viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
         override fun onGlobalLayout() {
@@ -96,7 +119,7 @@ class AlbumsFragment : Fragment() {
   override fun onPrepareOptionsMenu(menu: Menu) {
     super.onPrepareOptionsMenu(menu)
 
-    when (mModel.sorting.value) {
+    when (viewModel.sorting.value) {
       SortingMode.SORT_BY_ARTIST -> menu.findItem(R.id.menuSortByArtist).isChecked = true
       SortingMode.SORT_BY_TITLE -> menu.findItem(R.id.menuSortByTitle).isChecked = true
       else -> {
@@ -109,11 +132,11 @@ class AlbumsFragment : Fragment() {
     item.isChecked = true
     return when (item.itemId) {
       R.id.menuSortByArtist -> {
-        mModel.sorting.value = SortingMode.SORT_BY_ARTIST
+        viewModel.sorting.value = SortingMode.SORT_BY_ARTIST
         true
       }
       R.id.menuSortByTitle -> {
-        mModel.sorting.value = SortingMode.SORT_BY_TITLE
+        viewModel.sorting.value = SortingMode.SORT_BY_TITLE
         true
       }
       else -> super.onOptionsItemSelected(item)
@@ -122,12 +145,12 @@ class AlbumsFragment : Fragment() {
 
   override fun onStart() {
     super.onStart()
-    mModel.connect()
+    viewModel.connect()
   }
 
   override fun onStop() {
     super.onStop()
-    mModel.disconnect()
+    viewModel.disconnect()
   }
 
   private fun applyThemeAnimated(theme: Theme) {
