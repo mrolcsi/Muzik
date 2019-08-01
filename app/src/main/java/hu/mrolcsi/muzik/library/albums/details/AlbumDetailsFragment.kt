@@ -43,7 +43,7 @@ import kotlinx.android.synthetic.main.fragment_album_details.*
 
 class AlbumDetailsFragment : Fragment() {
 
-  private val args: AlbumDetailsFragmentArgs by navArgs()
+  private val args by navArgs<AlbumDetailsFragmentArgs>()
 
   private lateinit var viewModel: AlbumDetailsViewModel
 

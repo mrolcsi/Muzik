@@ -28,6 +28,7 @@ class NetworkModule {
   @Singleton
   fun provideDiscogsService(builder: Retrofit.Builder): DiscogsService =
     builder
+      .baseUrl("https://api.discogs.com/")
       .build()
       .create(DiscogsService::class.java)
 

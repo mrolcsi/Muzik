@@ -41,7 +41,7 @@ class ArtistsFragment : DaggerFragment() {
     }
   }
 
-  private val mDivider by lazy {
+  private val divider by lazy {
     ColoredDividerItemDecoration(requireContext(), LinearLayout.VERTICAL)
   }
 
@@ -58,7 +58,7 @@ class ArtistsFragment : DaggerFragment() {
       // Tell adapter to reload its views
       artistAdapter.notifyDataSetChanged()
 
-      mDivider.setTint(it.secondaryForegroundColor)
+      divider.setTint(it.secondaryForegroundColor)
 
       fastScroller.applyForegroundColor(requireContext(), it.secondaryForegroundColor)
 
@@ -74,7 +74,7 @@ class ArtistsFragment : DaggerFragment() {
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     rvArtists.apply {
       adapter = artistAdapter
-      addItemDecoration(mDivider)
+      addItemDecoration(divider)
 
       fastScroller.setRecyclerView(this)
       fastScroller.setOnTouchListener(AutoHidingFastScrollerTouchListener(fastScroller).also {

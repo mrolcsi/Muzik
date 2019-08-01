@@ -13,6 +13,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.lifecycle.Observer
+import androidx.navigation.fragment.FragmentNavigatorExtras
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import dagger.android.support.DaggerFragment
 import hu.mrolcsi.muzik.R
@@ -35,6 +37,7 @@ import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.synthetic.main.artist_details_header.*
 import kotlinx.android.synthetic.main.fragment_artist_details.*
 import kotlinx.android.synthetic.main.fragment_artist_details_content.*
+import kotlinx.android.synthetic.main.list_item_album_content.view.*
 import javax.inject.Inject
 
 class ArtistDetailsFragment : DaggerFragment() {
@@ -50,7 +53,18 @@ class ArtistDetailsFragment : DaggerFragment() {
           .from(parent.context)
           .inflate(R.layout.list_item_album_horizontal, parent, false)
       ).apply {
-        // TODO: onClickListener()
+        itemView.setOnClickListener { view ->
+          model?.let {
+            if (it.description.type == MediaType.MEDIA_ALBUM) {
+              findNavController().navigate(
+                R.id.navigation_albumDetails,
+                ArtistDetailsFragmentArgs(it).toBundle(),
+                null,
+                FragmentNavigatorExtras(view.imgCoverArt to "coverArt")
+              )
+            }
+          }
+        }
       }
     }
   }
@@ -60,25 +74,29 @@ class ArtistDetailsFragment : DaggerFragment() {
       SongHolder(
         LayoutInflater
           .from(parent.context)
-          .inflate(R.layout.list_item_album_horizontal, parent, false),
+          .inflate(R.layout.list_item_song, parent, false),
         false
       ).apply {
-        val controller = MediaControllerCompat.getMediaController(requireActivity())
+        itemView.setOnClickListener {
+          model?.let {
+            val controller = MediaControllerCompat.getMediaController(requireActivity())
 
-        viewModel.artistItem?.description?.artist?.let { controller.setQueueTitle(it) }
+            viewModel.artistItem?.description?.artist?.let { controller.setQueueTitle(it) }
 
-        if (model?.description?.type == MediaType.MEDIA_OTHER) {
-          // Shuffle All
-          viewModel.songDescriptions.observeOnce(viewLifecycleOwner, Observer { descriptions ->
-            controller.clearQueue()
-            controller.transportControls.setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_ALL)
-            controller.addQueueItems(descriptions)
-            controller.transportControls.play()
-          })
-        } else {
-          viewModel.artistSongs.value?.let { items ->
-            controller.transportControls.setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_NONE)
-            controller.playFromMediaItems(items, adapterPosition)
+            if (model?.description?.type == MediaType.MEDIA_OTHER) {
+              // Shuffle All
+              viewModel.songDescriptions.observeOnce(viewLifecycleOwner, Observer { descriptions ->
+                controller.clearQueue()
+                controller.transportControls.setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_ALL)
+                controller.addQueueItems(descriptions)
+                controller.transportControls.play()
+              })
+            } else {
+              viewModel.artistSongs.value?.let { items ->
+                controller.transportControls.setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_NONE)
+                controller.playFromMediaItems(items, adapterPosition)
+              }
+            }
           }
         }
       }
