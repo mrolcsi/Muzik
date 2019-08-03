@@ -10,6 +10,8 @@ import androidx.lifecycle.ViewModelProviders
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import hu.mrolcsi.muzik.discogs.DiscogsService
+import hu.mrolcsi.muzik.discogs.DiscogsServiceImpl
 import hu.mrolcsi.muzik.media.MediaRepository
 import hu.mrolcsi.muzik.media.MediaRepositoryImpl
 import hu.mrolcsi.muzik.media.MediaService
@@ -30,6 +32,10 @@ class AppModule(private val app: Application) {
     @Binds
     @Singleton
     fun provideMediaRepository(delegate: MediaRepositoryImpl): MediaRepository
+
+    @Binds
+    @Singleton
+    fun provideDiscogsService(delegate: DiscogsServiceImpl): DiscogsService
   }
 
   @Provides

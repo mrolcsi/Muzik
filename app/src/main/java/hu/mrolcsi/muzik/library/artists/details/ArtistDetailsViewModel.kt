@@ -2,11 +2,10 @@ package hu.mrolcsi.muzik.library.artists.details
 
 import android.net.Uri
 import android.support.v4.media.MediaBrowserCompat
-import android.support.v4.media.MediaDescriptionCompat
+import android.view.View
 import androidx.lifecycle.LiveData
-import hu.mrolcsi.muzik.library.SessionViewModel
 
-interface ArtistDetailsViewModel : SessionViewModel {
+interface ArtistDetailsViewModel {
 
   var artistItem: MediaBrowserCompat.MediaItem?
 
@@ -16,5 +15,7 @@ interface ArtistDetailsViewModel : SessionViewModel {
 
   val artistPicture: LiveData<Uri>
 
-  val songDescriptions: LiveData<List<MediaDescriptionCompat>>
+  fun onAlbumClick(albumItem: MediaBrowserCompat.MediaItem, vararg transitionedView: View)
+
+  fun onSongClick(songItem: MediaBrowserCompat.MediaItem, position: Int)
 }

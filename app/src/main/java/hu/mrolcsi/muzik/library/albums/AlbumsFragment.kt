@@ -31,7 +31,7 @@ import kotlinx.android.synthetic.main.list_item_album_content.view.*
 
 class AlbumsFragment : Fragment() {
 
-  private lateinit var viewModel: AlbumsViewModel
+  private lateinit var viewModel: AlbumsViewModelImpl
 
   private val albumsAdapter by lazy {
     MediaItemListAdapter(requireContext()) { parent, _ ->
@@ -62,7 +62,7 @@ class AlbumsFragment : Fragment() {
     postponeEnterTransition()
 
     activity?.run {
-      viewModel = ViewModelProviders.of(this).get(AlbumsViewModel::class.java).apply {
+      viewModel = ViewModelProviders.of(this).get(AlbumsViewModelImpl::class.java).apply {
         albums.observe(viewLifecycleOwner, Observer { albums ->
           Log.d(LOG_TAG, "Got items from LiveData: $albums")
 

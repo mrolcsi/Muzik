@@ -1,143 +1,116 @@
 package hu.mrolcsi.muzik.library.artists.details
 
 import android.app.Application
-import android.graphics.BitmapFactory
 import android.net.Uri
-import android.os.AsyncTask
-import android.os.Bundle
-import android.support.v4.media.MediaBrowserCompat
+import android.support.v4.media.MediaBrowserCompat.MediaItem
 import android.support.v4.media.MediaDescriptionCompat
-import android.util.Log
-import androidx.core.os.bundleOf
-import androidx.lifecycle.LiveData
+import android.view.View
+import androidx.core.view.ViewCompat
 import androidx.lifecycle.MutableLiveData
+import androidx.navigation.fragment.FragmentNavigatorExtras
+import com.google.android.exoplayer2.util.Log
 import hu.mrolcsi.muzik.R
+import hu.mrolcsi.muzik.common.viewmodel.DataBindingViewModel
+import hu.mrolcsi.muzik.common.viewmodel.ExecuteOnceNavCommandSource
+import hu.mrolcsi.muzik.common.viewmodel.ExecuteOnceUiCommandSource
+import hu.mrolcsi.muzik.common.viewmodel.ObservableImpl
 import hu.mrolcsi.muzik.discogs.DiscogsService
-import hu.mrolcsi.muzik.discogs.models.search.SearchResponse
-import hu.mrolcsi.muzik.extensions.switchMap
-import hu.mrolcsi.muzik.library.SessionViewModelBase
-import hu.mrolcsi.muzik.service.MuzikBrowserService
+import hu.mrolcsi.muzik.media.MediaRepository
+import hu.mrolcsi.muzik.media.MediaService
 import hu.mrolcsi.muzik.service.extensions.media.MediaType
+import hu.mrolcsi.muzik.service.extensions.media.artist
 import hu.mrolcsi.muzik.service.extensions.media.id
-import hu.mrolcsi.muzik.service.extensions.media.titleKey
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import hu.mrolcsi.muzik.service.extensions.media.type
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.rxkotlin.subscribeBy
+import io.reactivex.subjects.PublishSubject
 import javax.inject.Inject
+import kotlin.properties.Delegates
 
 class ArtistDetailsViewModelImpl @Inject constructor(
-  app: Application,
-  private val discogs: DiscogsService
-) : SessionViewModelBase(app), ArtistDetailsViewModel {
+  private val app: Application,
+  observable: ObservableImpl,
+  uiCommandSource: ExecuteOnceUiCommandSource,
+  navCommandSource: ExecuteOnceNavCommandSource,
+  private val mediaRepo: MediaRepository,
+  private val discogsService: DiscogsService,
+  private val mediaService: MediaService
+) : DataBindingViewModel(observable, uiCommandSource, navCommandSource),
+  ArtistDetailsViewModel {
 
-  override var artistItem: MediaBrowserCompat.MediaItem? = null
+  override var artistItem: MediaItem? by Delegates.observable(null) { _, old: MediaItem?, new: MediaItem? ->
+    if (old != new && new != null) {
+      artistSubject.onNext(new)
+    }
+  }
 
-  private val mShuffleItem = MediaBrowserCompat.MediaItem(
-    MediaDescriptionCompat.Builder()
-      .setMediaId("shuffle/all")
-      .setTitle(app.getString(R.string.mediaControl_shuffleAll))
-      .setIconBitmap(BitmapFactory.decodeResource(app.resources, R.drawable.ic_shuffle))
-      .setExtras(bundleOf(MediaType.MEDIA_TYPE_KEY to MediaType.MEDIA_OTHER))
-      .build(),
-    0
-  )
+  private val artistSubject = PublishSubject.create<MediaItem>()
 
-  private val albumsCallback = object : MediaBrowserCompat.SubscriptionCallback() {
-    override fun onChildrenLoaded(
-      parentId: String,
-      children: MutableList<MediaBrowserCompat.MediaItem>,
-      options: Bundle
-    ) {
-      Log.d(getLogTag(), "Albums loaded from MediaBrowser: $children")
+  override val artistSongs = MutableLiveData<List<MediaItem>>()
 
-      AsyncTask.execute {
-        (artistAlbums as MutableLiveData).postValue(
-          children.sortedBy { it.description.titleKey }
+  override val artistAlbums = MutableLiveData<List<MediaItem>>()
+
+  override val artistPicture = MutableLiveData<Uri>()
+
+  private var songDescriptions: List<MediaDescriptionCompat>? = null
+
+  override fun onAlbumClick(albumItem: MediaItem, vararg transitionedView: View) {
+    if (albumItem.description.type == MediaType.MEDIA_ALBUM) {
+      sendNavCommand {
+        navigate(
+          R.id.navigation_albumDetails,
+          ArtistDetailsFragmentArgs(albumItem).toBundle(),
+          null,
+          FragmentNavigatorExtras(*transitionedView.map { it to ViewCompat.getTransitionName(it)!! }.toTypedArray())
         )
       }
     }
   }
 
-  private val songsCallback = object : MediaBrowserCompat.SubscriptionCallback() {
-    override fun onChildrenLoaded(
-      parentId: String,
-      children: MutableList<MediaBrowserCompat.MediaItem>,
-      options: Bundle
-    ) {
-      Log.d(getLogTag(), "Songs loaded from MediaBrowser: $children")
+  override fun onSongClick(songItem: MediaItem, position: Int) {
 
-      AsyncTask.execute {
-        val songs = children.sortedBy { it.description.titleKey }.toMutableList()
-        songs.add(0, mShuffleItem)
-        artistSongs.postValue(songs)
-      }
+    artistItem?.description?.artist?.let { mediaService.setQueueTitle(it) }
+
+    if (songItem.description.type == MediaType.MEDIA_OTHER) {
+      songDescriptions?.let { mediaService.playAllShuffled(it) }
+    } else {
+      songDescriptions?.let { mediaService.playAll(it, position) }
     }
   }
 
-  override val artistPicture: LiveData<Uri> by lazy {
-    MutableLiveData<Uri>().also {
-      fetchArtistPicture()
-    }
-  }
+  init {
+    val publishedArtistSubject = artistSubject
+      .filter { it.mediaId != null }
+      .observeOn(AndroidSchedulers.mainThread())
+      .publish()
 
-  override val artistAlbums: LiveData<List<MediaBrowserCompat.MediaItem>> by lazy {
-    MutableLiveData<List<MediaBrowserCompat.MediaItem>>().apply {
-      loadAlbumsByArtist()
-    }
-  }
+    // Get Albums
+    publishedArtistSubject
+      .switchMap { mediaRepo.getAlbumsByArtist(it.description.id) }
+      .subscribeBy(
+        onNext = { artistAlbums.value = it },
+        onError = { showError(this@ArtistDetailsViewModelImpl, it) }
+      ).disposeOnClear()
 
-  override val artistSongs by lazy {
-    MutableLiveData<List<MediaBrowserCompat.MediaItem>>().apply {
-      loadSongsByArtist()
-    }
-  }
+    // Get Songs
+    publishedArtistSubject
+      .switchMap { mediaRepo.getSongsByArtist(it.description.id) }
+      .doOnNext { songs -> songDescriptions = songs.filter { it.isPlayable }.map { it.description } }
+      .subscribeBy(
+        onNext = { artistSongs.value = it },
+        onError = { showError(this@ArtistDetailsViewModelImpl, it) }
+      ).disposeOnClear()
 
-  override val songDescriptions = artistSongs.switchMap { songs ->
-    MutableLiveData<List<MediaDescriptionCompat>>().apply {
-      AsyncTask.execute {
-        postValue(songs.filter { it.isPlayable }.map { it.description })
-      }
-    }
-  }
+    // Get URL for Artist picture
+    publishedArtistSubject
+      .switchMapMaybe { discogsService.getArtistPictureUrl(it) }
+      .observeOn(AndroidSchedulers.mainThread())
+      .doOnNext { Log.d("ArtistDetailsVM", "Got uri: $it") }
+      .subscribeBy(
+        onNext = { artistPicture.value = it },
+        onError = { showError(this@ArtistDetailsViewModelImpl, it) }
+      ).disposeOnClear()
 
-  private fun fetchArtistPicture() {
-    artistItem?.description?.title?.let { artist ->
-      discogs.searchForArtist(artist = artist.toString()).enqueue(object : Callback<SearchResponse> {
-        override fun onFailure(call: Call<SearchResponse>, t: Throwable) {
-          Log.e(LOG_TAG, t.message)
-        }
-
-        override fun onResponse(call: Call<SearchResponse>, response: Response<SearchResponse>) {
-          response.body()?.let { body ->
-            body.results.takeIf { it.isNotEmpty() }?.first()?.let { result ->
-              (artistPicture as MutableLiveData).postValue(Uri.parse(result.coverImage))
-            }
-          }
-        }
-
-      })
-    }
-  }
-
-  private fun loadAlbumsByArtist() {
-    mediaBrowser.subscribe(
-      MuzikBrowserService.MEDIA_ROOT_ALBUMS,
-      bundleOf(MuzikBrowserService.OPTION_ARTIST_ID to artistItem?.description?.id),
-      albumsCallback
-    )
-  }
-
-  private fun loadSongsByArtist() {
-    mediaBrowser.subscribe(
-      MuzikBrowserService.MEDIA_ROOT_SONGS,
-      bundleOf(MuzikBrowserService.OPTION_ARTIST_ID to artistItem?.description?.id),
-      songsCallback
-    )
-  }
-
-  override fun getLogTag(): String = LOG_TAG
-
-  companion object {
-    private const val LOG_TAG = "ArtistDetailsViewModel"
+    publishedArtistSubject.connect()
   }
 }

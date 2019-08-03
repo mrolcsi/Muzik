@@ -1,14 +1,14 @@
 package hu.mrolcsi.muzik.common.view
 
-import androidx.databinding.BindingAdapter
+import androidx.databinding.BindingMethod
+import androidx.databinding.BindingMethods
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 
-object BindingAdapters {
 
-  @JvmStatic
-  @BindingAdapter("isRefreshing")
-  fun setIsRefreshing(view: SwipeRefreshLayout, isRefreshing: Boolean) {
-    view.isRefreshing = isRefreshing
-  }
-
-}
+@BindingMethods(
+  value = [
+    BindingMethod(type = SwipeRefreshLayout::class, attribute = "android:enabled", method = "setEnabled"),
+    BindingMethod(type = SwipeRefreshLayout::class, attribute = "isRefreshing", method = "setRefreshing")
+  ]
+)
+object BindingAdapters

@@ -1,43 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:app="http://schemas.android.com/apk/res-auto"
-  xmlns:tools="http://schemas.android.com/tools"
-  android:layout_width="0dp"
-  android:layout_height="0dp">
+  xmlns:tools="http://schemas.android.com/tools">
 
-  <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-    android:id="@+id/swipeRefreshLayout"
+  <data>
+
+    <variable
+      name="viewModel"
+      type="hu.mrolcsi.muzik.library.artists.ArtistsViewModel" />
+  </data>
+
+  <androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="0dp"
-    android:layout_height="0dp"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="parent">
+    android:layout_height="0dp">
 
-    <androidx.recyclerview.widget.RecyclerView
-      android:id="@+id/rvArtists"
-      android:layout_width="match_parent"
-      android:layout_height="match_parent"
-      app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-      tools:listitem="@layout/list_item_artist" />
-  </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+      android:id="@+id/swipeRefreshLayout"
+      android:layout_width="0dp"
+      android:layout_height="0dp"
+      android:enabled="@{false}"
+      app:isRefreshing="@{viewModel.progressVisible}"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent">
 
-  <xyz.danoz.recyclerviewfastscroller.vertical.VerticalRecyclerViewFastScroller
-    android:id="@+id/fastScroller"
-    android:layout_width="@dimen/fast_scroller_width"
-    android:layout_height="0dp"
-    app:layout_constraintBottom_toBottomOf="@+id/swipeRefreshLayout"
-    app:layout_constraintEnd_toEndOf="@id/swipeRefreshLayout"
-    app:layout_constraintTop_toTopOf="@id/swipeRefreshLayout"
-    app:rfs_handleBackground="@drawable/fast_scroller_handle_rounded" />
+      <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvArtists"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        tools:listitem="@layout/list_item_artist" />
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-  <hu.mrolcsi.muzik.common.fastscroller.SimpleSectionIndicator
-    android:id="@+id/sectionIndicator"
-    android:layout_width="wrap_content"
-    android:layout_height="@dimen/list_item_height"
-    app:layout_constraintEnd_toStartOf="@+id/fastScroller"
-    app:layout_constraintTop_toTopOf="@id/fastScroller"
-    app:rfs_backgroundColor="@android:color/white"
-    app:rfs_textColor="@android:color/black" />
+    <xyz.danoz.recyclerviewfastscroller.vertical.VerticalRecyclerViewFastScroller
+      android:id="@+id/fastScroller"
+      android:layout_width="@dimen/fast_scroller_width"
+      android:layout_height="0dp"
+      app:layout_constraintBottom_toBottomOf="@+id/swipeRefreshLayout"
+      app:layout_constraintEnd_toEndOf="@id/swipeRefreshLayout"
+      app:layout_constraintTop_toTopOf="@id/swipeRefreshLayout"
+      app:rfs_handleBackground="@drawable/fast_scroller_handle_rounded" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <hu.mrolcsi.muzik.common.fastscroller.SimpleSectionIndicator
+      android:id="@+id/sectionIndicator"
+      android:layout_width="wrap_content"
+      android:layout_height="@dimen/list_item_height"
+      app:layout_constraintEnd_toStartOf="@+id/fastScroller"
+      app:layout_constraintTop_toTopOf="@id/fastScroller"
+      app:rfs_backgroundColor="@android:color/white"
+      app:rfs_textColor="@android:color/black" />
+
+  </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

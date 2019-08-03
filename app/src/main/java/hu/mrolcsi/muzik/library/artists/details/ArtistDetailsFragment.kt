@@ -6,15 +6,11 @@ import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
-import android.support.v4.media.session.MediaControllerCompat
-import android.support.v4.media.session.PlaybackStateCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.lifecycle.Observer
-import androidx.navigation.fragment.FragmentNavigatorExtras
-import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import dagger.android.support.DaggerFragment
 import hu.mrolcsi.muzik.R
@@ -22,22 +18,14 @@ import hu.mrolcsi.muzik.common.ColoredDividerItemDecoration
 import hu.mrolcsi.muzik.common.MediaItemListAdapter
 import hu.mrolcsi.muzik.common.glide.GlideApp
 import hu.mrolcsi.muzik.common.glide.MuzikGlideModule
-import hu.mrolcsi.muzik.extensions.observeOnce
 import hu.mrolcsi.muzik.library.albums.AlbumHolder
 import hu.mrolcsi.muzik.library.songs.SongHolder
-import hu.mrolcsi.muzik.service.extensions.media.MediaType
-import hu.mrolcsi.muzik.service.extensions.media.addQueueItems
-import hu.mrolcsi.muzik.service.extensions.media.artist
-import hu.mrolcsi.muzik.service.extensions.media.clearQueue
-import hu.mrolcsi.muzik.service.extensions.media.playFromMediaItems
-import hu.mrolcsi.muzik.service.extensions.media.setQueueTitle
-import hu.mrolcsi.muzik.service.extensions.media.type
 import hu.mrolcsi.muzik.service.theme.Theme
 import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.synthetic.main.artist_details_header.*
 import kotlinx.android.synthetic.main.fragment_artist_details.*
 import kotlinx.android.synthetic.main.fragment_artist_details_content.*
-import kotlinx.android.synthetic.main.list_item_album_content.view.*
+import kotlinx.android.synthetic.main.list_item_album_content.*
 import javax.inject.Inject
 
 class ArtistDetailsFragment : DaggerFragment() {
@@ -53,16 +41,9 @@ class ArtistDetailsFragment : DaggerFragment() {
           .from(parent.context)
           .inflate(R.layout.list_item_album_horizontal, parent, false)
       ).apply {
-        itemView.setOnClickListener { view ->
+        itemView.setOnClickListener {
           model?.let {
-            if (it.description.type == MediaType.MEDIA_ALBUM) {
-              findNavController().navigate(
-                R.id.navigation_albumDetails,
-                ArtistDetailsFragmentArgs(it).toBundle(),
-                null,
-                FragmentNavigatorExtras(view.imgCoverArt to "coverArt")
-              )
-            }
+            viewModel.onAlbumClick(it, imgCoverArt)
           }
         }
       }
@@ -79,24 +60,7 @@ class ArtistDetailsFragment : DaggerFragment() {
       ).apply {
         itemView.setOnClickListener {
           model?.let {
-            val controller = MediaControllerCompat.getMediaController(requireActivity())
-
-            viewModel.artistItem?.description?.artist?.let { controller.setQueueTitle(it) }
-
-            if (model?.description?.type == MediaType.MEDIA_OTHER) {
-              // Shuffle All
-              viewModel.songDescriptions.observeOnce(viewLifecycleOwner, Observer { descriptions ->
-                controller.clearQueue()
-                controller.transportControls.setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_ALL)
-                controller.addQueueItems(descriptions)
-                controller.transportControls.play()
-              })
-            } else {
-              viewModel.artistSongs.value?.let { items ->
-                controller.transportControls.setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_NONE)
-                controller.playFromMediaItems(items, adapterPosition)
-              }
-            }
+            viewModel.onSongClick(it, adapterPosition)
           }
         }
       }
@@ -172,16 +136,6 @@ class ArtistDetailsFragment : DaggerFragment() {
         }
       }
     })
-  }
-
-  override fun onStart() {
-    super.onStart()
-    viewModel.connect()
-  }
-
-  override fun onStop() {
-    super.onStop()
-    viewModel.disconnect()
   }
 
   private fun loadHeader(artistItem: MediaBrowserCompat.MediaItem) {

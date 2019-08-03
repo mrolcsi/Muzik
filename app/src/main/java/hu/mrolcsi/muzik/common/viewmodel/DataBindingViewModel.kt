@@ -2,14 +2,19 @@ package hu.mrolcsi.muzik.common.viewmodel
 
 import androidx.databinding.Observable
 import com.afollestad.materialdialogs.MaterialDialog
+import com.google.android.exoplayer2.util.Log
 import kotlin.properties.ObservableProperty
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
 open class DataBindingViewModel(
   private val observable: ObservableImpl,
-  private val uiCommandSource: ExecuteOnceUiCommandSource
-) : RxViewModel(), Observable by observable, UiCommandSource by uiCommandSource {
+  private val uiCommandSource: ExecuteOnceUiCommandSource,
+  private val navCommandSource: ExecuteOnceNavCommandSource
+) : RxViewModel(),
+  Observable by observable,
+  UiCommandSource by uiCommandSource,
+  NavCommandSource by navCommandSource {
 
   inner class BoundProperty<T>(initialValue: T, private val onNewValue: ((T) -> Unit)?, private val id: Int) :
     ObservableProperty<T>(initialValue) {
@@ -72,7 +77,8 @@ open class DataBindingViewModel(
 
   fun notifyPropertyChanged(fieldId: Int) = observable.notifyPropertyChanged(this, fieldId)
 
-  open fun showError(throwable: Throwable) = sendUiCommand {
+  open fun showError(caller: Any, throwable: Throwable) = sendUiCommand {
+    Log.e(caller::class.simpleName, android.util.Log.getStackTraceString(throwable))
     MaterialDialog(this)
       .show {
         positiveButton(android.R.string.ok)

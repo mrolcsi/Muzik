@@ -6,14 +6,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.lifecycle.Observer
-import androidx.navigation.fragment.findNavController
 import dagger.android.support.DaggerFragment
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.ColoredDividerItemDecoration
 import hu.mrolcsi.muzik.common.MediaItemListAdapter
 import hu.mrolcsi.muzik.common.fastscroller.AutoHidingFastScrollerTouchListener
+import hu.mrolcsi.muzik.common.viewmodel.observeAndRunNavCommands
+import hu.mrolcsi.muzik.common.viewmodel.observeAndRunUiCommands
+import hu.mrolcsi.muzik.databinding.FragmentArtistsBinding
 import hu.mrolcsi.muzik.extensions.applyForegroundColor
-import hu.mrolcsi.muzik.library.artists.details.ArtistDetailsFragmentArgs
 import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.synthetic.main.fragment_artists.*
 import javax.inject.Inject
@@ -31,10 +32,7 @@ class ArtistsFragment : DaggerFragment() {
       ).apply {
         itemView.setOnClickListener {
           model?.let {
-            findNavController().navigate(
-              R.id.navigation_artistDetails,
-              ArtistDetailsFragmentArgs(it).toBundle()
-            )
+            viewModel.onSelect(it)
           }
         }
       }
@@ -49,6 +47,10 @@ class ArtistsFragment : DaggerFragment() {
     super.onActivityCreated(savedInstanceState)
 
     viewModel.apply {
+
+      observeAndRunUiCommands(uiCommand)
+      observeAndRunNavCommands(navCommand)
+
       items.observe(viewLifecycleOwner, Observer { artists ->
         artistAdapter.submitList(artists)
       })
@@ -68,10 +70,17 @@ class ArtistsFragment : DaggerFragment() {
   }
 
   override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-    return inflater.inflate(R.layout.fragment_artists, container, false)
+    return FragmentArtistsBinding.inflate(inflater, container, false).also { binding ->
+      binding.lifecycleOwner = viewLifecycleOwner
+      binding.viewModel = viewModel
+    }.root
   }
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    swipeRefreshLayout.setOnRefreshListener {
+      viewModel.onRefresh()
+    }
+
     rvArtists.apply {
       adapter = artistAdapter
       addItemDecoration(divider)

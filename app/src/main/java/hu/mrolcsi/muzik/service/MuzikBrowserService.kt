@@ -217,6 +217,11 @@ abstract class MuzikBrowserService : MediaBrowserServiceCompat() {
     options: Bundle
   ) {
 
+    if (options.isEmpty) {
+      onLoadChildren(parentId, result)
+      return
+    }
+
     AsyncTask.execute {
       val mediaItems = emptyList<MediaBrowserCompat.MediaItem>().toMutableList()
 

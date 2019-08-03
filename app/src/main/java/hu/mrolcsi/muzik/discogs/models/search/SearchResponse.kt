@@ -5,5 +5,5 @@ import hu.mrolcsi.muzik.discogs.models.Pagination
 
 data class SearchResponse(
   @SerializedName("pagination") val pagination: Pagination,
-  @SerializedName("results") val results: Array<SearchResult>
+  @SerializedName("results") val results: List<SearchResult>
 )
