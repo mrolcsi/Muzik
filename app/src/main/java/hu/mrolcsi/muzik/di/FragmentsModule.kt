@@ -11,6 +11,8 @@ import hu.mrolcsi.muzik.library.artists.ArtistsFragment
 import hu.mrolcsi.muzik.library.artists.ArtistsModule
 import hu.mrolcsi.muzik.library.artists.details.ArtistDetailsFragment
 import hu.mrolcsi.muzik.library.artists.details.ArtistDetailsModule
+import hu.mrolcsi.muzik.library.songs.SongsFragment
+import hu.mrolcsi.muzik.library.songs.SongsModule
 import hu.mrolcsi.muzik.player.PlayerFragment
 import hu.mrolcsi.muzik.player.PlayerModule
 import hu.mrolcsi.muzik.player.playlist.PlaylistFragment
@@ -34,6 +36,9 @@ abstract class FragmentsModule {
 
   @ContributesAndroidInjector(modules = [AlbumsModule::class])
   abstract fun contributeAlbumsFragment(): AlbumsFragment
+
+  @ContributesAndroidInjector(modules = [SongsModule::class])
+  abstract fun contributeSongsFragment(): SongsFragment
 
   @ContributesAndroidInjector(modules = [PlayerModule::class])
   abstract fun contributePlayerFragment(): PlayerFragment

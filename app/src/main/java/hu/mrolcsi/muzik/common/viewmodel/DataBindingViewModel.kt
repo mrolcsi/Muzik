@@ -82,7 +82,7 @@ open class DataBindingViewModel(
     MaterialDialog(this)
       .show {
         positiveButton(android.R.string.ok)
-        message(text = throwable.localizedMessage)
+        message(text = throwable.toString())
       }
   }
 }

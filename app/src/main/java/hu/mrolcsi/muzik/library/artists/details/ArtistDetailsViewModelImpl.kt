@@ -1,10 +1,12 @@
 package hu.mrolcsi.muzik.library.artists.details
 
-import android.app.Application
+import android.content.Context
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.support.v4.media.MediaBrowserCompat.MediaItem
 import android.support.v4.media.MediaDescriptionCompat
 import android.view.View
+import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.fragment.FragmentNavigatorExtras
@@ -28,7 +30,7 @@ import javax.inject.Inject
 import kotlin.properties.Delegates
 
 class ArtistDetailsViewModelImpl @Inject constructor(
-  private val app: Application,
+  context: Context,
   observable: ObservableImpl,
   uiCommandSource: ExecuteOnceUiCommandSource,
   navCommandSource: ExecuteOnceNavCommandSource,
@@ -74,9 +76,19 @@ class ArtistDetailsViewModelImpl @Inject constructor(
     if (songItem.description.type == MediaType.MEDIA_OTHER) {
       songDescriptions?.let { mediaService.playAllShuffled(it) }
     } else {
-      songDescriptions?.let { mediaService.playAll(it, position) }
+      songDescriptions?.let { mediaService.playAll(it, position - 1) }
     }
   }
+
+  private val shuffleAllItem = MediaItem(
+    MediaDescriptionCompat.Builder()
+      .setMediaId("shuffle/all")
+      .setTitle(context.getString(R.string.mediaControl_shuffleAll))
+      .setIconBitmap(BitmapFactory.decodeResource(context.resources, R.drawable.ic_shuffle))
+      .setExtras(bundleOf(MediaType.MEDIA_TYPE_KEY to MediaType.MEDIA_OTHER))
+      .build(),
+    0
+  )
 
   init {
     val publishedArtistSubject = artistSubject
@@ -89,16 +101,17 @@ class ArtistDetailsViewModelImpl @Inject constructor(
       .switchMap { mediaRepo.getAlbumsByArtist(it.description.id) }
       .subscribeBy(
         onNext = { artistAlbums.value = it },
-        onError = { showError(this@ArtistDetailsViewModelImpl, it) }
+        onError = { showError(this, it) }
       ).disposeOnClear()
 
     // Get Songs
     publishedArtistSubject
       .switchMap { mediaRepo.getSongsByArtist(it.description.id) }
       .doOnNext { songs -> songDescriptions = songs.filter { it.isPlayable }.map { it.description } }
+      .map { it.toMutableList().apply { add(0, shuffleAllItem) }.toList() }
       .subscribeBy(
         onNext = { artistSongs.value = it },
-        onError = { showError(this@ArtistDetailsViewModelImpl, it) }
+        onError = { showError(this, it) }
       ).disposeOnClear()
 
     // Get URL for Artist picture
@@ -108,7 +121,7 @@ class ArtistDetailsViewModelImpl @Inject constructor(
       .doOnNext { Log.d("ArtistDetailsVM", "Got uri: $it") }
       .subscribeBy(
         onNext = { artistPicture.value = it },
-        onError = { showError(this@ArtistDetailsViewModelImpl, it) }
+        onError = { showError(this, it) }
       ).disposeOnClear()
 
     publishedArtistSubject.connect()
