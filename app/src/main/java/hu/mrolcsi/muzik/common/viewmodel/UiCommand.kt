@@ -42,8 +42,8 @@ class ExecuteOnceUiCommandSource @Inject constructor() : UiCommandSource {
   }
 }
 
-fun Fragment.observeAndRunUiCommands(commands: LiveData<UiCommand>) =
-  commands.observe(viewLifecycleOwner, Observer { it?.invoke(requireContext()) })
+fun Fragment.observeAndRunUiCommands(source: UiCommandSource) =
+  source.uiCommand.observe(viewLifecycleOwner, Observer { it?.invoke(requireContext()) })
 
-fun FragmentActivity.observeAndRunUiCommands(commands: LiveData<UiCommand>) =
-  commands.observe(this, Observer { it?.invoke(this) })
+fun FragmentActivity.observeAndRunUiCommands(source: UiCommandSource) =
+  source.uiCommand.observe(this, Observer { it?.invoke(this) })

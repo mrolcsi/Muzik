@@ -19,7 +19,7 @@ open class MediaItemListAdapter<VH : MVVMViewHolder<MediaBrowserCompat.MediaItem
 ) : MVVMListAdapter<MediaBrowserCompat.MediaItem, VH>(DiffCallbacks.mediaItemCallback, viewHolderFactory),
   FastScroller.SectionIndexer {
 
-  @SortingMode var sorting: Int = SortingMode.SORT_BY_TITLE
+  var sorting: SortingMode = SortingMode.SORT_BY_TITLE
 
   override fun getSectionText(position: Int): CharSequence {
     val item = getItem(position)
@@ -35,7 +35,6 @@ open class MediaItemListAdapter<VH : MVVMViewHolder<MediaBrowserCompat.MediaItem
           else -> context.getString(R.string.dateAdded_old)
         }
       }
-      else -> throw IllegalArgumentException("unknown sorting constant.")
     }
   }
 

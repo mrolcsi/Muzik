@@ -46,8 +46,8 @@ class ArtistsFragment : DaggerFragment() {
 
     viewModel.apply {
 
-      observeAndRunUiCommands(uiCommand)
-      observeAndRunNavCommands(navCommand)
+      observeAndRunUiCommands(this)
+      observeAndRunNavCommands(this)
 
       items.observe(viewLifecycleOwner, Observer { artists ->
         artistAdapter.submitList(artists)

@@ -5,6 +5,8 @@ import dagger.android.ContributesAndroidInjector
 import hu.mrolcsi.muzik.library.LibraryFragment
 import hu.mrolcsi.muzik.library.LibraryModule
 import hu.mrolcsi.muzik.library.MiniPlayerFragment
+import hu.mrolcsi.muzik.library.albums.AlbumsFragment
+import hu.mrolcsi.muzik.library.albums.AlbumsModule
 import hu.mrolcsi.muzik.library.artists.ArtistsFragment
 import hu.mrolcsi.muzik.library.artists.ArtistsModule
 import hu.mrolcsi.muzik.library.artists.details.ArtistDetailsFragment
@@ -29,6 +31,9 @@ abstract class FragmentsModule {
 
   @ContributesAndroidInjector(modules = [ArtistDetailsModule::class])
   abstract fun contributeArtistDetailsFragment(): ArtistDetailsFragment
+
+  @ContributesAndroidInjector(modules = [AlbumsModule::class])
+  abstract fun contributeAlbumsFragment(): AlbumsFragment
 
   @ContributesAndroidInjector(modules = [PlayerModule::class])
   abstract fun contributePlayerFragment(): PlayerFragment

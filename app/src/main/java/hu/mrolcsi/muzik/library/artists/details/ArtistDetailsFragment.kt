@@ -79,8 +79,8 @@ class ArtistDetailsFragment : DaggerFragment() {
 
     viewModel.apply {
 
-      observeAndRunUiCommands(uiCommand)
-      observeAndRunNavCommands(navCommand)
+      observeAndRunUiCommands(this)
+      observeAndRunNavCommands(this)
 
       artistItem = args.artistItem
       artistItem?.let { loadHeader(it) }

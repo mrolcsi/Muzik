@@ -71,7 +71,7 @@ class MediaServiceImpl @Inject constructor(
     ComponentName(app, MuzikPlayerService::class.java),
     connectionCallbacks,
     null // optional Bundle
-  )
+  ).apply { connect() }
 
   private var lastMetadata: MediaMetadataCompat? = null
 
@@ -115,9 +115,7 @@ class MediaServiceImpl @Inject constructor(
           }
         })
     }
-      .doOnSubscribe { if (!mediaBrowser.isConnected) mediaBrowser.connect() }
-      .doOnTerminate { mediaBrowser.disconnect() }
-      .takeUntil { !mediaBrowser.isConnected }
+      .takeWhile { mediaBrowser.isConnected }
       .observeOn(AndroidSchedulers.mainThread())
 
   override fun setQueueTitle(title: CharSequence) {

@@ -42,5 +42,5 @@ class ExecuteOnceNavCommandSource @Inject constructor() : NavCommandSource {
   }
 }
 
-fun Fragment.observeAndRunNavCommands(commands: LiveData<NavCommand>) =
-  commands.observe(this.viewLifecycleOwner, Observer { it?.invoke(this.findNavController()) })
+fun Fragment.observeAndRunNavCommands(source: NavCommandSource) =
+  source.navCommand.observe(this.viewLifecycleOwner, Observer { it?.invoke(this.findNavController()) })
