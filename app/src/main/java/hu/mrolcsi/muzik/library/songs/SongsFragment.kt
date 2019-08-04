@@ -18,9 +18,6 @@ import androidx.lifecycle.ViewModelProviders
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.ColoredDividerItemDecoration
 import hu.mrolcsi.muzik.common.MediaItemListAdapter
-import hu.mrolcsi.muzik.common.fastscroller.AutoHidingFastScrollerTouchListener
-import hu.mrolcsi.muzik.common.fastscroller.SimpleSectionIndicator
-import hu.mrolcsi.muzik.extensions.applyForegroundColor
 import hu.mrolcsi.muzik.extensions.observeOnce
 import hu.mrolcsi.muzik.library.SortingMode
 import hu.mrolcsi.muzik.service.extensions.media.MediaType
@@ -93,9 +90,9 @@ class SongsFragment : Fragment() {
           songsAdapter.sorting = it
 
           if (it == SortingMode.SORT_BY_DATE) {
-            sectionIndicator.setIndicatorTextSize(18)
+            rvSongs.fastScroller.setBubbleTextSize(18)
           } else {
-            sectionIndicator.setIndicatorTextSize(SimpleSectionIndicator.DEFAULT_TEXT_SIZE)
+            rvSongs.fastScroller.setBubbleTextSize(22)
           }
         })
       }
@@ -108,12 +105,13 @@ class SongsFragment : Fragment() {
       // Apply colors to dividers
       divider.setTint(it.secondaryForegroundColor)
 
-      // Apply colors to FastScroller
-      fastScroller.applyForegroundColor(requireContext(), it.secondaryForegroundColor)
+      rvSongs.fastScroller.apply {
+        setTrackColor(it.secondaryForegroundColor)
+        setHandleColor(it.secondaryForegroundColor)
+        setBubbleColor(it.secondaryForegroundColor)
 
-      // Apply colors to SectionIndicator
-      sectionIndicator.setIndicatorBackgroundColor(it.secondaryForegroundColor)
-      sectionIndicator.setIndicatorTextColor(it.secondaryBackgroundColor)
+        setBubbleTextColor(it.secondaryBackgroundColor)
+      }
     })
   }
 
@@ -122,16 +120,9 @@ class SongsFragment : Fragment() {
   }
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-    rvSongs.apply {
-      adapter = songsAdapter
+    rvSongs.setAdapter(songsAdapter)
+    rvSongs.recyclerView.apply {
       addItemDecoration(divider)
-
-      fastScroller.setRecyclerView(this)
-      fastScroller.setOnTouchListener(AutoHidingFastScrollerTouchListener(fastScroller).also {
-        addOnScrollListener(it.autoHideOnScrollListener)
-      })
-
-      fastScroller.sectionIndicator = sectionIndicator
     }
   }
 

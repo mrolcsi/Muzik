@@ -20,8 +20,6 @@ import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.MediaItemListAdapter
-import hu.mrolcsi.muzik.common.fastscroller.AutoHidingFastScrollerTouchListener
-import hu.mrolcsi.muzik.extensions.applyForegroundColor
 import hu.mrolcsi.muzik.library.SortingMode
 import hu.mrolcsi.muzik.library.albums.details.AlbumDetailsFragmentArgs
 import hu.mrolcsi.muzik.service.theme.Theme
@@ -86,22 +84,14 @@ class AlbumsFragment : Fragment() {
   }
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-    rvAlbums.run {
-      rvAlbums.adapter = albumsAdapter
-
+    rvAlbums.setAdapter(albumsAdapter)
+    rvAlbums.recyclerView.run {
       viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
         override fun onGlobalLayout() {
           viewTreeObserver.removeOnGlobalLayoutListener(this)
           startPostponedEnterTransition()
         }
       })
-
-      fastScroller.setRecyclerView(this)
-      fastScroller.setOnTouchListener(AutoHidingFastScrollerTouchListener(fastScroller).also {
-        addOnScrollListener(it.autoHideOnScrollListener)
-      })
-
-      fastScroller.sectionIndicator = sectionIndicator
     }
   }
 
@@ -168,7 +158,7 @@ class AlbumsFragment : Fragment() {
 
         rvAlbums?.setBackgroundColor(color)
 
-        sectionIndicator?.setIndicatorTextColor(color)
+        rvAlbums.fastScroller.setBubbleTextColor(color)
       }
       start()
     }
@@ -181,11 +171,12 @@ class AlbumsFragment : Fragment() {
       addUpdateListener {
         val color = it.animatedValue as Int
 
-        // Apply color to FastScroller
-        fastScroller.applyForegroundColor(requireContext(), color)
+        rvAlbums.fastScroller.apply {
+          setTrackColor(color)
+          setHandleColor(color)
+          setBubbleColor(color)
+        }
 
-        // Apply color to Section Indicator
-        sectionIndicator.setIndicatorBackgroundColor(color)
       }
       start()
     }

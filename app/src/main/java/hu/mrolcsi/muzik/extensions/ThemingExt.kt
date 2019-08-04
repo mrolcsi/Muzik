@@ -2,7 +2,6 @@ package hu.mrolcsi.muzik.extensions
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.PorterDuff
 import android.os.Build
@@ -14,9 +13,7 @@ import androidx.core.view.get
 import com.google.android.material.bottomnavigation.BottomNavigationItemView
 import com.google.android.material.bottomnavigation.BottomNavigationMenuView
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.service.theme.Theme
-import xyz.danoz.recyclerviewfastscroller.AbsRecyclerViewFastScroller
 
 fun Activity.applyStatusBarColor(color: Int) {
   window?.statusBarColor = color
@@ -80,12 +77,4 @@ fun BottomNavigationView.applyForegroundColor(color: Int) {
       it.setItemBackground(Theme.getRippleDrawable(color))
     }
   }
-}
-
-fun AbsRecyclerViewFastScroller.applyForegroundColor(context: Context, color: Int) {
-  // Apply colors to FastScroller
-  setBarColor(color)
-  setHandleBackground(context.getDrawable(R.drawable.fast_scroller_handle_rounded)?.apply {
-    setTint(color)
-  })
 }

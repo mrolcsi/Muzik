@@ -1,42 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-  xmlns:android="http://schemas.android.com/apk/res/android"
+<com.l4digital.fastscroll.FastScrollView xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:app="http://schemas.android.com/apk/res-auto"
   xmlns:tools="http://schemas.android.com/tools"
+  android:id="@+id/rvAlbums"
   android:layout_width="match_parent"
-  android:layout_height="match_parent">
-
-  <androidx.recyclerview.widget.RecyclerView
-    android:id="@+id/rvAlbums"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:paddingTop="4dp"
-    android:paddingBottom="4dp"
-    android:paddingStart="4dp"
-    android:paddingEnd="4dp"
-    app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="parent"
-    app:spanCount="@integer/albumsColumnCount"
-    tools:listitem="@layout/list_item_album_vertical" />
-
-  <xyz.danoz.recyclerviewfastscroller.vertical.VerticalRecyclerViewFastScroller
-    android:id="@+id/fastScroller"
-    android:layout_width="@dimen/fast_scroller_width"
-    android:layout_height="0dp"
-    app:layout_constraintBottom_toBottomOf="@+id/rvAlbums"
-    app:layout_constraintEnd_toEndOf="@id/rvAlbums"
-    app:layout_constraintTop_toTopOf="@id/rvAlbums"/>
-
-  <hu.mrolcsi.muzik.common.fastscroller.SimpleSectionIndicator
-    android:id="@+id/sectionIndicator"
-    android:layout_width="wrap_content"
-    android:layout_height="@dimen/list_item_height"
-    app:layout_constraintEnd_toStartOf="@+id/fastScroller"
-    app:layout_constraintTop_toTopOf="@id/fastScroller"
-    app:rfs_backgroundColor="@android:color/white"
-    app:rfs_textColor="@android:color/black"/>
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+  android:layout_height="match_parent"
+  android:paddingStart="4dp"
+  android:paddingTop="4dp"
+  android:paddingEnd="4dp"
+  android:paddingBottom="4dp"
+  app:bubbleSize="small"
+  app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+  app:showBubble="true"
+  app:showTrack="true"
+  app:spanCount="@integer/albumsColumnCount"
+  tools:listitem="@layout/list_item_album_vertical" />

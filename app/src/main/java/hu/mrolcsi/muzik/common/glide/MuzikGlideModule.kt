@@ -44,6 +44,7 @@ class MuzikGlideModule : AppGlideModule() {
     )
   }
 
+  @Deprecated("use onResourceReady and onLoadFailed instead!")
   interface SimpleRequestListener<R> : RequestListener<R> {
 
     override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<R>?, isFirstResource: Boolean): Boolean {
@@ -72,3 +73,18 @@ class MuzikGlideModule : AppGlideModule() {
     private const val MEMORY_CACHE_SIZE = 1024 * 1024 * 20 // 20mb
   }
 }
+
+fun <T> GlideRequest<T>.onResourceReady(callback: (resource: T?) -> Unit): GlideRequest<T> {
+  return addListener(object : MuzikGlideModule.SimpleRequestListener<T> {
+    override fun onResourceReady(resource: T?) {
+      callback.invoke(resource)
+    }
+  })
+}
+
+fun <T> GlideRequest<T>.onLoadFailed(callback: (error: GlideException?) -> Boolean) =
+  addListener(object : MuzikGlideModule.SimpleRequestListener<T> {
+    override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<T>?, isFirstResource: Boolean): Boolean {
+      return callback.invoke(e)
+    }
+  })

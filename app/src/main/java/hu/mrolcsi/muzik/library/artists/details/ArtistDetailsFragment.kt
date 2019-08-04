@@ -1,7 +1,6 @@
 package hu.mrolcsi.muzik.library.artists.details
 
 import android.animation.ValueAnimator
-import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
@@ -17,7 +16,9 @@ import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.ColoredDividerItemDecoration
 import hu.mrolcsi.muzik.common.MediaItemListAdapter
 import hu.mrolcsi.muzik.common.glide.GlideApp
-import hu.mrolcsi.muzik.common.glide.MuzikGlideModule
+import hu.mrolcsi.muzik.common.glide.onResourceReady
+import hu.mrolcsi.muzik.common.viewmodel.observeAndRunNavCommands
+import hu.mrolcsi.muzik.common.viewmodel.observeAndRunUiCommands
 import hu.mrolcsi.muzik.library.albums.AlbumHolder
 import hu.mrolcsi.muzik.library.songs.SongHolder
 import hu.mrolcsi.muzik.service.theme.Theme
@@ -78,8 +79,10 @@ class ArtistDetailsFragment : DaggerFragment() {
 
     viewModel.apply {
 
-      artistItem = args.artistItem
+      observeAndRunUiCommands(uiCommand)
+      observeAndRunNavCommands(navCommand)
 
+      artistItem = args.artistItem
       artistItem?.let { loadHeader(it) }
 
       artistAlbums.observe(viewLifecycleOwner, Observer {
@@ -94,11 +97,7 @@ class ArtistDetailsFragment : DaggerFragment() {
         GlideApp.with(this@ArtistDetailsFragment)
           .asBitmap()
           .load(uri)
-          .addListener(object : MuzikGlideModule.SimpleRequestListener<Bitmap> {
-            override fun onResourceReady(resource: Bitmap?) {
-              appBar.setExpanded(true, true)
-            }
-          })
+          .onResourceReady { appBar.setExpanded(true, true) }
           .into(imgArtist)
       })
     }

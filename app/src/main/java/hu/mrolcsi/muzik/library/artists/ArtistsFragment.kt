@@ -10,11 +10,9 @@ import dagger.android.support.DaggerFragment
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.ColoredDividerItemDecoration
 import hu.mrolcsi.muzik.common.MediaItemListAdapter
-import hu.mrolcsi.muzik.common.fastscroller.AutoHidingFastScrollerTouchListener
 import hu.mrolcsi.muzik.common.viewmodel.observeAndRunNavCommands
 import hu.mrolcsi.muzik.common.viewmodel.observeAndRunUiCommands
 import hu.mrolcsi.muzik.databinding.FragmentArtistsBinding
-import hu.mrolcsi.muzik.extensions.applyForegroundColor
 import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.synthetic.main.fragment_artists.*
 import javax.inject.Inject
@@ -62,10 +60,13 @@ class ArtistsFragment : DaggerFragment() {
 
       divider.setTint(it.secondaryForegroundColor)
 
-      fastScroller.applyForegroundColor(requireContext(), it.secondaryForegroundColor)
+      rvArtists.fastScroller.apply {
+        setTrackColor(it.secondaryForegroundColor)
+        setHandleColor(it.secondaryForegroundColor)
+        setBubbleColor(it.secondaryForegroundColor)
 
-      sectionIndicator.setIndicatorBackgroundColor(it.secondaryForegroundColor)
-      sectionIndicator.setIndicatorTextColor(it.secondaryBackgroundColor)
+        setBubbleTextColor(it.secondaryBackgroundColor)
+      }
     })
   }
 
@@ -77,20 +78,9 @@ class ArtistsFragment : DaggerFragment() {
   }
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-    swipeRefreshLayout.setOnRefreshListener {
-      viewModel.onRefresh()
-    }
-
-    rvArtists.apply {
-      adapter = artistAdapter
+    rvArtists.setAdapter(artistAdapter)
+    rvArtists.recyclerView.apply {
       addItemDecoration(divider)
-
-      fastScroller.setRecyclerView(this)
-      fastScroller.setOnTouchListener(AutoHidingFastScrollerTouchListener(fastScroller).also {
-        addOnScrollListener(it.autoHideOnScrollListener)
-      })
-
-      fastScroller.sectionIndicator = sectionIndicator
     }
   }
 }
