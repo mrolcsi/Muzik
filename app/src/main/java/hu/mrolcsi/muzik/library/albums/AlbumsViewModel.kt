@@ -11,6 +11,6 @@ interface AlbumsViewModel : ListViewModel<MediaBrowserCompat.MediaItem>, UiComma
 
   var sortingMode: SortingMode
 
-  fun onAlbumClicked(albumItem: MediaBrowserCompat.MediaItem, vararg transitionedView: View)
+  fun onAlbumClicked(albumItem: MediaBrowserCompat.MediaItem, transitionedView: View)
 
 }

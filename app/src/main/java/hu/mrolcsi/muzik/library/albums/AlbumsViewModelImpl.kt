@@ -6,12 +6,13 @@ import android.view.View
 import androidx.core.view.ViewCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.fragment.FragmentNavigatorExtras
+import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.viewmodel.DataBindingViewModel
 import hu.mrolcsi.muzik.common.viewmodel.ExecuteOnceNavCommandSource
 import hu.mrolcsi.muzik.common.viewmodel.ExecuteOnceUiCommandSource
 import hu.mrolcsi.muzik.common.viewmodel.ObservableImpl
 import hu.mrolcsi.muzik.library.SortingMode
-import hu.mrolcsi.muzik.library.pager.LibraryPagerFragmentDirections
+import hu.mrolcsi.muzik.library.albums.details.AlbumDetailsFragmentArgs
 import hu.mrolcsi.muzik.media.MediaRepository
 import hu.mrolcsi.muzik.service.extensions.media.MediaType
 import hu.mrolcsi.muzik.service.extensions.media.artistKey
@@ -45,12 +46,15 @@ class AlbumsViewModelImpl @Inject constructor(
 
   private var sortingModeSubject = PublishSubject.create<SortingMode>()
 
-  override fun onAlbumClicked(albumItem: MediaItem, vararg transitionedView: View) {
+  override fun onAlbumClicked(albumItem: MediaItem, transitionedView: View) {
     if (albumItem.description.type == MediaType.MEDIA_ALBUM) {
+      val transitionName = ViewCompat.getTransitionName(transitionedView)!!
       sendNavCommand {
         navigate(
-          LibraryPagerFragmentDirections.actionToAlbumDetails(albumItem),
-          FragmentNavigatorExtras(*transitionedView.map { it to ViewCompat.getTransitionName(it)!! }.toTypedArray())
+          R.id.navAlbumDetails,
+          AlbumDetailsFragmentArgs(albumItem, transitionName).toBundle(),
+          null,
+          FragmentNavigatorExtras(transitionedView to transitionName)
         )
       }
     }

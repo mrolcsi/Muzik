@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import androidx.core.view.ViewCompat
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.navArgs
 import androidx.transition.TransitionInflater
@@ -114,6 +115,8 @@ class AlbumDetailsFragment : DaggerFragment() {
       adapter = songsAdapter
       addItemDecoration(mDivider)
     }
+
+    ViewCompat.setTransitionName(imgCoverArt, args.transitionName)
   }
 
   private fun loadHeader(albumItem: MediaBrowserCompat.MediaItem) {

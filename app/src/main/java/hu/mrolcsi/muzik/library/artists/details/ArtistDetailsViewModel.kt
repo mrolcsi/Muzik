@@ -17,7 +17,7 @@ interface ArtistDetailsViewModel : UiCommandSource, NavCommandSource {
 
   val artistPicture: LiveData<Uri>
 
-  fun onAlbumClick(albumItem: MediaBrowserCompat.MediaItem, vararg transitionedView: View)
+  fun onAlbumClick(albumItem: MediaBrowserCompat.MediaItem, transitionedView: View)
 
   fun onSongClick(songItem: MediaBrowserCompat.MediaItem, position: Int)
 }

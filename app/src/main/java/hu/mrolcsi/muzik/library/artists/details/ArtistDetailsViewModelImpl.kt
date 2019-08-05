@@ -17,7 +17,7 @@ import hu.mrolcsi.muzik.common.viewmodel.ExecuteOnceNavCommandSource
 import hu.mrolcsi.muzik.common.viewmodel.ExecuteOnceUiCommandSource
 import hu.mrolcsi.muzik.common.viewmodel.ObservableImpl
 import hu.mrolcsi.muzik.discogs.DiscogsService
-import hu.mrolcsi.muzik.library.pager.LibraryPagerFragmentDirections
+import hu.mrolcsi.muzik.library.albums.details.AlbumDetailsFragmentArgs
 import hu.mrolcsi.muzik.media.MediaRepository
 import hu.mrolcsi.muzik.media.MediaService
 import hu.mrolcsi.muzik.service.extensions.media.MediaType
@@ -57,12 +57,15 @@ class ArtistDetailsViewModelImpl @Inject constructor(
 
   private var songDescriptions: List<MediaDescriptionCompat>? = null
 
-  override fun onAlbumClick(albumItem: MediaItem, vararg transitionedView: View) {
+  override fun onAlbumClick(albumItem: MediaItem, transitionedView: View) {
     if (albumItem.description.type == MediaType.MEDIA_ALBUM) {
+      val transitionName = ViewCompat.getTransitionName(transitionedView)!!
       sendNavCommand {
         navigate(
-          LibraryPagerFragmentDirections.actionToAlbumDetails(albumItem),
-          FragmentNavigatorExtras(*transitionedView.map { it to ViewCompat.getTransitionName(it)!! }.toTypedArray())
+          R.id.navAlbumDetails,
+          AlbumDetailsFragmentArgs(albumItem, transitionName).toBundle(),
+          null,
+          FragmentNavigatorExtras(transitionedView to transitionName)
         )
       }
     }

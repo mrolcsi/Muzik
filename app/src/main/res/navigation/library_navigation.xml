@@ -59,6 +59,10 @@
     <argument
       android:name="albumItem"
       app:argType="android.support.v4.media.MediaBrowserCompat$MediaItem" />
+    <argument
+      android:name="transitionName"
+      app:argType="string"
+      android:defaultValue="coverArt" />
 
   </fragment>
 
