@@ -1,53 +1,43 @@
 package hu.mrolcsi.muzik.library.albums.details
 
 import android.animation.ValueAnimator
-import android.graphics.Bitmap
 import android.graphics.Color
-import android.os.AsyncTask
 import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
-import android.support.v4.media.session.MediaControllerCompat
-import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.navArgs
 import androidx.transition.TransitionInflater
+import dagger.android.support.DaggerFragment
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.ColoredDividerItemDecoration
 import hu.mrolcsi.muzik.common.MediaItemListAdapter
 import hu.mrolcsi.muzik.common.glide.GlideApp
-import hu.mrolcsi.muzik.common.glide.MuzikGlideModule
-import hu.mrolcsi.muzik.extensions.observeOnce
+import hu.mrolcsi.muzik.common.glide.onLoadFailed
+import hu.mrolcsi.muzik.common.glide.onResourceReady
 import hu.mrolcsi.muzik.library.songs.SongHolder
-import hu.mrolcsi.muzik.service.extensions.media.MediaType
-import hu.mrolcsi.muzik.service.extensions.media.addQueueItems
 import hu.mrolcsi.muzik.service.extensions.media.album
 import hu.mrolcsi.muzik.service.extensions.media.albumArtUri
 import hu.mrolcsi.muzik.service.extensions.media.albumYear
 import hu.mrolcsi.muzik.service.extensions.media.artist
-import hu.mrolcsi.muzik.service.extensions.media.clearQueue
 import hu.mrolcsi.muzik.service.extensions.media.numberOfSongs
-import hu.mrolcsi.muzik.service.extensions.media.playFromMediaItems
-import hu.mrolcsi.muzik.service.extensions.media.setQueueTitle
-import hu.mrolcsi.muzik.service.extensions.media.type
 import hu.mrolcsi.muzik.service.theme.Theme
 import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.synthetic.main.album_details_header.*
 import kotlinx.android.synthetic.main.fragment_album_details.*
+import javax.inject.Inject
 
-class AlbumDetailsFragment : Fragment() {
+class AlbumDetailsFragment : DaggerFragment() {
 
   private val args by navArgs<AlbumDetailsFragmentArgs>()
 
-  private lateinit var viewModel: AlbumDetailsViewModel
+  @Inject lateinit var viewModel: AlbumDetailsViewModel
 
-  private val mSongsAdapter by lazy {
+  private val songsAdapter by lazy {
     MediaItemListAdapter(requireContext()) { parent, _ ->
       SongHolder(
         LayoutInflater
@@ -57,24 +47,7 @@ class AlbumDetailsFragment : Fragment() {
       ).apply {
         itemView.setOnClickListener {
           model?.let {
-            val controller = MediaControllerCompat.getMediaController(requireActivity())
-
-            viewModel.albumItem.description.album?.let { controller.setQueueTitle(it) }
-
-            if (model?.description?.type == MediaType.MEDIA_OTHER) {
-              // Shuffle All
-              viewModel.songDescriptions.observeOnce(viewLifecycleOwner, Observer { descriptions ->
-                controller.clearQueue()
-                controller.transportControls.setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_ALL)
-                controller.addQueueItems(descriptions)
-                controller.transportControls.play()
-              })
-            } else {
-              viewModel.songsFromAlbum.value?.let { items ->
-                controller.transportControls.setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_NONE)
-                controller.playFromMediaItems(items, adapterPosition)
-              }
-            }
+            viewModel.onSongClick(it, adapterPosition)
           }
         }
       }
@@ -83,26 +56,6 @@ class AlbumDetailsFragment : Fragment() {
 
   private val mDivider by lazy {
     ColoredDividerItemDecoration(requireContext(), LinearLayout.VERTICAL)
-  }
-
-  private val onCoverArtReady = object : MuzikGlideModule.SimpleRequestListener<Bitmap> {
-    override fun onLoadFailed() {
-      startPostponedEnterTransition()
-    }
-
-    override fun onResourceReady(resource: Bitmap?) {
-      startPostponedEnterTransition()
-
-      resource?.let { bitmap ->
-        AsyncTask.execute {
-          // Generate theme from resource
-          val theme = ThemeManager.getInstance(requireContext()).createFromBitmap(bitmap)
-          view?.post {
-            applyTheme(theme)
-          }
-        }
-      }
-    }
   }
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -138,20 +91,19 @@ class AlbumDetailsFragment : Fragment() {
   override fun onActivityCreated(savedInstanceState: Bundle?) {
     super.onActivityCreated(savedInstanceState)
 
-    activity?.let { activity ->
-      viewModel = ViewModelProviders.of(this, AlbumDetailsViewModel.Factory(activity.application, args.albumItem))
-        .get(AlbumDetailsViewModel::class.java)
-        .apply {
+    viewModel.apply {
 
-          loadHeader(albumItem)
+      albumItem = args.albumItem
 
-          songsFromAlbum.observe(viewLifecycleOwner, Observer {
-            Log.d(LOG_TAG, "Got items from LiveData: $it")
-            mSongsAdapter.submitList(it)
-          })
-        }
+      items.observe(viewLifecycleOwner, Observer {
+        Log.d(LOG_TAG, "Got items from LiveData: $it")
+        songsAdapter.submitList(it)
+      })
+
+      albumDetails.observe(viewLifecycleOwner, Observer {
+        loadHeader(it)
+      })
     }
-
   }
 
   override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
@@ -159,19 +111,9 @@ class AlbumDetailsFragment : Fragment() {
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     rvSongs.apply {
-      adapter = mSongsAdapter
+      adapter = songsAdapter
       addItemDecoration(mDivider)
     }
-  }
-
-  override fun onStart() {
-    super.onStart()
-    viewModel.connect()
-  }
-
-  override fun onStop() {
-    super.onStop()
-    viewModel.disconnect()
   }
 
   private fun loadHeader(albumItem: MediaBrowserCompat.MediaItem) {
@@ -195,7 +137,8 @@ class AlbumDetailsFragment : Fragment() {
     GlideApp.with(imgCoverArt)
       .asBitmap()
       .load(albumItem.description.albumArtUri)
-      .addListener(onCoverArtReady)
+      .onResourceReady { startPostponedEnterTransition() }
+      .onLoadFailed { startPostponedEnterTransition(); true }
       .into(imgCoverArt)
   }
 
