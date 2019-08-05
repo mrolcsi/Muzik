@@ -3,26 +3,26 @@
   xmlns:app="http://schemas.android.com/apk/res-auto"
   xmlns:tools="http://schemas.android.com/tools"
   android:id="@+id/main_navigation"
-  app:startDestination="@id/navigation_library"
-  tools:ignore="UnusedNavigation">
+  app:startDestination="@id/navLibrary">
 
   <action
-    android:id="@+id/action_global_to_player"
-    app:destination="@id/navigation_player"
-    app:popUpTo="@+id/navigation_library"/>
+    android:id="@+id/action_toPlayer"
+    app:destination="@id/navPlayer"
+    app:popUpTo="@+id/navLibrary" />
 
   <!--app:enterAnim="@android:anim/fade_in"-->
   <!--app:exitAnim="@android:anim/fade_out"-->
   <!--app:popEnterAnim="@android:anim/fade_in"-->
   <!--app:popExitAnim="@android:anim/fade_out"-->
 
-  <fragment android:id="@+id/navigation_library"
+  <fragment
+    android:id="@+id/navLibrary"
     android:label="@string/library_title"
     android:name="hu.mrolcsi.muzik.library.LibraryFragment"
     tools:layout="@layout/fragment_library">
 
     <action android:id="@+id/action_library_to_player"
-      app:destination="@id/navigation_player"/>
+      app:destination="@id/navPlayer" />
 
     <!--app:enterAnim="@anim/slide_in_up"-->
     <!--app:exitAnim="@anim/slide_out_up"-->
@@ -32,7 +32,7 @@
   </fragment>
 
   <fragment
-    android:id="@+id/navigation_player"
+    android:id="@+id/navPlayer"
     android:name="hu.mrolcsi.muzik.player.PlayerFragment"
     tools:layout="@layout/fragment_player"/>
 

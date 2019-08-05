@@ -7,13 +7,12 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.NavigationUI
+import androidx.navigation.ui.setupWithNavController
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.extensions.applyForegroundColor
 import hu.mrolcsi.muzik.extensions.applyNavigationBarColor
@@ -51,8 +50,6 @@ class LibraryFragment : Fragment() {
   override fun onResume() {
     super.onResume()
 
-    (activity as AppCompatActivity?)?.setSupportActionBar(libraryToolbar)
-
     // Apply StatusBar and NavigationBar colors again
     val themeManager = ThemeManager.getInstance(requireContext())
     activity?.applyStatusBarColor(
@@ -67,13 +64,13 @@ class LibraryFragment : Fragment() {
 
   private fun setupNavigation(navController: NavController) {
     val topLevelDestinations = setOf(
-      R.id.navigation_pager,
+      R.id.navLibraryPager,
       R.id.navigation_artists,
       R.id.navigation_albums,
       R.id.navigation_songs
     )
     val appBarConfig = AppBarConfiguration.Builder(topLevelDestinations).build()
-    NavigationUI.setupWithNavController(libraryToolbar, navController, appBarConfig)
+    libraryToolbar.setupWithNavController(navController, appBarConfig)
 
     navController.addOnDestinationChangedListener { _, destination, _ ->
       when {
