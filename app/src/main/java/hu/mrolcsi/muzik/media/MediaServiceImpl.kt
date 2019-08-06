@@ -15,6 +15,8 @@ import hu.mrolcsi.muzik.service.extensions.media.addQueueItems
 import hu.mrolcsi.muzik.service.extensions.media.clearQueue
 import hu.mrolcsi.muzik.service.extensions.media.playFromDescriptions
 import hu.mrolcsi.muzik.service.extensions.media.setQueueTitle
+import hu.mrolcsi.muzik.service.extensions.media.startProgressUpdater
+import hu.mrolcsi.muzik.service.extensions.media.stopProgressUpdater
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.subjects.BehaviorSubject
@@ -57,7 +59,7 @@ class MediaServiceImpl @Inject constructor(
               }
             })
           }
-          mediaController = controller
+          this@MediaServiceImpl.controller = controller
 
           // Set initial state, and metadata
           if (!playbackStateSubject.hasValue()) playbackStateSubject.onNext(controller.playbackState)
@@ -78,9 +80,9 @@ class MediaServiceImpl @Inject constructor(
   private val metadataSubject = BehaviorSubject.create<MediaMetadataCompat>()
   private val playbackStateSubject = BehaviorSubject.create<PlaybackStateCompat>()
 
-  override val currentMetadata: Observable<MediaMetadataCompat> = metadataSubject.hide()
-  override val currentPlaybackState: Observable<PlaybackStateCompat> = playbackStateSubject.hide()
-  override var mediaController: MediaControllerCompat? = null
+  override val metadata: Observable<MediaMetadataCompat> = metadataSubject.hide()
+  override val playbackState: Observable<PlaybackStateCompat> = playbackStateSubject.hide()
+  override var controller: MediaControllerCompat? = null
 
   override fun observableSubscribe(
     parentId: String,
@@ -119,18 +121,46 @@ class MediaServiceImpl @Inject constructor(
       .observeOn(AndroidSchedulers.mainThread())
 
   override fun setQueueTitle(title: CharSequence) {
-    mediaController?.setQueueTitle(title)
+    controller?.setQueueTitle(title)
   }
 
   override fun playAll(descriptions: List<MediaDescriptionCompat>, startPosition: Int) {
-    mediaController?.transportControls?.setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_NONE)
-    mediaController?.playFromDescriptions(descriptions, startPosition)
+    controller?.transportControls?.setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_NONE)
+    controller?.playFromDescriptions(descriptions, startPosition)
   }
 
   override fun playAllShuffled(descriptions: List<MediaDescriptionCompat>) {
-    mediaController?.clearQueue()
-    mediaController?.transportControls?.setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_ALL)
-    mediaController?.addQueueItems(descriptions)
-    mediaController?.transportControls?.play()
+    controller?.clearQueue()
+    controller?.transportControls?.setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_ALL)
+    controller?.addQueueItems(descriptions)
+    controller?.transportControls?.play()
+  }
+
+  override fun seekTo(position: Long) {
+    controller?.transportControls?.seekTo(position)
+  }
+
+  override fun skipToPrevious() {
+    controller?.transportControls?.skipToPrevious()
+  }
+
+  override fun playPause() {
+    when (controller?.playbackState?.state) {
+      PlaybackStateCompat.STATE_PLAYING -> {
+        // Pause playback, stop updater
+        controller?.transportControls?.pause()
+        controller?.transportControls?.startProgressUpdater()
+      }
+      PlaybackStateCompat.STATE_PAUSED,
+      PlaybackStateCompat.STATE_STOPPED -> {
+        // Start playback, start updater
+        controller?.transportControls?.play()
+        controller?.transportControls?.stopProgressUpdater()
+      }
+    }
+  }
+
+  override fun skipToNext() {
+    controller?.transportControls?.skipToNext()
   }
 }

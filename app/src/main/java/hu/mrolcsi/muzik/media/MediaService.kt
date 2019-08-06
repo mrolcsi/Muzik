@@ -12,10 +12,10 @@ interface MediaService {
 
   val mediaBrowser: MediaBrowserCompat
 
-  val currentMetadata: Observable<MediaMetadataCompat>
-  val currentPlaybackState: Observable<PlaybackStateCompat>
+  val metadata: Observable<MediaMetadataCompat>
+  val playbackState: Observable<PlaybackStateCompat>
 
-  val mediaController: MediaControllerCompat?
+  val controller: MediaControllerCompat?
 
   fun observableSubscribe(parentId: String, options: Bundle? = null): Observable<List<MediaBrowserCompat.MediaItem>>
 
@@ -23,4 +23,9 @@ interface MediaService {
 
   fun playAll(descriptions: List<MediaDescriptionCompat>, startPosition: Int = 0)
   fun playAllShuffled(descriptions: List<MediaDescriptionCompat>)
+
+  fun seekTo(position: Long)
+  fun skipToPrevious()
+  fun playPause()
+  fun skipToNext()
 }

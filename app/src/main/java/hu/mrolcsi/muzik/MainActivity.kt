@@ -39,7 +39,7 @@ class MainActivity : AppCompatActivity() {
 
     mPlayerModel = ViewModelProviders.of(this).get(PlayerViewModelImpl::class.java).apply {
       mediaController.observe(this@MainActivity, Observer { controller ->
-        // Set mediaController to the Activity
+        // Set controller to the Activity
         MediaControllerCompat.setMediaController(this@MainActivity, controller)
       })
     }

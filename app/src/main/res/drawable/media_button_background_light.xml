@@ -1,16 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<inset xmlns:android="http://schemas.android.com/apk/res/android"
-  android:insetBottom="@dimen/media_button_inset"
-  android:insetLeft="@dimen/media_button_inset"
-  android:insetRight="@dimen/media_button_inset"
-  android:insetTop="@dimen/media_button_inset">
-  <shape android:shape="rectangle"
-    android:tint="?android:attr/textColorPrimary">
-    <corners android:radius="@dimen/media_button_corner_radius"/>
-    <solid android:color="?attr/colorButtonNormal"/>
-    <padding android:bottom="@dimen/media_button_padding"
-      android:left="@dimen/media_button_padding"
-      android:right="@dimen/media_button_padding"
-      android:top="@dimen/media_button_padding"/>
-  </shape>
-</inset>
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+  android:color="?attr/rippleColor">
+  <item>
+    <inset
+      android:insetLeft="@dimen/media_button_inset"
+      android:insetTop="@dimen/media_button_inset"
+      android:insetRight="@dimen/media_button_inset"
+      android:insetBottom="@dimen/media_button_inset">
+      <shape
+        android:shape="rectangle"
+        android:tint="?android:attr/textColorPrimary">
+        <corners android:radius="@dimen/media_button_corner_radius" />
+        <solid android:color="?attr/colorButtonNormal" />
+        <padding
+          android:bottom="@dimen/media_button_padding"
+          android:left="@dimen/media_button_padding"
+          android:right="@dimen/media_button_padding"
+          android:top="@dimen/media_button_padding" />
+      </shape>
+    </inset>
+  </item>
+</ripple>

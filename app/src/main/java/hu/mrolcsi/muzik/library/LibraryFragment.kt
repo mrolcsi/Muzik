@@ -7,6 +7,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.navigation.NavController
@@ -70,6 +71,7 @@ class LibraryFragment : Fragment() {
       R.id.navigation_songs
     )
     val appBarConfig = AppBarConfiguration.Builder(topLevelDestinations).build()
+    (activity as? AppCompatActivity)?.setSupportActionBar(libraryToolbar)
     libraryToolbar.setupWithNavController(navController, appBarConfig)
 
     navController.addOnDestinationChangedListener { _, destination, _ ->

@@ -6,6 +6,7 @@ import hu.mrolcsi.muzik.di.createOrReUseViewModel
 import hu.mrolcsi.muzik.library.artists.ArtistsFragment
 import hu.mrolcsi.muzik.library.artists.ArtistsViewModel
 import hu.mrolcsi.muzik.library.artists.ArtistsViewModelImpl
+import hu.mrolcsi.muzik.library.miniplayer.MiniPlayerFragment
 import hu.mrolcsi.muzik.player.PlayerViewModel
 import hu.mrolcsi.muzik.player.PlayerViewModelImpl
 import javax.inject.Provider

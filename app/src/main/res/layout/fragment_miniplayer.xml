@@ -1,130 +1,135 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-  xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:app="http://schemas.android.com/apk/res-auto"
-  xmlns:tools="http://schemas.android.com/tools"
-  android:layout_width="match_parent"
-  android:layout_height="wrap_content"
-  android:background="?attr/colorPrimary"
-  android:clickable="true"
-  android:elevation="@dimen/bottom_navigation_elevation"
-  android:focusable="true"
-  android:foreground="?attr/selectableItemBackgroundBorderless"
-  app:elevation="@dimen/bottom_navigation_elevation"
-  tools:context=".library.MiniPlayerFragment"
-  tools:ignore="Overdraw">
+  xmlns:tools="http://schemas.android.com/tools">
 
-  <androidx.constraintlayout.widget.ConstraintLayout
+  <data>
+
+    <variable
+      name="viewModel"
+      type="hu.mrolcsi.muzik.library.miniplayer.MiniPlayerViewModel" />
+  </data>
+
+  <FrameLayout
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:clickable="true"
+    android:elevation="@dimen/bottom_navigation_elevation"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackgroundBorderless"
+    app:elevation="@dimen/bottom_navigation_elevation"
+    tools:context=".library.miniplayer.MiniPlayerFragment">
 
-    <ImageView
-      android:id="@+id/imgCoverArt"
-      android:layout_width="64dp"
-      android:layout_height="64dp"
-      android:layout_marginTop="3dp"
-      android:contentDescription="@string/notification_nowPlaying_description"
-      android:scaleType="centerCrop"
-      android:transitionName="coverArt"
-      app:layout_constraintBottom_toBottomOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toTopOf="parent"
-      app:srcCompat="@drawable/placeholder_cover_art"/>
+    <androidx.constraintlayout.widget.ConstraintLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content">
 
-    <ProgressBar
-      android:id="@+id/pbSongProgress"
-      style="?android:attr/progressBarStyleHorizontal"
-      android:layout_width="0dp"
-      android:layout_height="4dp"
-      android:elevation="0dp"
-      app:elevation="0dp"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toTopOf="parent"
-      tools:max="10"
-      tools:progress="4"/>
+      <ImageView
+        android:id="@+id/imgCoverArt"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_marginTop="3dp"
+        android:contentDescription="@string/notification_nowPlaying_description"
+        android:scaleType="centerCrop"
+        android:transitionName="coverArt"
+        app:error="@{@drawable/placeholder_cover_art}"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcUri="@{viewModel.albumArtUri}"
+        tools:srcCompat="@drawable/placeholder_cover_art" />
 
-    <TextView
-      android:id="@+id/tvTitle"
-      android:layout_width="0dp"
-      android:layout_height="wrap_content"
-      android:layout_marginStart="8dp"
-      android:layout_marginEnd="8dp"
-      android:maxLines="2"
-      android:scrollHorizontally="true"
-      android:text="@string/player_noSongLoaded"
-      app:layout_constraintBottom_toTopOf="@+id/tvArtist"
-      app:layout_constraintEnd_toStartOf="@+id/btnPrevious"
-      app:layout_constraintStart_toEndOf="@+id/imgCoverArt"
-      app:layout_constraintTop_toBottomOf="@+id/pbSongProgress"
-      tools:text="Title"/>
+      <ProgressBar
+        android:id="@+id/pbSongProgress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="0dp"
+        android:layout_height="4dp"
+        android:elevation="0dp"
+        android:max="@{viewModel.songLength}"
+        android:progress="@{viewModel.songProgress}"
+        app:elevation="0dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:max="10"
+        tools:progress="4" />
 
-    <TextView
-      android:id="@+id/tvArtist"
-      android:layout_width="0dp"
-      android:layout_height="wrap_content"
-      android:layout_marginStart="8dp"
-      android:layout_marginEnd="8dp"
-      android:alpha="0.7"
-      android:maxLines="2"
-      android:scrollHorizontally="true"
-      app:layout_constraintBottom_toBottomOf="parent"
-      app:layout_constraintEnd_toStartOf="@+id/btnPrevious"
-      app:layout_constraintStart_toEndOf="@+id/imgCoverArt"
-      app:layout_constraintTop_toBottomOf="@+id/tvTitle"
-      tools:text="Artist"/>
+      <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:maxLines="2"
+        android:scrollHorizontally="true"
+        android:text="@{viewModel.songTitle}"
+        app:layout_constraintBottom_toTopOf="@+id/tvArtist"
+        app:layout_constraintEnd_toStartOf="@+id/btnPrevious"
+        app:layout_constraintStart_toEndOf="@+id/imgCoverArt"
+        app:layout_constraintTop_toBottomOf="@+id/pbSongProgress"
+        tools:text="Title" />
 
-    <ImageButton
-      android:id="@+id/btnPrevious"
-      android:layout_width="42dp"
-      android:layout_height="42dp"
-      android:layout_marginEnd="8dp"
-      android:background="@drawable/media_button_background_light"
-      android:contentDescription="@string/mediaControl_previous"
-      android:elevation="@dimen/button_elevation"
-      android:enabled="false"
-      android:scaleType="fitCenter"
-      android:tint="?attr/colorPrimary"
-      app:elevation="@dimen/button_elevation"
-      app:layout_constraintBottom_toBottomOf="parent"
-      app:layout_constraintEnd_toStartOf="@+id/btnPlayPause"
-      app:layout_constraintTop_toBottomOf="@+id/pbSongProgress"
-      app:srcCompat="@android:drawable/ic_media_previous"/>
+      <TextView
+        android:id="@+id/tvArtist"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:alpha="0.7"
+        android:maxLines="2"
+        android:scrollHorizontally="true"
+        android:text="@{viewModel.songArtist}"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/btnPrevious"
+        app:layout_constraintStart_toEndOf="@+id/imgCoverArt"
+        app:layout_constraintTop_toBottomOf="@+id/tvTitle"
+        tools:text="Artist" />
 
-    <ImageButton
-      android:id="@+id/btnPlayPause"
-      android:layout_width="48dp"
-      android:layout_height="48dp"
-      android:layout_marginEnd="8dp"
-      android:background="@drawable/media_button_background_light"
-      android:contentDescription="@string/mediaControl_playPause"
-      android:elevation="@dimen/button_elevation"
-      android:enabled="false"
-      android:scaleType="fitCenter"
-      android:tint="?attr/colorPrimary"
-      app:elevation="@dimen/button_elevation"
-      app:layout_constraintBottom_toBottomOf="parent"
-      app:layout_constraintEnd_toStartOf="@+id/btnNext"
-      app:layout_constraintTop_toBottomOf="@+id/pbSongProgress"
-      app:srcCompat="@android:drawable/ic_media_play"/>
+      <ImageButton
+        android:id="@+id/btnPrevious"
+        android:layout_width="42dp"
+        android:layout_height="42dp"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/media_button_background"
+        android:contentDescription="@string/mediaControl_previous"
+        android:enabled="@{viewModel.previousEnabled}"
+        android:onClick="@{() -> viewModel.onPreviousClicked()}"
+        android:src="@android:drawable/ic_media_previous"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/btnPlayPause"
+        app:layout_constraintTop_toBottomOf="@+id/pbSongProgress" />
 
-    <ImageButton
-      android:id="@+id/btnNext"
-      android:layout_width="42dp"
-      android:layout_height="42dp"
-      android:layout_marginEnd="8dp"
-      android:background="@drawable/media_button_background_light"
-      android:contentDescription="@string/mediaControl_next"
-      android:elevation="@dimen/button_elevation"
-      android:enabled="false"
-      android:scaleType="fitCenter"
-      android:tint="?attr/colorPrimary"
-      app:elevation="@dimen/button_elevation"
-      app:layout_constraintBottom_toBottomOf="parent"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintTop_toBottomOf="@+id/pbSongProgress"
-      app:srcCompat="@android:drawable/ic_media_next"/>
+      <ImageButton
+        android:id="@+id/btnPlayPause"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/media_button_background"
+        android:contentDescription="@string/mediaControl_playPause"
+        android:enabled="@{viewModel.playPauseEnabled}"
+        android:onClick="@{() -> viewModel.onPlayPauseClicked()}"
+        android:src="@{viewModel.isPlaying ? @android:drawable/ic_media_pause : @android:drawable/ic_media_play}"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/btnNext"
+        app:layout_constraintTop_toBottomOf="@+id/pbSongProgress"
+        tools:src="@android:drawable/ic_media_play" />
 
-  </androidx.constraintlayout.widget.ConstraintLayout>
+      <ImageButton
+        android:id="@+id/btnNext"
+        android:layout_width="42dp"
+        android:layout_height="42dp"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/media_button_background"
+        android:contentDescription="@string/mediaControl_next"
+        android:enabled="@{viewModel.nextEnabled}"
+        android:onClick="@{() -> viewModel.onNextClicked()}"
+        android:src="@android:drawable/ic_media_next"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/pbSongProgress" />
 
-</FrameLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+  </FrameLayout>
+
+</layout>
