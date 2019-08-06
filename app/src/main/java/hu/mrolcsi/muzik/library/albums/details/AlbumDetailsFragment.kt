@@ -3,7 +3,7 @@ package hu.mrolcsi.muzik.library.albums.details
 import android.animation.ValueAnimator
 import android.graphics.Color
 import android.os.Bundle
-import android.support.v4.media.MediaBrowserCompat
+import android.support.v4.media.MediaBrowserCompat.MediaItem
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -20,6 +20,7 @@ import hu.mrolcsi.muzik.common.MediaItemListAdapter
 import hu.mrolcsi.muzik.common.glide.GlideApp
 import hu.mrolcsi.muzik.common.glide.onLoadFailed
 import hu.mrolcsi.muzik.common.glide.onResourceReady
+import hu.mrolcsi.muzik.common.view.MVVMViewHolder
 import hu.mrolcsi.muzik.library.songs.SongHolder
 import hu.mrolcsi.muzik.service.extensions.media.album
 import hu.mrolcsi.muzik.service.extensions.media.albumArtUri
@@ -39,19 +40,30 @@ class AlbumDetailsFragment : DaggerFragment() {
   @Inject lateinit var viewModel: AlbumDetailsViewModel
 
   private val songsAdapter by lazy {
-    MediaItemListAdapter(requireContext()) { parent, _ ->
-      SongHolder(
-        LayoutInflater
-          .from(parent.context)
-          .inflate(R.layout.list_item_song, parent, false),
-        true
-      ).apply {
-        itemView.setOnClickListener {
-          model?.let {
-            viewModel.onSongClick(it, adapterPosition)
+    object : MediaItemListAdapter<MVVMViewHolder<MediaItem>>(requireContext(), { parent, viewType ->
+      if (viewType == DiscHeaderHolder.VIEW_TYPE) {
+        DiscHeaderHolder(
+          LayoutInflater
+            .from(parent.context)
+            .inflate(R.layout.list_item_disc_number, parent, false)
+        )
+      } else {
+        SongHolder(
+          LayoutInflater
+            .from(parent.context)
+            .inflate(R.layout.list_item_song, parent, false),
+          true
+        ).apply {
+          itemView.setOnClickListener {
+            model?.let {
+              viewModel.onSongClick(it, adapterPosition)
+            }
           }
         }
       }
+    }) {
+      override fun getItemViewType(position: Int) =
+        if (getItem(position).isBrowsable) DiscHeaderHolder.VIEW_TYPE else SongHolder.VIEW_TYPE
     }
   }
 
@@ -119,7 +131,7 @@ class AlbumDetailsFragment : DaggerFragment() {
     ViewCompat.setTransitionName(imgCoverArt, args.transitionName)
   }
 
-  private fun loadHeader(albumItem: MediaBrowserCompat.MediaItem) {
+  private fun loadHeader(albumItem: MediaItem) {
 
     albumDetailsToolbar.title = albumItem.description.album
 

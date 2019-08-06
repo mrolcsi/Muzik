@@ -96,4 +96,7 @@ open class SongHolder(override val containerView: View, private val showTrackNum
     tvTrackNumber?.setTextColor(theme.secondaryForegroundColor)
   }
 
+  companion object {
+    const val VIEW_TYPE = 8664
+  }
 }
