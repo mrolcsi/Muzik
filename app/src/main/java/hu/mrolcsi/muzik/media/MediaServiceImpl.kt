@@ -8,6 +8,17 @@ import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
+import android.support.v4.media.session.PlaybackStateCompat.REPEAT_MODE_ALL
+import android.support.v4.media.session.PlaybackStateCompat.REPEAT_MODE_INVALID
+import android.support.v4.media.session.PlaybackStateCompat.REPEAT_MODE_NONE
+import android.support.v4.media.session.PlaybackStateCompat.REPEAT_MODE_ONE
+import android.support.v4.media.session.PlaybackStateCompat.SHUFFLE_MODE_ALL
+import android.support.v4.media.session.PlaybackStateCompat.SHUFFLE_MODE_INVALID
+import android.support.v4.media.session.PlaybackStateCompat.SHUFFLE_MODE_NONE
+import android.support.v4.media.session.PlaybackStateCompat.STATE_PAUSED
+import android.support.v4.media.session.PlaybackStateCompat.STATE_PLAYING
+import android.support.v4.media.session.PlaybackStateCompat.STATE_STOPPED
+import android.support.v4.media.session.PlaybackStateCompat.ShuffleMode
 import android.util.Log
 import androidx.core.os.bundleOf
 import hu.mrolcsi.muzik.service.MuzikPlayerService
@@ -39,6 +50,17 @@ class MediaServiceImpl @Inject constructor(
           val controller = MediaControllerCompat(app, token).apply {
             // Register callbacks to watch for changes
             registerCallback(object : MediaControllerCompat.Callback() {
+
+              override fun onSessionReady() {
+                Log.v("MediaService", "Session ready. ")
+
+                // Set initial state, and metadata
+                if (!playbackStateSubject.hasValue()) playbackStateSubject.onNext(playbackState)
+                if (!metadataSubject.hasValue()) metadataSubject.onNext(metadata)
+                if (!repeatModeSubject.hasValue()) repeatModeSubject.onNext(repeatMode)
+                if (!shuffleModeSubject.hasValue()) shuffleModeSubject.onNext(shuffleMode)
+              }
+
               override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
                 metadata?.let {
                   Log.v("MediaService", "onMetadataChanged(${metadata.description})")
@@ -54,16 +76,20 @@ class MediaServiceImpl @Inject constructor(
               }
 
               override fun onPlaybackStateChanged(state: PlaybackStateCompat) {
-                //Log.v(getLogTag(), "onPlaybackStateChanged($state)")/
                 playbackStateSubject.onNext(state)
+              }
+
+              override fun onRepeatModeChanged(repeatMode: Int) {
+                repeatModeSubject.onNext(repeatMode)
+              }
+
+              override fun onShuffleModeChanged(shuffleMode: Int) {
+                shuffleModeSubject.onNext(shuffleMode)
               }
             })
           }
-          this@MediaServiceImpl.controller = controller
 
-          // Set initial state, and metadata
-          if (!playbackStateSubject.hasValue()) playbackStateSubject.onNext(controller.playbackState)
-          if (!metadataSubject.hasValue()) metadataSubject.onNext(controller.metadata)
+          this@MediaServiceImpl.controller = controller
         }
       }
     }
@@ -79,10 +105,15 @@ class MediaServiceImpl @Inject constructor(
 
   private val metadataSubject = BehaviorSubject.create<MediaMetadataCompat>()
   private val playbackStateSubject = BehaviorSubject.create<PlaybackStateCompat>()
+  private val repeatModeSubject = BehaviorSubject.create<@ShuffleMode Int>()
+  private val shuffleModeSubject = BehaviorSubject.create<@ShuffleMode Int>()
 
   override val metadata: Observable<MediaMetadataCompat> = metadataSubject.hide()
   override val playbackState: Observable<PlaybackStateCompat> = playbackStateSubject.hide()
-  override var controller: MediaControllerCompat? = null
+  override val repeatMode: Observable<Int> = repeatModeSubject.hide()
+  override val shuffleMode: Observable<Int> = shuffleModeSubject.hide()
+
+  private var controller: MediaControllerCompat? = null
 
   override fun observableSubscribe(
     parentId: String,
@@ -125,13 +156,13 @@ class MediaServiceImpl @Inject constructor(
   }
 
   override fun playAll(descriptions: List<MediaDescriptionCompat>, startPosition: Int) {
-    controller?.transportControls?.setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_NONE)
+    controller?.transportControls?.setShuffleMode(SHUFFLE_MODE_NONE)
     controller?.playFromDescriptions(descriptions, startPosition)
   }
 
   override fun playAllShuffled(descriptions: List<MediaDescriptionCompat>) {
     controller?.clearQueue()
-    controller?.transportControls?.setShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_ALL)
+    controller?.transportControls?.setShuffleMode(SHUFFLE_MODE_ALL)
     controller?.addQueueItems(descriptions)
     controller?.transportControls?.play()
   }
@@ -146,21 +177,57 @@ class MediaServiceImpl @Inject constructor(
 
   override fun playPause() {
     when (controller?.playbackState?.state) {
-      PlaybackStateCompat.STATE_PLAYING -> {
+      STATE_PLAYING -> {
         // Pause playback, stop updater
         controller?.transportControls?.pause()
-        controller?.transportControls?.startProgressUpdater()
+        controller?.transportControls?.stopProgressUpdater()
       }
-      PlaybackStateCompat.STATE_PAUSED,
-      PlaybackStateCompat.STATE_STOPPED -> {
+      STATE_PAUSED,
+      STATE_STOPPED -> {
         // Start playback, start updater
         controller?.transportControls?.play()
-        controller?.transportControls?.stopProgressUpdater()
+        controller?.transportControls?.startProgressUpdater()
       }
     }
   }
 
   override fun skipToNext() {
     controller?.transportControls?.skipToNext()
+  }
+
+  override fun getShuffleMode(): Int = controller?.shuffleMode ?: SHUFFLE_MODE_INVALID
+
+  override fun setShuffleMode(shuffleMode: Int) {
+    controller?.transportControls?.setShuffleMode(shuffleMode)
+  }
+
+  override fun toggleShuffle() {
+    controller?.let {
+      when (it.shuffleMode) {
+        SHUFFLE_MODE_NONE ->
+          it.transportControls.setShuffleMode(SHUFFLE_MODE_ALL)
+        else ->
+          it.transportControls.setShuffleMode(SHUFFLE_MODE_NONE)
+      }
+    }
+  }
+
+  override fun getRepeatMode() = controller?.repeatMode ?: REPEAT_MODE_INVALID
+
+  override fun setRepeatMode(repeatMode: Int) {
+    controller?.transportControls?.setRepeatMode(repeatMode)
+  }
+
+  override fun toggleRepeat() {
+    controller?.let {
+      when (it.repeatMode) {
+        REPEAT_MODE_NONE ->
+          it.transportControls.setRepeatMode(REPEAT_MODE_ONE)
+        REPEAT_MODE_ONE ->
+          it.transportControls.setRepeatMode(REPEAT_MODE_ALL)
+        else ->
+          it.transportControls.setRepeatMode(REPEAT_MODE_NONE)
+      }
+    }
   }
 }

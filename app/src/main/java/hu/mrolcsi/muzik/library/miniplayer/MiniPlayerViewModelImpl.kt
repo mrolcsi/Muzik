@@ -1,18 +1,18 @@
 package hu.mrolcsi.muzik.library.miniplayer
 
-import android.graphics.drawable.Drawable
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.view.View
 import androidx.core.view.ViewCompat
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import hu.mrolcsi.muzik.BR
-import hu.mrolcsi.muzik.MainNavigationDirections
+import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.viewmodel.DataBindingViewModel
 import hu.mrolcsi.muzik.common.viewmodel.ExecuteOnceNavCommandSource
 import hu.mrolcsi.muzik.common.viewmodel.ExecuteOnceUiCommandSource
 import hu.mrolcsi.muzik.common.viewmodel.ObservableImpl
 import hu.mrolcsi.muzik.media.MediaService
+import hu.mrolcsi.muzik.player.PlayerFragmentArgs
 import hu.mrolcsi.muzik.service.extensions.media.albumArtUri
 import hu.mrolcsi.muzik.service.extensions.media.artist
 import hu.mrolcsi.muzik.service.extensions.media.duration
@@ -26,7 +26,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import javax.inject.Inject
 
-class MiniPlayerViewModelImpl @Inject constructor(
+open class MiniPlayerViewModelImpl @Inject constructor(
   observable: ObservableImpl,
   uiCommandSource: ExecuteOnceUiCommandSource,
   navCommandSource: ExecuteOnceNavCommandSource,
@@ -36,11 +36,10 @@ class MiniPlayerViewModelImpl @Inject constructor(
 
   override var songTitle: String? by boundStringOrNull(BR.songTitle)
   override var songArtist: String? by boundStringOrNull(BR.songArtist)
-  override val albumArt: Drawable? by boundProperty(BR.albumArt, null)
   override var albumArtUri: String? by boundStringOrNull(BR.albumArtUri, null)
 
-  override var songLength: Int by boundInt(BR.songLength, 0)
-  override var songProgress: Int by boundInt(BR.songProgress, 0)
+  override var duration: Int by boundInt(BR.duration, 0)
+  override var elapsedTime: Int by boundInt(BR.elapsedTime, 0)
 
   override var isPlaying: Boolean by boundBoolean(BR.playing, false)
   override var isPreviousEnabled: Boolean by boundBoolean(BR.previousEnabled, false)
@@ -51,14 +50,16 @@ class MiniPlayerViewModelImpl @Inject constructor(
     sendNavCommand {
       val transitionName = ViewCompat.getTransitionName(transitionedView)!!
       navigate(
-        MainNavigationDirections.actionToPlayer(transitionName),
+        R.id.navPlayer,
+        PlayerFragmentArgs(transitionName).toBundle(),
+        null,
         FragmentNavigatorExtras(transitionedView to transitionName)
       )
     }
   }
 
   override fun onPreviousClicked() {
-    if (songProgress > 5) {
+    if (elapsedTime > 5) {
       // restart the song
       mediaService.seekTo(0)
     } else {
@@ -78,18 +79,18 @@ class MiniPlayerViewModelImpl @Inject constructor(
     mediaService.playbackState
       .observeOn(AndroidSchedulers.mainThread())
       .subscribeBy { updateControls(it) }
-      .disposeOnClear()
+      .disposeOnCleared()
 
     mediaService.metadata
       .observeOn(AndroidSchedulers.mainThread())
       .subscribeBy { updateMetadata(it) }
-      .disposeOnClear()
+      .disposeOnCleared()
   }
 
-  private fun updateControls(playbackState: PlaybackStateCompat) {
+  protected open fun updateControls(playbackState: PlaybackStateCompat) {
     // Update progress
     val elapsedTime = playbackState.position / 1000
-    songProgress = elapsedTime.toInt()
+    this.elapsedTime = elapsedTime.toInt()
 
     isPreviousEnabled = playbackState.isSkipToPreviousEnabled
     isPlayPauseEnabled = playbackState.isPauseEnabled || playbackState.isPlayEnabled
@@ -98,10 +99,10 @@ class MiniPlayerViewModelImpl @Inject constructor(
     isPlaying = playbackState.isPlaying
   }
 
-  private fun updateMetadata(metadata: MediaMetadataCompat) {
+  protected open fun updateMetadata(metadata: MediaMetadataCompat) {
     albumArtUri = metadata.albumArtUri?.toString()
 
-    songLength = (metadata.duration / 1000).toInt()
+    duration = (metadata.duration / 1000).toInt()
 
     songTitle = metadata.title
     songArtist = metadata.artist

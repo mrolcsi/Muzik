@@ -1,11 +1,31 @@
 package hu.mrolcsi.muzik.player
 
-import android.support.v4.media.session.MediaSessionCompat
-import androidx.lifecycle.LiveData
-import hu.mrolcsi.muzik.library.SessionViewModel
+import androidx.databinding.Bindable
+import hu.mrolcsi.muzik.library.miniplayer.MiniPlayerViewModel
 
-interface PlayerViewModel : SessionViewModel {
+interface PlayerViewModel : MiniPlayerViewModel {
 
-  val currentQueue: LiveData<List<MediaSessionCompat.QueueItem>>
+  @get:Bindable
+  val elapsedTimeText: String?
+  @get:Bindable
+  val remainingTimeText: String?
 
+  @get:Bindable
+  val shuffleDrawableRes: Int
+  @get:Bindable
+  val repeatDrawableRes: Int
+
+  //val queue: LiveData<List<MediaSessionCompat.QueueItem>>
+
+  fun onShuffleClicked()
+  fun onRepeatClicked()
+
+  @get:Bindable
+  val isSeekProgressVisible: Boolean
+  @get:Bindable
+  val seekProgressText: String?
+
+  fun onStartTrackingTouch()
+  fun onSeek(progress: Int, fromUser: Boolean)
+  fun onStopTrackingTouch()
 }

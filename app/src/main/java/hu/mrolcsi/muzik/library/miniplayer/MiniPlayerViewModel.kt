@@ -1,6 +1,5 @@
 package hu.mrolcsi.muzik.library.miniplayer
 
-import android.graphics.drawable.Drawable
 import android.view.View
 import androidx.databinding.Bindable
 import androidx.databinding.Observable
@@ -14,14 +13,12 @@ interface MiniPlayerViewModel : Observable, UiCommandSource, NavCommandSource {
   @get:Bindable
   val songArtist: String?
   @get:Bindable
-  val albumArt: Drawable?
-  @get:Bindable
   val albumArtUri: String?
 
   @get:Bindable
-  val songLength: Int
+  val duration: Int
   @get:Bindable
-  val songProgress: Int
+  val elapsedTime: Int
 
   @get:Bindable
   val isPlaying: Boolean

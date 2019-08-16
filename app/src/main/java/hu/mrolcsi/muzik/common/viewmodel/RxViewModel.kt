@@ -8,7 +8,7 @@ abstract class RxViewModel : ViewModel() {
 
   private val disposables = CompositeDisposable()
 
-  fun Disposable.disposeOnClear() = disposables.add(this)
+  fun Disposable.disposeOnCleared() = disposables.add(this)
 
   public override fun onCleared() {
     super.onCleared()

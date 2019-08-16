@@ -3,22 +3,16 @@ package hu.mrolcsi.muzik
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.support.v4.media.session.MediaControllerCompat
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.NavHostFragment
 import hu.mrolcsi.muzik.extensions.isPermissionGranted
 import hu.mrolcsi.muzik.extensions.requestPermission
 import hu.mrolcsi.muzik.extensions.shouldShowPermissionRationale
-import hu.mrolcsi.muzik.player.PlayerViewModelImpl
 import kotlinx.android.synthetic.main.content_permission.*
 
 class MainActivity : AppCompatActivity() {
-
-  private lateinit var mPlayerModel: PlayerViewModelImpl
 
   override fun onCreate(savedInstanceState: Bundle?) {
     setTheme(R.style.FluxTheme)
@@ -36,23 +30,6 @@ class MainActivity : AppCompatActivity() {
         createNavHost()
       }
     }
-
-    mPlayerModel = ViewModelProviders.of(this).get(PlayerViewModelImpl::class.java).apply {
-      mediaController.observe(this@MainActivity, Observer { controller ->
-        // Set controller to the Activity
-        MediaControllerCompat.setMediaController(this@MainActivity, controller)
-      })
-    }
-  }
-
-  override fun onStart() {
-    super.onStart()
-    mPlayerModel.connect()
-  }
-
-  override fun onStop() {
-    super.onStop()
-    mPlayerModel.disconnect()
   }
 
   @Suppress("UNUSED_PARAMETER")

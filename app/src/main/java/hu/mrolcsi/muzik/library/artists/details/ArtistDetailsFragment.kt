@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.lifecycle.Observer
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import dagger.android.support.DaggerFragment
 import hu.mrolcsi.muzik.R
@@ -79,8 +80,8 @@ class ArtistDetailsFragment : DaggerFragment() {
 
     viewModel.apply {
 
-      observeAndRunUiCommands(this)
-      observeAndRunNavCommands(this)
+      requireContext().observeAndRunUiCommands(viewLifecycleOwner, this)
+      findNavController().observeAndRunNavCommands(viewLifecycleOwner, this)
 
       artistItem = args.artistItem
       artistItem?.let { loadHeader(it) }

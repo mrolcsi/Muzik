@@ -1,8 +1,7 @@
 package hu.mrolcsi.muzik.common.viewmodel
 
 import android.content.Context
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
@@ -42,8 +41,5 @@ class ExecuteOnceUiCommandSource @Inject constructor() : UiCommandSource {
   }
 }
 
-fun Fragment.observeAndRunUiCommands(source: UiCommandSource) =
-  source.uiCommand.observe(viewLifecycleOwner, Observer { it?.invoke(requireContext()) })
-
-fun FragmentActivity.observeAndRunUiCommands(source: UiCommandSource) =
-  source.uiCommand.observe(this, Observer { it?.invoke(this) })
+fun Context.observeAndRunUiCommands(lifecycleOwner: LifecycleOwner, source: UiCommandSource) =
+  source.uiCommand.observe(lifecycleOwner, Observer { it?.invoke(this) })

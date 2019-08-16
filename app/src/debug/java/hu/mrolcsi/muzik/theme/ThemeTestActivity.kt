@@ -16,7 +16,6 @@ import androidx.recyclerview.widget.RecyclerView
 import dagger.android.support.DaggerAppCompatActivity
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.player.PlayerViewModel
-import hu.mrolcsi.muzik.service.extensions.media.albumArt
 import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.debug.activity_theme_test.*
@@ -37,19 +36,19 @@ class ThemeTestActivity : DaggerAppCompatActivity() {
 
     root.background = CheckerboardDrawable.create()
 
-    viewModel.apply {
-      mediaController.observe(this@ThemeTestActivity, Observer {
-        MediaControllerCompat.setMediaController(this@ThemeTestActivity, it)
-
-        setupControls()
-      })
-
-      currentMediaMetadata.observe(this@ThemeTestActivity, Observer {
-        it?.let { metadata ->
-          imgInput.setImageBitmap(metadata.albumArt)
-        }
-      })
-    }
+//    viewModel.apply {
+//      mediaController.observe(this@ThemeTestActivity, Observer {
+//        MediaControllerCompat.setMediaController(this@ThemeTestActivity, it)
+//
+//        setupControls()
+//      })
+//
+//      currentMediaMetadata.observe(this@ThemeTestActivity, Observer {
+//        it?.let { metadata ->
+//          imgInput.setImageBitmap(metadata.albumArt)
+//        }
+//      })
+//    }
 
     ThemeManager.getInstance(this).currentTheme.observe(this, Observer { theme ->
       // Source Palette
@@ -92,18 +91,6 @@ class ThemeTestActivity : DaggerAppCompatActivity() {
     btnNext.setOnClickListener {
       controller.transportControls.skipToNext()
     }
-  }
-
-  override fun onStart() {
-    super.onStart()
-
-    viewModel.connect()
-  }
-
-  override fun onStop() {
-    super.onStop()
-
-    viewModel.disconnect()
   }
 
   private class PaletteAdapter : ListAdapter<Palette.Swatch?, PaletteAdapter.SwatchHolder>(

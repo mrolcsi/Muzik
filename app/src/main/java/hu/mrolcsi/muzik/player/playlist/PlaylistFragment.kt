@@ -4,15 +4,12 @@ import android.animation.ValueAnimator
 import android.graphics.Color
 import android.os.Bundle
 import android.support.v4.media.session.MediaControllerCompat
-import android.support.v4.media.session.PlaybackStateCompat
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
-import androidx.recyclerview.widget.LinearLayoutManager
 import dagger.android.support.DaggerFragment
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.ColoredDividerItemDecoration
@@ -20,7 +17,6 @@ import hu.mrolcsi.muzik.database.playqueue.PlayQueueDatabase
 import hu.mrolcsi.muzik.extensions.OnItemClickListener
 import hu.mrolcsi.muzik.extensions.applyForegroundColor
 import hu.mrolcsi.muzik.player.PlayerViewModel
-import hu.mrolcsi.muzik.service.extensions.media.isPlaying
 import hu.mrolcsi.muzik.service.theme.Theme
 import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.synthetic.main.fragment_playlist.*
@@ -47,45 +43,45 @@ class PlaylistFragment : DaggerFragment() {
   override fun onActivityCreated(savedInstanceState: Bundle?) {
     super.onActivityCreated(savedInstanceState)
 
-    viewModel.apply {
-      Log.d(LOG_TAG, "Got PlayerViewModel: $this")
-
-      currentPlaybackState.observe(viewLifecycleOwner, object : Observer<PlaybackStateCompat?> {
-
-        private var previousState: PlaybackStateCompat? = null
-
-        override fun onChanged(it: PlaybackStateCompat?) {
-          if (it != null) {
-            if (previousState?.state != it.state) {
-              previousState = it
-              mPlaylistAdapter.isPlaying = it.isPlaying
-            }
-          }
-        }
-      })
-
-      currentMediaMetadata.observe(viewLifecycleOwner, Observer { metadata ->
-        metadata?.let {
-          // Update active queueId in adapter (notifyDataSetChanged will do the rest)
-          MediaControllerCompat.getMediaController(requireActivity())?.let { controller ->
-            mPlaylistAdapter.activeQueueId = controller.playbackState.activeQueueItemId
-
-            val layoutManager = rvPlaylist.layoutManager as LinearLayoutManager
-            val activePosition = controller.playbackState.activeQueueItemId.toInt()
-            val first = layoutManager.findFirstCompletelyVisibleItemPosition()
-            val last = layoutManager.findLastCompletelyVisibleItemPosition()
-
-            if (activePosition !in first..last) {
-              layoutManager.scrollToPositionWithOffset(activePosition, 500)
-            }
-          }
-        }
-      })
-
-      currentQueue.observe(viewLifecycleOwner, Observer {
-        playlistToolbar.title = MediaControllerCompat.getMediaController(requireActivity())?.queueTitle
-      })
-    }
+//    viewModel.apply {
+//      Log.d(LOG_TAG, "Got PlayerViewModel: $this")
+//
+//      currentPlaybackState.observe(viewLifecycleOwner, object : Observer<PlaybackStateCompat?> {
+//
+//        private var previousState: PlaybackStateCompat? = null
+//
+//        override fun onChanged(it: PlaybackStateCompat?) {
+//          if (it != null) {
+//            if (previousState?.state != it.state) {
+//              previousState = it
+//              mPlaylistAdapter.isPlaying = it.isPlaying
+//            }
+//          }
+//        }
+//      })
+//
+//      currentMediaMetadata.observe(viewLifecycleOwner, Observer { metadata ->
+//        metadata?.let {
+//          // Update active queueId in adapter (notifyDataSetChanged will do the rest)
+//          MediaControllerCompat.getMediaController(requireActivity())?.let { controller ->
+//            mPlaylistAdapter.activeQueueId = controller.playbackState.activeQueueItemId
+//
+//            val layoutManager = rvPlaylist.layoutManager as LinearLayoutManager
+//            val activePosition = controller.playbackState.activeQueueItemId.toInt()
+//            val first = layoutManager.findFirstCompletelyVisibleItemPosition()
+//            val last = layoutManager.findLastCompletelyVisibleItemPosition()
+//
+//            if (activePosition !in first..last) {
+//              layoutManager.scrollToPositionWithOffset(activePosition, 500)
+//            }
+//          }
+//        }
+//      })
+//
+//      currentQueue.observe(viewLifecycleOwner, Observer {
+//        playlistToolbar.title = MediaControllerCompat.getMediaController(requireActivity())?.queueTitle
+//      })
+//    }
 
     PlayQueueDatabase.getInstance(requireContext())
       .getPlayQueueDao()

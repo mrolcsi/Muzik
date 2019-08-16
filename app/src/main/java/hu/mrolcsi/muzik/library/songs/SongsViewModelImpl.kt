@@ -62,7 +62,7 @@ class SongsViewModelImpl @Inject constructor(
     MediaDescriptionCompat.Builder()
       .setMediaId("shuffle/all")
       .setTitle(context.getString(R.string.mediaControl_shuffleAll))
-      .setIconBitmap(BitmapFactory.decodeResource(context.resources, R.drawable.ic_shuffle))
+      .setIconBitmap(BitmapFactory.decodeResource(context.resources, R.drawable.ic_shuffle_all))
       .setExtras(bundleOf(MediaType.MEDIA_TYPE_KEY to MediaType.MEDIA_OTHER))
       .build(),
     0
@@ -79,7 +79,7 @@ class SongsViewModelImpl @Inject constructor(
       .subscribeBy(
         onNext = { items.value = it },
         onError = { showError(this, it) }
-      ).disposeOnClear()
+      ).disposeOnCleared()
   }
 
   private fun List<MediaItem>.applySorting(sortingMode: SortingMode): List<MediaItem> {

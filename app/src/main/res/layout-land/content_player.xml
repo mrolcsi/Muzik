@@ -117,7 +117,7 @@
     app:layout_constraintBottom_toBottomOf="@+id/btnPlayPause"
     app:layout_constraintStart_toEndOf="@+id/imgCoverArt"
     app:layout_constraintTop_toTopOf="@+id/btnPlayPause"
-    app:srcCompat="@drawable/ic_shuffle"
+    app:srcCompat="@drawable/ic_shuffle_all"
     tools:tint="@android:color/white"/>
 
   <ImageButton

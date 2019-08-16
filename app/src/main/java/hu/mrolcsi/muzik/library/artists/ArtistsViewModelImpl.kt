@@ -33,7 +33,7 @@ class ArtistsViewModelImpl @Inject constructor(
       .subscribeBy(
         onNext = { items.value = it },
         onError = { showError(this, it) }
-      ).disposeOnClear()
+      ).disposeOnCleared()
   }
 
   override fun onSelect(item: MediaBrowserCompat.MediaItem) {

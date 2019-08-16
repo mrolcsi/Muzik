@@ -11,6 +11,7 @@ import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.lifecycle.Observer
+import androidx.navigation.fragment.NavHostFragment
 import dagger.android.support.DaggerFragment
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.OnSwipeTouchListener
@@ -53,8 +54,8 @@ class MiniPlayerFragment : DaggerFragment() {
     super.onActivityCreated(savedInstanceState)
 
     viewModel.apply {
-      observeAndRunUiCommands(this)
-      observeAndRunNavCommands(this)
+      requireContext().observeAndRunUiCommands(viewLifecycleOwner, this)
+      NavHostFragment.findNavController(requireParentFragment()).observeAndRunNavCommands(viewLifecycleOwner, this)
     }
 
     ThemeManager.getInstance(requireContext()).currentTheme.observe(viewLifecycleOwner, Observer {

@@ -74,7 +74,7 @@ class AlbumsViewModelImpl @Inject constructor(
       .subscribeBy(
         onNext = { (_, albums) -> items.value = albums },
         onError = { showError(this, it) }
-      ).disposeOnClear()
+      ).disposeOnCleared()
   }
 
   private fun List<MediaItem>.applySorting(sortingMode: SortingMode): List<MediaItem> {
