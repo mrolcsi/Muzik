@@ -1,6 +1,7 @@
 package hu.mrolcsi.muzik.player
 
 import android.support.v4.media.MediaMetadataCompat
+import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.support.v4.media.session.PlaybackStateCompat.REPEAT_MODE_ALL
 import android.support.v4.media.session.PlaybackStateCompat.REPEAT_MODE_NONE
@@ -8,6 +9,7 @@ import android.support.v4.media.session.PlaybackStateCompat.REPEAT_MODE_ONE
 import android.support.v4.media.session.PlaybackStateCompat.SHUFFLE_MODE_ALL
 import android.support.v4.media.session.PlaybackStateCompat.SHUFFLE_MODE_NONE
 import android.widget.Toast
+import androidx.lifecycle.MutableLiveData
 import hu.mrolcsi.muzik.BR
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.viewmodel.ExecuteOnceNavCommandSource
@@ -95,6 +97,13 @@ class PlayerViewModelImpl @Inject constructor(
     remainingTimeText = "-${(duration - elapsedTime).secondsToTimeStamp()}"
   }
 
+  override val queue = MutableLiveData<List<MediaSessionCompat.QueueItem>>()
+  override fun getCurrentQueueId() = mediaService.getCurrentQueueId()
+
+  override fun skipToQueueItem(itemId: Long) {
+    mediaService.skipToQueueItem(itemId)
+  }
+
   init {
     mediaService.shuffleMode
       .observeOn(AndroidSchedulers.mainThread())
@@ -142,6 +151,13 @@ class PlayerViewModelImpl @Inject constructor(
             }
           }
         },
+        onError = { showError(this, it) }
+      ).disposeOnCleared()
+
+    mediaService.queue
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribeBy(
+        onNext = { queue.value = it },
         onError = { showError(this, it) }
       ).disposeOnCleared()
   }

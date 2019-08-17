@@ -1,6 +1,5 @@
 package hu.mrolcsi.muzik.library.albums
 
-import android.graphics.Bitmap
 import android.os.AsyncTask
 import android.support.v4.media.MediaBrowserCompat
 import android.view.View
@@ -8,7 +7,7 @@ import androidx.cardview.widget.CardView
 import androidx.core.view.ViewCompat
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.glide.GlideApp
-import hu.mrolcsi.muzik.common.glide.MuzikGlideModule
+import hu.mrolcsi.muzik.common.glide.onResourceReady
 import hu.mrolcsi.muzik.common.view.MVVMViewHolder
 import hu.mrolcsi.muzik.extensions.startMarquee
 import hu.mrolcsi.muzik.service.extensions.media.albumArtUri
@@ -28,22 +27,6 @@ class AlbumHolder(override val containerView: View) :
 
   private val marqueeDelay = containerView.resources.getInteger(R.integer.preferredMarqueeDelay).toLong()
 
-  private val onCoverArtReady = object : MuzikGlideModule.SimpleRequestListener<Bitmap> {
-    override fun onLoadFailed() {}
-
-    override fun onResourceReady(resource: Bitmap?) {
-      resource?.let { bitmap ->
-        AsyncTask.execute {
-          // Generate theme from resource
-          val theme = ThemeManager.getInstance(containerView.context).createFromBitmap(bitmap)
-          containerView.post {
-            applyTheme(theme)
-          }
-        }
-      }
-    }
-  }
-
   private fun bind(item: MediaBrowserCompat.MediaItem) {
 
     // Set texts
@@ -62,7 +45,15 @@ class AlbumHolder(override val containerView: View) :
     GlideApp.with(imgCoverArt)
       .asBitmap()
       .load(item.description.albumArtUri)
-      .addListener(onCoverArtReady)
+      .onResourceReady {
+        AsyncTask.execute {
+          // Generate theme from resource
+          val theme = ThemeManager.getInstance(containerView.context).createFromBitmap(it)
+          containerView.post {
+            applyTheme(theme)
+          }
+        }
+      }
       .into(imgCoverArt)
   }
 

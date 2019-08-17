@@ -32,17 +32,15 @@
       app:srcUri="@{viewModel.albumArtUri}"
       tools:src="@drawable/placeholder_cover_art" />
 
-    <!--<androidx.recyclerview.widget.RecyclerView-->
-    <!--android:id="@+id/rvQueue"-->
-    <!--android:layout_width="0dp"-->
-    <!--android:layout_height="0dp"-->
-    <!--android:alpha="0.0"-->
-    <!--app:layout_constraintBottom_toTopOf="@+id/sbSongProgress"-->
-    <!--app:layout_constraintEnd_toEndOf="parent"-->
-    <!--app:layout_constraintStart_toStartOf="parent"-->
-    <!--app:layout_constraintTop_toTopOf="parent"-->
-    <!--tools:alpha="1.0"-->
-    <!--tools:listitem="@layout/list_item_queue" />-->
+    <androidx.recyclerview.widget.RecyclerView
+      android:id="@+id/rvQueue"
+      android:layout_width="0dp"
+      android:layout_height="0dp"
+      app:layout_constraintBottom_toTopOf="@+id/sbSongProgress"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent"
+      tools:listitem="@layout/list_item_queue" />
 
     <!-- Make sure Toolbar is above the Cover Art -->
 
@@ -147,7 +145,6 @@
       android:contentDescription="@string/mediaControl_previous"
       android:elevation="@dimen/button_elevation"
       android:enabled="@{viewModel.isPreviousEnabled}"
-      android:onClick="@{() -> viewModel.onPreviousClicked()}"
       android:scaleType="fitCenter"
       app:elevation="@dimen/button_elevation"
       app:layout_constraintBottom_toBottomOf="@+id/btnPlayPause"
@@ -187,7 +184,6 @@
       android:contentDescription="@string/mediaControl_next"
       android:elevation="@dimen/button_elevation"
       android:enabled="@{viewModel.isNextEnabled}"
-      android:onClick="@{() -> viewModel.onNextClicked()}"
       android:scaleType="fitCenter"
       app:elevation="@dimen/button_elevation"
       app:layout_constraintBottom_toBottomOf="@+id/btnPlayPause"

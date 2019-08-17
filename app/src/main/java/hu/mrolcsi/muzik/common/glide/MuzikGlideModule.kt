@@ -65,7 +65,7 @@ class MuzikGlideModule : AppGlideModule() {
       return false
     }
 
-    fun onResourceReady(resource: R?) {}
+    fun onResourceReady(resource: R) {}
 
   }
 
@@ -74,9 +74,9 @@ class MuzikGlideModule : AppGlideModule() {
   }
 }
 
-fun <T> GlideRequest<T>.onResourceReady(callback: (resource: T?) -> Unit): GlideRequest<T> {
+fun <T> GlideRequest<T>.onResourceReady(callback: (resource: T) -> Unit): GlideRequest<T> {
   return addListener(object : MuzikGlideModule.SimpleRequestListener<T> {
-    override fun onResourceReady(resource: T?) {
+    override fun onResourceReady(resource: T) {
       callback.invoke(resource)
     }
   })

@@ -1,6 +1,8 @@
 package hu.mrolcsi.muzik.player
 
+import android.support.v4.media.session.MediaSessionCompat
 import androidx.databinding.Bindable
+import androidx.lifecycle.LiveData
 import hu.mrolcsi.muzik.library.miniplayer.MiniPlayerViewModel
 
 interface PlayerViewModel : MiniPlayerViewModel {
@@ -15,7 +17,6 @@ interface PlayerViewModel : MiniPlayerViewModel {
   @get:Bindable
   val repeatDrawableRes: Int
 
-  //val queue: LiveData<List<MediaSessionCompat.QueueItem>>
 
   fun onShuffleClicked()
   fun onRepeatClicked()
@@ -28,4 +29,10 @@ interface PlayerViewModel : MiniPlayerViewModel {
   fun onStartTrackingTouch()
   fun onSeek(progress: Int, fromUser: Boolean)
   fun onStopTrackingTouch()
+
+  val queue: LiveData<List<MediaSessionCompat.QueueItem>>
+  fun getCurrentQueueId(): Long
+
+  fun skipToQueueItem(itemId: Long)
+
 }

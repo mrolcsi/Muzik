@@ -7,6 +7,7 @@ import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
+import android.support.v4.media.session.MediaSessionCompat.QueueItem
 import android.support.v4.media.session.PlaybackStateCompat
 import android.support.v4.media.session.PlaybackStateCompat.REPEAT_MODE_ALL
 import android.support.v4.media.session.PlaybackStateCompat.REPEAT_MODE_INVALID
@@ -59,6 +60,7 @@ class MediaServiceImpl @Inject constructor(
                 if (!metadataSubject.hasValue()) metadataSubject.onNext(metadata)
                 if (!repeatModeSubject.hasValue()) repeatModeSubject.onNext(repeatMode)
                 if (!shuffleModeSubject.hasValue()) shuffleModeSubject.onNext(shuffleMode)
+                if (!queueSubject.hasValue()) queue?.let { queueSubject.onNext(it) }
               }
 
               override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
@@ -86,6 +88,10 @@ class MediaServiceImpl @Inject constructor(
               override fun onShuffleModeChanged(shuffleMode: Int) {
                 shuffleModeSubject.onNext(shuffleMode)
               }
+
+              override fun onQueueChanged(queue: MutableList<QueueItem>?) {
+                queue?.let { queueSubject.onNext(it) }
+              }
             })
           }
 
@@ -94,7 +100,7 @@ class MediaServiceImpl @Inject constructor(
       }
     }
 
-  override val mediaBrowser = MediaBrowserCompat(
+  private val mediaBrowser = MediaBrowserCompat(
     app,
     ComponentName(app, MuzikPlayerService::class.java),
     connectionCallbacks,
@@ -107,11 +113,13 @@ class MediaServiceImpl @Inject constructor(
   private val playbackStateSubject = BehaviorSubject.create<PlaybackStateCompat>()
   private val repeatModeSubject = BehaviorSubject.create<@ShuffleMode Int>()
   private val shuffleModeSubject = BehaviorSubject.create<@ShuffleMode Int>()
+  private val queueSubject = BehaviorSubject.create<List<QueueItem>>()
 
   override val metadata: Observable<MediaMetadataCompat> = metadataSubject.hide()
   override val playbackState: Observable<PlaybackStateCompat> = playbackStateSubject.hide()
   override val repeatMode: Observable<Int> = repeatModeSubject.hide()
   override val shuffleMode: Observable<Int> = shuffleModeSubject.hide()
+  override val queue: Observable<List<QueueItem>> = queueSubject.hide()
 
   private var controller: MediaControllerCompat? = null
 
@@ -229,5 +237,13 @@ class MediaServiceImpl @Inject constructor(
           it.transportControls.setRepeatMode(REPEAT_MODE_NONE)
       }
     }
+  }
+
+  override fun getCurrentQueueId(): Long {
+    return controller?.playbackState?.activeQueueItemId ?: QueueItem.UNKNOWN_ID.toLong()
+  }
+
+  override fun skipToQueueItem(id: Long) {
+    controller?.transportControls?.skipToQueueItem(id)
   }
 }
