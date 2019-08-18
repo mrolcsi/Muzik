@@ -15,12 +15,16 @@ import androidx.core.graphics.ColorUtils
 import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.doOnNextLayout
+import androidx.core.view.doOnPreDraw
 import androidx.core.view.postDelayed
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.transition.Transition
+import androidx.transition.TransitionInflater
+import androidx.transition.TransitionListenerAdapter
 import dagger.android.support.DaggerFragment
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.DiffCallbacks
@@ -64,45 +68,110 @@ class PlayerFragment : DaggerFragment() {
   override fun onActivityCreated(savedInstanceState: Bundle?) {
     super.onActivityCreated(savedInstanceState)
 
-    activity?.run {
-      viewModel.apply {
-        requireContext().observeAndRunUiCommands(viewLifecycleOwner, this)
-        findNavController().observeAndRunNavCommands(viewLifecycleOwner, this)
-        queue.observe(viewLifecycleOwner, queueAdapter)
-      }
+    viewModel.apply {
+      requireContext().observeAndRunUiCommands(viewLifecycleOwner, this)
+      findNavController().observeAndRunNavCommands(viewLifecycleOwner, this)
+      queue.observe(viewLifecycleOwner, queueAdapter)
+      albumArt.observe(viewLifecycleOwner, Observer {
+        imgCoverArt.setImageDrawable(it)
+        (view?.parent as? ViewGroup)?.doOnPreDraw {
+          // Parent has been drawn. Start transitioning!
+          startPostponedEnterTransition()
+        }
+      })
+    }
 
-      ThemeManager.getInstance(requireContext()).currentTheme.observe(viewLifecycleOwner, object : Observer<Theme> {
+    ThemeManager.getInstance(requireContext()).currentTheme.observe(viewLifecycleOwner, object : Observer<Theme> {
 
-        private var initialLoad = true
+      private var initialLoad = true
 
-        override fun onChanged(it: Theme) {
-          if (initialLoad) {
-            applyThemeStatic(it)
-            initialLoad = false
-          } else {
-            val backgroundColor = (content_player.background as? ColorDrawable)?.color
-            Log.v(
-              LOG_TAG,
-              "onThemeChanged(" +
-                  "backgroundColor=${String.format("#%X", backgroundColor)}, " +
-                  "themeColor=${String.format("#%X", it.primaryBackgroundColor)}" +
-                  ")"
-            )
-            if (backgroundColor != it.primaryBackgroundColor) {
-              val visiblePosition = snapHelper.findSnapPosition(rvQueue.layoutManager)
+      override fun onChanged(it: Theme) {
+        if (initialLoad) {
+          applyThemeStatic(it)
+          initialLoad = false
+        } else {
+          val backgroundColor = (view?.background as? ColorDrawable)?.color
+          Log.v(
+            LOG_TAG,
+            "onThemeChanged(" +
+                "backgroundColor=${String.format("#%X", backgroundColor)}, " +
+                "themeColor=${String.format("#%X", it.primaryBackgroundColor)}" +
+                ")"
+          )
+          if (backgroundColor != it.primaryBackgroundColor) {
+            val visiblePosition = snapHelper.findSnapPosition(rvQueue.layoutManager)
 
-              val queueId = viewModel.getCurrentQueueId()
-              val activePosition = queueAdapter.getItemPositionById(queueId)
+            val queueId = viewModel.getCurrentQueueId()
+            val activePosition = queueAdapter.getItemPositionById(queueId)
 
-              if (abs(visiblePosition - activePosition) > 1) {
-                applyThemeAnimated(it)
-              } else {
-                applyThemeStatic(it)
-              }
+            if (abs(visiblePosition - activePosition) > 1) {
+              applyThemeAnimated(it)
+            } else {
+              applyThemeStatic(it)
             }
           }
         }
-      })
+      }
+    })
+  }
+
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+
+    postponeEnterTransition()
+
+    val animationDuration = context?.resources?.getInteger(R.integer.preferredAnimationDuration)?.toLong() ?: 300L
+
+    val transitionInflater = TransitionInflater.from(requireContext())
+
+    enterTransition = transitionInflater
+      .inflateTransition(R.transition.slide_bottom)
+      .setDuration(animationDuration)
+      .excludeTarget(imgCoverArt, true)
+      .onTransitionEnd {
+        Log.v(LOG_TAG, "enterTransition.onTransitionEnd()")
+        context?.let {
+          ThemeManager.getInstance(it).currentTheme.value?.let { theme ->
+            activity?.applyStatusBarColor(theme.statusBarColor)
+          }
+        }
+      }
+
+    returnTransition = transitionInflater
+      .inflateTransition(R.transition.slide_bottom)
+      .setDuration(animationDuration)
+      .excludeTarget(imgCoverArt, true)
+      .onTransitionEnd {
+        Log.v(LOG_TAG, "returnTransition.onTransitionStart()")
+        context?.let {
+          ThemeManager.getInstance(requireContext()).currentTheme.value?.let { theme ->
+            activity?.applyStatusBarColor(theme.primaryBackgroundColor)
+          }
+        }
+      }
+
+    sharedElementEnterTransition = transitionInflater
+      .inflateTransition(android.R.transition.move)
+      .setDuration(animationDuration)
+
+    sharedElementReturnTransition = transitionInflater
+      .inflateTransition(android.R.transition.move)
+      .setDuration(animationDuration)
+
+    if (savedInstanceState != null) {
+      // Re-apply status bar color after rotation
+      activity?.run {
+
+        ViewCompat.animate(rvQueue)
+          .alpha(1f)
+          .setDuration(context?.resources?.getInteger(R.integer.preferredAnimationDuration)?.toLong() ?: 300L)
+          .withEndAction { imgCoverArt?.visibility = View.INVISIBLE }
+          .start()
+
+        ThemeManager.getInstance(this).currentTheme.value?.let { theme ->
+          applyStatusBarColor(theme.statusBarColor)
+        }
+      }
     }
   }
 
@@ -203,7 +272,6 @@ class PlayerFragment : DaggerFragment() {
           }
         }
       }
-
     })
   }
 
@@ -250,13 +318,6 @@ class PlayerFragment : DaggerFragment() {
         // Try again after the adapter settles?
         Log.v(LOG_TAG, "updatePager() DELAY CHANGE")
         rvQueue.postDelayed(300) { updatePager() }
-      } else {
-        // Make view visible
-        ViewCompat.animate(rvQueue)
-          .alpha(1f)
-          .setDuration(context?.resources?.getInteger(R.integer.preferredAnimationDuration)?.toLong() ?: 300L)
-          .withEndAction { imgCoverArt?.visibility = View.INVISIBLE }
-          .start()
       }
     }
   }
@@ -380,3 +441,10 @@ class PlayerFragment : DaggerFragment() {
     private const val FAST_FORWARD_INTERVAL = 500
   }
 }
+
+fun Transition.onTransitionEnd(listener: (Transition) -> Unit) =
+  addListener(object : TransitionListenerAdapter() {
+    override fun onTransitionEnd(transition: Transition) {
+      listener.invoke(transition)
+    }
+  })

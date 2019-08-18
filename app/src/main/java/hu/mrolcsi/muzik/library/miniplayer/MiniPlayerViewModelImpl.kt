@@ -78,17 +78,20 @@ open class MiniPlayerViewModelImpl @Inject constructor(
   init {
     mediaService.playbackState
       .observeOn(AndroidSchedulers.mainThread())
-      .subscribeBy { updateControls(it) }
-      .disposeOnCleared()
+      .subscribeBy(
+        onNext = { updateState(it) },
+        onError = { showError(this, it) }
+      ).disposeOnCleared()
 
     mediaService.metadata
       .observeOn(AndroidSchedulers.mainThread())
-      .subscribeBy { updateMetadata(it) }
-      .disposeOnCleared()
+      .subscribeBy(
+        onNext = { updateMetadata(it) },
+        onError = { showError(this, it) }
+      ).disposeOnCleared()
   }
 
-  protected open fun updateControls(playbackState: PlaybackStateCompat) {
-    // Update progress
+  protected open fun updateState(playbackState: PlaybackStateCompat) {
     val elapsedTime = playbackState.position / 1000
     this.elapsedTime = elapsedTime.toInt()
 

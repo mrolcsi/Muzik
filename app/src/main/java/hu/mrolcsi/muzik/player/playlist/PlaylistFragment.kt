@@ -122,7 +122,7 @@ class PlaylistFragment : DaggerFragment() {
   }
 
   private fun applyForegroundColor(color: Int) {
-    playlistToolbar.applyForegroundColor(color)
+    playlistToolbar?.applyForegroundColor(color)
     divider.setTint(color)
   }
 

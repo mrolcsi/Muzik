@@ -1,11 +1,14 @@
 package hu.mrolcsi.muzik.player
 
+import android.graphics.drawable.Drawable
 import android.support.v4.media.session.MediaSessionCompat
 import androidx.databinding.Bindable
 import androidx.lifecycle.LiveData
 import hu.mrolcsi.muzik.library.miniplayer.MiniPlayerViewModel
 
 interface PlayerViewModel : MiniPlayerViewModel {
+
+  val albumArt: LiveData<Drawable>
 
   @get:Bindable
   val elapsedTimeText: String?
@@ -16,7 +19,6 @@ interface PlayerViewModel : MiniPlayerViewModel {
   val shuffleDrawableRes: Int
   @get:Bindable
   val repeatDrawableRes: Int
-
 
   fun onShuffleClicked()
   fun onRepeatClicked()

@@ -3,7 +3,7 @@ package hu.mrolcsi.muzik.player
 import android.os.AsyncTask
 import android.support.v4.media.session.MediaSessionCompat.QueueItem
 import android.view.ViewGroup
-import androidx.core.view.ViewCompat
+import com.bumptech.glide.request.target.Target
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.glide.GlideApp
 import hu.mrolcsi.muzik.common.glide.onLoadFailed
@@ -11,7 +11,6 @@ import hu.mrolcsi.muzik.common.glide.onResourceReady
 import hu.mrolcsi.muzik.common.view.MVVMViewHolder
 import hu.mrolcsi.muzik.extensions.startMarquee
 import hu.mrolcsi.muzik.service.extensions.media.coverArtUri
-import hu.mrolcsi.muzik.service.extensions.media.id
 import hu.mrolcsi.muzik.service.theme.Theme
 import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.synthetic.main.list_item_queue.view.*
@@ -29,11 +28,10 @@ class QueueItemHolder(parent: ViewGroup) : MVVMViewHolder<QueueItem>(R.layout.li
 
   private fun bind(item: QueueItem) {
     itemView.run {
-      ViewCompat.setTransitionName(imgCoverArt, "coverArt" + item.description.id)
-
       GlideApp.with(imgCoverArt)
         .asBitmap()
         .load(item.description.coverArtUri)
+        .override(Target.SIZE_ORIGINAL)
         .onResourceReady {
           AsyncTask.execute {
             // Generate theme from resource
@@ -45,7 +43,7 @@ class QueueItemHolder(parent: ViewGroup) : MVVMViewHolder<QueueItem>(R.layout.li
             }
           }
         }
-        .onLoadFailed { usedTheme = null;false }
+        .onLoadFailed { usedTheme = null; false }
         .into(imgCoverArt)
 
       tvTitle?.run {

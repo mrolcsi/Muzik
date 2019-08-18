@@ -1,5 +1,7 @@
 package hu.mrolcsi.muzik.player
 
+import android.content.Context
+import android.graphics.drawable.Drawable
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
@@ -12,12 +14,15 @@ import android.widget.Toast
 import androidx.lifecycle.MutableLiveData
 import hu.mrolcsi.muzik.BR
 import hu.mrolcsi.muzik.R
+import hu.mrolcsi.muzik.common.glide.GlideApp
+import hu.mrolcsi.muzik.common.glide.onResourceReady
 import hu.mrolcsi.muzik.common.viewmodel.ExecuteOnceNavCommandSource
 import hu.mrolcsi.muzik.common.viewmodel.ExecuteOnceUiCommandSource
 import hu.mrolcsi.muzik.common.viewmodel.ObservableImpl
 import hu.mrolcsi.muzik.extensions.secondsToTimeStamp
 import hu.mrolcsi.muzik.library.miniplayer.MiniPlayerViewModelImpl
 import hu.mrolcsi.muzik.media.MediaService
+import hu.mrolcsi.muzik.service.extensions.media.albumArtUri
 import hu.mrolcsi.muzik.service.extensions.media.isPauseEnabled
 import hu.mrolcsi.muzik.service.extensions.media.isPlayEnabled
 import hu.mrolcsi.muzik.service.extensions.media.isPlaying
@@ -28,12 +33,15 @@ import io.reactivex.rxkotlin.subscribeBy
 import javax.inject.Inject
 
 class PlayerViewModelImpl @Inject constructor(
+  private val context: Context,
   observable: ObservableImpl,
   uiCommandSource: ExecuteOnceUiCommandSource,
   navCommandSource: ExecuteOnceNavCommandSource,
   private val mediaService: MediaService
 ) : MiniPlayerViewModelImpl(observable, uiCommandSource, navCommandSource, mediaService),
   PlayerViewModel {
+
+  override val albumArt = MutableLiveData<Drawable>()
 
   override var elapsedTimeText: String? by boundStringOrNull(BR.elapsedTimeText)
   override var remainingTimeText: String? by boundStringOrNull(BR.remainingTimeText)
@@ -75,8 +83,7 @@ class PlayerViewModelImpl @Inject constructor(
     mediaService.seekTo(seekProgress * 1000L)
   }
 
-  override fun updateControls(playbackState: PlaybackStateCompat) {
-    // Update progress
+  override fun updateState(playbackState: PlaybackStateCompat) {
     val elapsedTime = (playbackState.position / 1000).toInt()
     if (!userInitiatedChange) {
       this.elapsedTime = elapsedTime
@@ -95,6 +102,12 @@ class PlayerViewModelImpl @Inject constructor(
     super.updateMetadata(metadata)
 
     remainingTimeText = "-${(duration - elapsedTime).secondsToTimeStamp()}"
+
+    GlideApp.with(context)
+      .asDrawable()
+      .load(metadata.albumArtUri)
+      .onResourceReady { albumArt.value = it }
+      .preload()
   }
 
   override val queue = MutableLiveData<List<MediaSessionCompat.QueueItem>>()
