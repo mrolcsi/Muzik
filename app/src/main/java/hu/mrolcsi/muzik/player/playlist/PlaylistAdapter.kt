@@ -56,9 +56,9 @@ class PlaylistAdapter(
     // Hide/Show Now Playing indicator
     if (item._id == activeQueueId) {
       if (isPlaying) {
-        holder.imgNowPlaying.setImageResource(R.drawable.ic_media_play)
+        holder.imgNowPlaying.setImageResource(R.drawable.exo_notification_play)
       } else {
-        holder.imgNowPlaying.setImageResource(R.drawable.ic_media_pause)
+        holder.imgNowPlaying.setImageResource(R.drawable.exo_notification_pause)
       }
     }
     holder.imgNowPlaying.visibility = if (item._id == activeQueueId) View.VISIBLE else View.GONE

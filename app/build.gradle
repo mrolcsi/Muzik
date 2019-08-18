@@ -68,11 +68,14 @@ dependencies {
     implementation 'androidx.media:media:1.1.0-rc01'
 
     // ExoPlayer (Use submodule for now)
-    implementation project(':exoplayer-library-core')
-    implementation project(':exoplayer-library-ui')
-    implementation project(':exoplayer-extension-mediasession')
-    implementation project(':exoplayer-extension-ffmpeg')
-    implementation project(':exoplayer-extension-flac')
+    implementation 'com.google.android.exoplayer:exoplayer-core:2.10.4'
+    implementation 'com.google.android.exoplayer:exoplayer-ui:2.10.4'
+    implementation 'com.google.android.exoplayer:extension-mediasession:2.10.4'
+    //implementation project(':exoplayer-library-core')
+    //implementation project(':exoplayer-library-ui')
+    //implementation project(':exoplayer-extension-mediasession')
+    //implementation project(':exoplayer-extension-ffmpeg')
+    //implementation project(':exoplayer-extension-flac')
 
     // Navigation
     implementation "androidx.navigation:navigation-fragment-ktx:$navigationVersion"
