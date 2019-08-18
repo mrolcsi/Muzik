@@ -363,8 +363,6 @@ class PlayerFragment : DaggerFragment() {
 
   companion object {
     private const val LOG_TAG = "PlayerFragment"
-
-    private const val FAST_FORWARD_INTERVAL = 500
   }
 }
 

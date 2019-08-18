@@ -210,6 +210,18 @@ class MediaServiceImpl @Inject constructor(
     controller?.transportControls?.skipToNext()
   }
 
+  override fun rewind() {
+    controller?.playbackState?.let {
+      controller?.transportControls?.seekTo(it.position - 5000)
+    }
+  }
+
+  override fun fastForward() {
+    controller?.playbackState?.let {
+      controller?.transportControls?.seekTo(it.position + 5000)
+    }
+  }
+
   override fun getShuffleMode(): Int = controller?.shuffleMode ?: SHUFFLE_MODE_INVALID
 
   override fun setShuffleMode(shuffleMode: Int) {

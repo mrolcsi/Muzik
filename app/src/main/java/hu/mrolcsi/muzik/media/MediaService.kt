@@ -28,6 +28,8 @@ interface MediaService {
   fun skipToPrevious()
   fun playPause()
   fun skipToNext()
+  fun rewind()
+  fun fastForward()
 
   @ShuffleMode fun getShuffleMode(): Int
   fun setShuffleMode(@ShuffleMode shuffleMode: Int)

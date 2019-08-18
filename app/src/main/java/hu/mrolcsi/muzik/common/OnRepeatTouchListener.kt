@@ -3,7 +3,6 @@ package hu.mrolcsi.muzik.common
 import android.os.Handler
 import android.view.MotionEvent
 import android.view.View
-import android.view.View.OnClickListener
 import android.view.View.OnTouchListener
 
 /**
@@ -21,15 +20,15 @@ class OnRepeatTouchListener
 /**
  * @param initialInterval The interval after first click event.
  * @param normalInterval The interval after second and subsequent click events.
- * @param onRepeat The OnClickListener, that will be called periodically.
- * @param onDown An optional OnClickListener, that occurs on the first click.
- * @param onUp An optional OnClickListener, that occurs when the view is no longer being held.
+ * @param onRepeat The listener, that will be called periodically.
+ * @param onDown An optional listener, that occurs on the first click.
+ * @param onUp An optional listener, that occurs when the view is no longer being held.
  */
   (
   private val initialInterval: Int, private val normalInterval: Int,
-  private val onRepeat: OnClickListener?,
-  private val onDown: OnClickListener? = null,
-  private val onUp: OnClickListener? = null
+  private val onRepeat: ((View) -> Unit)?,
+  private val onDown: ((View) -> Unit)? = null,
+  private val onUp: ((View) -> Unit)? = null
 ) : OnTouchListener {
 
   private val handler = Handler()
@@ -41,12 +40,14 @@ class OnRepeatTouchListener
 
     override fun run() {
       if (touchedView?.isEnabled == true) {
-        handler.postDelayed(this, normalInterval.toLong())
-        if (first) {
-          onDown?.onClick(touchedView)
-          first = false
+        touchedView?.let {
+          handler.postDelayed(this, normalInterval.toLong())
+          if (first) {
+            onDown?.invoke(it)
+            first = false
+          }
+          onRepeat?.invoke(it)
         }
-        onRepeat?.onClick(touchedView)
       } else {
         // if the view was disabled by the onRepeat, remove the callback
         handler.removeCallbacks(this)
@@ -81,7 +82,7 @@ class OnRepeatTouchListener
           // Repeat wasn't triggered yet -> preform normal click
           view.performClick()
         } else {
-          onUp?.onClick(view)
+          onUp?.invoke(view)
           handlerRunnable.first = true
         }
         touchedView?.isPressed = false

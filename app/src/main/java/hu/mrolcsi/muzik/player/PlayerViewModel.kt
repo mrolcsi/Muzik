@@ -4,6 +4,7 @@ import android.graphics.drawable.Drawable
 import android.support.v4.media.session.MediaSessionCompat
 import androidx.databinding.Bindable
 import androidx.lifecycle.LiveData
+import hu.mrolcsi.muzik.common.OnRepeatTouchListener
 import hu.mrolcsi.muzik.library.miniplayer.MiniPlayerViewModel
 
 interface PlayerViewModel : MiniPlayerViewModel {
@@ -37,4 +38,6 @@ interface PlayerViewModel : MiniPlayerViewModel {
 
   fun skipToQueueItem(itemId: Long)
 
+  val previousTouchListener: OnRepeatTouchListener
+  val nextTouchListener: OnRepeatTouchListener
 }

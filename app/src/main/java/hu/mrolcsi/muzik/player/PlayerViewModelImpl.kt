@@ -14,6 +14,7 @@ import android.widget.Toast
 import androidx.lifecycle.MutableLiveData
 import hu.mrolcsi.muzik.BR
 import hu.mrolcsi.muzik.R
+import hu.mrolcsi.muzik.common.OnRepeatTouchListener
 import hu.mrolcsi.muzik.common.glide.GlideApp
 import hu.mrolcsi.muzik.common.glide.onResourceReady
 import hu.mrolcsi.muzik.common.viewmodel.ExecuteOnceNavCommandSource
@@ -83,39 +84,27 @@ class PlayerViewModelImpl @Inject constructor(
     mediaService.seekTo(seekProgress * 1000L)
   }
 
-  override fun updateState(playbackState: PlaybackStateCompat) {
-    val elapsedTime = (playbackState.position / 1000).toInt()
-    if (!userInitiatedChange) {
-      this.elapsedTime = elapsedTime
-    }
-    elapsedTimeText = elapsedTime.secondsToTimeStamp()
-    remainingTimeText = "-${(duration - elapsedTime).secondsToTimeStamp()}"
-
-    isPreviousEnabled = playbackState.isSkipToPreviousEnabled
-    isPlayPauseEnabled = playbackState.isPauseEnabled || playbackState.isPlayEnabled
-    isNextEnabled = playbackState.isSkipToNextEnabled
-
-    isPlaying = playbackState.isPlaying
-  }
-
-  override fun updateMetadata(metadata: MediaMetadataCompat) {
-    super.updateMetadata(metadata)
-
-    remainingTimeText = "-${(duration - elapsedTime).secondsToTimeStamp()}"
-
-    GlideApp.with(context)
-      .asDrawable()
-      .load(metadata.albumArtUri)
-      .onResourceReady { albumArt.value = it }
-      .preload()
-  }
-
   override val queue = MutableLiveData<List<MediaSessionCompat.QueueItem>>()
   override fun getCurrentQueueId() = mediaService.getCurrentQueueId()
 
   override fun skipToQueueItem(itemId: Long) {
     mediaService.skipToQueueItem(itemId)
   }
+
+  override val previousTouchListener = OnRepeatTouchListener(
+    initialInterval = 500,
+    normalInterval = 500,
+    onRepeat = { mediaService.rewind(); seekProgressText = elapsedTimeText },
+    onDown = { isSeekProgressVisible = true },
+    onUp = { isSeekProgressVisible = false }
+  )
+  override val nextTouchListener = OnRepeatTouchListener(
+    initialInterval = 500,
+    normalInterval = 500,
+    onRepeat = { mediaService.fastForward(); seekProgressText = elapsedTimeText },
+    onDown = { isSeekProgressVisible = true },
+    onUp = { isSeekProgressVisible = false }
+  )
 
   init {
     mediaService.shuffleMode
@@ -173,5 +162,32 @@ class PlayerViewModelImpl @Inject constructor(
         onNext = { queue.value = it },
         onError = { showError(this, it) }
       ).disposeOnCleared()
+  }
+
+  override fun updateState(playbackState: PlaybackStateCompat) {
+    val elapsedTime = (playbackState.position / 1000).toInt()
+    if (!userInitiatedChange) {
+      this.elapsedTime = elapsedTime
+    }
+    elapsedTimeText = elapsedTime.secondsToTimeStamp()
+    remainingTimeText = "-${(duration - elapsedTime).secondsToTimeStamp()}"
+
+    isPreviousEnabled = playbackState.isSkipToPreviousEnabled
+    isPlayPauseEnabled = playbackState.isPauseEnabled || playbackState.isPlayEnabled
+    isNextEnabled = playbackState.isSkipToNextEnabled
+
+    isPlaying = playbackState.isPlaying
+  }
+
+  override fun updateMetadata(metadata: MediaMetadataCompat) {
+    super.updateMetadata(metadata)
+
+    remainingTimeText = "-${(duration - elapsedTime).secondsToTimeStamp()}"
+
+    GlideApp.with(context)
+      .asDrawable()
+      .load(metadata.albumArtUri)
+      .onResourceReady { albumArt.value = it }
+      .preload()
   }
 }

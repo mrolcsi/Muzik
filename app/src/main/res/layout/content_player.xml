@@ -14,6 +14,7 @@
     android:id="@+id/playerRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
     tools:context=".player.PlayerFragment">
 
     <ImageView
@@ -32,9 +33,9 @@
 
     <androidx.recyclerview.widget.RecyclerView
       android:id="@+id/rvQueue"
-      android:alpha="0.0"
       android:layout_width="0dp"
       android:layout_height="0dp"
+      android:alpha="0.0"
       app:layout_constraintBottom_toTopOf="@+id/sbSongProgress"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
@@ -144,6 +145,7 @@
       android:contentDescription="@string/mediaControl_previous"
       android:elevation="@dimen/button_elevation"
       android:enabled="@{viewModel.isPreviousEnabled}"
+      android:onTouch="@{viewModel.previousTouchListener}"
       android:scaleType="fitCenter"
       app:elevation="@dimen/button_elevation"
       app:layout_constraintBottom_toBottomOf="@+id/btnPlayPause"
@@ -183,6 +185,7 @@
       android:contentDescription="@string/mediaControl_next"
       android:elevation="@dimen/button_elevation"
       android:enabled="@{viewModel.isNextEnabled}"
+      android:onTouch="@{viewModel.nextTouchListener}"
       android:scaleType="fitCenter"
       app:elevation="@dimen/button_elevation"
       app:layout_constraintBottom_toBottomOf="@+id/btnPlayPause"
