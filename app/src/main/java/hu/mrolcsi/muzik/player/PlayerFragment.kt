@@ -1,16 +1,12 @@
 package hu.mrolcsi.muzik.player
 
-import android.animation.ValueAnimator
 import android.content.res.ColorStateList
-import android.graphics.Color
 import android.graphics.PorterDuff
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
@@ -89,27 +85,6 @@ class PlayerFragment : DaggerFragment() {
         if (initialLoad) {
           applyThemeStatic(it)
           initialLoad = false
-        } else {
-          val backgroundColor = (view?.background as? ColorDrawable)?.color
-          Log.v(
-            LOG_TAG,
-            "onThemeChanged(" +
-                "backgroundColor=${String.format("#%X", backgroundColor)}, " +
-                "themeColor=${String.format("#%X", it.primaryBackgroundColor)}" +
-                ")"
-          )
-          if (backgroundColor != it.primaryBackgroundColor) {
-            val visiblePosition = snapHelper.findSnapPosition(rvQueue.layoutManager)
-
-            val queueId = viewModel.getCurrentQueueId()
-            val activePosition = queueAdapter.getItemPositionById(queueId)
-
-            if (abs(visiblePosition - activePosition) > 1) {
-              applyThemeAnimated(it)
-            } else {
-              applyThemeStatic(it)
-            }
-          }
         }
       }
     })
@@ -159,18 +134,10 @@ class PlayerFragment : DaggerFragment() {
       .setDuration(animationDuration)
 
     if (savedInstanceState != null) {
+      updatePager()
       // Re-apply status bar color after rotation
-      activity?.run {
-
-        ViewCompat.animate(rvQueue)
-          .alpha(1f)
-          .setDuration(context?.resources?.getInteger(R.integer.preferredAnimationDuration)?.toLong() ?: 300L)
-          .withEndAction { imgCoverArt?.visibility = View.INVISIBLE }
-          .start()
-
-        ThemeManager.getInstance(this).currentTheme.value?.let { theme ->
-          applyStatusBarColor(theme.statusBarColor)
-        }
+      ThemeManager.getInstance(requireContext()).currentTheme.value?.let { theme ->
+        activity?.applyStatusBarColor(theme.statusBarColor)
       }
     }
   }
@@ -219,6 +186,12 @@ class PlayerFragment : DaggerFragment() {
     snapHelper = RVPagerSnapHelperListenable().attachToRecyclerView(rvQueue, object : RVPagerStateListener {
 
       override fun onPageScroll(pagesState: List<VisiblePageState>) {
+        if (scrollState == RecyclerView.SCROLL_STATE_IDLE && pagesState.size == 1) {
+          // Apply theme of visible holder
+          val holder = rvQueue.findContainingViewHolder(pagesState.first().view) as QueueItemHolder
+          holder.usedTheme?.let { applyThemeStatic(it) }
+        }
+
         // Blend colors while scrolling
         if (pagesState.size == 2) {  // between 2 pages -> blend colors
           val leftHolder = rvQueue.findContainingViewHolder(pagesState.first().view) as QueueItemHolder
@@ -267,6 +240,7 @@ class PlayerFragment : DaggerFragment() {
 
           Log.d(LOG_TAG, "onScrollStateChanged($state) queueId=$queueId itemId=$itemId")
 
+          // Skip to visible item in queue
           if (queueId != itemId) {
             viewModel.skipToQueueItem(itemId)
           }
@@ -312,7 +286,7 @@ class PlayerFragment : DaggerFragment() {
         ViewCompat.animate(rvQueue)
           .alpha(1f)
           .setDuration(context?.resources?.getInteger(R.integer.preferredAnimationDuration)?.toLong() ?: 300L)
-          .withEndAction { imgCoverArt?.visibility = View.INVISIBLE }
+          .withEndAction { imgCoverArt?.alpha = 0.0f }
           .start()
       } else if (queuePosition == RecyclerView.NO_POSITION) {
         // Try again after the adapter settles?
@@ -339,54 +313,6 @@ class PlayerFragment : DaggerFragment() {
 
     applyBackgroundColor(theme.primaryBackgroundColor)
     applyForegroundColor(theme.primaryForegroundColor)
-  }
-
-  private fun applyThemeAnimated(theme: Theme) {
-    Log.i(LOG_TAG, "applyingThemeAnimated($theme)")
-
-    val previousTheme = ThemeManager.getInstance(requireContext()).previousTheme
-    val animationDuration = context?.resources?.getInteger(R.integer.preferredAnimationDuration)?.toLong() ?: 300L
-
-    // StatusBar Color
-    ValueAnimator.ofArgb(
-      previousTheme?.statusBarColor ?: ContextCompat.getColor(requireContext(), R.color.backgroundColor),
-      theme.statusBarColor
-    ).run {
-      duration = animationDuration
-      addUpdateListener {
-        val color = it.animatedValue as Int
-
-        activity?.applyStatusBarColor(color)
-      }
-      start()
-    }
-
-    // Background Color
-    ValueAnimator.ofArgb(
-      previousTheme?.primaryBackgroundColor ?: ContextCompat.getColor(requireContext(), R.color.backgroundColor),
-      theme.primaryBackgroundColor
-    ).run {
-      duration = animationDuration
-      addUpdateListener {
-        val color = it.animatedValue as Int
-        applyBackgroundColor(color)
-      }
-      start()
-    }
-
-    // Foreground Color
-    ValueAnimator.ofArgb(
-      previousTheme?.primaryForegroundColor ?: Color.WHITE,
-      theme.primaryForegroundColor
-    ).run {
-      duration = animationDuration
-      addUpdateListener {
-        val color = it.animatedValue as Int
-
-        applyForegroundColor(color)
-      }
-      start()
-    }
   }
 
   private fun applyForegroundColor(color: Int) {
