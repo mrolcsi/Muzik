@@ -17,6 +17,7 @@ interface MediaService {
   val repeatMode: Observable<Int>
   val shuffleMode: Observable<Int>
   val queue: Observable<List<QueueItem>>
+  val queueTitle: Observable<CharSequence>
 
   fun observableSubscribe(parentId: String, options: Bundle? = null): Observable<List<MediaBrowserCompat.MediaItem>>
 

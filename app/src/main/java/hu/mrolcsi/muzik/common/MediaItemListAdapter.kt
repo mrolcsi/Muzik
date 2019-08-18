@@ -16,8 +16,10 @@ import java.util.*
 open class MediaItemListAdapter<VH : MVVMViewHolder<MediaBrowserCompat.MediaItem>>(
   private val context: Context,
   viewHolderFactory: ViewHolderFactory<VH>
-) : MVVMListAdapter<MediaBrowserCompat.MediaItem, VH>(DiffCallbacks.mediaItemCallback, viewHolderFactory),
-  FastScroller.SectionIndexer {
+) : MVVMListAdapter<MediaBrowserCompat.MediaItem, VH>(
+  diffCallback = DiffCallbacks.mediaItemCallback,
+  viewHolderFactory = viewHolderFactory
+), FastScroller.SectionIndexer {
 
   var sorting: SortingMode = SortingMode.SORT_BY_TITLE
 

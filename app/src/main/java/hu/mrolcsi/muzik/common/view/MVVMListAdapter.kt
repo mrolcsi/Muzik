@@ -4,8 +4,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.LayoutRes
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -25,6 +23,7 @@ abstract class MVVMViewHolder<T>(itemView: View) : RecyclerView.ViewHolder(itemV
 
 open class MVVMListAdapter<ItemViewModel, ViewHolder : MVVMViewHolder<in ItemViewModel>>(
   diffCallback: DiffUtil.ItemCallback<ItemViewModel>,
+  private val itemIdSelector: ((item: ItemViewModel) -> Long)? = null,
   private val viewHolderFactory: ViewHolderFactory<ViewHolder>
 ) : ListAdapter<ItemViewModel, ViewHolder>(diffCallback), Observer<List<ItemViewModel>> {
 
@@ -38,15 +37,17 @@ open class MVVMListAdapter<ItemViewModel, ViewHolder : MVVMViewHolder<in ItemVie
   override fun onBindViewHolder(holder: ViewHolder, position: Int) {
     holder.model = getItem(position)
   }
-}
 
-fun <ItemViewModel, ViewHolder : MVVMViewHolder<in ItemViewModel>> RecyclerView.setup(
-  lifecycleOwner: LifecycleOwner,
-  items: LiveData<List<ItemViewModel>>,
-  diffCallback: DiffUtil.ItemCallback<ItemViewModel>,
-  viewHolderFactory: ViewHolderFactory<ViewHolder>
-) {
-  adapter = MVVMListAdapter(diffCallback, viewHolderFactory).apply {
-    items.observe(lifecycleOwner, this)
+  override fun getItemId(position: Int): Long {
+    return itemIdSelector?.let { itemIdSelector.invoke(getItem(position)) } ?: super.getItemId(position)
+  }
+
+  fun getItemPositionById(id: Long): Int {
+    for (i in 0 until itemCount) {
+      if (getItemId(i) == id) {
+        return i
+      }
+    }
+    return RecyclerView.NO_POSITION
   }
 }

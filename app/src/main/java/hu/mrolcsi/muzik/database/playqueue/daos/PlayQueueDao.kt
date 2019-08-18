@@ -8,6 +8,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import hu.mrolcsi.muzik.database.playqueue.entities.LastPlayed
 import hu.mrolcsi.muzik.database.playqueue.entities.PlayQueueEntry
+import io.reactivex.Observable
 
 @Dao
 interface PlayQueueDao {
@@ -39,8 +40,9 @@ interface PlayQueueDao {
   // QUERIES
 
   @Query("SELECT * FROM play_queue ORDER BY _id")
-  fun fetchQueue(): LiveData<List<PlayQueueEntry>>
+  fun fetchQueue(): Observable<List<PlayQueueEntry>>
 
+  @Deprecated("Use Observables!")
   @Query("SELECT * FROM play_queue ORDER BY _id")
   fun getQueue(): List<PlayQueueEntry>
 

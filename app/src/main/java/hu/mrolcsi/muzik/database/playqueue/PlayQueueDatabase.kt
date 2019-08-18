@@ -20,11 +20,12 @@ abstract class PlayQueueDatabase : RoomDatabase() {
     @Suppress("unused")
     private const val LOG_TAG = "PlayQueueDatabase"
 
-    private const val DATABASE_NAME = "playqueue.db"
+    const val DATABASE_NAME = "playqueue.db"
 
     // For Singleton instantiation
     @Volatile private var instance: PlayQueueDatabase? = null
 
+    @Deprecated("Use injection!")
     fun getInstance(context: Context): PlayQueueDatabase {
       return instance ?: synchronized(this) {
         instance ?: buildDatabase(context).also { instance = it }

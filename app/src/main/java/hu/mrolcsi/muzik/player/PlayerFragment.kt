@@ -23,10 +23,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import dagger.android.support.DaggerFragment
 import hu.mrolcsi.muzik.R
+import hu.mrolcsi.muzik.common.DiffCallbacks
 import hu.mrolcsi.muzik.common.pager.PagerSnapHelperVerbose
 import hu.mrolcsi.muzik.common.pager.RVPagerSnapHelperListenable
 import hu.mrolcsi.muzik.common.pager.RVPagerStateListener
 import hu.mrolcsi.muzik.common.pager.VisiblePageState
+import hu.mrolcsi.muzik.common.view.MVVMListAdapter
 import hu.mrolcsi.muzik.common.viewmodel.observeAndRunNavCommands
 import hu.mrolcsi.muzik.common.viewmodel.observeAndRunUiCommands
 import hu.mrolcsi.muzik.databinding.FragmentPlayerBinding
@@ -49,9 +51,13 @@ class PlayerFragment : DaggerFragment() {
   private val mPlayPauseBackground by lazy { context?.getDrawable(R.drawable.media_button_background) }
   private val mNextBackground by lazy { context?.getDrawable(R.drawable.media_button_background) }
 
-  private val queueAdapter = QueueAdapter()
   private lateinit var snapHelper: PagerSnapHelperVerbose
   private var scrollState: Int = RecyclerView.SCROLL_STATE_IDLE
+  private val queueAdapter = MVVMListAdapter(
+    diffCallback = DiffCallbacks.queueItemCallback,
+    itemIdSelector = { it.queueId },
+    viewHolderFactory = { parent, _ -> QueueItemHolder(parent) }
+  )
 
   //region LIFECYCLE
 
@@ -83,12 +89,10 @@ class PlayerFragment : DaggerFragment() {
                   ")"
             )
             if (backgroundColor != it.primaryBackgroundColor) {
-//            val visiblePosition = if (mQueueAdapter.realItemCount == 0) -1
-//            else mSnapHelper.findSnapPosition(rvQueue.layoutManager) //% mQueueAdapter.realItemCount
               val visiblePosition = snapHelper.findSnapPosition(rvQueue.layoutManager)
 
               val queueId = viewModel.getCurrentQueueId()
-              val activePosition = queueAdapter.getItemPositionById(queueId/*, visiblePosition*/)
+              val activePosition = queueAdapter.getItemPositionById(queueId)
 
               if (abs(visiblePosition - activePosition) > 1) {
                 applyThemeAnimated(it)
@@ -205,8 +209,6 @@ class PlayerFragment : DaggerFragment() {
 
   private fun updatePager() {
     // Scroll pager to current item
-//    val visiblePosition = if (mQueueAdapter.realItemCount == 0) -1
-//    else mSnapHelper.findSnapPosition(rvQueue.layoutManager) % mQueueAdapter.realItemCount
     val visiblePosition = snapHelper.findSnapPosition(rvQueue.layoutManager)
 
     // Skip if Pager is not ready yet
@@ -219,7 +221,7 @@ class PlayerFragment : DaggerFragment() {
 
     // If Metadata has changed, then PlaybackState should have changed as well.
     val queueId = viewModel.getCurrentQueueId()
-    val queuePosition = queueAdapter.getItemPositionById(queueId/*, visiblePosition*/)
+    val queuePosition = queueAdapter.getItemPositionById(queueId)
 
     Log.d(
       LOG_TAG,

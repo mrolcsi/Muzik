@@ -61,6 +61,7 @@ class MediaServiceImpl @Inject constructor(
                 if (!repeatModeSubject.hasValue()) repeatModeSubject.onNext(repeatMode)
                 if (!shuffleModeSubject.hasValue()) shuffleModeSubject.onNext(shuffleMode)
                 if (!queueSubject.hasValue()) queue?.let { queueSubject.onNext(it) }
+                if (!queueTitleSubject.hasValue()) queueTitle?.let { queueTitleSubject.onNext(it) }
               }
 
               override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
@@ -92,6 +93,10 @@ class MediaServiceImpl @Inject constructor(
               override fun onQueueChanged(queue: MutableList<QueueItem>?) {
                 queue?.let { queueSubject.onNext(it) }
               }
+
+              override fun onQueueTitleChanged(title: CharSequence?) {
+                title?.let { queueTitleSubject.onNext(title) }
+              }
             })
           }
 
@@ -114,12 +119,14 @@ class MediaServiceImpl @Inject constructor(
   private val repeatModeSubject = BehaviorSubject.create<@ShuffleMode Int>()
   private val shuffleModeSubject = BehaviorSubject.create<@ShuffleMode Int>()
   private val queueSubject = BehaviorSubject.create<List<QueueItem>>()
+  private val queueTitleSubject = BehaviorSubject.create<CharSequence>()
 
   override val metadata: Observable<MediaMetadataCompat> = metadataSubject.hide()
   override val playbackState: Observable<PlaybackStateCompat> = playbackStateSubject.hide()
   override val repeatMode: Observable<Int> = repeatModeSubject.hide()
   override val shuffleMode: Observable<Int> = shuffleModeSubject.hide()
   override val queue: Observable<List<QueueItem>> = queueSubject.hide()
+  override val queueTitle: Observable<CharSequence> = queueTitleSubject.hide()
 
   private var controller: MediaControllerCompat? = null
 

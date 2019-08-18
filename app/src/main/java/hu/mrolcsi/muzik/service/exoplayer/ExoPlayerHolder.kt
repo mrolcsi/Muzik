@@ -41,7 +41,6 @@ import hu.mrolcsi.muzik.database.playqueue.PlayQueueDatabase
 import hu.mrolcsi.muzik.database.playqueue.entities.LastPlayed
 import hu.mrolcsi.muzik.database.playqueue.entities.PlayQueueEntry
 import hu.mrolcsi.muzik.service.BecomingNoisyReceiver
-import hu.mrolcsi.muzik.service.extensions.database.fromDescription
 import hu.mrolcsi.muzik.service.extensions.media.mediaPath
 import java.io.File
 import java.util.concurrent.Executors
@@ -414,7 +413,7 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
         mDatabaseWorker.submit {
           PlayQueueDatabase.getInstance(context)
             .getPlayQueueDao()
-            .insertEntries(PlayQueueEntry.fromDescription(position, description))
+            .insertEntries(PlayQueueEntry(position, description))
         }
       }
 
@@ -449,7 +448,7 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
         // Save queue to Database
         mDatabaseWorker.submit {
           val queue = descriptions.mapIndexed { index, description ->
-            PlayQueueEntry.fromDescription(position + index, description)
+            PlayQueueEntry(position + index, description)
           }
           PlayQueueDatabase.getInstance(context)
             .getPlayQueueDao()
@@ -479,12 +478,7 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
         mDatabaseWorker.submit {
           val queue = emptyList<PlayQueueEntry>().toMutableList()
           for (i in 0 until mQueueDataSource.size) {
-            queue.add(
-              PlayQueueEntry.fromDescription(
-                i,
-                mQueueDataSource.getMediaSource(i).tag as MediaDescriptionCompat
-              )
-            )
+            queue.add(PlayQueueEntry(i, mQueueDataSource.getMediaSource(i).tag as MediaDescriptionCompat))
           }
 
           PlayQueueDatabase.getInstance(context)

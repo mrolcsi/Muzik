@@ -7,9 +7,13 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
+import androidx.room.Room
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import hu.mrolcsi.muzik.database.playqueue.PlayQueueDatabase
+import hu.mrolcsi.muzik.database.playqueue.PlayQueueMigrations
+import hu.mrolcsi.muzik.database.playqueue.daos.PlayQueueDao
 import hu.mrolcsi.muzik.discogs.DiscogsService
 import hu.mrolcsi.muzik.discogs.DiscogsServiceImpl
 import hu.mrolcsi.muzik.media.MediaRepository
@@ -45,6 +49,19 @@ class AppModule(private val app: Application) {
   @Provides
   @Singleton
   fun provideContext(): Context = app.applicationContext
+
+  @Provides
+  @Singleton
+  fun provideAppDatabase(context: Context) =
+    Room.databaseBuilder(context, PlayQueueDatabase::class.java, PlayQueueDatabase.DATABASE_NAME)
+      .addMigrations(
+        PlayQueueMigrations.MIGRATION_1_2,
+        PlayQueueMigrations.MIGRATION_2_3
+      ).build()
+
+  @Provides
+  @Singleton
+  fun providePlayQueueDaoDao(db: PlayQueueDatabase): PlayQueueDao = db.getPlayQueueDao()
 
 }
 

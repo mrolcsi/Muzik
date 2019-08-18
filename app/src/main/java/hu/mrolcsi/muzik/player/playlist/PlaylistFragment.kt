@@ -3,7 +3,6 @@ package hu.mrolcsi.muzik.player.playlist
 import android.animation.ValueAnimator
 import android.graphics.Color
 import android.os.Bundle
-import android.support.v4.media.session.MediaControllerCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,10 +12,9 @@ import androidx.lifecycle.Observer
 import dagger.android.support.DaggerFragment
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.ColoredDividerItemDecoration
-import hu.mrolcsi.muzik.database.playqueue.PlayQueueDatabase
-import hu.mrolcsi.muzik.extensions.OnItemClickListener
+import hu.mrolcsi.muzik.common.view.MVVMListAdapter
+import hu.mrolcsi.muzik.databinding.FragmentPlaylistBinding
 import hu.mrolcsi.muzik.extensions.applyForegroundColor
-import hu.mrolcsi.muzik.player.PlayerViewModel
 import hu.mrolcsi.muzik.service.theme.Theme
 import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.synthetic.main.fragment_playlist.*
@@ -24,17 +22,21 @@ import javax.inject.Inject
 
 class PlaylistFragment : DaggerFragment() {
 
-  @Inject lateinit var viewModel: PlayerViewModel
+  @Inject lateinit var viewModel: PlaylistViewModel
 
-  private val mPlaylistAdapter =
-    PlaylistAdapter(OnItemClickListener { _, _, _, id ->
-      // Skip to clicked item
-      val controller = MediaControllerCompat.getMediaController(requireActivity())
-      controller.transportControls.skipToQueueItem(id)
-      controller.transportControls.play()
-    })
+  private val playlistAdapter = MVVMListAdapter(
+    diffCallback = PlaylistItem.DIFF_CALLBACK,
+    itemIdSelector = { it.entry._id },
+    viewHolderFactory = { parent, _ ->
+      PlaylistItemHolder(parent).apply {
+        itemView.setOnClickListener {
+          model?.let { viewModel.onSelect(it) }
+        }
+      }
+    }
+  )
 
-  private val mDivider by lazy {
+  private val divider by lazy {
     ColoredDividerItemDecoration(requireContext(), LinearLayout.VERTICAL).apply {
       setDrawable(resources.getDrawable(R.drawable.list_divider_inset, requireContext().theme))
     }
@@ -43,52 +45,7 @@ class PlaylistFragment : DaggerFragment() {
   override fun onActivityCreated(savedInstanceState: Bundle?) {
     super.onActivityCreated(savedInstanceState)
 
-//    viewModel.apply {
-//      Log.d(LOG_TAG, "Got PlayerViewModel: $this")
-//
-//      currentPlaybackState.observe(viewLifecycleOwner, object : Observer<PlaybackStateCompat?> {
-//
-//        private var previousState: PlaybackStateCompat? = null
-//
-//        override fun onChanged(it: PlaybackStateCompat?) {
-//          if (it != null) {
-//            if (previousState?.state != it.state) {
-//              previousState = it
-//              mPlaylistAdapter.isPlaying = it.isPlaying
-//            }
-//          }
-//        }
-//      })
-//
-//      currentMediaMetadata.observe(viewLifecycleOwner, Observer { metadata ->
-//        metadata?.let {
-//          // Update active queueId in adapter (notifyDataSetChanged will do the rest)
-//          MediaControllerCompat.getMediaController(requireActivity())?.let { controller ->
-//            mPlaylistAdapter.activeQueueId = controller.playbackState.activeQueueItemId
-//
-//            val layoutManager = rvPlaylist.layoutManager as LinearLayoutManager
-//            val activePosition = controller.playbackState.activeQueueItemId.toInt()
-//            val first = layoutManager.findFirstCompletelyVisibleItemPosition()
-//            val last = layoutManager.findLastCompletelyVisibleItemPosition()
-//
-//            if (activePosition !in first..last) {
-//              layoutManager.scrollToPositionWithOffset(activePosition, 500)
-//            }
-//          }
-//        }
-//      })
-//
-//      currentQueue.observe(viewLifecycleOwner, Observer {
-//        playlistToolbar.title = MediaControllerCompat.getMediaController(requireActivity())?.queueTitle
-//      })
-//    }
-
-    PlayQueueDatabase.getInstance(requireContext())
-      .getPlayQueueDao()
-      .fetchQueue()
-      .observe(this, Observer {
-        mPlaylistAdapter.submitList(it)
-      })
+    viewModel.items.observe(viewLifecycleOwner, playlistAdapter)
 
     ThemeManager.getInstance(requireContext()).currentTheme.observe(viewLifecycleOwner, object : Observer<Theme> {
 
@@ -105,18 +62,17 @@ class PlaylistFragment : DaggerFragment() {
     })
   }
 
-  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-    return inflater.inflate(R.layout.fragment_playlist, container, false)
-  }
+  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) =
+    FragmentPlaylistBinding.inflate(inflater, container, false).also {
+      it.viewModel = viewModel
+      it.lifecycleOwner = viewLifecycleOwner
+    }.root
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     rvPlaylist.apply {
-      adapter = mPlaylistAdapter
-      addItemDecoration(mDivider)
+      addItemDecoration(divider)
+      adapter = playlistAdapter
     }
-
-    // TODO: Dynamic title
-    playlistToolbar.setTitle(R.string.playlist_title)
   }
 
   private fun applyThemeStatic(theme: Theme) {
@@ -161,17 +117,13 @@ class PlaylistFragment : DaggerFragment() {
 
   private fun applyBackgroundColor(color: Int) {
     rvPlaylist?.setBackgroundColor(color)
-    mPlaylistAdapter.notifyDataSetChanged()
+    playlistAdapter.notifyDataSetChanged()
     playlistToolbar?.setBackgroundColor(color)
   }
 
   private fun applyForegroundColor(color: Int) {
     playlistToolbar.applyForegroundColor(color)
-    mDivider.setTint(color)
-  }
-
-  companion object {
-    private const val LOG_TAG = "PlaylistFragment"
+    divider.setTint(color)
   }
 
 }

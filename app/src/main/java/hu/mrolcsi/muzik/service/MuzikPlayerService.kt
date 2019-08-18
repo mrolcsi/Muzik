@@ -22,7 +22,6 @@ import hu.mrolcsi.muzik.database.playqueue.PlayQueueDatabase
 import hu.mrolcsi.muzik.database.playqueue.entities.LastPlayed
 import hu.mrolcsi.muzik.service.exoplayer.ExoPlayerHolder
 import hu.mrolcsi.muzik.service.exoplayer.notification.ExoNotificationManager
-import hu.mrolcsi.muzik.service.extensions.database.toDescription
 import hu.mrolcsi.muzik.service.extensions.media.albumArt
 import hu.mrolcsi.muzik.service.extensions.media.isSkipToNextEnabled
 import hu.mrolcsi.muzik.service.extensions.media.prepareFromDescriptions
