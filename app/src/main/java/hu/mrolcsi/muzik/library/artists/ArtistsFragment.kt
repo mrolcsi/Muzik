@@ -14,7 +14,6 @@ import hu.mrolcsi.muzik.common.MediaItemListAdapter
 import hu.mrolcsi.muzik.common.viewmodel.observeAndRunNavCommands
 import hu.mrolcsi.muzik.common.viewmodel.observeAndRunUiCommands
 import hu.mrolcsi.muzik.databinding.FragmentArtistsBinding
-import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.synthetic.main.fragment_artists.*
 import javax.inject.Inject
 
@@ -55,7 +54,9 @@ class ArtistsFragment : DaggerFragment() {
       })
     }
 
-    ThemeManager.getInstance(requireContext()).currentTheme.observe(viewLifecycleOwner, Observer {
+    viewModel.currentTheme.observe(
+      viewLifecycleOwner,
+      Observer {
       // Tell adapter to reload its views
       artistAdapter.notifyDataSetChanged()
 

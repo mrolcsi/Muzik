@@ -14,6 +14,7 @@ import hu.mrolcsi.muzik.library.artists.details.ArtistDetailsFragment
 import hu.mrolcsi.muzik.library.artists.details.ArtistDetailsModule
 import hu.mrolcsi.muzik.library.miniplayer.MiniPlayerFragment
 import hu.mrolcsi.muzik.library.miniplayer.MiniPlayerModule
+import hu.mrolcsi.muzik.library.pager.LibraryPagerFragment
 import hu.mrolcsi.muzik.library.songs.SongsFragment
 import hu.mrolcsi.muzik.library.songs.SongsModule
 import hu.mrolcsi.muzik.player.PlayerFragment
@@ -21,12 +22,14 @@ import hu.mrolcsi.muzik.player.PlayerModule
 import hu.mrolcsi.muzik.player.playlist.PlaylistFragment
 import hu.mrolcsi.muzik.player.playlist.PlaylistModule
 
-@Suppress("unused")
 @Module
 abstract class FragmentsModule {
 
   @ContributesAndroidInjector(modules = [LibraryModule::class])
   abstract fun contributeLibraryFragment(): LibraryFragment
+
+  @ContributesAndroidInjector(modules = [LibraryModule::class])
+  abstract fun contributeLibraryPagerFragment(): LibraryPagerFragment
 
   @ContributesAndroidInjector(modules = [ArtistsModule::class])
   abstract fun contributeArtistsFragment(): ArtistsFragment

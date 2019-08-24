@@ -29,6 +29,7 @@ import hu.mrolcsi.muzik.service.extensions.media.isPlayEnabled
 import hu.mrolcsi.muzik.service.extensions.media.isPlaying
 import hu.mrolcsi.muzik.service.extensions.media.isSkipToNextEnabled
 import hu.mrolcsi.muzik.service.extensions.media.isSkipToPreviousEnabled
+import hu.mrolcsi.muzik.theme.ThemedViewModelImpl
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import javax.inject.Inject
@@ -38,9 +39,15 @@ class PlayerViewModelImpl @Inject constructor(
   observable: ObservableImpl,
   uiCommandSource: ExecuteOnceUiCommandSource,
   navCommandSource: ExecuteOnceNavCommandSource,
+  themedViewModel: ThemedViewModelImpl,
   private val mediaService: MediaService
-) : MiniPlayerViewModelImpl(observable, uiCommandSource, navCommandSource, mediaService),
-  PlayerViewModel {
+) : MiniPlayerViewModelImpl(
+  observable,
+  uiCommandSource,
+  navCommandSource,
+  themedViewModel,
+  mediaService
+), PlayerViewModel {
 
   override val albumArt = MutableLiveData<Drawable>()
 
@@ -187,7 +194,7 @@ class PlayerViewModelImpl @Inject constructor(
     GlideApp.with(context)
       .asDrawable()
       .load(metadata.albumArtUri)
-      .onResourceReady { albumArt.value = it }
+      .onResourceReady { art -> albumArt.value = art }
       .preload()
   }
 }

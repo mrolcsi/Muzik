@@ -22,6 +22,8 @@ import hu.mrolcsi.muzik.service.extensions.media.isPlaying
 import hu.mrolcsi.muzik.service.extensions.media.isSkipToNextEnabled
 import hu.mrolcsi.muzik.service.extensions.media.isSkipToPreviousEnabled
 import hu.mrolcsi.muzik.service.extensions.media.title
+import hu.mrolcsi.muzik.theme.ThemedViewModel
+import hu.mrolcsi.muzik.theme.ThemedViewModelImpl
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import javax.inject.Inject
@@ -30,8 +32,10 @@ open class MiniPlayerViewModelImpl @Inject constructor(
   observable: ObservableImpl,
   uiCommandSource: ExecuteOnceUiCommandSource,
   navCommandSource: ExecuteOnceNavCommandSource,
+  themedViewModel: ThemedViewModelImpl,
   private val mediaService: MediaService
 ) : DataBindingViewModel(observable, uiCommandSource, navCommandSource),
+  ThemedViewModel by themedViewModel,
   MiniPlayerViewModel {
 
   override var songTitle: String? by boundStringOrNull(BR.songTitle)

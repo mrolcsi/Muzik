@@ -19,8 +19,7 @@ import hu.mrolcsi.muzik.common.MediaItemListAdapter
 import hu.mrolcsi.muzik.common.viewmodel.observeAndRunNavCommands
 import hu.mrolcsi.muzik.common.viewmodel.observeAndRunUiCommands
 import hu.mrolcsi.muzik.library.SortingMode
-import hu.mrolcsi.muzik.service.theme.Theme
-import hu.mrolcsi.muzik.service.theme.ThemeManager
+import hu.mrolcsi.muzik.theme.Theme
 import kotlinx.android.synthetic.main.fragment_albums.*
 import kotlinx.android.synthetic.main.list_item_album_content.*
 import javax.inject.Inject
@@ -64,7 +63,9 @@ class AlbumsFragment : DaggerFragment() {
       })
     }
 
-    ThemeManager.getInstance(requireContext()).currentTheme.observe(viewLifecycleOwner, Observer {
+    viewModel.currentTheme.observe(
+      viewLifecycleOwner,
+      Observer {
       applyThemeAnimated(it)
     })
   }
@@ -82,7 +83,7 @@ class AlbumsFragment : DaggerFragment() {
     inflater.inflate(R.menu.menu_albums, menu)
 
     // Apply theme to items
-    val color = ThemeManager.getInstance(requireContext()).currentTheme.value?.primaryForegroundColor ?: Color.WHITE
+    val color = viewModel.currentTheme.value?.primaryForegroundColor ?: Color.WHITE
     menu.forEach {
       it.icon.setTint(color)
     }
@@ -119,11 +120,14 @@ class AlbumsFragment : DaggerFragment() {
 
   private fun applyThemeAnimated(theme: Theme) {
 
-    val previousTheme = ThemeManager.getInstance(requireContext()).previousTheme
+    val previousTheme = viewModel.previousTheme
     val animationDuration = context?.resources?.getInteger(R.integer.preferredAnimationDuration)?.toLong() ?: 300L
 
     ValueAnimator.ofArgb(
-      previousTheme?.secondaryBackgroundColor ?: ContextCompat.getColor(requireContext(), R.color.backgroundColor),
+      previousTheme?.secondaryBackgroundColor ?: ContextCompat.getColor(
+        requireContext(),
+        R.color.backgroundColor
+      ),
       theme.secondaryBackgroundColor
     ).run {
       duration = animationDuration

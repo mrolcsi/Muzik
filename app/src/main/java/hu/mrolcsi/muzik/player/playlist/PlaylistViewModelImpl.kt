@@ -13,6 +13,8 @@ import hu.mrolcsi.muzik.common.viewmodel.ObservableImpl
 import hu.mrolcsi.muzik.database.playqueue.daos.PlayQueueDao
 import hu.mrolcsi.muzik.database.playqueue.entities.PlayQueueEntry
 import hu.mrolcsi.muzik.media.MediaService
+import hu.mrolcsi.muzik.theme.ThemedViewModel
+import hu.mrolcsi.muzik.theme.ThemedViewModelImpl
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.Observables
 import io.reactivex.rxkotlin.subscribeBy
@@ -23,9 +25,11 @@ class PlaylistViewModelImpl @Inject constructor(
   observable: ObservableImpl,
   uiCommandSource: ExecuteOnceUiCommandSource,
   navCommandSource: ExecuteOnceNavCommandSource,
+  themedViewModel: ThemedViewModelImpl,
   playQueueDao: PlayQueueDao,
   private val mediaService: MediaService
 ) : DataBindingViewModel(observable, uiCommandSource, navCommandSource),
+  ThemedViewModel by themedViewModel,
   PlaylistViewModel {
 
   override val progressVisible: Boolean = false

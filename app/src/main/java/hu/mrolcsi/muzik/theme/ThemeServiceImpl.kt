@@ -1,81 +1,85 @@
-package hu.mrolcsi.muzik.service.theme
+package hu.mrolcsi.muzik.theme
 
-import android.content.Context
+import android.annotation.SuppressLint
 import android.content.SharedPreferences
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Color
-import android.os.AsyncTask
-import android.preference.PreferenceManager
 import android.util.Log
 import android.util.LruCache
 import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.get
-import androidx.lifecycle.MutableLiveData
 import androidx.palette.graphics.Palette
-import hu.mrolcsi.muzik.R
-import org.json.JSONObject
-import java.util.concurrent.Executors
+import com.google.gson.Gson
+import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.rxkotlin.subscribeBy
+import io.reactivex.schedulers.Schedulers
+import io.reactivex.subjects.PublishSubject
+import io.reactivex.subjects.Subject
+import javax.inject.Inject
+import kotlin.math.pow
+import kotlin.math.sqrt
 
-// Singleton or ViewModel?
+@SuppressLint("CheckResult")
+class ThemeServiceImpl @Inject constructor(
+  private val sharedPrefs: SharedPreferences,
+  private val gson: Gson
+) : ThemeService {
 
-class ThemeManager(private val sharedPrefs: SharedPreferences) {
+  private val pendingThemeSubject: Subject<Observable<Theme>> = PublishSubject.create()
+  private val createThemeSubject: Subject<Bitmap> = PublishSubject.create()
 
+  private val themeCache = LruCache<Int, Theme>(50)
 
-  private val mThemeWorker = Executors.newSingleThreadExecutor()
-
-  private var mPreviousHash = 0
-  private val mThemeCache = LruCache<Int, Theme>(50)
-
-  var previousTheme: Theme? = null
-  val currentTheme = MutableLiveData<Theme>().apply {
-    // Load last used theme from SharedPrefs
-    AsyncTask.execute {
-      sharedPrefs.getString(LAST_USED_THEME, null)?.let {
-        val lastUsedTheme = Theme(JSONObject(it))
-        this.postValue(lastUsedTheme)
-      }
-    }
-  }
+  override val currentTheme: Observable<Theme>
 
   private val mPaletteFiler = Palette.Filter { _, hsl ->
     hsl[1] > 0.4
   }
 
-  @Synchronized
-  fun updateFromBitmap(bitmap: Bitmap) {
-    mThemeWorker.submit {
+  init {
+    currentTheme = pendingThemeSubject
+      .switchMap { it }
+      .doOnNext { Log.d(LOG_TAG, "Theme ready: $it") }
+      .replay(1)
+      .apply { connect() }
+      .hide()
+      .observeOn(AndroidSchedulers.mainThread())
 
-      // Calculate hash for this bitmap
-      val hashCode = bitmap.bitmapHash()
-
-      Log.d(LOG_TAG, "Updating Theme from $bitmap (hash=$hashCode)")
-
-      // compare with hash?
-      if (mPreviousHash == hashCode) {
-        Log.d(LOG_TAG, "Same bitmap as before. Skipping update.")
-        return@submit
+    createThemeSubject
+      .subscribeOn(Schedulers.computation())
+      .distinctUntilChanged { bitmap -> bitmap.bitmapHash() }
+      .map { createTheme(it) }
+      .doOnNext { Log.d(LOG_TAG, "Updating theme: $it") }
+      .doOnNext {
+        sharedPrefs.edit().putString(LAST_USED_THEME, gson.toJson(it)).apply()
       }
-      mPreviousHash = hashCode
+      .subscribeBy(
+        onNext = { pendingThemeSubject.onNext(Observable.just(it)) },
+        onError = { Log.e(LOG_TAG, Log.getStackTraceString(it)) }
+      )
 
-      // If the Theme is not cached, create it
-      val theme = createFromBitmap(bitmap)
+    loadSavedTheme()
+  }
 
-      // Save previous theme
-      previousTheme = currentTheme.value
-      currentTheme.postValue(theme)
-
-      // Save theme to shared prefs
-      sharedPrefs.edit().putString(LAST_USED_THEME, theme.toJson().toString()).apply()
+  private fun loadSavedTheme() {
+    sharedPrefs.getString(LAST_USED_THEME, null)?.let {
+      gson.fromJson(it, Theme::class.java)
+    }?.let {
+      pendingThemeSubject.onNext(Observable.just(it))
     }
   }
 
-  fun createFromBitmap(bitmap: Bitmap): Theme {
+  override fun updateTheme(bitmap: Bitmap) {
+    createThemeSubject.onNext(bitmap)
+  }
+
+  override fun createTheme(bitmap: Bitmap): Theme {
 
     // Calculate hash for this bitmap
     val hashCode = bitmap.bitmapHash()
 
-    val cachedTheme = mThemeCache[hashCode]
+    val cachedTheme = themeCache[hashCode]
 
     if (cachedTheme != null) {
       return cachedTheme
@@ -96,7 +100,7 @@ class ThemeManager(private val sharedPrefs: SharedPreferences) {
     theme.statusBarColor = statusBarPalette.swatches.maxBy { it.population }?.rgb
       ?: theme.primaryBackgroundColor
 
-    mThemeCache.put(hashCode, theme)
+    themeCache.put(hashCode, theme)
 
     return theme
   }
@@ -154,7 +158,8 @@ class ThemeManager(private val sharedPrefs: SharedPreferences) {
       val isAllowed = mPaletteFiler.isAllowed(it.rgb, it.hsl)
 
       // Also ignore swatches that don't have a minimum contrast
-      val hasEnoughContrast = ColorUtils.calculateContrast(it.rgb, backgroundColor) > MINIMUM_CONTRAST_RATIO
+      val hasEnoughContrast =
+        ColorUtils.calculateContrast(it.rgb, backgroundColor) > MINIMUM_CONTRAST_RATIO
 
       isAllowed && hasEnoughContrast
     }.maxBy {
@@ -191,31 +196,21 @@ class ThemeManager(private val sharedPrefs: SharedPreferences) {
   private fun distanceEuclidean(color1: Int, color2: Int): Double {
     // https://en.wikipedia.org/wiki/Color_difference#Euclidean
 
-    val redDistance = Math.pow((Color.red(color2) - Color.red(color1).toDouble()), 2.0)
-    val greenDistance = Math.pow((Color.green(color2) - Color.green(color1).toDouble()), 2.0)
-    val blueDistance = Math.pow((Color.blue(color2) - Color.blue(color1).toDouble()), 2.0)
+    val redDistance = (Color.red(color2) - Color.red(color1).toDouble()).pow(2.0)
+    val greenDistance = (Color.green(color2) - Color.green(color1).toDouble()).pow(2.0)
+    val blueDistance = (Color.blue(color2) - Color.blue(color1).toDouble()).pow(2.0)
 
-    return Math.sqrt(redDistance + greenDistance + blueDistance)
+    return sqrt(redDistance + greenDistance + blueDistance)
   }
 
   companion object {
-    private const val LOG_TAG = "ThemeManager"
+    private const val LOG_TAG = "ThemeService"
 
     private const val MINIMUM_CONTRAST_RATIO = 4
 
     private const val LAST_USED_THEME = "lastUsedTheme"
 
-    private lateinit var mPlaceholderCoverArt: Bitmap
-
-    @Volatile private var instance: ThemeManager? = null
-
-    fun getInstance(context: Context): ThemeManager {
-      if (!Companion::mPlaceholderCoverArt.isInitialized) {
-        mPlaceholderCoverArt = BitmapFactory.decodeResource(context.resources, R.drawable.placeholder_cover_art)
-      }
-      return instance
-        ?: ThemeManager(PreferenceManager.getDefaultSharedPreferences(context)).also { instance = it }
-    }
   }
 
 }
+

@@ -4,6 +4,9 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.res.ColorStateList
 import android.graphics.PorterDuff
+import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.RippleDrawable
 import android.os.Build
 import android.view.View
 import androidx.appcompat.widget.Toolbar
@@ -13,7 +16,9 @@ import androidx.core.view.get
 import com.google.android.material.bottomnavigation.BottomNavigationItemView
 import com.google.android.material.bottomnavigation.BottomNavigationMenuView
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import hu.mrolcsi.muzik.service.theme.Theme
+
+const val DISABLED_ALPHA = 0.5f
+const val DISABLED_OPACITY = (255 * DISABLED_ALPHA).toInt()
 
 fun Activity.applyStatusBarColor(color: Int) {
   window?.statusBarColor = color
@@ -66,7 +71,7 @@ fun Toolbar.applyForegroundColor(color: Int) {
 fun BottomNavigationView.applyForegroundColor(color: Int) {
   // Selected Colors
   val itemStates = arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf())
-  val itemColors = intArrayOf(color, ColorUtils.setAlphaComponent(color, Theme.DISABLED_OPACITY))
+  val itemColors = intArrayOf(color, ColorUtils.setAlphaComponent(color, DISABLED_OPACITY))
   val itemStateList = ColorStateList(itemStates, itemColors)
 
   itemIconTintList = itemStateList
@@ -74,7 +79,19 @@ fun BottomNavigationView.applyForegroundColor(color: Int) {
 
   (this[0] as BottomNavigationMenuView).forEach {
     if (it is BottomNavigationItemView) {
-      it.setItemBackground(Theme.getRippleDrawable(color))
+      it.setItemBackground(getRippleDrawable(color))
     }
   }
 }
+
+fun getRippleDrawable(rippleColor: Int, backgroundColor: Int): RippleDrawable = RippleDrawable(
+  ColorStateList.valueOf(rippleColor),
+  null,
+  ColorDrawable(backgroundColor)
+)
+
+fun getRippleDrawable(rippleColor: Int, background: Drawable? = null) = RippleDrawable(
+  ColorStateList.valueOf(rippleColor),
+  background,
+  null
+)

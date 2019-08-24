@@ -27,8 +27,7 @@ import hu.mrolcsi.muzik.service.extensions.media.albumArtUri
 import hu.mrolcsi.muzik.service.extensions.media.albumYear
 import hu.mrolcsi.muzik.service.extensions.media.artist
 import hu.mrolcsi.muzik.service.extensions.media.numberOfSongs
-import hu.mrolcsi.muzik.service.theme.Theme
-import hu.mrolcsi.muzik.service.theme.ThemeManager
+import hu.mrolcsi.muzik.theme.Theme
 import kotlinx.android.synthetic.main.album_details_header.*
 import kotlinx.android.synthetic.main.fragment_album_details.*
 import javax.inject.Inject
@@ -116,6 +115,8 @@ class AlbumDetailsFragment : DaggerFragment() {
       albumDetails.observe(viewLifecycleOwner, Observer {
         loadHeader(it)
       })
+
+      albumTheme.observe(viewLifecycleOwner, Observer { applyTheme(it) })
     }
   }
 
@@ -157,9 +158,9 @@ class AlbumDetailsFragment : DaggerFragment() {
       .into(imgCoverArt)
   }
 
-  private fun applyTheme(theme: Theme) {
+  private fun applyTheme(albumTheme: Theme) {
 
-    val currentTheme = ThemeManager.getInstance(requireContext()).currentTheme.value
+    val currentTheme = viewModel.currentTheme.value
 
     // Primary: Toolbar
     // Tertiary: RecyclerView
@@ -168,7 +169,7 @@ class AlbumDetailsFragment : DaggerFragment() {
 
     ValueAnimator.ofArgb(
       currentTheme?.primaryBackgroundColor ?: Color.BLACK,
-      theme.primaryBackgroundColor
+      albumTheme.primaryBackgroundColor
     ).run {
       duration = animationDuration
       addUpdateListener {
@@ -182,7 +183,7 @@ class AlbumDetailsFragment : DaggerFragment() {
 
     ValueAnimator.ofArgb(
       currentTheme?.primaryForegroundColor ?: Color.WHITE,
-      theme.primaryForegroundColor
+      albumTheme.primaryForegroundColor
     ).run {
       duration = animationDuration
       addUpdateListener {
@@ -200,7 +201,7 @@ class AlbumDetailsFragment : DaggerFragment() {
 
     ValueAnimator.ofArgb(
       currentTheme?.secondaryBackgroundColor ?: Color.BLACK,
-      theme.secondaryBackgroundColor
+      albumTheme.secondaryBackgroundColor
     ).run {
       duration = animationDuration
       addUpdateListener {
@@ -214,7 +215,7 @@ class AlbumDetailsFragment : DaggerFragment() {
 
     ValueAnimator.ofArgb(
       currentTheme?.secondaryForegroundColor ?: Color.WHITE,
-      theme.secondaryForegroundColor
+      albumTheme.secondaryForegroundColor
     ).run {
       duration = animationDuration
       addUpdateListener {

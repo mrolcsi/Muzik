@@ -19,7 +19,6 @@ import hu.mrolcsi.muzik.common.MediaItemListAdapter
 import hu.mrolcsi.muzik.common.viewmodel.observeAndRunNavCommands
 import hu.mrolcsi.muzik.common.viewmodel.observeAndRunUiCommands
 import hu.mrolcsi.muzik.library.SortingMode
-import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.synthetic.main.fragment_songs.*
 import javax.inject.Inject
 
@@ -69,7 +68,9 @@ class SongsFragment : DaggerFragment() {
       })
     }
 
-    ThemeManager.getInstance(requireContext()).currentTheme.observe(viewLifecycleOwner, Observer {
+    viewModel.currentTheme.observe(
+      viewLifecycleOwner,
+      Observer {
       // Tell adapter to reload its views
       songsAdapter.notifyDataSetChanged()
 
@@ -101,8 +102,8 @@ class SongsFragment : DaggerFragment() {
     super.onCreateOptionsMenu(menu, inflater)
     inflater.inflate(R.menu.menu_songs, menu)
 
-    // Apply theme to items
-    val color = ThemeManager.getInstance(requireContext()).currentTheme.value?.primaryForegroundColor ?: Color.WHITE
+    // Apply currentTheme to items
+    val color = viewModel.currentTheme.value?.primaryForegroundColor ?: Color.WHITE
     menu.forEach {
       it.icon.setTint(color)
     }

@@ -24,6 +24,8 @@ import hu.mrolcsi.muzik.service.extensions.media.MediaType
 import hu.mrolcsi.muzik.service.extensions.media.artist
 import hu.mrolcsi.muzik.service.extensions.media.id
 import hu.mrolcsi.muzik.service.extensions.media.type
+import hu.mrolcsi.muzik.theme.ThemedViewModel
+import hu.mrolcsi.muzik.theme.ThemedViewModelImpl
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.subjects.PublishSubject
@@ -35,10 +37,12 @@ class ArtistDetailsViewModelImpl @Inject constructor(
   observable: ObservableImpl,
   uiCommandSource: ExecuteOnceUiCommandSource,
   navCommandSource: ExecuteOnceNavCommandSource,
+  themedViewModel: ThemedViewModelImpl,
   private val mediaRepo: MediaRepository,
   private val discogsService: DiscogsService,
   private val mediaService: MediaService
 ) : DataBindingViewModel(observable, uiCommandSource, navCommandSource),
+  ThemedViewModel by themedViewModel,
   ArtistDetailsViewModel {
 
   override var artistItem: MediaItem? by Delegates.observable(null) { _, old: MediaItem?, new: MediaItem? ->

@@ -9,8 +9,7 @@ import hu.mrolcsi.muzik.common.glide.GlideApp
 import hu.mrolcsi.muzik.common.view.MVVMViewHolder
 import hu.mrolcsi.muzik.extensions.millisecondsToTimeStamp
 import hu.mrolcsi.muzik.extensions.startMarquee
-import hu.mrolcsi.muzik.service.theme.Theme
-import hu.mrolcsi.muzik.service.theme.ThemeManager
+import hu.mrolcsi.muzik.theme.Theme
 import kotlinx.android.synthetic.main.list_item_playlist.view.*
 import kotlin.properties.Delegates
 
@@ -25,10 +24,7 @@ class PlaylistItemHolder(parent: ViewGroup) : MVVMViewHolder<PlaylistItem>(R.lay
   private val marqueeDelay = itemView.resources.getInteger(R.integer.preferredMarqueeDelay).toLong()
 
   fun bind(item: PlaylistItem) {
-    // Apply theme
-    ThemeManager.getInstance(itemView.context).currentTheme.value?.let { theme ->
-      applyTheme(theme)
-    }
+    // TODO: Apply theme
 
     itemView.tvSongTitle?.run {
       text = item.entry.title

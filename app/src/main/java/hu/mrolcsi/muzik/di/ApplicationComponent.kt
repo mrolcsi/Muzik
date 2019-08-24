@@ -11,7 +11,9 @@ import javax.inject.Singleton
     AppModule::class,
     ActivitiesModule::class,
     FragmentsModule::class,
-    NetworkModule::class
+    ServicesModule::class,
+    NetworkModule::class,
+    DatabaseModule::class
   ]
 )
 @Singleton

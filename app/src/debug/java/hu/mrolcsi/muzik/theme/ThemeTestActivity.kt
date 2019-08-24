@@ -3,7 +3,6 @@ package hu.mrolcsi.muzik.theme
 import android.annotation.SuppressLint
 import android.graphics.Color
 import android.os.Bundle
-import android.support.v4.media.session.MediaControllerCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,8 +14,6 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import dagger.android.support.DaggerAppCompatActivity
 import hu.mrolcsi.muzik.R
-import hu.mrolcsi.muzik.player.PlayerViewModel
-import hu.mrolcsi.muzik.service.theme.ThemeManager
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.debug.activity_theme_test.*
 import kotlinx.android.synthetic.debug.list_item_swatch.*
@@ -25,7 +22,7 @@ import javax.inject.Inject
 
 class ThemeTestActivity : DaggerAppCompatActivity() {
 
-  @Inject lateinit var viewModel: PlayerViewModel
+  @Inject lateinit var viewModel: ThemeTestViewModel
 
   // Adapters
   private val mAllColorsAdapter = PaletteAdapter()
@@ -36,21 +33,7 @@ class ThemeTestActivity : DaggerAppCompatActivity() {
 
     root.background = CheckerboardDrawable.create()
 
-//    viewModel.apply {
-//      mediaController.observe(this@ThemeTestActivity, Observer {
-//        MediaControllerCompat.setMediaController(this@ThemeTestActivity, it)
-//
-//        setupControls()
-//      })
-//
-//      currentMediaMetadata.observe(this@ThemeTestActivity, Observer {
-//        it?.let { metadata ->
-//          imgInput.setImageBitmap(metadata.albumArt)
-//        }
-//      })
-//    }
-
-    ThemeManager.getInstance(this).currentTheme.observe(this, Observer { theme ->
+    viewModel.theme.observe(this, Observer { theme ->
       // Source Palette
       theme.sourcePalette?.let { palette ->
         tvPaletteLightVibrant.setBackgroundColor(palette.lightVibrantSwatch?.rgb ?: Color.TRANSPARENT)
@@ -78,18 +61,6 @@ class ThemeTestActivity : DaggerAppCompatActivity() {
     rvAllColors.apply {
       layoutManager = LinearLayoutManager(this@ThemeTestActivity, RecyclerView.HORIZONTAL, false)
       adapter = mAllColorsAdapter
-    }
-  }
-
-  private fun setupControls() {
-    val controller = MediaControllerCompat.getMediaController(this)
-
-    btnPrevious.setOnClickListener {
-      controller.transportControls.skipToPrevious()
-    }
-
-    btnNext.setOnClickListener {
-      controller.transportControls.skipToNext()
     }
   }
 

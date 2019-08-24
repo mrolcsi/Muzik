@@ -8,22 +8,23 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
+import dagger.android.support.DaggerFragment
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.extensions.applyForegroundColor
 import hu.mrolcsi.muzik.extensions.applyNavigationBarColor
 import hu.mrolcsi.muzik.extensions.applyStatusBarColor
-import hu.mrolcsi.muzik.service.theme.Theme
-import hu.mrolcsi.muzik.service.theme.ThemeManager
+import hu.mrolcsi.muzik.theme.Theme
 import kotlinx.android.synthetic.main.fragment_library.*
+import javax.inject.Inject
 
+class LibraryFragment : DaggerFragment() {
 
-class LibraryFragment : Fragment() {
+  @Inject lateinit var viewModel: LibraryViewModel
 
   override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
     inflater.inflate(R.layout.fragment_library, container, false)
@@ -33,7 +34,7 @@ class LibraryFragment : Fragment() {
 
     setupNavigation(requireActivity().findNavController(R.id.libraryNavHost))
 
-    ThemeManager.getInstance(requireContext()).currentTheme.observe(viewLifecycleOwner, object : Observer<Theme> {
+    viewModel.currentTheme.observe(viewLifecycleOwner, object : Observer<Theme> {
 
       private var initialLoad = true
 
@@ -52,14 +53,11 @@ class LibraryFragment : Fragment() {
     super.onResume()
 
     // Apply StatusBar and NavigationBar colors again
-    val themeManager = ThemeManager.getInstance(requireContext())
     activity?.applyStatusBarColor(
-      themeManager.currentTheme.value?.primaryBackgroundColor
-        ?: Color.BLACK
+      viewModel.currentTheme.value?.primaryBackgroundColor ?: Color.BLACK
     )
     activity?.applyNavigationBarColor(
-      themeManager.currentTheme.value?.primaryBackgroundColor
-        ?: Color.BLACK
+      viewModel.currentTheme.value?.primaryBackgroundColor ?: Color.BLACK
     )
   }
 
@@ -81,8 +79,7 @@ class LibraryFragment : Fragment() {
         }
         else -> {
           // Apply color to back arrow
-          val theme = ThemeManager.getInstance(requireContext()).currentTheme.value
-          val color = theme?.primaryForegroundColor ?: Color.WHITE
+          val color = viewModel.currentTheme.value?.primaryForegroundColor ?: Color.WHITE
 
           libraryToolbar.applyForegroundColor(color)
 
@@ -122,7 +119,7 @@ class LibraryFragment : Fragment() {
   private fun applyThemeAnimated(theme: Theme) {
     Log.d(LOG_TAG, "Applying theme (animated)...")
 
-    val previousTheme = ThemeManager.getInstance(requireContext()).previousTheme
+    val previousTheme = viewModel.previousTheme
     val animationDuration =
       context?.resources?.getInteger(R.integer.preferredAnimationDuration)?.toLong() ?: 300L
 

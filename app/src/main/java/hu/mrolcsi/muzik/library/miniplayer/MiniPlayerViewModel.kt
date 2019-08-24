@@ -5,8 +5,9 @@ import androidx.databinding.Bindable
 import androidx.databinding.Observable
 import hu.mrolcsi.muzik.common.viewmodel.NavCommandSource
 import hu.mrolcsi.muzik.common.viewmodel.UiCommandSource
+import hu.mrolcsi.muzik.theme.ThemedViewModel
 
-interface MiniPlayerViewModel : Observable, UiCommandSource, NavCommandSource {
+interface MiniPlayerViewModel : ThemedViewModel, Observable, UiCommandSource, NavCommandSource {
 
   @get:Bindable
   val songTitle: String?

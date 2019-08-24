@@ -1,6 +1,5 @@
 package hu.mrolcsi.muzik.player
 
-import android.os.AsyncTask
 import android.support.v4.media.session.MediaSessionCompat.QueueItem
 import android.view.ViewGroup
 import com.bumptech.glide.request.target.Target
@@ -11,8 +10,7 @@ import hu.mrolcsi.muzik.common.glide.onResourceReady
 import hu.mrolcsi.muzik.common.view.MVVMViewHolder
 import hu.mrolcsi.muzik.extensions.startMarquee
 import hu.mrolcsi.muzik.service.extensions.media.coverArtUri
-import hu.mrolcsi.muzik.service.theme.Theme
-import hu.mrolcsi.muzik.service.theme.ThemeManager
+import hu.mrolcsi.muzik.theme.Theme
 import kotlinx.android.synthetic.main.list_item_queue.view.*
 import kotlin.properties.Delegates
 
@@ -32,17 +30,7 @@ class QueueItemHolder(parent: ViewGroup) : MVVMViewHolder<QueueItem>(R.layout.li
         .asBitmap()
         .load(item.description.coverArtUri)
         .override(Target.SIZE_ORIGINAL)
-        .onResourceReady {
-          AsyncTask.execute {
-            // Generate theme from resource
-            val theme = ThemeManager.getInstance(itemView.context).createFromBitmap(it).also {
-              usedTheme = it
-            }
-            itemView.post {
-              applyTheme(theme)
-            }
-          }
-        }
+        .onResourceReady { albumArt -> /* TODO: create theme */ }
         .onLoadFailed { usedTheme = null; false }
         .into(imgCoverArt)
 

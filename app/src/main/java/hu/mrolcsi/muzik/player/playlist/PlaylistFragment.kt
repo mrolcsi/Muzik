@@ -15,8 +15,7 @@ import hu.mrolcsi.muzik.common.ColoredDividerItemDecoration
 import hu.mrolcsi.muzik.common.view.MVVMListAdapter
 import hu.mrolcsi.muzik.databinding.FragmentPlaylistBinding
 import hu.mrolcsi.muzik.extensions.applyForegroundColor
-import hu.mrolcsi.muzik.service.theme.Theme
-import hu.mrolcsi.muzik.service.theme.ThemeManager
+import hu.mrolcsi.muzik.theme.Theme
 import kotlinx.android.synthetic.main.fragment_playlist.*
 import javax.inject.Inject
 
@@ -47,7 +46,9 @@ class PlaylistFragment : DaggerFragment() {
 
     viewModel.items.observe(viewLifecycleOwner, playlistAdapter)
 
-    ThemeManager.getInstance(requireContext()).currentTheme.observe(viewLifecycleOwner, object : Observer<Theme> {
+    viewModel.currentTheme.observe(
+      viewLifecycleOwner,
+      object : Observer<Theme> {
 
       private var initialLoad = true
 
@@ -82,7 +83,7 @@ class PlaylistFragment : DaggerFragment() {
 
   private fun applyThemeAnimated(theme: Theme) {
 
-    val previousTheme = ThemeManager.getInstance(requireContext()).previousTheme
+    val previousTheme = viewModel.previousTheme
     val animationDuration = context?.resources?.getInteger(R.integer.preferredAnimationDuration)?.toLong() ?: 300L
 
     // Background Color

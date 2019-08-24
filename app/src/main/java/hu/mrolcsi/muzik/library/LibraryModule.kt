@@ -3,24 +3,24 @@ package hu.mrolcsi.muzik.library
 import dagger.Module
 import dagger.Provides
 import hu.mrolcsi.muzik.di.createOrReUseViewModel
-import hu.mrolcsi.muzik.library.artists.ArtistsFragment
-import hu.mrolcsi.muzik.library.artists.ArtistsViewModel
-import hu.mrolcsi.muzik.library.artists.ArtistsViewModelImpl
-import hu.mrolcsi.muzik.library.miniplayer.MiniPlayerFragment
-import hu.mrolcsi.muzik.player.PlayerViewModel
-import hu.mrolcsi.muzik.player.PlayerViewModelImpl
+import hu.mrolcsi.muzik.library.pager.LibraryPagerFragment
+import hu.mrolcsi.muzik.library.pager.LibraryPagerViewModel
+import hu.mrolcsi.muzik.library.pager.LibraryPagerViewModelImpl
 import javax.inject.Provider
 
 @Module
 class LibraryModule {
 
   @Provides
-  fun providePlayerViewModel(fragment: MiniPlayerFragment, provider: Provider<PlayerViewModelImpl>): PlayerViewModel =
-    createOrReUseViewModel(fragment, provider)
+  fun provideLibraryViewModel(
+    fragment: LibraryFragment,
+    provider: Provider<LibraryViewModelImpl>
+  ): LibraryViewModel = createOrReUseViewModel(fragment, provider)
 
   @Provides
-  fun provideArtistsViewModel(fragment: ArtistsFragment, provider: Provider<ArtistsViewModelImpl>): ArtistsViewModel =
-    createOrReUseViewModel(fragment, provider)
-
+  fun provideLibraryPagerViewModel(
+    fragment: LibraryPagerFragment,
+    provider: Provider<LibraryPagerViewModelImpl>
+  ): LibraryPagerViewModel = createOrReUseViewModel(fragment, provider)
 
 }

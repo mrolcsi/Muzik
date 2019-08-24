@@ -1,6 +1,5 @@
 package hu.mrolcsi.muzik.library.albums
 
-import android.os.AsyncTask
 import android.support.v4.media.MediaBrowserCompat
 import android.view.View
 import androidx.cardview.widget.CardView
@@ -9,11 +8,11 @@ import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.glide.GlideApp
 import hu.mrolcsi.muzik.common.glide.onResourceReady
 import hu.mrolcsi.muzik.common.view.MVVMViewHolder
+import hu.mrolcsi.muzik.extensions.getRippleDrawable
 import hu.mrolcsi.muzik.extensions.startMarquee
 import hu.mrolcsi.muzik.service.extensions.media.albumArtUri
 import hu.mrolcsi.muzik.service.extensions.media.id
-import hu.mrolcsi.muzik.service.theme.Theme
-import hu.mrolcsi.muzik.service.theme.ThemeManager
+import hu.mrolcsi.muzik.theme.Theme
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.list_item_album_content.*
 import kotlin.properties.Delegates
@@ -45,21 +44,14 @@ class AlbumHolder(override val containerView: View) :
     GlideApp.with(imgCoverArt)
       .asBitmap()
       .load(item.description.albumArtUri)
-      .onResourceReady {
-        AsyncTask.execute {
-          // Generate theme from resource
-          val theme = ThemeManager.getInstance(containerView.context).createFromBitmap(it)
-          containerView.post {
-            applyTheme(theme)
-          }
-        }
-      }
+      .onResourceReady { /* TODO: create theme */ }
       .into(imgCoverArt)
   }
 
   private fun applyTheme(theme: Theme) {
     (itemView as CardView).setCardBackgroundColor(theme.primaryBackgroundColor)
-    itemView.foreground = Theme.getRippleDrawable(theme.primaryBackgroundColor, theme.primaryForegroundColor)
+    itemView.foreground =
+      getRippleDrawable(theme.primaryBackgroundColor, theme.primaryForegroundColor)
 
     tvAlbumTitle?.setTextColor(theme.primaryForegroundColor)
     tvAlbumArtist?.setTextColor(theme.primaryForegroundColor)

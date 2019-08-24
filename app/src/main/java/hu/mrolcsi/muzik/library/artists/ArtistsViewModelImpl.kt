@@ -9,6 +9,8 @@ import hu.mrolcsi.muzik.common.viewmodel.ExecuteOnceUiCommandSource
 import hu.mrolcsi.muzik.common.viewmodel.ObservableImpl
 import hu.mrolcsi.muzik.library.pager.LibraryPagerFragmentDirections
 import hu.mrolcsi.muzik.media.MediaRepository
+import hu.mrolcsi.muzik.theme.ThemedViewModel
+import hu.mrolcsi.muzik.theme.ThemedViewModelImpl
 import io.reactivex.rxkotlin.subscribeBy
 import javax.inject.Inject
 
@@ -16,8 +18,10 @@ class ArtistsViewModelImpl @Inject constructor(
   observable: ObservableImpl,
   uiCommandSource: ExecuteOnceUiCommandSource,
   navCommandSource: ExecuteOnceNavCommandSource,
-  private val mediaRepo: MediaRepository
+  themedViewModel: ThemedViewModelImpl,
+  mediaRepo: MediaRepository
 ) : DataBindingViewModel(observable, uiCommandSource, navCommandSource),
+  ThemedViewModel by themedViewModel,
   ArtistsViewModel {
 
   override var progressVisible: Boolean by boundBoolean(BR.progressVisible)

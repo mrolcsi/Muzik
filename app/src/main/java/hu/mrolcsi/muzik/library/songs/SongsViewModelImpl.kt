@@ -19,6 +19,8 @@ import hu.mrolcsi.muzik.service.extensions.media.artistKey
 import hu.mrolcsi.muzik.service.extensions.media.dateAdded
 import hu.mrolcsi.muzik.service.extensions.media.titleKey
 import hu.mrolcsi.muzik.service.extensions.media.type
+import hu.mrolcsi.muzik.theme.ThemedViewModel
+import hu.mrolcsi.muzik.theme.ThemedViewModelImpl
 import io.reactivex.rxkotlin.Observables
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.subjects.PublishSubject
@@ -30,9 +32,11 @@ class SongsViewModelImpl @Inject constructor(
   observable: ObservableImpl,
   uiCommandSource: ExecuteOnceUiCommandSource,
   navCommandSource: ExecuteOnceNavCommandSource,
+  themedViewModel: ThemedViewModelImpl,
   mediaRepo: MediaRepository,
   private val mediaService: MediaService
 ) : DataBindingViewModel(observable, uiCommandSource, navCommandSource),
+  ThemedViewModel by themedViewModel,
   SongsViewModel {
 
   override val progressVisible: Boolean = false

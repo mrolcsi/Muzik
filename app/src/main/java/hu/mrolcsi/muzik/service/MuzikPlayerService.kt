@@ -20,15 +20,20 @@ import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import hu.mrolcsi.muzik.database.playqueue.PlayQueueDatabase
 import hu.mrolcsi.muzik.database.playqueue.entities.LastPlayed
+import hu.mrolcsi.muzik.di.MuzikApplication
 import hu.mrolcsi.muzik.service.exoplayer.ExoPlayerHolder
 import hu.mrolcsi.muzik.service.exoplayer.notification.ExoNotificationManager
 import hu.mrolcsi.muzik.service.extensions.media.albumArt
 import hu.mrolcsi.muzik.service.extensions.media.isSkipToNextEnabled
 import hu.mrolcsi.muzik.service.extensions.media.prepareFromDescriptions
 import hu.mrolcsi.muzik.service.extensions.media.setShuffleMode
-import hu.mrolcsi.muzik.service.theme.ThemeManager
+import hu.mrolcsi.muzik.theme.ThemeService
+import javax.inject.Inject
+
 
 class MuzikPlayerService : MuzikBrowserService() {
+
+  @Inject lateinit var themeService: ThemeService
 
   // MediaSession and Player implementations
   private lateinit var mMediaSession: MediaSessionCompat
@@ -43,6 +48,7 @@ class MuzikPlayerService : MuzikBrowserService() {
 
   override fun onCreate() {
     super.onCreate()
+    (application as MuzikApplication).androidInjector().inject(this)
 
     Log.i(LOG_TAG, "onCreate()")
 
@@ -138,7 +144,7 @@ class MuzikPlayerService : MuzikBrowserService() {
 
         override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
           metadata?.albumArt?.let {
-            ThemeManager.getInstance(applicationContext).updateFromBitmap(it)
+            themeService.updateTheme(it)
           }
         }
       })

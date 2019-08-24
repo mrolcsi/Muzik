@@ -18,6 +18,8 @@ import hu.mrolcsi.muzik.service.extensions.media.MediaType
 import hu.mrolcsi.muzik.service.extensions.media.artistKey
 import hu.mrolcsi.muzik.service.extensions.media.titleKey
 import hu.mrolcsi.muzik.service.extensions.media.type
+import hu.mrolcsi.muzik.theme.ThemedViewModel
+import hu.mrolcsi.muzik.theme.ThemedViewModelImpl
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.Observables
 import io.reactivex.rxkotlin.subscribeBy
@@ -30,9 +32,10 @@ class AlbumsViewModelImpl @Inject constructor(
   observable: ObservableImpl,
   uiCommandSource: ExecuteOnceUiCommandSource,
   navCommandSource: ExecuteOnceNavCommandSource,
+  themedViewModel: ThemedViewModelImpl,
   mediaRepo: MediaRepository
 ) : DataBindingViewModel(observable, uiCommandSource, navCommandSource),
-  AlbumsViewModel {
+  AlbumsViewModel, ThemedViewModel by themedViewModel {
 
   override val progressVisible: Boolean = false
   override val listViewVisible: Boolean = true

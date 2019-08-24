@@ -24,9 +24,10 @@ class MuzikGlideModule : AppGlideModule() {
   // See: https://medium.com/@nuhkocaa/manage-all-your-glides-in-a-single-class-with-glidemodule-on-android-4856ee4983a1
 
   override fun applyOptions(context: Context, builder: GlideBuilder) {
-    val factory = DrawableCrossFadeFactory.Builder(context.resources.getInteger(R.integer.preferredAnimationDuration))
-      .setCrossFadeEnabled(true)
-      .build()
+    val factory =
+      DrawableCrossFadeFactory.Builder(context.resources.getInteger(R.integer.preferredAnimationDuration))
+        .setCrossFadeEnabled(true)
+        .build()
 
     builder.setDefaultTransitionOptions(
       Bitmap::class.java,
@@ -44,47 +45,72 @@ class MuzikGlideModule : AppGlideModule() {
     )
   }
 
-  @Deprecated("use onResourceReady and onLoadFailed instead!")
-  interface SimpleRequestListener<R> : RequestListener<R> {
+  companion object {
+    private const val MEMORY_CACHE_SIZE = 1024 * 1024 * 20 // 20mb
+  }
+}
 
-    override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<R>?, isFirstResource: Boolean): Boolean {
-      onLoadFailed()
+fun <R> GlideRequest<R>.onResourceReady(callback: (resource: R) -> Unit): GlideRequest<R> {
+  return addListener(object : RequestListener<R> {
+    override fun onLoadFailed(
+      e: GlideException?,
+      model: Any,
+      target: Target<R>,
+      isFirstResource: Boolean
+    ): Boolean = false
+
+    override fun onResourceReady(
+      resource: R,
+      model: Any,
+      target: Target<R>,
+      dataSource: DataSource?,
+      isFirstResource: Boolean
+    ): Boolean {
+      callback.invoke(resource)
       return false
     }
 
-    fun onLoadFailed() {}
+  })
+}
 
+fun <R> GlideRequest<R>.onResourceReadyWithTarget(callback: (target: Target<R>, resource: R) -> Boolean): GlideRequest<R> {
+  return addListener(object : RequestListener<R> {
+    override fun onLoadFailed(
+      e: GlideException?,
+      model: Any,
+      target: Target<R>,
+      isFirstResource: Boolean
+    ): Boolean = false
+
+    override fun onResourceReady(
+      resource: R,
+      model: Any,
+      target: Target<R>,
+      dataSource: DataSource?,
+      isFirstResource: Boolean
+    ): Boolean {
+      return callback.invoke(target, resource)
+    }
+
+  })
+}
+
+fun <R> GlideRequest<R>.onLoadFailed(callback: (error: GlideException?) -> Boolean) =
+  addListener(object : RequestListener<R> {
     override fun onResourceReady(
       resource: R,
       model: Any?,
       target: Target<R>?,
       dataSource: DataSource?,
       isFirstResource: Boolean
+    ): Boolean = false
+
+    override fun onLoadFailed(
+      e: GlideException?,
+      model: Any?,
+      target: Target<R>?,
+      isFirstResource: Boolean
     ): Boolean {
-      onResourceReady(resource)
-      return false
-    }
-
-    fun onResourceReady(resource: R) {}
-
-  }
-
-  companion object {
-    private const val MEMORY_CACHE_SIZE = 1024 * 1024 * 20 // 20mb
-  }
-}
-
-fun <T> GlideRequest<T>.onResourceReady(callback: (resource: T) -> Unit): GlideRequest<T> {
-  return addListener(object : MuzikGlideModule.SimpleRequestListener<T> {
-    override fun onResourceReady(resource: T) {
-      callback.invoke(resource)
-    }
-  })
-}
-
-fun <T> GlideRequest<T>.onLoadFailed(callback: (error: GlideException?) -> Boolean) =
-  addListener(object : MuzikGlideModule.SimpleRequestListener<T> {
-    override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<T>?, isFirstResource: Boolean): Boolean {
       return callback.invoke(e)
     }
   })

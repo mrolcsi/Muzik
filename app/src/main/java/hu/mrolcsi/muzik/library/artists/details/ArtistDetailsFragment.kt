@@ -22,8 +22,7 @@ import hu.mrolcsi.muzik.common.viewmodel.observeAndRunNavCommands
 import hu.mrolcsi.muzik.common.viewmodel.observeAndRunUiCommands
 import hu.mrolcsi.muzik.library.albums.AlbumHolder
 import hu.mrolcsi.muzik.library.songs.SongHolder
-import hu.mrolcsi.muzik.service.theme.Theme
-import hu.mrolcsi.muzik.service.theme.ThemeManager
+import hu.mrolcsi.muzik.theme.Theme
 import kotlinx.android.synthetic.main.artist_details_header.*
 import kotlinx.android.synthetic.main.fragment_artist_details.*
 import kotlinx.android.synthetic.main.fragment_artist_details_content.*
@@ -122,7 +121,9 @@ class ArtistDetailsFragment : DaggerFragment() {
     }
 
 
-    ThemeManager.getInstance(requireContext()).currentTheme.observe(viewLifecycleOwner, object : Observer<Theme> {
+    viewModel.currentTheme.observe(
+      viewLifecycleOwner,
+      object : Observer<Theme> {
       private var initialLoad = true
 
       override fun onChanged(it: Theme) {
@@ -183,7 +184,7 @@ class ArtistDetailsFragment : DaggerFragment() {
 
   private fun applyThemeAnimated(theme: Theme) {
 
-    val currentTheme = ThemeManager.getInstance(requireContext()).currentTheme.value
+    val currentTheme = viewModel.currentTheme.value
 
     val animationDuration = context?.resources?.getInteger(R.integer.preferredAnimationDuration)?.toLong() ?: 300L
 

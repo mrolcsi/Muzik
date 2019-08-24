@@ -35,8 +35,8 @@ import hu.mrolcsi.muzik.databinding.FragmentPlayerBinding
 import hu.mrolcsi.muzik.extensions.applyForegroundColor
 import hu.mrolcsi.muzik.extensions.applyNavigationBarColor
 import hu.mrolcsi.muzik.extensions.applyStatusBarColor
-import hu.mrolcsi.muzik.service.theme.Theme
-import hu.mrolcsi.muzik.service.theme.ThemeManager
+import hu.mrolcsi.muzik.extensions.getRippleDrawable
+import hu.mrolcsi.muzik.theme.Theme
 import kotlinx.android.synthetic.main.content_player.*
 import kotlinx.android.synthetic.main.fragment_player.*
 import javax.inject.Inject
@@ -77,7 +77,9 @@ class PlayerFragment : DaggerFragment() {
       })
     }
 
-    ThemeManager.getInstance(requireContext()).currentTheme.observe(viewLifecycleOwner, object : Observer<Theme> {
+    viewModel.currentTheme.observe(
+      viewLifecycleOwner,
+      object : Observer<Theme> {
 
       private var initialLoad = true
 
@@ -106,7 +108,7 @@ class PlayerFragment : DaggerFragment() {
       .onTransitionEnd {
         Log.v(LOG_TAG, "enterTransition.onTransitionEnd()")
         context?.let {
-          ThemeManager.getInstance(it).currentTheme.value?.let { theme ->
+          viewModel.currentTheme.value?.let { theme ->
             activity?.applyStatusBarColor(theme.statusBarColor)
           }
         }
@@ -119,7 +121,7 @@ class PlayerFragment : DaggerFragment() {
       .onTransitionEnd {
         Log.v(LOG_TAG, "returnTransition.onTransitionStart()")
         context?.let {
-          ThemeManager.getInstance(requireContext()).currentTheme.value?.let { theme ->
+          viewModel.currentTheme.value?.let { theme ->
             activity?.applyStatusBarColor(theme.primaryBackgroundColor)
           }
         }
@@ -136,7 +138,7 @@ class PlayerFragment : DaggerFragment() {
     if (savedInstanceState != null) {
       updatePager()
       // Re-apply status bar color after rotation
-      ThemeManager.getInstance(requireContext()).currentTheme.value?.let { theme ->
+      viewModel.currentTheme.value?.let { theme ->
         activity?.applyStatusBarColor(theme.statusBarColor)
       }
     }
@@ -187,7 +189,7 @@ class PlayerFragment : DaggerFragment() {
 
       override fun onPageScroll(pagesState: List<VisiblePageState>) {
         if (scrollState == RecyclerView.SCROLL_STATE_IDLE && pagesState.size == 1) {
-          // Apply theme of visible holder
+          // Apply currentTheme of visible holder
           val holder = rvQueue.findContainingViewHolder(pagesState.first().view) as QueueItemHolder
           holder.usedTheme?.let { applyThemeStatic(it) }
         }
@@ -356,9 +358,9 @@ class PlayerFragment : DaggerFragment() {
 
     // Media Buttons Ripple (need to use separate drawables)
     val rippleColor = ColorUtils.setAlphaComponent(color, Theme.DISABLED_OPACITY)
-    btnPrevious.background = Theme.getRippleDrawable(rippleColor, mPreviousBackground)
-    btnPlayPause.background = Theme.getRippleDrawable(rippleColor, mPlayPauseBackground)
-    btnNext.background = Theme.getRippleDrawable(rippleColor, mNextBackground)
+    btnPrevious.background = getRippleDrawable(rippleColor, mPreviousBackground)
+    btnPlayPause.background = getRippleDrawable(rippleColor, mPlayPauseBackground)
+    btnNext.background = getRippleDrawable(rippleColor, mNextBackground)
   }
 
   companion object {

@@ -7,6 +7,8 @@ import android.support.v4.media.MediaDescriptionCompat
 import androidx.core.os.bundleOf
 import androidx.lifecycle.MutableLiveData
 import hu.mrolcsi.muzik.R
+import hu.mrolcsi.muzik.common.glide.GlideApp
+import hu.mrolcsi.muzik.common.glide.onResourceReady
 import hu.mrolcsi.muzik.common.viewmodel.DataBindingViewModel
 import hu.mrolcsi.muzik.common.viewmodel.ExecuteOnceNavCommandSource
 import hu.mrolcsi.muzik.common.viewmodel.ExecuteOnceUiCommandSource
@@ -14,11 +16,15 @@ import hu.mrolcsi.muzik.common.viewmodel.ObservableImpl
 import hu.mrolcsi.muzik.media.MediaRepository
 import hu.mrolcsi.muzik.media.MediaService
 import hu.mrolcsi.muzik.service.extensions.media.MediaType
+import hu.mrolcsi.muzik.service.extensions.media.albumArtUri
 import hu.mrolcsi.muzik.service.extensions.media.artist
 import hu.mrolcsi.muzik.service.extensions.media.id
 import hu.mrolcsi.muzik.service.extensions.media.titleKey
 import hu.mrolcsi.muzik.service.extensions.media.trackNumber
 import hu.mrolcsi.muzik.service.extensions.media.type
+import hu.mrolcsi.muzik.theme.Theme
+import hu.mrolcsi.muzik.theme.ThemedViewModel
+import hu.mrolcsi.muzik.theme.ThemedViewModelImpl
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.subjects.PublishSubject
@@ -29,11 +35,12 @@ class AlbumDetailsViewModelImpl @Inject constructor(
   observable: ObservableImpl,
   uiCommandSource: ExecuteOnceUiCommandSource,
   navCommandSource: ExecuteOnceNavCommandSource,
+  themedViewModel: ThemedViewModelImpl,
   context: Context,
   private val mediaService: MediaService,
   private val mediaRepo: MediaRepository
 ) : DataBindingViewModel(observable, uiCommandSource, navCommandSource),
-  AlbumDetailsViewModel {
+  ThemedViewModel by themedViewModel, AlbumDetailsViewModel {
 
   override val progressVisible: Boolean = false
   override val listViewVisible: Boolean = true
@@ -45,12 +52,22 @@ class AlbumDetailsViewModelImpl @Inject constructor(
     if (old != new) new?.let {
       albumDetails.value = it
       albumSubject.onNext(it)
+
+      GlideApp.with(context)
+        .asBitmap()
+        .load(it.description.albumArtUri)
+        .onResourceReady { albumArt ->
+          albumTheme.value = themedViewModel.themeService.createTheme(albumArt)
+        }
+        .preload()
     }
   }
 
   private var albumSubject = PublishSubject.create<MediaItem>()
 
   override val albumDetails = MutableLiveData<MediaItem>()
+
+  override val albumTheme = MutableLiveData<Theme>()
 
   private val shuffleAllItem = MediaItem(
     MediaDescriptionCompat.Builder()

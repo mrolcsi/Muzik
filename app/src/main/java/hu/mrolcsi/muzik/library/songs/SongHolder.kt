@@ -1,19 +1,17 @@
 package hu.mrolcsi.muzik.library.songs
 
-import android.graphics.drawable.Drawable
 import android.graphics.drawable.InsetDrawable
 import android.support.v4.media.MediaBrowserCompat
 import android.view.View
-import com.bumptech.glide.load.DataSource
-import com.bumptech.glide.request.target.Target
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.glide.GlideApp
-import hu.mrolcsi.muzik.common.glide.MuzikGlideModule
+import hu.mrolcsi.muzik.common.glide.onResourceReadyWithTarget
 import hu.mrolcsi.muzik.common.view.MVVMViewHolder
+import hu.mrolcsi.muzik.extensions.getRippleDrawable
 import hu.mrolcsi.muzik.extensions.startMarquee
 import hu.mrolcsi.muzik.service.extensions.media.coverArtUri
 import hu.mrolcsi.muzik.service.extensions.media.trackNumber
-import hu.mrolcsi.muzik.service.theme.Theme
+import hu.mrolcsi.muzik.theme.Theme
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.list_item_song.*
 import kotlin.properties.Delegates
@@ -55,23 +53,16 @@ open class SongHolder(override val containerView: View, private val showTrackNum
         GlideApp.with(imgCoverArt)
           .asDrawable()
           .load(item.description.iconBitmap)
-          .addListener(object : MuzikGlideModule.SimpleRequestListener<Drawable> {
-            override fun onResourceReady(
-              resource: Drawable,
-              model: Any?,
-              target: Target<Drawable>?,
-              dataSource: DataSource?,
-              isFirstResource: Boolean
-            ): Boolean {
-              lastTheme?.secondaryForegroundColor?.let { resource.setTint(it) }
-              target?.getSize { width, height ->
-                // Add artificial padding using an InsetDrawable
-                val drawable = InsetDrawable(resource, width / 3, height / 3, width / 3, height / 3)
-                target.onResourceReady(drawable, null)
-              }
-              return true
+          .onResourceReadyWithTarget { target, resource ->
+            lastTheme?.secondaryForegroundColor?.let { resource.setTint(it) }
+            target.getSize { width, height ->
+              // Add artificial padding using an InsetDrawable
+              val drawable = InsetDrawable(resource, width / 3, height / 3, width / 3, height / 3)
+              target.onResourceReady(drawable, null)
             }
-          }).into(imgCoverArt)
+            true
+          }
+          .into(imgCoverArt)
       }
       showTrackNumber -> {
         // Set track number
@@ -89,7 +80,8 @@ open class SongHolder(override val containerView: View, private val showTrackNum
 
   open fun applyTheme(theme: Theme) {
     lastTheme = theme
-    itemView.background = Theme.getRippleDrawable(theme.secondaryForegroundColor, theme.secondaryBackgroundColor)
+    itemView.background =
+      getRippleDrawable(theme.secondaryForegroundColor, theme.secondaryBackgroundColor)
 
     tvSongTitle?.setTextColor(theme.secondaryForegroundColor)
     tvSongArtist?.setTextColor(theme.secondaryForegroundColor)

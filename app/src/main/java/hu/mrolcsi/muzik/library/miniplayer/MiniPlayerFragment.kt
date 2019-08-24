@@ -18,11 +18,11 @@ import hu.mrolcsi.muzik.common.OnSwipeTouchListener
 import hu.mrolcsi.muzik.common.viewmodel.observeAndRunNavCommands
 import hu.mrolcsi.muzik.common.viewmodel.observeAndRunUiCommands
 import hu.mrolcsi.muzik.databinding.FragmentMiniplayerBinding
+import hu.mrolcsi.muzik.extensions.getRippleDrawable
 import hu.mrolcsi.muzik.extensions.mediaControllerCompat
 import hu.mrolcsi.muzik.extensions.startMarquee
 import hu.mrolcsi.muzik.service.extensions.media.stopProgressUpdater
-import hu.mrolcsi.muzik.service.theme.Theme
-import hu.mrolcsi.muzik.service.theme.ThemeManager
+import hu.mrolcsi.muzik.theme.Theme
 import kotlinx.android.synthetic.main.fragment_miniplayer.*
 import javax.inject.Inject
 
@@ -58,7 +58,9 @@ class MiniPlayerFragment : DaggerFragment() {
       NavHostFragment.findNavController(requireParentFragment()).observeAndRunNavCommands(viewLifecycleOwner, this)
     }
 
-    ThemeManager.getInstance(requireContext()).currentTheme.observe(viewLifecycleOwner, Observer {
+    viewModel.currentTheme.observe(
+      viewLifecycleOwner,
+      Observer {
       applyTheme(it)
     })
   }
@@ -94,11 +96,14 @@ class MiniPlayerFragment : DaggerFragment() {
 
   private fun applyTheme(theme: Theme) {
 
-    val previousTheme = ThemeManager.getInstance(requireContext()).previousTheme
+    val previousTheme = viewModel.previousTheme
     val animationDuration = context?.resources?.getInteger(R.integer.preferredAnimationDuration)?.toLong() ?: 300L
 
     ValueAnimator.ofArgb(
-      previousTheme?.primaryBackgroundColor ?: ContextCompat.getColor(requireContext(), R.color.backgroundColor),
+      previousTheme?.primaryBackgroundColor ?: ContextCompat.getColor(
+        requireContext(),
+        R.color.backgroundColor
+      ),
       theme.primaryBackgroundColor
     ).run {
       duration = animationDuration
@@ -123,7 +128,7 @@ class MiniPlayerFragment : DaggerFragment() {
       start()
     }
 
-    val ripple = Theme.getRippleDrawable(theme.primaryForegroundColor, theme.primaryBackgroundColor)
+    val ripple = getRippleDrawable(theme.primaryForegroundColor, theme.primaryBackgroundColor)
     (view as? FrameLayout)?.foreground = ripple
   }
 
@@ -137,9 +142,9 @@ class MiniPlayerFragment : DaggerFragment() {
 
     // Media Buttons Ripple (need to use separate drawables)
     val rippleColor = ColorUtils.setAlphaComponent(color, Theme.DISABLED_OPACITY)
-    btnPrevious.background = Theme.getRippleDrawable(rippleColor, mPreviousBackground)
-    btnPlayPause.background = Theme.getRippleDrawable(rippleColor, mPlayPauseBackground)
-    btnNext.background = Theme.getRippleDrawable(rippleColor, mNextBackground)
+    btnPrevious.background = getRippleDrawable(rippleColor, mPreviousBackground)
+    btnPlayPause.background = getRippleDrawable(rippleColor, mPlayPauseBackground)
+    btnNext.background = getRippleDrawable(rippleColor, mNextBackground)
   }
 
   private fun applyForegroundColor(color: Int) {

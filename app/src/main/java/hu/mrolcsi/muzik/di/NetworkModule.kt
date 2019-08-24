@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import dagger.Module
 import dagger.Provides
+import hu.mrolcsi.muzik.common.AnnotationExclusionStrategy
 import hu.mrolcsi.muzik.discogs.DiscogsApi
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
@@ -15,7 +16,10 @@ class NetworkModule {
 
   @Provides
   @Singleton
-  fun provideGson(): Gson = GsonBuilder().create()
+  fun provideGson(): Gson =
+    GsonBuilder()
+      .setExclusionStrategies(AnnotationExclusionStrategy())
+      .create()
 
   @Provides
   @Singleton

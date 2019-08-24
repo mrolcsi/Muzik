@@ -12,15 +12,18 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import androidx.lifecycle.Observer
+import dagger.android.support.DaggerFragment
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.library.albums.AlbumsFragment
 import hu.mrolcsi.muzik.library.artists.ArtistsFragment
 import hu.mrolcsi.muzik.library.songs.SongsFragment
-import hu.mrolcsi.muzik.service.theme.Theme
-import hu.mrolcsi.muzik.service.theme.ThemeManager
+import hu.mrolcsi.muzik.theme.Theme
 import kotlinx.android.synthetic.main.fragment_library_pager.*
+import javax.inject.Inject
 
-class LibraryPagerFragment : Fragment() {
+class LibraryPagerFragment : DaggerFragment() {
+
+  @Inject lateinit var viewModel: LibraryPagerViewModel
 
   override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
     return inflater.inflate(R.layout.fragment_library_pager, container, false)
@@ -30,7 +33,9 @@ class LibraryPagerFragment : Fragment() {
     libraryPager.adapter = LibraryPagerAdapter(requireContext(), childFragmentManager)
     libraryTabs.setupWithViewPager(libraryPager)
 
-    ThemeManager.getInstance(requireContext()).currentTheme.observe(viewLifecycleOwner, object : Observer<Theme> {
+    viewModel.currentTheme.observe(
+      viewLifecycleOwner,
+      object : Observer<Theme> {
       private var initialLoad = true
 
       override fun onChanged(it: Theme) {
@@ -62,7 +67,7 @@ class LibraryPagerFragment : Fragment() {
 
   private fun applyThemeAnimated(theme: Theme) {
 
-    val previousTheme = ThemeManager.getInstance(requireContext()).previousTheme
+    val previousTheme = viewModel.previousTheme
     val animationDuration =
       context?.resources?.getInteger(R.integer.preferredAnimationDuration)?.toLong() ?: 300L
 

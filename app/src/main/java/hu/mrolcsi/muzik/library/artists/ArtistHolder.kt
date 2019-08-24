@@ -5,10 +5,11 @@ import android.support.v4.media.MediaBrowserCompat
 import android.view.View
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.view.MVVMViewHolder
+import hu.mrolcsi.muzik.extensions.getRippleDrawable
 import hu.mrolcsi.muzik.extensions.startMarquee
 import hu.mrolcsi.muzik.service.extensions.media.numberOfAlbums
 import hu.mrolcsi.muzik.service.extensions.media.numberOfTracks
-import hu.mrolcsi.muzik.service.theme.Theme
+import hu.mrolcsi.muzik.theme.Theme
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.list_item_artist.*
 import kotlin.properties.Delegates
@@ -40,7 +41,8 @@ class ArtistHolder(override val containerView: View) :
   }
 
   fun applyTheme(theme: Theme) {
-    itemView.background = Theme.getRippleDrawable(theme.secondaryForegroundColor, theme.secondaryBackgroundColor)
+    itemView.background =
+      getRippleDrawable(theme.secondaryForegroundColor, theme.secondaryBackgroundColor)
 
     tvArtist?.setTextColor(theme.secondaryForegroundColor)
     tvNumberOfSongs?.setTextColor(theme.secondaryForegroundColor)

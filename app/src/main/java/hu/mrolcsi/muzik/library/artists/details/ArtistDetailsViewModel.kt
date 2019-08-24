@@ -6,8 +6,9 @@ import android.view.View
 import androidx.lifecycle.LiveData
 import hu.mrolcsi.muzik.common.viewmodel.NavCommandSource
 import hu.mrolcsi.muzik.common.viewmodel.UiCommandSource
+import hu.mrolcsi.muzik.theme.ThemedViewModel
 
-interface ArtistDetailsViewModel : UiCommandSource, NavCommandSource {
+interface ArtistDetailsViewModel : ThemedViewModel, UiCommandSource, NavCommandSource {
 
   var artistItem: MediaBrowserCompat.MediaItem?
 

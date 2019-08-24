@@ -83,3 +83,5 @@ fun String.toKeyString(): String {
 }
 
 fun CharSequence.toKeyString(): String = this.toString().toKeyString()
+
+fun Int.toColorHex() = String.format("#%X", this)
