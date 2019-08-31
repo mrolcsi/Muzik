@@ -6,6 +6,14 @@
   <data>
 
     <variable
+      name="backgroundColor"
+      type="int" />
+
+    <variable
+      name="foregroundColor"
+      type="int" />
+
+    <variable
       name="viewModel"
       type="hu.mrolcsi.muzik.player.PlayerViewModel" />
   </data>
@@ -22,6 +30,8 @@
       layout="@layout/content_player"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
+      app:backgroundColor="@{backgroundColor}"
+      app:foregroundColor="@{foregroundColor}"
       app:viewModel="@{viewModel}" />
 
     <!-- Container for contents of drawer - use NavigationView to make configuration easier -->

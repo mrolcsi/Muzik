@@ -2,9 +2,9 @@ package hu.mrolcsi.muzik.player.playlist
 
 import android.content.Context
 import android.support.v4.media.session.PlaybackStateCompat
+import androidx.databinding.library.baseAdapters.BR
 import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.DiffUtil
-import hu.mrolcsi.muzik.BR
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.viewmodel.DataBindingViewModel
 import hu.mrolcsi.muzik.common.viewmodel.ExecuteOnceNavCommandSource

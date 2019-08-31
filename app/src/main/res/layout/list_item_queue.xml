@@ -1,83 +1,90 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-  xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:app="http://schemas.android.com/apk/res-auto"
-  xmlns:tools="http://schemas.android.com/tools"
-  android:layout_width="match_parent"
-  android:layout_height="match_parent">
+  xmlns:tools="http://schemas.android.com/tools">
 
-  <ImageView
-    android:id="@+id/imgCoverArt"
-    android:layout_width="0dp"
-    android:layout_height="0dp"
-    android:contentDescription="@string/contentDescription_coverArt"
-    android:elevation="@dimen/action_bar_elevation"
-    android:scaleType="centerCrop"
-    app:elevation="@dimen/action_bar_elevation"
-    app:layout_constraintDimensionRatio="1:1"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="parent"
-    tools:src="@tools:sample/avatars"/>
+  <data>
 
-  <TextView
-    android:id="@+id/tvTitle"
-    android:layout_width="0dp"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="8dp"
-    android:layout_marginStart="16dp"
-    android:layout_marginEnd="16dp"
-    android:elevation="@dimen/action_bar_elevation"
-    android:maxLines="2"
-    android:textAlignment="center"
-    android:textAppearance="?android:attr/textAppearanceLarge"
-    app:elevation="@dimen/action_bar_elevation"
-    app:layout_constraintBottom_toTopOf="@+id/tvArtist"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintHorizontal_bias="0.5"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@+id/imgCoverArt"
-    app:layout_constraintVertical_chainStyle="packed"
-    tools:text="Title"/>
+    <variable
+      name="theme"
+      type="hu.mrolcsi.muzik.theme.Theme" />
+  </data>
 
-  <TextView
-    android:id="@+id/tvArtist"
-    android:layout_width="0dp"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="8dp"
-    android:layout_marginStart="16dp"
-    android:layout_marginEnd="16dp"
-    android:alpha="0.7"
-    android:elevation="@dimen/action_bar_elevation"
-    android:maxLines="2"
-    android:textAlignment="center"
-    android:textAppearance="?android:attr/textAppearanceMedium"
-    app:elevation="@dimen/action_bar_elevation"
-    app:layout_constraintBottom_toTopOf="@+id/tvAlbum"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintHorizontal_bias="0.5"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@+id/tvTitle"
-    tools:text="Artist"/>
+  <androidx.constraintlayout.widget.ConstraintLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-  <TextView
-    android:id="@+id/tvAlbum"
-    android:layout_width="0dp"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="8dp"
-    android:layout_marginBottom="8dp"
-    android:layout_marginStart="16dp"
-    android:layout_marginEnd="16dp"
-    android:alpha="0.7"
-    android:elevation="@dimen/action_bar_elevation"
-    android:maxLines="2"
-    android:textAlignment="center"
-    app:elevation="@dimen/action_bar_elevation"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintHorizontal_bias="0.5"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@+id/tvArtist"
-    tools:text="Album"/>
+    <ImageView
+      android:id="@+id/imgCoverArt"
+      android:layout_width="0dp"
+      android:layout_height="0dp"
+      android:contentDescription="@string/contentDescription_coverArt"
+      android:scaleType="centerCrop"
+      app:layout_constraintDimensionRatio="1:1"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent"
+      tools:src="@tools:sample/avatars" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <TextView
+      android:id="@+id/tvTitle"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="16dp"
+      android:layout_marginTop="8dp"
+      android:layout_marginEnd="16dp"
+      android:textAlignment="center"
+      android:textAppearance="?android:attr/textAppearanceLarge"
+      android:textColor="@{theme.primaryForegroundColor}"
+      app:enableMarquee="@{true}"
+      app:layout_constraintBottom_toTopOf="@+id/tvArtist"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintHorizontal_bias="0.5"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@+id/imgCoverArt"
+      app:layout_constraintVertical_chainStyle="packed"
+      app:marqueeDelay="@{@integer/preferredMarqueeDelay}"
+      tools:text="Title" />
+
+    <TextView
+      android:id="@+id/tvArtist"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="16dp"
+      android:layout_marginTop="8dp"
+      android:layout_marginEnd="16dp"
+      android:alpha="0.6"
+      android:textAlignment="center"
+      android:textAppearance="?android:attr/textAppearanceMedium"
+      android:textColor="@{theme.primaryForegroundColor}"
+      app:enableMarquee="@{true}"
+      app:layout_constraintBottom_toTopOf="@+id/tvAlbum"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintHorizontal_bias="0.5"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@+id/tvTitle"
+      app:marqueeDelay="@{@integer/preferredMarqueeDelay}"
+      tools:text="Artist" />
+
+    <TextView
+      android:id="@+id/tvAlbum"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="16dp"
+      android:layout_marginTop="8dp"
+      android:layout_marginEnd="16dp"
+      android:layout_marginBottom="8dp"
+      android:alpha="0.6"
+      android:textAlignment="center"
+      android:textColor="@{theme.primaryForegroundColor}"
+      app:enableMarquee="@{true}"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintHorizontal_bias="0.5"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@+id/tvArtist"
+      app:marqueeDelay="@{@integer/preferredMarqueeDelay}"
+      tools:text="Album" />
+
+  </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

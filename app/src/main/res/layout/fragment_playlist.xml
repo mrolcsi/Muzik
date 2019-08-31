@@ -6,35 +6,43 @@
   <data>
 
     <variable
+      name="theme"
+      type="androidx.lifecycle.LiveData&lt;hu.mrolcsi.muzik.theme.Theme&gt;" />
+
+    <variable
       name="viewModel"
       type="hu.mrolcsi.muzik.player.playlist.PlaylistViewModel" />
   </data>
 
   <androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@{theme.primaryBackgroundColor}">
 
     <androidx.appcompat.widget.Toolbar
       android:id="@+id/playlistToolbar"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:background="?attr/colorPrimary"
+      android:background="@{theme.primaryBackgroundColor}"
       android:minHeight="?attr/actionBarSize"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toTopOf="parent"
-      app:title="@{viewModel.queueTitle}" />
+      app:title="@{viewModel.queueTitle}"
+      app:titleTextColor="@{theme.primaryForegroundColor}" />
 
     <androidx.recyclerview.widget.RecyclerView
       android:id="@+id/rvPlaylist"
       android:layout_width="match_parent"
       android:layout_height="0dp"
       android:orientation="vertical"
+      app:dividerColor="@{theme.primaryForegroundColor}"
       app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
       app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toBottomOf="@+id/playlistToolbar"
+      app:showColoredDivider="@{true}"
       tools:listitem="@layout/list_item_playlist" />
 
   </androidx.constraintlayout.widget.ConstraintLayout>

@@ -34,6 +34,7 @@ interface PlayerViewModel : MiniPlayerViewModel {
   fun onStopTrackingTouch()
 
   val queue: LiveData<List<MediaSessionCompat.QueueItem>>
+  val currentQueueId: LiveData<Long>
   fun getCurrentQueueId(): Long
 
   fun skipToQueueItem(itemId: Long)

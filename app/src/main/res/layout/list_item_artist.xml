@@ -26,9 +26,11 @@
       android:layout_marginEnd="8dp"
       android:textAppearance="?attr/textAppearanceListItem"
       android:textColor="@{theme.secondaryForegroundColor}"
+      app:enableMarquee="@{true}"
       app:layout_constraintEnd_toStartOf="@+id/imgChevronRight"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toTopOf="parent"
+      app:marqueeDelay="@{@integer/preferredMarqueeDelay}"
       tools:text="Artist" />
 
     <TextView

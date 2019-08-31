@@ -39,7 +39,13 @@ open class MVVMListAdapter<ItemViewModel, ViewHolder : MVVMViewHolder<in ItemVie
   }
 
   override fun getItemId(position: Int): Long {
-    return itemIdSelector?.let { itemIdSelector.invoke(getItem(position)) } ?: super.getItemId(position)
+    return itemIdSelector?.let {
+      try {
+        itemIdSelector.invoke(getItem(position))
+      } catch (e: IndexOutOfBoundsException) {
+        super.getItemId(position)
+      }
+    } ?: super.getItemId(position)
   }
 
   fun getItemPositionById(id: Long): Int {

@@ -1,83 +1,102 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:app="http://schemas.android.com/apk/res-auto"
-  xmlns:tools="http://schemas.android.com/tools"
-  android:layout_width="match_parent"
-  android:layout_height="wrap_content"
-  android:animateLayoutChanges="true"
-  android:background="?android:attr/selectableItemBackground"
-  android:minHeight="?attr/listPreferredItemHeight">
+  xmlns:tools="http://schemas.android.com/tools">
 
-  <ImageView
-    android:id="@+id/imgCoverArt"
-    android:layout_width="0dp"
-    android:layout_height="0dp"
-    android:layout_marginTop="1dp"
-    android:layout_marginBottom="1dp"
-    android:contentDescription="@string/contentDescription_coverArt"
-    android:scaleType="centerCrop"
-    android:visibility="visible"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintDimensionRatio="h,1:1"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="parent"
-    app:layout_constraintVertical_bias="0.0"
-    tools:srcCompat="@tools:sample/avatars" />
+  <data>
 
-  <ImageView
-    android:id="@+id/imgNowPlaying"
-    android:layout_width="24dp"
-    android:layout_height="24dp"
-    android:layout_marginStart="8dp"
-    android:layout_marginTop="8dp"
-    android:layout_marginBottom="8dp"
-    android:contentDescription="@string/notification_nowPlaying"
-    android:visibility="gone"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintStart_toEndOf="@+id/imgCoverArt"
-    app:layout_constraintTop_toTopOf="parent"
-    app:srcCompat="@drawable/exo_notification_play"
-    tools:tint="?attr/colorPrimary"
-    tools:visibility="visible" />
+    <variable
+      name="theme"
+      type="androidx.lifecycle.LiveData&lt;hu.mrolcsi.muzik.theme.Theme&gt;" />
+  </data>
 
-  <TextView
-    android:id="@+id/tvSongTitle"
-    android:layout_width="0dp"
+  <androidx.constraintlayout.widget.ConstraintLayout
+    rippleColor="@{theme.primaryForegroundColor}"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginStart="8dp"
-    android:layout_marginTop="8dp"
-    android:layout_marginEnd="8dp"
-    android:textAppearance="?attr/textAppearanceListItem"
-    app:layout_constraintBottom_toTopOf="@+id/tvSongArtist"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toEndOf="@+id/imgNowPlaying"
-    app:layout_constraintTop_toTopOf="parent"
-    app:layout_constraintVertical_chainStyle="packed"
-    tools:text="Song Title" />
+    android:animateLayoutChanges="true"
+    android:background="?android:attr/selectableItemBackground"
+    android:minHeight="?attr/listPreferredItemHeight">
 
-  <TextView
-    android:id="@+id/tvSongArtist"
-    android:layout_width="0dp"
-    android:layout_height="wrap_content"
-    android:layout_marginStart="8dp"
-    android:layout_marginEnd="8dp"
-    android:layout_marginBottom="8dp"
-    android:alpha="0.6"
-    android:textAppearance="?attr/textAppearanceListItemSecondary"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintEnd_toStartOf="@+id/tvDuration"
-    app:layout_constraintStart_toEndOf="@+id/imgNowPlaying"
-    app:layout_constraintTop_toBottomOf="@+id/tvSongTitle"
-    tools:text="Song Artist" />
+    <ImageView
+      android:id="@+id/imgCoverArt"
+      android:layout_width="0dp"
+      android:layout_height="0dp"
+      android:layout_marginTop="1dp"
+      android:layout_marginBottom="1dp"
+      android:contentDescription="@string/contentDescription_coverArt"
+      android:scaleType="centerCrop"
+      android:visibility="visible"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintDimensionRatio="h,1:1"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent"
+      app:layout_constraintVertical_bias="0.0"
+      tools:srcCompat="@tools:sample/avatars" />
 
-  <TextView
-    android:id="@+id/tvDuration"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_marginEnd="8dp"
-    android:alpha="0.6"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintTop_toBottomOf="@+id/tvSongTitle"
-    tools:text="03:24" />
+    <ImageView
+      android:id="@+id/imgNowPlaying"
+      android:layout_width="24dp"
+      android:layout_height="24dp"
+      android:layout_marginStart="8dp"
+      android:layout_marginTop="8dp"
+      android:layout_marginBottom="8dp"
+      android:contentDescription="@string/notification_nowPlaying"
+      android:tint="@{theme.primaryForegroundColor}"
+      android:visibility="gone"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintStart_toEndOf="@+id/imgCoverArt"
+      app:layout_constraintTop_toTopOf="parent"
+      app:srcCompat="@drawable/exo_notification_play"
+      tools:tint="?attr/colorPrimary"
+      tools:visibility="visible" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <TextView
+      android:id="@+id/tvSongTitle"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="8dp"
+      android:layout_marginTop="8dp"
+      android:layout_marginEnd="8dp"
+      android:textAppearance="?attr/textAppearanceListItem"
+      android:textColor="@{theme.primaryForegroundColor}"
+      app:enableMarquee="@{true}"
+      app:layout_constraintBottom_toTopOf="@+id/tvSongArtist"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toEndOf="@+id/imgNowPlaying"
+      app:layout_constraintTop_toTopOf="parent"
+      app:layout_constraintVertical_chainStyle="packed"
+      app:marqueeDelay="@{@integer/preferredMarqueeDelay}"
+      tools:text="Song Title" />
+
+    <TextView
+      android:id="@+id/tvSongArtist"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="8dp"
+      android:layout_marginEnd="8dp"
+      android:layout_marginBottom="8dp"
+      android:alpha="0.6"
+      android:textAppearance="?attr/textAppearanceListItemSecondary"
+      android:textColor="@{theme.primaryForegroundColor}"
+      app:enableMarquee="@{true}"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toStartOf="@+id/tvDuration"
+      app:layout_constraintStart_toEndOf="@+id/imgNowPlaying"
+      app:layout_constraintTop_toBottomOf="@+id/tvSongTitle"
+      app:marqueeDelay="@{@integer/preferredMarqueeDelay}"
+      tools:text="Song Artist" />
+
+    <TextView
+      android:id="@+id/tvDuration"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginEnd="8dp"
+      android:alpha="0.6"
+      android:textColor="@{theme.primaryForegroundColor}"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintTop_toBottomOf="@+id/tvSongTitle"
+      tools:text="03:24" />
+
+  </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

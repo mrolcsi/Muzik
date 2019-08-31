@@ -16,7 +16,6 @@ import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.databinding.FragmentLibraryBinding
 import hu.mrolcsi.muzik.extensions.applyNavigationBarColor
 import hu.mrolcsi.muzik.extensions.applyStatusBarColor
-import hu.mrolcsi.muzik.extensions.applyThemeAnimated
 import hu.mrolcsi.muzik.theme.Theme
 import kotlinx.android.synthetic.main.fragment_library.*
 import javax.inject.Inject
@@ -36,22 +35,8 @@ class LibraryFragment : DaggerFragment() {
 
     setupNavigation(requireActivity().findNavController(R.id.libraryNavHost))
 
-    viewModel.currentTheme.observe(viewLifecycleOwner, object : Observer<Theme> {
-
-      private var initialLoad = true
-
-      override fun onChanged(theme: Theme) {
-        if (initialLoad) {
-          applyPrimaryBackgroundColor(theme.primaryBackgroundColor)
-          initialLoad = false
-        } else {
-          applyThemeAnimated(
-            previousTheme = viewModel.previousTheme,
-            newTheme = theme,
-            applyPrimaryBackgroundColor = this@LibraryFragment::applyPrimaryBackgroundColor
-          )
-        }
-      }
+    viewModel.currentTheme.observe(viewLifecycleOwner, Observer<Theme> {
+      applyPrimaryBackgroundColor(it.primaryBackgroundColor)
     })
   }
 

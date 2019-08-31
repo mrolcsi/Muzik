@@ -6,6 +6,14 @@
   <data>
 
     <variable
+      name="backgroundColor"
+      type="int" />
+
+    <variable
+      name="foregroundColor"
+      type="int" />
+
+    <variable
       name="viewModel"
       type="hu.mrolcsi.muzik.player.PlayerViewModel" />
   </data>
@@ -15,6 +23,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:animateLayoutChanges="true"
+    android:background="@{backgroundColor}"
     tools:context=".player.PlayerFragment">
 
     <ImageView
@@ -52,11 +61,12 @@
       android:minHeight="?attr/actionBarSize"
       android:theme="?attr/actionBarTheme"
       app:elevation="@dimen/action_bar_elevation"
+      app:iconTint="@{foregroundColor}"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toTopOf="parent"
       app:menu="@menu/menu_player"
-      app:navigationIcon="?attr/homeAsUpIndicator" />
+      app:navigationIcon="@drawable/ic_chevron_down" />
 
     <SeekBar
       android:id="@+id/sbSongProgress"
@@ -69,9 +79,11 @@
       android:onStopTrackingTouch="@{() -> viewModel.onStopTrackingTouch()}"
       android:onStartTrackingTouch="@{() -> viewModel.onStartTrackingTouch()}"
       android:progress="@{viewModel.elapsedTime}"
+      android:progressBackgroundTint="@{foregroundColor}"
+      android:progressTint="@{foregroundColor}"
+      android:thumbTint="@{foregroundColor}"
       app:layout_constraintBottom_toTopOf="@+id/btnPlayPause"
       app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintHorizontal_bias="0.5"
       app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
@@ -80,8 +92,9 @@
       android:layout_height="wrap_content"
       android:layout_marginStart="16dp"
       android:layout_marginTop="8dp"
-      android:alpha="0.7"
+      android:alpha="0.6"
       android:text="@{viewModel.elapsedTimeText}"
+      android:textColor="@{foregroundColor}"
       app:layout_constraintStart_toStartOf="@+id/sbSongProgress"
       app:layout_constraintTop_toBottomOf="@+id/sbSongProgress"
       tools:text="01:23" />
@@ -92,8 +105,9 @@
       android:layout_height="wrap_content"
       android:layout_marginTop="8dp"
       android:layout_marginEnd="16dp"
-      android:alpha="0.7"
+      android:alpha="0.6"
       android:text="@{viewModel.remainingTimeText}"
+      android:textColor="@{foregroundColor}"
       app:layout_constraintEnd_toEndOf="@+id/sbSongProgress"
       app:layout_constraintTop_toBottomOf="@+id/sbSongProgress"
       tools:text="-02:11" />
@@ -102,14 +116,15 @@
       android:id="@+id/tvSeekProgress"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:background="#990e0e0e"
+      android:alpha="0.6"
+      android:background="@{backgroundColor}"
       android:elevation="@dimen/bottom_navigation_elevation"
       android:minWidth="120dp"
       android:padding="8dp"
       android:text="@{viewModel.seekProgressText}"
       android:textAlignment="center"
       android:textAppearance="@style/TextAppearance.AppCompat.Display1"
-      android:textColor="?android:attr/textColorPrimary"
+      android:textColor="@{foregroundColor}"
       android:typeface="monospace"
       android:visibility="@{viewModel.seekProgressVisible}"
       app:elevation="@dimen/bottom_navigation_elevation"
@@ -129,9 +144,11 @@
       android:contentDescription="@string/player_toggleShuffle"
       android:onClick="@{() -> viewModel.onShuffleClicked()}"
       android:src="@{viewModel.shuffleDrawableRes}"
+      android:tint="@{foregroundColor}"
       app:layout_constraintBottom_toBottomOf="@+id/btnPlayPause"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toTopOf="@+id/btnPlayPause"
+      app:rippleColor="@{foregroundColor}"
       tools:src="@drawable/ic_shuffle_none"
       tools:tint="@android:color/white" />
 
@@ -142,17 +159,20 @@
       android:layout_marginStart="8dp"
       android:layout_marginEnd="8dp"
       android:background="@drawable/media_button_background"
+      android:backgroundTint="@{foregroundColor}"
       android:contentDescription="@string/mediaControl_previous"
       android:elevation="@dimen/button_elevation"
       android:enabled="@{viewModel.isPreviousEnabled}"
       android:onTouch="@{viewModel.previousTouchListener}"
       android:scaleType="fitCenter"
+      android:tint="@{backgroundColor}"
       app:elevation="@dimen/button_elevation"
       app:layout_constraintBottom_toBottomOf="@+id/btnPlayPause"
       app:layout_constraintEnd_toStartOf="@+id/btnPlayPause"
       app:layout_constraintHorizontal_chainStyle="packed"
       app:layout_constraintStart_toEndOf="@+id/btnShuffle"
       app:layout_constraintTop_toTopOf="@+id/btnPlayPause"
+      app:rippleColor="@{backgroundColor}"
       app:srcCompat="@android:drawable/ic_media_previous"
       tools:visibility="visible" />
 
@@ -162,17 +182,20 @@
       android:layout_height="72dp"
       android:layout_marginBottom="32dp"
       android:background="@drawable/media_button_background"
+      android:backgroundTint="@{foregroundColor}"
       android:contentDescription="@string/mediaControl_playPause"
       android:elevation="@dimen/button_elevation"
       android:enabled="@{viewModel.isPlayPauseEnabled}"
       android:onClick="@{() -> viewModel.onPlayPauseClicked()}"
       android:scaleType="fitCenter"
       android:src="@{viewModel.isPlaying ? @android:drawable/ic_media_pause : @android:drawable/ic_media_play}"
+      android:tint="@{backgroundColor}"
       app:elevation="@dimen/button_elevation"
       app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintEnd_toStartOf="@+id/btnNext"
       app:layout_constraintHorizontal_bias="0.5"
       app:layout_constraintStart_toEndOf="@+id/btnPrevious"
+      app:rippleColor="@{backgroundColor}"
       tools:src="@android:drawable/ic_media_play" />
 
     <ImageButton
@@ -182,16 +205,19 @@
       android:layout_marginStart="8dp"
       android:layout_marginEnd="8dp"
       android:background="@drawable/media_button_background"
+      android:backgroundTint="@{foregroundColor}"
       android:contentDescription="@string/mediaControl_next"
       android:elevation="@dimen/button_elevation"
       android:enabled="@{viewModel.isNextEnabled}"
       android:onTouch="@{viewModel.nextTouchListener}"
       android:scaleType="fitCenter"
+      android:tint="@{backgroundColor}"
       app:elevation="@dimen/button_elevation"
       app:layout_constraintBottom_toBottomOf="@+id/btnPlayPause"
       app:layout_constraintEnd_toStartOf="@+id/btnRepeat"
       app:layout_constraintStart_toEndOf="@+id/btnPlayPause"
       app:layout_constraintTop_toTopOf="@+id/btnPlayPause"
+      app:rippleColor="@{backgroundColor}"
       app:srcCompat="@android:drawable/ic_media_next"
       tools:visibility="visible" />
 
@@ -204,9 +230,11 @@
       android:contentDescription="@string/player_toggleRepeat"
       android:onClick="@{() -> viewModel.onRepeatClicked()}"
       android:src="@{viewModel.repeatDrawableRes}"
+      android:tint="@{foregroundColor}"
       app:layout_constraintBottom_toBottomOf="@+id/btnPlayPause"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintTop_toTopOf="@+id/btnPlayPause"
+      app:rippleColor="@{foregroundColor}"
       tools:src="@drawable/ic_repeat_none"
       tools:tint="@android:color/white" />
 

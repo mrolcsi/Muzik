@@ -8,7 +8,6 @@ import hu.mrolcsi.muzik.common.glide.GlideApp
 import hu.mrolcsi.muzik.common.glide.onResourceReadyWithTarget
 import hu.mrolcsi.muzik.common.view.MVVMViewHolder
 import hu.mrolcsi.muzik.extensions.millisecondsToTimeStamp
-import hu.mrolcsi.muzik.extensions.startMarquee
 import hu.mrolcsi.muzik.service.extensions.media.coverArtUri
 import hu.mrolcsi.muzik.service.extensions.media.duration
 import hu.mrolcsi.muzik.service.extensions.media.trackNumber
@@ -27,20 +26,16 @@ open class SongHolder(itemView: View, private val showTrackNumber: Boolean) :
   open fun bind(item: MediaBrowserCompat.MediaItem) {
     itemView.run {
       // Set texts
-      tvSongTitle?.run {
-        text = item.description.title
-        startMarquee(marqueeDelay)
-      }
-      tvSongArtist?.run {
+      tvSongTitle.text = item.description.title
+      tvSongArtist.run {
         if (item.description.subtitle != null) {
           visibility = View.VISIBLE
           text = item.description.subtitle
         } else {
           visibility = View.GONE
         }
-        startMarquee(marqueeDelay)
       }
-      tvDuration?.text = item.description.duration.takeIf { it > 0 }?.millisecondsToTimeStamp()
+      tvDuration.text = item.description.duration.takeIf { it > 0 }?.millisecondsToTimeStamp()
 
       when {
         item.description.iconBitmap != null -> {

@@ -15,15 +15,18 @@ import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.media.session.MediaButtonReceiver
+import com.bumptech.glide.request.target.Target
 import com.google.android.exoplayer2.ExoPlaybackException
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
+import hu.mrolcsi.muzik.common.glide.GlideApp
+import hu.mrolcsi.muzik.common.glide.onResourceReady
 import hu.mrolcsi.muzik.database.playqueue.PlayQueueDatabase
 import hu.mrolcsi.muzik.database.playqueue.entities.LastPlayed
 import hu.mrolcsi.muzik.di.MuzikApplication
 import hu.mrolcsi.muzik.service.exoplayer.ExoPlayerHolder
 import hu.mrolcsi.muzik.service.exoplayer.notification.ExoNotificationManager
-import hu.mrolcsi.muzik.service.extensions.media.albumArt
+import hu.mrolcsi.muzik.service.extensions.media.albumArtUri
 import hu.mrolcsi.muzik.service.extensions.media.isSkipToNextEnabled
 import hu.mrolcsi.muzik.service.extensions.media.prepareFromDescriptions
 import hu.mrolcsi.muzik.service.extensions.media.setShuffleMode
@@ -143,9 +146,12 @@ class MuzikPlayerService : MuzikBrowserService() {
         override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {}
 
         override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
-          metadata?.albumArt?.let {
-            themeService.updateTheme(it)
-          }
+          GlideApp.with(this@MuzikPlayerService)
+            .asBitmap()
+            .load(metadata?.albumArtUri)
+            .override(Target.SIZE_ORIGINAL)
+            .onResourceReady { themeService.updateTheme(it) }
+            .preload()
         }
       })
 

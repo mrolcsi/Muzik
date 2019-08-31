@@ -4,7 +4,6 @@ import android.support.v4.media.MediaBrowserCompat
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.view.MVVMViewHolder
 import hu.mrolcsi.muzik.databinding.ListItemArtistBinding
-import hu.mrolcsi.muzik.extensions.startMarquee
 import hu.mrolcsi.muzik.service.extensions.media.numberOfAlbums
 import hu.mrolcsi.muzik.service.extensions.media.numberOfTracks
 import kotlinx.android.synthetic.main.list_item_artist.view.*
@@ -17,24 +16,28 @@ class ArtistHolder(binding: ListItemArtistBinding) :
     new?.let { bind(it) }
   }
 
-  private val marqueeDelay = itemView.resources.getInteger(R.integer.preferredMarqueeDelay).toLong()
-
   private fun bind(item: MediaBrowserCompat.MediaItem) {
     itemView.run {
       // Set texts
-      tvArtist?.run {
-        startMarquee(marqueeDelay)
-        text = item.description.title
-      }
+      tvArtist.text = item.description.title
 
       val numberOfAlbums = item.description.numberOfAlbums
       val numberOfSongs = item.description.numberOfTracks
-      val numberOfAlbumsString =
-        itemView.context.resources.getQuantityString(R.plurals.artists_numberOfAlbums, numberOfAlbums, numberOfAlbums)
-      val numberOfSongsString =
-        itemView.context.resources.getQuantityString(R.plurals.artists_numberOfSongs, numberOfSongs, numberOfSongs)
-      tvNumberOfSongs?.text =
-        itemView.context.getString(R.string.artists_item_subtitle, numberOfAlbumsString, numberOfSongsString)
+      val numberOfAlbumsString = itemView.context.resources.getQuantityString(
+        R.plurals.artists_numberOfAlbums,
+        numberOfAlbums,
+        numberOfAlbums
+      )
+      val numberOfSongsString = itemView.context.resources.getQuantityString(
+        R.plurals.artists_numberOfSongs,
+        numberOfSongs,
+        numberOfSongs
+      )
+      tvNumberOfSongs.text = itemView.context.getString(
+        R.string.artists_item_subtitle,
+        numberOfAlbumsString,
+        numberOfSongsString
+      )
     }
   }
 }

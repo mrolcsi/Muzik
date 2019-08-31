@@ -1,7 +1,5 @@
 package hu.mrolcsi.muzik.player
 
-import android.content.res.ColorStateList
-import android.graphics.PorterDuff
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -32,11 +30,10 @@ import hu.mrolcsi.muzik.common.view.MVVMListAdapter
 import hu.mrolcsi.muzik.common.viewmodel.observeAndRunNavCommands
 import hu.mrolcsi.muzik.common.viewmodel.observeAndRunUiCommands
 import hu.mrolcsi.muzik.databinding.FragmentPlayerBinding
-import hu.mrolcsi.muzik.extensions.applyForegroundColor
 import hu.mrolcsi.muzik.extensions.applyNavigationBarColor
 import hu.mrolcsi.muzik.extensions.applyStatusBarColor
-import hu.mrolcsi.muzik.extensions.getRippleDrawable
 import hu.mrolcsi.muzik.theme.Theme
+import hu.mrolcsi.muzik.theme.ThemeService
 import kotlinx.android.synthetic.main.content_player.*
 import kotlinx.android.synthetic.main.fragment_player.*
 import javax.inject.Inject
@@ -45,18 +42,17 @@ import kotlin.math.abs
 class PlayerFragment : DaggerFragment() {
 
   @Inject lateinit var viewModel: PlayerViewModel
+  @Inject lateinit var themeService: ThemeService
 
-  // Prepare drawables (separate for each button)
-  private val mPreviousBackground by lazy { context?.getDrawable(R.drawable.media_button_background) }
-  private val mPlayPauseBackground by lazy { context?.getDrawable(R.drawable.media_button_background) }
-  private val mNextBackground by lazy { context?.getDrawable(R.drawable.media_button_background) }
+  private lateinit var binding: FragmentPlayerBinding
 
   private lateinit var snapHelper: PagerSnapHelperVerbose
   private var scrollState: Int = RecyclerView.SCROLL_STATE_IDLE
+
   private val queueAdapter = MVVMListAdapter(
     diffCallback = DiffCallbacks.queueItemCallback,
     itemIdSelector = { it.queueId },
-    viewHolderFactory = { parent, _ -> QueueItemHolder(parent) }
+    viewHolderFactory = { parent, _ -> QueueItemHolder(parent, themeService) }
   )
 
   //region LIFECYCLE
@@ -67,29 +63,20 @@ class PlayerFragment : DaggerFragment() {
     viewModel.apply {
       requireContext().observeAndRunUiCommands(viewLifecycleOwner, this)
       findNavController().observeAndRunNavCommands(viewLifecycleOwner, this)
+
       queue.observe(viewLifecycleOwner, queueAdapter)
+
+      currentQueueId.observe(viewLifecycleOwner, Observer {
+        updatePager()
+      })
+
       albumArt.observe(viewLifecycleOwner, Observer {
         imgCoverArt.setImageDrawable(it)
         (view?.parent as? ViewGroup)?.doOnPreDraw {
-          // Parent has been drawn. Start transitioning!
           startPostponedEnterTransition()
         }
       })
     }
-
-    viewModel.currentTheme.observe(
-      viewLifecycleOwner,
-      object : Observer<Theme> {
-
-      private var initialLoad = true
-
-      override fun onChanged(it: Theme) {
-        if (initialLoad) {
-          applyThemeStatic(it)
-          initialLoad = false
-        }
-      }
-    })
   }
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -136,7 +123,6 @@ class PlayerFragment : DaggerFragment() {
       .setDuration(animationDuration)
 
     if (savedInstanceState != null) {
-      updatePager()
       // Re-apply status bar color after rotation
       viewModel.currentTheme.value?.let { theme ->
         activity?.applyStatusBarColor(theme.statusBarColor)
@@ -146,6 +132,7 @@ class PlayerFragment : DaggerFragment() {
 
   override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
     FragmentPlayerBinding.inflate(inflater, container, false).also {
+      binding = it
       it.viewModel = viewModel
       it.lifecycleOwner = viewLifecycleOwner
     }.root
@@ -189,9 +176,7 @@ class PlayerFragment : DaggerFragment() {
 
       override fun onPageScroll(pagesState: List<VisiblePageState>) {
         if (scrollState == RecyclerView.SCROLL_STATE_IDLE && pagesState.size == 1) {
-          // Apply currentTheme of visible holder
-          val holder = rvQueue.findContainingViewHolder(pagesState.first().view) as QueueItemHolder
-          holder.usedTheme?.let { applyThemeStatic(it) }
+          viewModel.currentTheme.value?.let { applyTheme(it) }
         }
 
         // Blend colors while scrolling
@@ -217,8 +202,9 @@ class PlayerFragment : DaggerFragment() {
               ratio
             )
 
-            applyBackgroundColor(backgroundColor)
-            applyForegroundColor(foregroundColor)
+            binding.backgroundColor = backgroundColor
+            binding.foregroundColor = foregroundColor
+            activity?.applyNavigationBarColor(backgroundColor)
 
             val statusBarColor = ColorUtils.blendARGB(
               leftTheme.statusBarColor,
@@ -238,13 +224,13 @@ class PlayerFragment : DaggerFragment() {
           // check if item position is different from the now playing position
           val queueId = viewModel.getCurrentQueueId()
           val pagerPosition = snapHelper.findSnapPosition(rvQueue.layoutManager)
-          val itemId = rvQueue.adapter?.getItemId(pagerPosition) ?: RecyclerView.NO_ID
+          val visibleId = rvQueue.adapter?.getItemId(pagerPosition) ?: RecyclerView.NO_ID
 
-          Log.d(LOG_TAG, "onScrollStateChanged($state) queueId=$queueId itemId=$itemId")
+          Log.d(LOG_TAG, "onScrollStateChanged($state) queueId=$queueId visibleId=$visibleId")
 
           // Skip to visible item in queue
-          if (queueId != itemId) {
-            viewModel.skipToQueueItem(itemId)
+          if (queueId != visibleId) {
+            viewModel.skipToQueueItem(visibleId)
           }
         }
       }
@@ -267,7 +253,7 @@ class PlayerFragment : DaggerFragment() {
     val queueId = viewModel.getCurrentQueueId()
     val queuePosition = queueAdapter.getItemPositionById(queueId)
 
-    Log.d(
+    Log.v(
       LOG_TAG,
       "updatePager(" +
           "visiblePosition=$visiblePosition, " +
@@ -310,67 +296,23 @@ class PlayerFragment : DaggerFragment() {
     }
   }
 
-  private fun applyThemeStatic(theme: Theme) {
-    Log.i(LOG_TAG, "applyThemeStatic($theme)")
-
-    applyBackgroundColor(theme.primaryBackgroundColor)
-    applyForegroundColor(theme.primaryForegroundColor)
+  private fun applyTheme(it: Theme) {
+    Log.d(LOG_TAG, "Apply theme: $it")
+    activity?.applyStatusBarColor(it.statusBarColor)
+    activity?.applyNavigationBarColor(it.primaryBackgroundColor)
+    binding.backgroundColor = it.primaryBackgroundColor
+    binding.foregroundColor = it.primaryForegroundColor
   }
 
-  private fun applyForegroundColor(color: Int) {
-    // Toolbar
-    playerToolbar.applyForegroundColor(color)
-
-    // Texts
-    tvElapsedTime.setTextColor(color)
-    tvRemainingTime.setTextColor(color)
-    tvSeekProgress.setTextColor(color)
-
-    // SeekBar
-    sbSongProgress.progressDrawable.setColorFilter(color, PorterDuff.Mode.SRC_ATOP)
-    sbSongProgress.thumb.setColorFilter(color, PorterDuff.Mode.SRC_ATOP)
-
-    // Media Buttons Background
-    mPreviousBackground?.setTint(color)
-    mPlayPauseBackground?.setTint(color)
-    mNextBackground?.setTint(color)
-
-    // Additional Buttons
-    btnShuffle.imageTintList = ColorStateList.valueOf(color)
-    btnRepeat.imageTintList = ColorStateList.valueOf(color)
-  }
-
-  private fun applyBackgroundColor(color: Int) {
-    // Window background
-    view?.setBackgroundColor(color)
-
-    // Navigation Bar
-    activity?.window?.navigationBarColor = color
-    activity?.applyNavigationBarColor(color)
-
-    // Seek Progress background
-    tvSeekProgress.setBackgroundColor(ColorUtils.setAlphaComponent(color, Theme.DISABLED_OPACITY))
-
-    // Media Buttons Icon
-    btnPrevious.setColorFilter(color)
-    btnPlayPause.setColorFilter(color)
-    btnNext.setColorFilter(color)
-
-    // Media Buttons Ripple (need to use separate drawables)
-    val rippleColor = ColorUtils.setAlphaComponent(color, Theme.DISABLED_OPACITY)
-    btnPrevious.background = getRippleDrawable(rippleColor, mPreviousBackground)
-    btnPlayPause.background = getRippleDrawable(rippleColor, mPlayPauseBackground)
-    btnNext.background = getRippleDrawable(rippleColor, mNextBackground)
-  }
+  private fun Transition.onTransitionEnd(listener: (Transition) -> Unit) =
+    addListener(object : TransitionListenerAdapter() {
+      override fun onTransitionEnd(transition: Transition) {
+        listener.invoke(transition)
+      }
+    })
 
   companion object {
     private const val LOG_TAG = "PlayerFragment"
   }
-}
 
-fun Transition.onTransitionEnd(listener: (Transition) -> Unit) =
-  addListener(object : TransitionListenerAdapter() {
-    override fun onTransitionEnd(transition: Transition) {
-      listener.invoke(transition)
-    }
-  })
+}

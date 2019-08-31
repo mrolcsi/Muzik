@@ -11,8 +11,8 @@ import android.support.v4.media.session.PlaybackStateCompat.REPEAT_MODE_ONE
 import android.support.v4.media.session.PlaybackStateCompat.SHUFFLE_MODE_ALL
 import android.support.v4.media.session.PlaybackStateCompat.SHUFFLE_MODE_NONE
 import android.widget.Toast
+import androidx.databinding.library.baseAdapters.BR
 import androidx.lifecycle.MutableLiveData
-import hu.mrolcsi.muzik.BR
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.OnRepeatTouchListener
 import hu.mrolcsi.muzik.common.glide.GlideApp
@@ -92,7 +92,9 @@ class PlayerViewModelImpl @Inject constructor(
   }
 
   override val queue = MutableLiveData<List<MediaSessionCompat.QueueItem>>()
-  override fun getCurrentQueueId() = mediaService.getCurrentQueueId()
+  override val currentQueueId = MutableLiveData<Long>()
+
+  override fun getCurrentQueueId(): Long = currentQueueId.value ?: -1
 
   override fun skipToQueueItem(itemId: Long) {
     mediaService.skipToQueueItem(itemId)
@@ -114,6 +116,12 @@ class PlayerViewModelImpl @Inject constructor(
   )
 
   init {
+    mediaService.playbackState
+      .map { it.activeQueueItemId }
+      .distinctUntilChanged()
+      .subscribeBy { currentQueueId.value = it }
+      .disposeOnCleared()
+
     mediaService.shuffleMode
       .observeOn(AndroidSchedulers.mainThread())
       .subscribeBy(
