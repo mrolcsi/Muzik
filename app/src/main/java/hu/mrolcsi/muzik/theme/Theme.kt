@@ -5,6 +5,7 @@ import androidx.palette.graphics.Palette
 import com.google.gson.annotations.SerializedName
 import hu.mrolcsi.muzik.common.Exclude
 import hu.mrolcsi.muzik.extensions.toColorHex
+import kotlin.math.roundToInt
 
 data class Theme(
   // Source palette
@@ -27,7 +28,17 @@ data class Theme(
   }
 
   companion object {
-    const val DISABLED_OPACITY = 128
+    val DISABLED_OPACITY = (255 * 0.6).roundToInt()
+
+    val DEFAULT_THEME = Theme(
+      sourcePalette = null,
+      primaryBackgroundColor = Color.rgb(39, 115, 231),
+      primaryForegroundColor = Color.WHITE,
+      secondaryBackgroundColor = Color.BLACK,
+      secondaryForegroundColor = Color.WHITE,
+      tertiaryBackgroundColor = Color.rgb(46, 70, 106),
+      tertiaryForegroundColor = Color.WHITE
+    )
   }
 
 }

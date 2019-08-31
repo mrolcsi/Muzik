@@ -1,5 +1,6 @@
 package hu.mrolcsi.muzik.extensions
 
+import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.res.ColorStateList
@@ -13,9 +14,12 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.forEach
 import androidx.core.view.get
+import androidx.fragment.app.Fragment
 import com.google.android.material.bottomnavigation.BottomNavigationItemView
 import com.google.android.material.bottomnavigation.BottomNavigationMenuView
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import hu.mrolcsi.muzik.R
+import hu.mrolcsi.muzik.theme.Theme
 
 const val DISABLED_ALPHA = 0.5f
 const val DISABLED_OPACITY = (255 * DISABLED_ALPHA).toInt()
@@ -56,6 +60,7 @@ fun Activity.applyNavigationBarColor(color: Int) {
   }
 }
 
+@Deprecated("Use 'app:iconTint' with DataBinding!")
 fun Toolbar.applyForegroundColor(color: Int) {
   // Icons
   navigationIcon?.setColorFilter(color, PorterDuff.Mode.SRC_IN)
@@ -95,3 +100,69 @@ fun getRippleDrawable(rippleColor: Int, background: Drawable? = null) = RippleDr
   background,
   null
 )
+
+fun Fragment.applyThemeAnimated(
+  previousTheme: Theme?, newTheme: Theme,
+  applyPrimaryBackgroundColor: ((color: Int) -> Unit)? = null,
+  applyPrimaryForegroundColor: ((color: Int) -> Unit)? = null,
+  applySecondaryBackgroundColor: ((color: Int) -> Unit)? = null,
+  applySecondaryForegroundColor: ((color: Int) -> Unit)? = null
+) {
+  val animationDuration = requireContext().resources.getInteger(R.integer.preferredAnimationDuration).toLong()
+
+  applyPrimaryBackgroundColor?.let { apply ->
+    ValueAnimator.ofArgb(
+      previousTheme?.primaryBackgroundColor ?: Theme.DEFAULT_THEME.primaryBackgroundColor,
+      newTheme.primaryBackgroundColor
+    ).run {
+      duration = animationDuration
+      addUpdateListener {
+        val color = it.animatedValue as Int
+        apply.invoke(color)
+      }
+      start()
+    }
+  }
+
+  applyPrimaryForegroundColor?.let { apply ->
+    ValueAnimator.ofArgb(
+      previousTheme?.primaryForegroundColor ?: Theme.DEFAULT_THEME.primaryForegroundColor,
+      newTheme.primaryForegroundColor
+    ).run {
+      duration = animationDuration
+      addUpdateListener {
+        val color = it.animatedValue as Int
+        apply.invoke(color)
+      }
+      start()
+    }
+  }
+
+  applySecondaryBackgroundColor?.let { apply ->
+    ValueAnimator.ofArgb(
+      previousTheme?.secondaryBackgroundColor ?: Theme.DEFAULT_THEME.secondaryBackgroundColor,
+      newTheme.secondaryBackgroundColor
+    ).run {
+      duration = animationDuration
+      addUpdateListener {
+        val color = it.animatedValue as Int
+        apply.invoke(color)
+      }
+      start()
+    }
+  }
+
+  applySecondaryForegroundColor?.let { apply ->
+    ValueAnimator.ofArgb(
+      previousTheme?.secondaryForegroundColor ?: Theme.DEFAULT_THEME.secondaryForegroundColor,
+      newTheme.secondaryForegroundColor
+    ).run {
+      duration = animationDuration
+      addUpdateListener {
+        val color = it.animatedValue as Int
+        apply.invoke(color)
+      }
+      start()
+    }
+  }
+}

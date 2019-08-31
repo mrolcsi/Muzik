@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.os.Looper
 import android.util.Log
 import android.util.LruCache
 import androidx.core.graphics.ColorUtils
@@ -11,6 +12,7 @@ import androidx.core.graphics.get
 import androidx.palette.graphics.Palette
 import com.google.gson.Gson
 import io.reactivex.Observable
+import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
@@ -33,9 +35,7 @@ class ThemeServiceImpl @Inject constructor(
 
   override val currentTheme: Observable<Theme>
 
-  private val mPaletteFiler = Palette.Filter { _, hsl ->
-    hsl[1] > 0.4
-  }
+  private val mPaletteFiler = Palette.Filter { _, hsl -> hsl[1] > 0.4 }
 
   init {
     currentTheme = pendingThemeSubject
@@ -47,13 +47,14 @@ class ThemeServiceImpl @Inject constructor(
       .observeOn(AndroidSchedulers.mainThread())
 
     createThemeSubject
-      .subscribeOn(Schedulers.computation())
+      .observeOn(Schedulers.computation())
       .distinctUntilChanged { bitmap -> bitmap.bitmapHash() }
-      .map { createTheme(it) }
+      .flatMapSingle { createTheme(it) }
       .doOnNext { Log.d(LOG_TAG, "Updating theme: $it") }
       .doOnNext {
         sharedPrefs.edit().putString(LAST_USED_THEME, gson.toJson(it)).apply()
       }
+      .observeOn(AndroidSchedulers.mainThread())
       .subscribeBy(
         onNext = { pendingThemeSubject.onNext(Observable.just(it)) },
         onError = { Log.e(LOG_TAG, Log.getStackTraceString(it)) }
@@ -74,7 +75,8 @@ class ThemeServiceImpl @Inject constructor(
     createThemeSubject.onNext(bitmap)
   }
 
-  override fun createTheme(bitmap: Bitmap): Theme {
+  override fun createTheme(bitmap: Bitmap) = Single.create<Theme> { emitter ->
+    require(Looper.myLooper() != Looper.getMainLooper()) { "Theme creation is not allowed on the main thread!" }
 
     // Calculate hash for this bitmap
     val hashCode = bitmap.bitmapHash()
@@ -82,28 +84,28 @@ class ThemeServiceImpl @Inject constructor(
     val cachedTheme = themeCache[hashCode]
 
     if (cachedTheme != null) {
-      return cachedTheme
+      emitter.onSuccess(cachedTheme)
+    } else {
+      val mainPalette = Palette.from(bitmap)
+        .clearFilters()
+        //.addFilter(mPaletteFiler)
+        .generate()
+
+      val theme = createTheme(mainPalette)
+
+      val statusBarPalette = Palette.from(bitmap)
+        .clearFilters()
+        .setRegion(0, 0, bitmap.width, 48)    // approx.
+        .generate()
+
+      theme.statusBarColor = statusBarPalette.swatches.maxBy { it.population }?.rgb
+        ?: theme.primaryBackgroundColor
+
+      themeCache.put(hashCode, theme)
+
+      emitter.onSuccess(theme)
     }
-
-    val mainPalette = Palette.from(bitmap)
-      .clearFilters()
-      //.addFilter(mPaletteFiler)
-      .generate()
-
-    val theme = createTheme(mainPalette)
-
-    val statusBarPalette = Palette.from(bitmap)
-      .clearFilters()
-      .setRegion(0, 0, bitmap.width, 48)    // approx.
-      .generate()
-
-    theme.statusBarColor = statusBarPalette.swatches.maxBy { it.population }?.rgb
-      ?: theme.primaryBackgroundColor
-
-    themeCache.put(hashCode, theme)
-
-    return theme
-  }
+  }.subscribeOn(Schedulers.computation()).observeOn(AndroidSchedulers.mainThread())
 
   private fun createTheme(sourcePalette: Palette): Theme {
 

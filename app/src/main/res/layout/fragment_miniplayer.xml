@@ -8,17 +8,22 @@
     <variable
       name="viewModel"
       type="hu.mrolcsi.muzik.library.miniplayer.MiniPlayerViewModel" />
+
+    <variable
+      name="theme"
+      type="androidx.lifecycle.LiveData&lt;hu.mrolcsi.muzik.theme.Theme&gt;" />
   </data>
 
   <FrameLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@{theme.primaryBackgroundColor}"
     android:clickable="true"
     android:elevation="@dimen/bottom_navigation_elevation"
     android:focusable="true"
     android:foreground="?attr/selectableItemBackgroundBorderless"
-    app:elevation="@dimen/bottom_navigation_elevation"
-    tools:context=".library.miniplayer.MiniPlayerFragment">
+    android:foregroundTint="@{theme.primaryForegroundColor}"
+    app:elevation="@dimen/bottom_navigation_elevation">
 
     <androidx.constraintlayout.widget.ConstraintLayout
       android:layout_width="match_parent"
@@ -47,6 +52,7 @@
         android:elevation="0dp"
         android:max="@{viewModel.duration}"
         android:progress="@{viewModel.elapsedTime}"
+        android:progressTint="@{theme.primaryForegroundColor}"
         app:elevation="0dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -60,13 +66,16 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
-        android:maxLines="2"
+        android:maxLines="1"
         android:scrollHorizontally="true"
         android:text="@{viewModel.songTitle}"
+        android:textColor="@{theme.primaryForegroundColor}"
+        app:enableMarquee="@{true}"
         app:layout_constraintBottom_toTopOf="@+id/tvArtist"
         app:layout_constraintEnd_toStartOf="@+id/btnPrevious"
         app:layout_constraintStart_toEndOf="@+id/imgCoverArt"
         app:layout_constraintTop_toBottomOf="@+id/pbSongProgress"
+        app:marqueeDelay="@{@integer/preferredMarqueeDelay}"
         tools:text="Title" />
 
       <TextView
@@ -76,13 +85,16 @@
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:alpha="0.7"
-        android:maxLines="2"
+        android:maxLines="1"
         android:scrollHorizontally="true"
         android:text="@{viewModel.songArtist}"
+        android:textColor="@{theme.primaryForegroundColor}"
+        app:enableMarquee="@{true}"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/btnPrevious"
         app:layout_constraintStart_toEndOf="@+id/imgCoverArt"
         app:layout_constraintTop_toBottomOf="@+id/tvTitle"
+        app:marqueeDelay="@{@integer/preferredMarqueeDelay}"
         tools:text="Artist" />
 
       <ImageButton
@@ -91,13 +103,16 @@
         android:layout_height="42dp"
         android:layout_marginEnd="8dp"
         android:background="@drawable/media_button_background"
+        android:backgroundTint="@{theme.primaryForegroundColor}"
         android:contentDescription="@string/mediaControl_previous"
         android:enabled="@{viewModel.previousEnabled}"
         android:onClick="@{() -> viewModel.onPreviousClicked()}"
         android:src="@android:drawable/ic_media_previous"
+        android:tint="@{theme.primaryBackgroundColor}"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/btnPlayPause"
-        app:layout_constraintTop_toBottomOf="@+id/pbSongProgress" />
+        app:layout_constraintTop_toBottomOf="@+id/pbSongProgress"
+        app:rippleColor="@{theme.primaryBackgroundColor}" />
 
       <ImageButton
         android:id="@+id/btnPlayPause"
@@ -105,13 +120,16 @@
         android:layout_height="48dp"
         android:layout_marginEnd="8dp"
         android:background="@drawable/media_button_background"
+        android:backgroundTint="@{theme.primaryForegroundColor}"
         android:contentDescription="@string/mediaControl_playPause"
         android:enabled="@{viewModel.playPauseEnabled}"
         android:onClick="@{() -> viewModel.onPlayPauseClicked()}"
         android:src="@{viewModel.isPlaying ? @android:drawable/ic_media_pause : @android:drawable/ic_media_play}"
+        android:tint="@{theme.primaryBackgroundColor}"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/btnNext"
         app:layout_constraintTop_toBottomOf="@+id/pbSongProgress"
+        app:rippleColor="@{theme.primaryBackgroundColor}"
         tools:src="@android:drawable/ic_media_play" />
 
       <ImageButton
@@ -120,13 +138,16 @@
         android:layout_height="42dp"
         android:layout_marginEnd="8dp"
         android:background="@drawable/media_button_background"
+        android:backgroundTint="@{theme.primaryForegroundColor}"
         android:contentDescription="@string/mediaControl_next"
         android:enabled="@{viewModel.nextEnabled}"
         android:onClick="@{() -> viewModel.onNextClicked()}"
         android:src="@android:drawable/ic_media_next"
+        android:tint="@{theme.primaryBackgroundColor}"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/pbSongProgress" />
+        app:layout_constraintTop_toBottomOf="@+id/pbSongProgress"
+        app:rippleColor="@{theme.primaryBackgroundColor}" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

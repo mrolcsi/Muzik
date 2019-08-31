@@ -1,15 +1,13 @@
-package hu.mrolcsi.muzik.common.view
+package hu.mrolcsi.muzik.common.bindings
 
 import android.graphics.drawable.Drawable
 import android.net.Uri
-import android.view.View
 import android.widget.ImageView
 import androidx.annotation.DrawableRes
 import androidx.databinding.BindingAdapter
-import androidx.databinding.BindingConversion
 import hu.mrolcsi.muzik.common.glide.GlideApp
 
-object BindingAdapters {
+object ImageViewBindings {
 
   @JvmStatic
   @BindingAdapter(value = ["srcUri", "placeholder", "error"], requireAll = false)
@@ -30,13 +28,5 @@ object BindingAdapters {
   fun setImageResource(view: ImageView, @DrawableRes drawableRes: Int) {
     view.setImageResource(drawableRes)
   }
-
-}
-
-object BindingConverters {
-
-  @JvmStatic
-  @BindingConversion
-  fun booleanToVisibility(isVisible: Boolean) = if (isVisible) View.VISIBLE else View.GONE
 
 }

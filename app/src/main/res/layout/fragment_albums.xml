@@ -1,17 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.l4digital.fastscroll.FastScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:app="http://schemas.android.com/apk/res-auto"
-  xmlns:tools="http://schemas.android.com/tools"
-  android:id="@+id/rvAlbums"
-  android:layout_width="match_parent"
-  android:layout_height="match_parent"
-  android:paddingStart="4dp"
-  android:paddingTop="4dp"
-  android:paddingEnd="4dp"
-  android:paddingBottom="4dp"
-  app:bubbleSize="small"
-  app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-  app:showBubble="true"
-  app:showTrack="true"
-  app:spanCount="@integer/albumsColumnCount"
-  tools:listitem="@layout/list_item_album_vertical" />
+  xmlns:tools="http://schemas.android.com/tools">
+
+  <data>
+
+    <variable
+      name="theme"
+      type="androidx.lifecycle.LiveData&lt;hu.mrolcsi.muzik.theme.Theme&gt;" />
+  </data>
+
+  <FrameLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.l4digital.fastscroll.FastScrollRecyclerView
+      android:id="@+id/rvAlbums"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:paddingStart="4dp"
+      android:paddingTop="4dp"
+      android:paddingEnd="4dp"
+      android:paddingBottom="4dp"
+      app:bubbleColor="@{theme.secondaryForegroundColor}"
+      app:bubbleSize="small"
+      app:bubbleTextColor="@{theme.secondaryBackgroundColor}"
+      app:dividerColor="@{theme.secondaryForegroundColor}"
+      app:handleColor="@{theme.secondaryForegroundColor}"
+      app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+      app:showBubble="true"
+      app:showTrack="true"
+      app:spanCount="@integer/albumsColumnCount"
+      app:trackColor="@{theme.secondaryForegroundColor}"
+      tools:listitem="@layout/list_item_album_vertical" />
+
+  </FrameLayout>
+
+</layout>

@@ -1,62 +1,85 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:app="http://schemas.android.com/apk/res-auto"
-  xmlns:tools="http://schemas.android.com/tools"
-  android:layout_width="match_parent"
-  android:layout_height="match_parent"
-  tools:showIn="@layout/fragment_album_details">
+  xmlns:tools="http://schemas.android.com/tools">
 
-  <ImageView
-    android:id="@+id/imgCoverArt"
-    android:layout_width="0dp"
-    android:layout_height="0dp"
-    android:adjustViewBounds="true"
-    android:contentDescription="@string/contentDescription_coverArt"
-    android:scaleType="centerCrop"
-    android:transitionName="coverArt"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintDimensionRatio="1:1"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="parent"
-    app:layout_constraintVertical_bias="0.0"
-    tools:srcCompat="@tools:sample/avatars"/>
+  <data>
 
-  <TextView
-    android:id="@+id/tvArtist"
-    android:layout_width="0dp"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="8dp"
-    android:layout_marginStart="8dp"
-    android:layout_marginEnd="8dp"
-    android:textAppearance="?android:attr/textAppearanceMedium"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintHorizontal_bias="0.5"
-    app:layout_constraintStart_toEndOf="@+id/imgCoverArt"
-    app:layout_constraintTop_toBottomOf="@+id/tvNumSongs"
-    tools:text="Album Artist"/>
+    <import type="android.text.TextUtils" />
 
-  <TextView
-    android:id="@+id/tvYear"
-    android:layout_width="0dp"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="24dp"
-    android:layout_marginStart="8dp"
-    android:textAppearance="?android:attr/textAppearanceSmall"
-    app:layout_constraintStart_toEndOf="@+id/imgCoverArt"
-    app:layout_constraintTop_toTopOf="parent"
-    tools:text="Year"/>
+    <variable
+      name="viewModel"
+      type="hu.mrolcsi.muzik.library.albums.details.AlbumDetailsViewModel" />
 
-  <TextView
-    android:id="@+id/tvNumSongs"
-    android:layout_width="0dp"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="24dp"
-    android:layout_marginStart="8dp"
-    android:layout_marginEnd="8dp"
-    android:textAppearance="?android:attr/textAppearanceSmall"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toEndOf="@+id/tvYear"
-    app:layout_constraintTop_toTopOf="parent"
-    tools:text="12 songs"/>
+    <variable
+      name="theme"
+      type="androidx.lifecycle.LiveData&lt;hu.mrolcsi.muzik.theme.Theme&gt;" />
+  </data>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+  <androidx.constraintlayout.widget.ConstraintLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:showIn="@layout/fragment_album_details">
+
+    <ImageView
+      android:id="@+id/imgCoverArt"
+      android:layout_width="0dp"
+      android:layout_height="0dp"
+      android:adjustViewBounds="true"
+      android:contentDescription="@string/contentDescription_coverArt"
+      android:scaleType="centerCrop"
+      android:transitionName="coverArt"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintDimensionRatio="1:1"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent"
+      app:layout_constraintVertical_bias="0.0"
+      tools:srcCompat="@tools:sample/avatars" />
+
+    <TextView
+      android:id="@+id/tvArtist"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="8dp"
+      android:layout_marginTop="8dp"
+      android:layout_marginEnd="8dp"
+      android:text="@{viewModel.artistText}"
+      android:textAppearance="?android:attr/textAppearanceMedium"
+      android:textColor="@{theme.primaryForegroundColor}"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintHorizontal_bias="0.5"
+      app:layout_constraintStart_toEndOf="@+id/imgCoverArt"
+      app:layout_constraintTop_toBottomOf="@+id/tvNumberOfSongs"
+      tools:text="Album Artist" />
+
+    <TextView
+      android:id="@+id/tvYear"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="8dp"
+      android:layout_marginTop="24dp"
+      android:text="@{viewModel.yearText}"
+      android:textAppearance="?android:attr/textAppearanceSmall"
+      android:textColor="@{theme.primaryForegroundColor}"
+      app:layout_constraintStart_toEndOf="@+id/imgCoverArt"
+      app:layout_constraintTop_toTopOf="parent"
+      app:visibility="@{!TextUtils.isEmpty(viewModel.yearText)}"
+      tools:text="Year" />
+
+    <TextView
+      android:id="@+id/tvNumberOfSongs"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="8dp"
+      android:layout_marginTop="24dp"
+      android:layout_marginEnd="8dp"
+      android:text="@{viewModel.numberOfSongsText}"
+      android:textAppearance="?android:attr/textAppearanceSmall"
+      android:textColor="@{theme.primaryForegroundColor}"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toEndOf="@+id/tvYear"
+      app:layout_constraintTop_toTopOf="parent"
+      tools:text="12 songs" />
+
+  </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

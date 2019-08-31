@@ -4,16 +4,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
-import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import dagger.android.support.DaggerFragment
-import hu.mrolcsi.muzik.R
-import hu.mrolcsi.muzik.common.ColoredDividerItemDecoration
 import hu.mrolcsi.muzik.common.MediaItemListAdapter
 import hu.mrolcsi.muzik.common.viewmodel.observeAndRunNavCommands
 import hu.mrolcsi.muzik.common.viewmodel.observeAndRunUiCommands
 import hu.mrolcsi.muzik.databinding.FragmentArtistsBinding
+import hu.mrolcsi.muzik.databinding.ListItemArtistBinding
 import kotlinx.android.synthetic.main.fragment_artists.*
 import javax.inject.Inject
 
@@ -24,9 +21,14 @@ class ArtistsFragment : DaggerFragment() {
   private val artistAdapter by lazy {
     MediaItemListAdapter(requireContext()) { parent, _ ->
       ArtistHolder(
-        LayoutInflater
-          .from(parent.context)
-          .inflate(R.layout.list_item_artist, parent, false)
+        ListItemArtistBinding.inflate(
+          LayoutInflater.from(parent.context),
+          parent,
+          false
+        ).apply {
+          lifecycleOwner = viewLifecycleOwner
+          theme = viewModel.currentTheme
+        }
       ).apply {
         itemView.setOnClickListener {
           model?.let {
@@ -37,10 +39,6 @@ class ArtistsFragment : DaggerFragment() {
     }
   }
 
-  private val divider by lazy {
-    ColoredDividerItemDecoration(requireContext(), LinearLayout.VERTICAL)
-  }
-
   override fun onActivityCreated(savedInstanceState: Bundle?) {
     super.onActivityCreated(savedInstanceState)
 
@@ -49,40 +47,17 @@ class ArtistsFragment : DaggerFragment() {
       requireContext().observeAndRunUiCommands(viewLifecycleOwner, this)
       findNavController().observeAndRunNavCommands(viewLifecycleOwner, this)
 
-      items.observe(viewLifecycleOwner, Observer { artists ->
-        artistAdapter.submitList(artists)
-      })
+      items.observe(viewLifecycleOwner, artistAdapter)
     }
-
-    viewModel.currentTheme.observe(
-      viewLifecycleOwner,
-      Observer {
-      // Tell adapter to reload its views
-      artistAdapter.notifyDataSetChanged()
-
-      divider.setTint(it.secondaryForegroundColor)
-
-      rvArtists.fastScroller.apply {
-        setTrackColor(it.secondaryForegroundColor)
-        setHandleColor(it.secondaryForegroundColor)
-        setBubbleColor(it.secondaryForegroundColor)
-
-        setBubbleTextColor(it.secondaryBackgroundColor)
-      }
-    })
   }
 
-  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-    return FragmentArtistsBinding.inflate(inflater, container, false).also { binding ->
+  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) =
+    FragmentArtistsBinding.inflate(inflater, container, false).also { binding ->
       binding.lifecycleOwner = viewLifecycleOwner
-      binding.viewModel = viewModel
+      binding.theme = viewModel.currentTheme
     }.root
-  }
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-    rvArtists.setAdapter(artistAdapter)
-    rvArtists.recyclerView.apply {
-      addItemDecoration(divider)
-    }
+    rvArtists.adapter = artistAdapter
   }
 }

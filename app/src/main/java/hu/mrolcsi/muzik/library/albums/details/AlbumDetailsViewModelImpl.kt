@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory
 import android.support.v4.media.MediaBrowserCompat.MediaItem
 import android.support.v4.media.MediaDescriptionCompat
 import androidx.core.os.bundleOf
+import androidx.databinding.library.baseAdapters.BR
 import androidx.lifecycle.MutableLiveData
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.glide.GlideApp
@@ -16,9 +17,12 @@ import hu.mrolcsi.muzik.common.viewmodel.ObservableImpl
 import hu.mrolcsi.muzik.media.MediaRepository
 import hu.mrolcsi.muzik.media.MediaService
 import hu.mrolcsi.muzik.service.extensions.media.MediaType
+import hu.mrolcsi.muzik.service.extensions.media.album
 import hu.mrolcsi.muzik.service.extensions.media.albumArtUri
+import hu.mrolcsi.muzik.service.extensions.media.albumYear
 import hu.mrolcsi.muzik.service.extensions.media.artist
 import hu.mrolcsi.muzik.service.extensions.media.id
+import hu.mrolcsi.muzik.service.extensions.media.numberOfSongs
 import hu.mrolcsi.muzik.service.extensions.media.titleKey
 import hu.mrolcsi.muzik.service.extensions.media.trackNumber
 import hu.mrolcsi.muzik.service.extensions.media.type
@@ -27,6 +31,7 @@ import hu.mrolcsi.muzik.theme.ThemedViewModel
 import hu.mrolcsi.muzik.theme.ThemedViewModelImpl
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
+import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import javax.inject.Inject
 import kotlin.properties.Delegates
@@ -35,12 +40,13 @@ class AlbumDetailsViewModelImpl @Inject constructor(
   observable: ObservableImpl,
   uiCommandSource: ExecuteOnceUiCommandSource,
   navCommandSource: ExecuteOnceNavCommandSource,
-  themedViewModel: ThemedViewModelImpl,
-  context: Context,
+  private val themedViewModel: ThemedViewModelImpl,
+  private val context: Context,
   private val mediaService: MediaService,
   private val mediaRepo: MediaRepository
 ) : DataBindingViewModel(observable, uiCommandSource, navCommandSource),
-  ThemedViewModel by themedViewModel, AlbumDetailsViewModel {
+  ThemedViewModel by themedViewModel,
+  AlbumDetailsViewModel {
 
   override val progressVisible: Boolean = false
   override val listViewVisible: Boolean = true
@@ -48,24 +54,18 @@ class AlbumDetailsViewModelImpl @Inject constructor(
 
   override val items = MutableLiveData<List<MediaItem>>()
 
+  override var albumTitleText: String? by boundStringOrNull(BR.albumTitleText)
+  override var artistText: String? by boundStringOrNull(BR.artistText)
+  override var yearText: String? by boundStringOrNull(BR.yearText)
+  override var numberOfSongsText: String? by boundStringOrNull(BR.numberOfSongsText)
+
   override var albumItem: MediaItem? by Delegates.observable(null) { _, old: MediaItem?, new: MediaItem? ->
     if (old != new) new?.let {
-      albumDetails.value = it
       albumSubject.onNext(it)
-
-      GlideApp.with(context)
-        .asBitmap()
-        .load(it.description.albumArtUri)
-        .onResourceReady { albumArt ->
-          albumTheme.value = themedViewModel.themeService.createTheme(albumArt)
-        }
-        .preload()
     }
   }
 
   private var albumSubject = PublishSubject.create<MediaItem>()
-
-  override val albumDetails = MutableLiveData<MediaItem>()
 
   override val albumTheme = MutableLiveData<Theme>()
 
@@ -93,17 +93,35 @@ class AlbumDetailsViewModelImpl @Inject constructor(
 
   init {
     albumSubject
+      .subscribeOn(Schedulers.io())
       .filter { it.mediaId != null }
-      .observeOn(AndroidSchedulers.mainThread())
+      .doOnNext { updateHeaderText(it) }
       .switchMap { mediaRepo.getSongsFromAlbum(it.description.id) }
       .map { songs -> songs.sortedBy { it.description.titleKey }.sortedBy { it.description.trackNumber } }
       .doOnNext { songs -> songDescriptions = songs.filter { it.isPlayable }.map { it.description } }
       .map { it.addDiscIndicator().addShuffleAll() }
+      .observeOn(AndroidSchedulers.mainThread())
       .subscribeBy(
         onNext = { items.value = it },
         onError = { showError(this, it) }
       ).disposeOnCleared()
+  }
 
+  private fun updateHeaderText(albumItem: MediaItem) {
+    albumTitleText = albumItem.description.album
+    artistText = albumItem.description.artist
+    yearText = albumItem.description.albumYear
+
+    val numberOfSong = albumItem.description.numberOfSongs
+    numberOfSongsText = context.resources.getQuantityString(R.plurals.artists_numberOfSongs, numberOfSong, numberOfSong)
+
+    GlideApp.with(context)
+      .asBitmap()
+      .load(albumItem.description.albumArtUri)
+      .onResourceReady { albumArt ->
+        themedViewModel.themeService.createTheme(albumArt).subscribeBy { albumTheme.value = it }
+      }
+      .preload()
   }
 
   private fun List<MediaItem>.addDiscIndicator(): List<MediaItem> = toMutableList().apply {

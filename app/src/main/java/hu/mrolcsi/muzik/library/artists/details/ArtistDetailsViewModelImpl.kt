@@ -23,6 +23,7 @@ import hu.mrolcsi.muzik.media.MediaService
 import hu.mrolcsi.muzik.service.extensions.media.MediaType
 import hu.mrolcsi.muzik.service.extensions.media.artist
 import hu.mrolcsi.muzik.service.extensions.media.id
+import hu.mrolcsi.muzik.service.extensions.media.titleKey
 import hu.mrolcsi.muzik.service.extensions.media.type
 import hu.mrolcsi.muzik.theme.ThemedViewModel
 import hu.mrolcsi.muzik.theme.ThemedViewModelImpl
@@ -113,6 +114,7 @@ class ArtistDetailsViewModelImpl @Inject constructor(
     // Get Songs
     publishedArtistSubject
       .switchMap { mediaRepo.getSongsByArtist(it.description.id) }
+      .map { items -> items.sortedBy { it.description.titleKey } }
       .doOnNext { songs -> songDescriptions = songs.filter { it.isPlayable }.map { it.description } }
       .map { it.toMutableList().apply { add(0, shuffleAllItem) }.toList() }
       .subscribeBy(

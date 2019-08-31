@@ -6,18 +6,31 @@
   <data>
 
     <variable
-      name="viewModel"
-      type="hu.mrolcsi.muzik.library.artists.ArtistsViewModel" />
+      name="theme"
+      type="androidx.lifecycle.LiveData&lt;hu.mrolcsi.muzik.theme.Theme&gt;" />
   </data>
 
-  <com.l4digital.fastscroll.FastScrollView
-    android:id="@+id/rvArtists"
+  <FrameLayout
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    app:bubbleSize="small"
-    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-    app:showBubble="true"
-    app:showTrack="true"
-    tools:listitem="@layout/list_item_artist" />
+    android:layout_height="match_parent">
+
+    <com.l4digital.fastscroll.FastScrollRecyclerView
+      android:id="@+id/rvArtists"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:orientation="vertical"
+      app:bubbleColor="@{theme.secondaryForegroundColor}"
+      app:bubbleSize="small"
+      app:bubbleTextColor="@{theme.secondaryBackgroundColor}"
+      app:dividerColor="@{theme.secondaryForegroundColor}"
+      app:handleColor="@{theme.secondaryForegroundColor}"
+      app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+      app:showBubble="true"
+      app:showColoredDivider="@{true}"
+      app:showTrack="true"
+      app:trackColor="@{theme.secondaryForegroundColor}"
+      tools:listitem="@layout/list_item_artist" />
+
+  </FrameLayout>
 
 </layout>

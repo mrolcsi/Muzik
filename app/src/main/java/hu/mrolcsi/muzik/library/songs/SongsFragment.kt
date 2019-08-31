@@ -8,16 +8,15 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
 import androidx.core.view.forEach
-import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import dagger.android.support.DaggerFragment
 import hu.mrolcsi.muzik.R
-import hu.mrolcsi.muzik.common.ColoredDividerItemDecoration
 import hu.mrolcsi.muzik.common.MediaItemListAdapter
 import hu.mrolcsi.muzik.common.viewmodel.observeAndRunNavCommands
 import hu.mrolcsi.muzik.common.viewmodel.observeAndRunUiCommands
+import hu.mrolcsi.muzik.databinding.FragmentSongsBinding
+import hu.mrolcsi.muzik.databinding.ListItemSongBinding
 import hu.mrolcsi.muzik.library.SortingMode
 import kotlinx.android.synthetic.main.fragment_songs.*
 import javax.inject.Inject
@@ -26,19 +25,18 @@ class SongsFragment : DaggerFragment() {
 
   @Inject lateinit var viewModel: SongsViewModel
 
-  private val divider by lazy {
-    ColoredDividerItemDecoration(requireContext(), LinearLayout.VERTICAL).apply {
-      setDrawable(resources.getDrawable(R.drawable.list_divider_inset, requireContext().theme))
-    }
-  }
-
   private val songsAdapter by lazy {
     MediaItemListAdapter(requireContext()) { parent, _ ->
       SongHolder(
-        LayoutInflater
-          .from(parent.context)
-          .inflate(R.layout.list_item_song, parent, false),
-        false
+        itemView = ListItemSongBinding.inflate(
+          LayoutInflater.from(parent.context),
+          parent,
+          false
+        ).apply {
+          theme = viewModel.currentTheme
+          lifecycleOwner = viewLifecycleOwner
+        }.root,
+        showTrackNumber = false
       ).apply {
         itemView.setOnClickListener {
           model?.let {
@@ -63,39 +61,18 @@ class SongsFragment : DaggerFragment() {
       requireContext().observeAndRunUiCommands(viewLifecycleOwner, this)
       findNavController().observeAndRunNavCommands(viewLifecycleOwner, this)
 
-      items.observe(viewLifecycleOwner, Observer { songs ->
-        songsAdapter.submitList(songs)
-      })
+      items.observe(viewLifecycleOwner, songsAdapter)
     }
-
-    viewModel.currentTheme.observe(
-      viewLifecycleOwner,
-      Observer {
-      // Tell adapter to reload its views
-      songsAdapter.notifyDataSetChanged()
-
-      // Apply colors to dividers
-      divider.setTint(it.secondaryForegroundColor)
-
-      rvSongs.fastScroller.apply {
-        setTrackColor(it.secondaryForegroundColor)
-        setHandleColor(it.secondaryForegroundColor)
-        setBubbleColor(it.secondaryForegroundColor)
-
-        setBubbleTextColor(it.secondaryBackgroundColor)
-      }
-    })
   }
 
-  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-    return inflater.inflate(R.layout.fragment_songs, container, false)
-  }
+  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) =
+    FragmentSongsBinding.inflate(inflater, container, false).apply {
+      theme = viewModel.currentTheme
+      lifecycleOwner = viewLifecycleOwner
+    }.root
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-    rvSongs.setAdapter(songsAdapter)
-    rvSongs.recyclerView.apply {
-      addItemDecoration(divider)
-    }
+    rvSongs.adapter = songsAdapter
   }
 
   override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

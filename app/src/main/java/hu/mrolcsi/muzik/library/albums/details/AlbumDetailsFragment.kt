@@ -1,33 +1,25 @@
 package hu.mrolcsi.muzik.library.albums.details
 
-import android.animation.ValueAnimator
-import android.graphics.Color
 import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat.MediaItem
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
 import androidx.core.view.ViewCompat
-import androidx.lifecycle.Observer
 import androidx.navigation.fragment.navArgs
 import androidx.transition.TransitionInflater
 import dagger.android.support.DaggerFragment
 import hu.mrolcsi.muzik.R
-import hu.mrolcsi.muzik.common.ColoredDividerItemDecoration
 import hu.mrolcsi.muzik.common.MediaItemListAdapter
 import hu.mrolcsi.muzik.common.glide.GlideApp
 import hu.mrolcsi.muzik.common.glide.onLoadFailed
 import hu.mrolcsi.muzik.common.glide.onResourceReady
 import hu.mrolcsi.muzik.common.view.MVVMViewHolder
+import hu.mrolcsi.muzik.databinding.FragmentAlbumDetailsBinding
+import hu.mrolcsi.muzik.databinding.ListItemDiscNumberBinding
+import hu.mrolcsi.muzik.databinding.ListItemSongBinding
 import hu.mrolcsi.muzik.library.songs.SongHolder
-import hu.mrolcsi.muzik.service.extensions.media.album
 import hu.mrolcsi.muzik.service.extensions.media.albumArtUri
-import hu.mrolcsi.muzik.service.extensions.media.albumYear
-import hu.mrolcsi.muzik.service.extensions.media.artist
-import hu.mrolcsi.muzik.service.extensions.media.numberOfSongs
-import hu.mrolcsi.muzik.theme.Theme
 import kotlinx.android.synthetic.main.album_details_header.*
 import kotlinx.android.synthetic.main.fragment_album_details.*
 import javax.inject.Inject
@@ -42,16 +34,22 @@ class AlbumDetailsFragment : DaggerFragment() {
     object : MediaItemListAdapter<MVVMViewHolder<MediaItem>>(requireContext(), { parent, viewType ->
       if (viewType == DiscHeaderHolder.VIEW_TYPE) {
         DiscHeaderHolder(
-          LayoutInflater
-            .from(parent.context)
-            .inflate(R.layout.list_item_disc_number, parent, false)
+          ListItemDiscNumberBinding.inflate(layoutInflater, parent, false).apply {
+            theme = viewModel.albumTheme
+            lifecycleOwner = viewLifecycleOwner
+          }.root
         )
       } else {
         SongHolder(
-          LayoutInflater
-            .from(parent.context)
-            .inflate(R.layout.list_item_song, parent, false),
-          true
+          itemView = ListItemSongBinding.inflate(
+            LayoutInflater.from(parent.context),
+            parent,
+            false
+          ).apply {
+            theme = viewModel.albumTheme
+            lifecycleOwner = viewLifecycleOwner
+          }.root,
+          showTrackNumber = true
         ).apply {
           itemView.setOnClickListener {
             model?.let {
@@ -64,10 +62,6 @@ class AlbumDetailsFragment : DaggerFragment() {
       override fun getItemViewType(position: Int) =
         if (getItem(position).isBrowsable) DiscHeaderHolder.VIEW_TYPE else SongHolder.VIEW_TYPE
     }
-  }
-
-  private val mDivider by lazy {
-    ColoredDividerItemDecoration(requireContext(), LinearLayout.VERTICAL)
   }
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -107,127 +101,27 @@ class AlbumDetailsFragment : DaggerFragment() {
 
       albumItem = args.albumItem
 
-      items.observe(viewLifecycleOwner, Observer {
-        Log.d(LOG_TAG, "Got items from LiveData: $it")
-        songsAdapter.submitList(it)
-      })
+      items.observe(viewLifecycleOwner, songsAdapter)
 
-      albumDetails.observe(viewLifecycleOwner, Observer {
-        loadHeader(it)
-      })
-
-      albumTheme.observe(viewLifecycleOwner, Observer { applyTheme(it) })
+      GlideApp.with(imgCoverArt)
+        .asBitmap()
+        .load(args.albumItem.description.albumArtUri)
+        .onResourceReady { startPostponedEnterTransition() }
+        .onLoadFailed { startPostponedEnterTransition(); true }
+        .into(imgCoverArt)
     }
   }
 
-  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
-    inflater.inflate(R.layout.fragment_album_details, container, false)
+  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) =
+    FragmentAlbumDetailsBinding.inflate(inflater, container, false).also {
+      it.lifecycleOwner = viewLifecycleOwner
+      it.viewModel = viewModel
+      it.theme = viewModel.albumTheme
+    }.root
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-    rvSongs.apply {
-      adapter = songsAdapter
-      addItemDecoration(mDivider)
-    }
+    rvSongs.adapter = songsAdapter
 
     ViewCompat.setTransitionName(imgCoverArt, args.transitionName)
-  }
-
-  private fun loadHeader(albumItem: MediaItem) {
-
-    albumDetailsToolbar.title = albumItem.description.album
-
-    tvArtist.text = albumItem.description.artist
-
-    if (albumItem.description.albumYear == null) {
-      tvYear.visibility = View.GONE
-    } else {
-      tvYear.visibility = View.VISIBLE
-      tvYear.text = albumItem.description.albumYear
-    }
-
-    tvYear.text = albumItem.description.albumYear
-
-    val numberOfSong = albumItem.description.numberOfSongs
-    tvNumSongs.text = resources.getQuantityString(R.plurals.artists_numberOfSongs, numberOfSong, numberOfSong)
-
-    GlideApp.with(imgCoverArt)
-      .asBitmap()
-      .load(albumItem.description.albumArtUri)
-      .onResourceReady { startPostponedEnterTransition() }
-      .onLoadFailed { startPostponedEnterTransition(); true }
-      .into(imgCoverArt)
-  }
-
-  private fun applyTheme(albumTheme: Theme) {
-
-    val currentTheme = viewModel.currentTheme.value
-
-    // Primary: Toolbar
-    // Tertiary: RecyclerView
-
-    val animationDuration = context?.resources?.getInteger(R.integer.preferredAnimationDuration)?.toLong() ?: 300L
-
-    ValueAnimator.ofArgb(
-      currentTheme?.primaryBackgroundColor ?: Color.BLACK,
-      albumTheme.primaryBackgroundColor
-    ).run {
-      duration = animationDuration
-      addUpdateListener {
-        val color = it.animatedValue as Int
-
-        appBar.setBackgroundColor(color)
-        collapsingToolbar.setContentScrimColor(color)
-      }
-      start()
-    }
-
-    ValueAnimator.ofArgb(
-      currentTheme?.primaryForegroundColor ?: Color.WHITE,
-      albumTheme.primaryForegroundColor
-    ).run {
-      duration = animationDuration
-      addUpdateListener {
-        val color = it.animatedValue as Int
-
-        collapsingToolbar.setExpandedTitleColor(color)
-        collapsingToolbar.setCollapsedTitleTextColor(color)
-
-        tvArtist.setTextColor(color)
-        tvYear.setTextColor(color)
-        tvNumSongs.setTextColor(color)
-      }
-      start()
-    }
-
-    ValueAnimator.ofArgb(
-      currentTheme?.secondaryBackgroundColor ?: Color.BLACK,
-      albumTheme.secondaryBackgroundColor
-    ).run {
-      duration = animationDuration
-      addUpdateListener {
-        val color = it.animatedValue as Int
-
-        // Window background
-        view?.setBackgroundColor(color)
-      }
-      start()
-    }
-
-    ValueAnimator.ofArgb(
-      currentTheme?.secondaryForegroundColor ?: Color.WHITE,
-      albumTheme.secondaryForegroundColor
-    ).run {
-      duration = animationDuration
-      addUpdateListener {
-        val color = it.animatedValue as Int
-
-        mDivider.setTint(color)
-      }
-      start()
-    }
-  }
-
-  companion object {
-    private const val LOG_TAG = "AlbumDetailsFragment"
   }
 }

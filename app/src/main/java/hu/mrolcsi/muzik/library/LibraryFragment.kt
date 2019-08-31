@@ -1,7 +1,5 @@
 package hu.mrolcsi.muzik.library
 
-import android.animation.ValueAnimator
-import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -15,9 +13,10 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
 import dagger.android.support.DaggerFragment
 import hu.mrolcsi.muzik.R
-import hu.mrolcsi.muzik.extensions.applyForegroundColor
+import hu.mrolcsi.muzik.databinding.FragmentLibraryBinding
 import hu.mrolcsi.muzik.extensions.applyNavigationBarColor
 import hu.mrolcsi.muzik.extensions.applyStatusBarColor
+import hu.mrolcsi.muzik.extensions.applyThemeAnimated
 import hu.mrolcsi.muzik.theme.Theme
 import kotlinx.android.synthetic.main.fragment_library.*
 import javax.inject.Inject
@@ -26,8 +25,11 @@ class LibraryFragment : DaggerFragment() {
 
   @Inject lateinit var viewModel: LibraryViewModel
 
-  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
-    inflater.inflate(R.layout.fragment_library, container, false)
+  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) =
+    FragmentLibraryBinding.inflate(inflater, container, false).apply {
+      theme = viewModel.currentTheme
+      lifecycleOwner = viewLifecycleOwner
+    }.root
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     libraryToolbar.setTitle(R.string.library_title)
@@ -38,12 +40,16 @@ class LibraryFragment : DaggerFragment() {
 
       private var initialLoad = true
 
-      override fun onChanged(it: Theme) {
+      override fun onChanged(theme: Theme) {
         if (initialLoad) {
-          applyThemeStatic(it)
+          applyPrimaryBackgroundColor(theme.primaryBackgroundColor)
           initialLoad = false
         } else {
-          applyThemeAnimated(it)
+          applyThemeAnimated(
+            previousTheme = viewModel.previousTheme,
+            newTheme = theme,
+            applyPrimaryBackgroundColor = this@LibraryFragment::applyPrimaryBackgroundColor
+          )
         }
       }
     })
@@ -53,12 +59,9 @@ class LibraryFragment : DaggerFragment() {
     super.onResume()
 
     // Apply StatusBar and NavigationBar colors again
-    activity?.applyStatusBarColor(
-      viewModel.currentTheme.value?.primaryBackgroundColor ?: Color.BLACK
-    )
-    activity?.applyNavigationBarColor(
-      viewModel.currentTheme.value?.primaryBackgroundColor ?: Color.BLACK
-    )
+    viewModel.currentTheme.value?.let {
+      applyPrimaryBackgroundColor(it.primaryBackgroundColor)
+    }
   }
 
   private fun setupNavigation(navController: NavController) {
@@ -78,11 +81,6 @@ class LibraryFragment : DaggerFragment() {
           // Nothing for now
         }
         else -> {
-          // Apply color to back arrow
-          val color = viewModel.currentTheme.value?.primaryForegroundColor ?: Color.WHITE
-
-          libraryToolbar.applyForegroundColor(color)
-
           // Show AppBar, hide NavigationBar
           appBar.setExpanded(true, true)
         }
@@ -90,85 +88,14 @@ class LibraryFragment : DaggerFragment() {
     }
   }
 
-  private fun applyThemeStatic(theme: Theme) {
-    Log.d(LOG_TAG, "Applying theme (static)...")
+  private fun applyPrimaryBackgroundColor(color: Int) {
+    Log.d(LOG_TAG, "Applying theme...")
 
-    theme.primaryBackgroundColor.also { color ->
-      // Status Bar
-      activity?.applyStatusBarColor(color)
+    // Status Bar
+    activity?.applyStatusBarColor(color)
 
-      // Navigation
-      activity?.applyNavigationBarColor(color)
-
-      // Toolbar Background
-      libraryToolbar.setBackgroundColor(color)
-    }
-
-    theme.secondaryBackgroundColor.also { color ->
-      // Window background
-      activity?.window?.decorView?.setBackgroundColor(color)
-    }
-
-    theme.primaryForegroundColor.also { color ->
-      // Toolbar
-      libraryToolbar.applyForegroundColor(color)
-    }
-
-  }
-
-  private fun applyThemeAnimated(theme: Theme) {
-    Log.d(LOG_TAG, "Applying theme (animated)...")
-
-    val previousTheme = viewModel.previousTheme
-    val animationDuration =
-      context?.resources?.getInteger(R.integer.preferredAnimationDuration)?.toLong() ?: 300L
-
-    ValueAnimator.ofArgb(
-      previousTheme?.primaryBackgroundColor ?: Color.BLACK,
-      theme.primaryBackgroundColor
-    ).run {
-      duration = animationDuration
-      addUpdateListener {
-        val color = it.animatedValue as Int
-
-        // Status Bar
-        activity?.applyStatusBarColor(color)
-
-        // Navigation Bar
-        activity?.applyNavigationBarColor(color)
-
-        // Toolbar Background
-        libraryToolbar.setBackgroundColor(color)
-      }
-      start()
-    }
-
-    ValueAnimator.ofArgb(
-      previousTheme?.secondaryBackgroundColor ?: Color.BLACK,
-      theme.secondaryBackgroundColor
-    ).run {
-      duration = animationDuration
-      addUpdateListener {
-        val color = it.animatedValue as Int
-
-        // Window background
-        activity?.window?.decorView?.setBackgroundColor(color)
-      }
-      start()
-    }
-
-    ValueAnimator.ofArgb(
-      previousTheme?.primaryForegroundColor ?: Color.WHITE,
-      theme.primaryForegroundColor
-    ).run {
-      duration = animationDuration
-      addUpdateListener {
-        val color = it.animatedValue as Int
-
-        libraryToolbar.applyForegroundColor(color)
-      }
-      start()
-    }
+    // Navigation
+    activity?.applyNavigationBarColor(color)
   }
 
   companion object {

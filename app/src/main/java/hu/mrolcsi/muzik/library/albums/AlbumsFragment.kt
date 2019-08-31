@@ -1,6 +1,5 @@
 package hu.mrolcsi.muzik.library.albums
 
-import android.animation.ValueAnimator
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -9,17 +8,17 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat
 import androidx.core.view.forEach
-import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.RecyclerView
 import dagger.android.support.DaggerFragment
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.MediaItemListAdapter
 import hu.mrolcsi.muzik.common.viewmodel.observeAndRunNavCommands
 import hu.mrolcsi.muzik.common.viewmodel.observeAndRunUiCommands
+import hu.mrolcsi.muzik.databinding.FragmentAlbumsBinding
 import hu.mrolcsi.muzik.library.SortingMode
-import hu.mrolcsi.muzik.theme.Theme
+import hu.mrolcsi.muzik.theme.ThemeService
 import kotlinx.android.synthetic.main.fragment_albums.*
 import kotlinx.android.synthetic.main.list_item_album_content.*
 import javax.inject.Inject
@@ -27,13 +26,15 @@ import javax.inject.Inject
 class AlbumsFragment : DaggerFragment() {
 
   @Inject lateinit var viewModel: AlbumsViewModel
+  @Inject lateinit var themeService: ThemeService
 
   private val albumsAdapter by lazy {
     MediaItemListAdapter(requireContext()) { parent, _ ->
       AlbumHolder(
-        LayoutInflater
-          .from(parent.context)
-          .inflate(R.layout.list_item_album_vertical, parent, false)
+        parent = parent,
+        viewLifecycleOwner = viewLifecycleOwner,
+        orientation = RecyclerView.VERTICAL,
+        themeService = themeService
       ).apply {
         itemView.setOnClickListener { _ ->
           model?.let {
@@ -58,24 +59,18 @@ class AlbumsFragment : DaggerFragment() {
       requireContext().observeAndRunUiCommands(viewLifecycleOwner, this)
       findNavController().observeAndRunNavCommands(viewLifecycleOwner, this)
 
-      items.observe(viewLifecycleOwner, Observer { albums ->
-        albumsAdapter.submitList(albums)
-      })
+      items.observe(viewLifecycleOwner, albumsAdapter)
     }
-
-    viewModel.currentTheme.observe(
-      viewLifecycleOwner,
-      Observer {
-      applyThemeAnimated(it)
-    })
   }
 
-  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-    return inflater.inflate(R.layout.fragment_albums, container, false)
-  }
+  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) =
+    FragmentAlbumsBinding.inflate(inflater, container, false).apply {
+      theme = viewModel.currentTheme
+      lifecycleOwner = viewLifecycleOwner
+    }.root
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-    rvAlbums.setAdapter(albumsAdapter)
+    rvAlbums.adapter = albumsAdapter
   }
 
   override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -117,47 +112,4 @@ class AlbumsFragment : DaggerFragment() {
       else -> super.onOptionsItemSelected(item)
     }
   }
-
-  private fun applyThemeAnimated(theme: Theme) {
-
-    val previousTheme = viewModel.previousTheme
-    val animationDuration = context?.resources?.getInteger(R.integer.preferredAnimationDuration)?.toLong() ?: 300L
-
-    ValueAnimator.ofArgb(
-      previousTheme?.secondaryBackgroundColor ?: ContextCompat.getColor(
-        requireContext(),
-        R.color.backgroundColor
-      ),
-      theme.secondaryBackgroundColor
-    ).run {
-      duration = animationDuration
-      addUpdateListener {
-        val color = it.animatedValue as Int
-
-        rvAlbums?.setBackgroundColor(color)
-
-        rvAlbums.fastScroller.setBubbleTextColor(color)
-      }
-      start()
-    }
-
-    ValueAnimator.ofArgb(
-      previousTheme?.secondaryForegroundColor ?: Color.WHITE,
-      theme.secondaryForegroundColor
-    ).run {
-      duration = animationDuration
-      addUpdateListener {
-        val color = it.animatedValue as Int
-
-        rvAlbums.fastScroller.apply {
-          setTrackColor(color)
-          setHandleColor(color)
-          setBubbleColor(color)
-        }
-
-      }
-      start()
-    }
-  }
-
 }

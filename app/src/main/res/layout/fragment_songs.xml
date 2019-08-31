@@ -1,18 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.l4digital.fastscroll.FastScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:app="http://schemas.android.com/apk/res-auto"
-  xmlns:tools="http://schemas.android.com/tools"
-  android:id="@+id/rvSongs"
-  android:layout_width="match_parent"
-  android:layout_height="match_parent"
-  android:orientation="vertical"
-  app:bubbleSize="small"
-  app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-  app:layout_constraintBottom_toBottomOf="parent"
-  app:layout_constraintEnd_toEndOf="parent"
-  app:layout_constraintStart_toStartOf="parent"
-  app:layout_constraintTop_toTopOf="parent"
-  app:showBubble="true"
-  app:showTrack="true"
-  tools:listitem="@layout/list_item_song" />
+  xmlns:tools="http://schemas.android.com/tools">
 
+  <data>
+
+    <variable
+      name="theme"
+      type="androidx.lifecycle.LiveData&lt;hu.mrolcsi.muzik.theme.Theme&gt;" />
+  </data>
+
+  <FrameLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.l4digital.fastscroll.FastScrollRecyclerView
+      android:id="@+id/rvSongs"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:orientation="vertical"
+      app:bubbleColor="@{theme.secondaryForegroundColor}"
+      app:bubbleSize="small"
+      app:bubbleTextColor="@{theme.secondaryBackgroundColor}"
+      app:dividerColor="@{theme.secondaryForegroundColor}"
+      app:handleColor="@{theme.secondaryForegroundColor}"
+      app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+      app:showBubble="true"
+      app:showColoredDivider="@{true}"
+      app:showTrack="true"
+      app:trackColor="@{theme.secondaryForegroundColor}"
+      tools:listitem="@layout/list_item_song" />
+
+  </FrameLayout>
+
+</layout>
