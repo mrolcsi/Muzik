@@ -50,7 +50,7 @@ inline val MediaMetadataCompat.mediaId: String?
 inline val MediaMetadataCompat.title: String?
   get() = getString(MediaMetadataCompat.METADATA_KEY_TITLE)
     ?: getString(MediaStore.Audio.Media.TITLE)
-    ?: description.title.toString()
+    ?: description.title?.toString()
 
 inline val MediaMetadataCompat.artist: String?
   get() = getString(MediaMetadataCompat.METADATA_KEY_ARTIST)

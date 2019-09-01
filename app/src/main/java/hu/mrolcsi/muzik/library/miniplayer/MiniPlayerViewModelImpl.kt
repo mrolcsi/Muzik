@@ -1,11 +1,12 @@
 package hu.mrolcsi.muzik.library.miniplayer
 
+import android.content.Context
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.view.View
 import androidx.core.view.ViewCompat
+import androidx.databinding.library.baseAdapters.BR
 import androidx.navigation.fragment.FragmentNavigatorExtras
-import hu.mrolcsi.muzik.BR
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.viewmodel.DataBindingViewModel
 import hu.mrolcsi.muzik.common.viewmodel.ExecuteOnceNavCommandSource
@@ -33,6 +34,7 @@ open class MiniPlayerViewModelImpl @Inject constructor(
   uiCommandSource: ExecuteOnceUiCommandSource,
   navCommandSource: ExecuteOnceNavCommandSource,
   themedViewModel: ThemedViewModelImpl,
+  private val context: Context,
   private val mediaService: MediaService
 ) : DataBindingViewModel(observable, uiCommandSource, navCommandSource),
   ThemedViewModel by themedViewModel,
@@ -111,7 +113,7 @@ open class MiniPlayerViewModelImpl @Inject constructor(
 
     duration = (metadata.duration / 1000).toInt()
 
-    songTitle = metadata.title
+    songTitle = metadata.title ?: context.getString(R.string.player_noSongLoaded)
     songArtist = metadata.artist
   }
 }

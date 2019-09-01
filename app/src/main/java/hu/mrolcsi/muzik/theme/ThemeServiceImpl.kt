@@ -51,9 +51,7 @@ class ThemeServiceImpl @Inject constructor(
       .distinctUntilChanged { bitmap -> bitmap.bitmapHash() }
       .flatMapSingle { createTheme(it) }
       .doOnNext { Log.d(LOG_TAG, "Updating theme: $it") }
-      .doOnNext {
-        sharedPrefs.edit().putString(LAST_USED_THEME, gson.toJson(it)).apply()
-      }
+      .doOnNext { sharedPrefs.edit().putString(LAST_USED_THEME, gson.toJson(it)).apply() }
       .observeOn(AndroidSchedulers.mainThread())
       .subscribeBy(
         onNext = { pendingThemeSubject.onNext(Observable.just(it)) },
@@ -64,11 +62,11 @@ class ThemeServiceImpl @Inject constructor(
   }
 
   private fun loadSavedTheme() {
-    sharedPrefs.getString(LAST_USED_THEME, null)?.let {
+    val savedTheme = sharedPrefs.getString(LAST_USED_THEME, null)?.let {
       gson.fromJson(it, Theme::class.java)
-    }?.let {
-      pendingThemeSubject.onNext(Observable.just(it))
     }
+
+    pendingThemeSubject.onNext(Observable.just(savedTheme ?: Theme.DEFAULT_THEME))
   }
 
   override fun updateTheme(bitmap: Bitmap) {

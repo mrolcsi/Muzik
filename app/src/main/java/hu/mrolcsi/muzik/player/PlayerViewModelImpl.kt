@@ -35,17 +35,18 @@ import io.reactivex.rxkotlin.subscribeBy
 import javax.inject.Inject
 
 class PlayerViewModelImpl @Inject constructor(
-  private val context: Context,
   observable: ObservableImpl,
   uiCommandSource: ExecuteOnceUiCommandSource,
   navCommandSource: ExecuteOnceNavCommandSource,
   themedViewModel: ThemedViewModelImpl,
+  private val context: Context,
   private val mediaService: MediaService
 ) : MiniPlayerViewModelImpl(
   observable,
   uiCommandSource,
   navCommandSource,
   themedViewModel,
+  context,
   mediaService
 ), PlayerViewModel {
 
