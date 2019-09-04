@@ -2,7 +2,6 @@ package hu.mrolcsi.muzik.service
 
 import android.database.Cursor
 import android.net.Uri
-import android.os.AsyncTask
 import android.os.Bundle
 import android.provider.MediaStore
 import android.support.v4.media.MediaBrowserCompat
@@ -11,9 +10,16 @@ import androidx.core.content.ContentResolverCompat
 import androidx.media.MediaBrowserServiceCompat
 import hu.mrolcsi.muzik.BuildConfig
 import hu.mrolcsi.muzik.service.extensions.media.MediaType
+import io.reactivex.Single
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxkotlin.subscribeBy
+import io.reactivex.schedulers.Schedulers
 
 @Suppress("ConstantConditionIf")
 abstract class MuzikBrowserService : MediaBrowserServiceCompat() {
+
+  private val disposables = CompositeDisposable()
 
   private val useInternal = false
   private val useExternal = true
@@ -41,8 +47,7 @@ abstract class MuzikBrowserService : MediaBrowserServiceCompat() {
       return
     }
 
-    // do loading in the background
-    AsyncTask.execute {
+    Single.create<MutableList<MediaBrowserCompat.MediaItem>> { emitter ->
       val mediaItems = emptyList<MediaBrowserCompat.MediaItem>().toMutableList()
 
       when (parentId) {
@@ -60,8 +65,11 @@ abstract class MuzikBrowserService : MediaBrowserServiceCompat() {
         }
       }
 
-      result.sendResult(mediaItems)
+      emitter.onSuccess(mediaItems)
     }
+      .subscribeOn(Schedulers.io())
+      .subscribeBy { result.sendResult(it) }
+      .addTo(disposables)
 
     // Let it load in the background.
     result.detach()
@@ -222,7 +230,7 @@ abstract class MuzikBrowserService : MediaBrowserServiceCompat() {
       return
     }
 
-    AsyncTask.execute {
+    Single.create<MutableList<MediaBrowserCompat.MediaItem>> { emitter ->
       val mediaItems = emptyList<MediaBrowserCompat.MediaItem>().toMutableList()
 
       when (parentId) {
@@ -291,8 +299,11 @@ abstract class MuzikBrowserService : MediaBrowserServiceCompat() {
         }
       }
 
-      result.sendResult(mediaItems)
+      emitter.onSuccess(mediaItems)
     }
+      .subscribeOn(Schedulers.io())
+      .subscribeBy { result.sendResult(it) }
+      .addTo(disposables)
 
     result.detach()
   }
@@ -315,6 +326,11 @@ abstract class MuzikBrowserService : MediaBrowserServiceCompat() {
 
   private fun allowBrowsing(clientPackageName: String): Boolean {
     return clientPackageName.startsWith(BuildConfig.APPLICATION_ID)
+  }
+
+  override fun onDestroy() {
+    super.onDestroy()
+    disposables.dispose()
   }
 
   companion object {

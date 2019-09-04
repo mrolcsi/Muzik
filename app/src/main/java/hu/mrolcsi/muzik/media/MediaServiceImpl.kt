@@ -3,6 +3,7 @@ package hu.mrolcsi.muzik.media
 import android.app.Application
 import android.content.ComponentName
 import android.os.Bundle
+import android.os.Looper
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
@@ -135,6 +136,8 @@ class MediaServiceImpl @Inject constructor(
     options: Bundle?
   ): Observable<List<MediaBrowserCompat.MediaItem>> =
     Observable.create<List<MediaBrowserCompat.MediaItem>> { emitter ->
+      require(Looper.myLooper() != Looper.getMainLooper()) { "MediaStore query is not allowed on the main thread!" }
+
       mediaBrowser.subscribe(
         parentId,
         options ?: bundleOf(),
