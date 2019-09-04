@@ -16,6 +16,7 @@ import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.request.transition.DrawableCrossFadeFactory
 import hu.mrolcsi.muzik.R
+import io.reactivex.Single
 
 
 @GlideModule
@@ -114,3 +115,9 @@ fun <R> GlideRequest<R>.onLoadFailed(callback: (error: GlideException?) -> Boole
       return callback.invoke(e)
     }
   })
+
+fun <R> GlideRequest<R>.toSingle() = Single.create<R> { emitter ->
+  this.onResourceReady { emitter.onSuccess(it) }
+    .onLoadFailed { emitter.onError(it!!); false }
+    .preload()
+}

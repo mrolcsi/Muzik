@@ -1,6 +1,8 @@
 package hu.mrolcsi.muzik.player
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
@@ -13,10 +15,12 @@ import android.support.v4.media.session.PlaybackStateCompat.SHUFFLE_MODE_NONE
 import android.widget.Toast
 import androidx.databinding.library.baseAdapters.BR
 import androidx.lifecycle.MutableLiveData
+import com.bumptech.glide.request.target.Target
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.OnRepeatTouchListener
 import hu.mrolcsi.muzik.common.glide.GlideApp
 import hu.mrolcsi.muzik.common.glide.onResourceReady
+import hu.mrolcsi.muzik.common.glide.toSingle
 import hu.mrolcsi.muzik.common.viewmodel.ExecuteOnceNavCommandSource
 import hu.mrolcsi.muzik.common.viewmodel.ExecuteOnceUiCommandSource
 import hu.mrolcsi.muzik.common.viewmodel.ObservableImpl
@@ -24,21 +28,24 @@ import hu.mrolcsi.muzik.extensions.secondsToTimeStamp
 import hu.mrolcsi.muzik.library.miniplayer.MiniPlayerViewModelImpl
 import hu.mrolcsi.muzik.media.MediaService
 import hu.mrolcsi.muzik.service.extensions.media.albumArtUri
+import hu.mrolcsi.muzik.service.extensions.media.coverArtUri
 import hu.mrolcsi.muzik.service.extensions.media.isPauseEnabled
 import hu.mrolcsi.muzik.service.extensions.media.isPlayEnabled
 import hu.mrolcsi.muzik.service.extensions.media.isPlaying
 import hu.mrolcsi.muzik.service.extensions.media.isSkipToNextEnabled
 import hu.mrolcsi.muzik.service.extensions.media.isSkipToPreviousEnabled
 import hu.mrolcsi.muzik.theme.ThemedViewModelImpl
+import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
+import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
 class PlayerViewModelImpl @Inject constructor(
   observable: ObservableImpl,
   uiCommandSource: ExecuteOnceUiCommandSource,
   navCommandSource: ExecuteOnceNavCommandSource,
-  themedViewModel: ThemedViewModelImpl,
+  private val themedViewModel: ThemedViewModelImpl,
   private val context: Context,
   private val mediaService: MediaService
 ) : MiniPlayerViewModelImpl(
@@ -92,7 +99,7 @@ class PlayerViewModelImpl @Inject constructor(
     mediaService.seekTo(seekProgress * 1000L)
   }
 
-  override val queue = MutableLiveData<List<MediaSessionCompat.QueueItem>>()
+  override val queue = MutableLiveData<List<ThemedQueueItem>>()
   override val currentQueueId = MutableLiveData<Long>()
 
   override fun getCurrentQueueId(): Long = currentQueueId.value ?: -1
@@ -115,6 +122,10 @@ class PlayerViewModelImpl @Inject constructor(
     onDown = { isSeekProgressVisible = true },
     onUp = { isSeekProgressVisible = false }
   )
+
+  private val placeholderArt: Bitmap by lazy {
+    BitmapFactory.decodeResource(context.resources, R.drawable.placeholder_cover_art)
+  }
 
   init {
     mediaService.playbackState
@@ -173,12 +184,34 @@ class PlayerViewModelImpl @Inject constructor(
       ).disposeOnCleared()
 
     mediaService.queue
+      .distinctUntilChanged { t1, t2 -> t1.map { it.queueId } == t2.map { it.queueId } }
+      .flatMapSingle { queueItems -> queueItems.createThemes() }
       .observeOn(AndroidSchedulers.mainThread())
       .subscribeBy(
         onNext = { queue.value = it },
         onError = { showError(this, it) }
       ).disposeOnCleared()
   }
+
+  private fun List<MediaSessionCompat.QueueItem>.createThemes() =
+    Observable.fromIterable(this)
+      .subscribeOn(Schedulers.computation())
+      .concatMapSingle { item ->
+        // Get coverArt
+        GlideApp.with(context)
+          .asBitmap()
+          .load(item.description.coverArtUri)
+          .override(Target.SIZE_ORIGINAL)
+          .toSingle()
+          .onErrorReturnItem(placeholderArt)
+          .map { item to it }
+      }
+      .concatMapSingle { (item, coverArt) ->
+        // Generate theme from coverArt
+        themedViewModel.themeService
+          .createTheme(coverArt)
+          .map { theme -> ThemedQueueItem(item, theme) }
+      }.toList()
 
   override fun updateState(playbackState: PlaybackStateCompat) {
     val elapsedTime = (playbackState.position / 1000).toInt()
@@ -205,5 +238,9 @@ class PlayerViewModelImpl @Inject constructor(
       .load(metadata.albumArtUri)
       .onResourceReady { art -> albumArt.value = art }
       .preload()
+  }
+
+  companion object {
+    const val LOG_TAG = "PlayerViewModel"
   }
 }

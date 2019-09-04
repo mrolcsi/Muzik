@@ -51,6 +51,8 @@
       </intent-filter>
     </activity>
 
+    <activity android:name=".player.PlayerActivity" />
+
     <activity
       android:name="cat.ereza.customactivityoncrash.activity.DefaultErrorActivity"
       android:process=":error_activity"

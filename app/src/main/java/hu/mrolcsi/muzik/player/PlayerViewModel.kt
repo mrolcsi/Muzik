@@ -4,8 +4,10 @@ import android.graphics.drawable.Drawable
 import android.support.v4.media.session.MediaSessionCompat
 import androidx.databinding.Bindable
 import androidx.lifecycle.LiveData
+import androidx.recyclerview.widget.DiffUtil
 import hu.mrolcsi.muzik.common.OnRepeatTouchListener
 import hu.mrolcsi.muzik.library.miniplayer.MiniPlayerViewModel
+import hu.mrolcsi.muzik.theme.Theme
 
 interface PlayerViewModel : MiniPlayerViewModel {
 
@@ -33,7 +35,7 @@ interface PlayerViewModel : MiniPlayerViewModel {
   fun onSeek(progress: Int, fromUser: Boolean)
   fun onStopTrackingTouch()
 
-  val queue: LiveData<List<MediaSessionCompat.QueueItem>>
+  val queue: LiveData<List<ThemedQueueItem>>
   val currentQueueId: LiveData<Long>
   fun getCurrentQueueId(): Long
 
@@ -41,4 +43,20 @@ interface PlayerViewModel : MiniPlayerViewModel {
 
   val previousTouchListener: OnRepeatTouchListener
   val nextTouchListener: OnRepeatTouchListener
+}
+
+data class ThemedQueueItem(
+  val queueItem: MediaSessionCompat.QueueItem,
+  val theme: Theme
+) {
+
+  companion object DiffCallback : DiffUtil.ItemCallback<ThemedQueueItem>() {
+
+    override fun areItemsTheSame(oldItem: ThemedQueueItem, newItem: ThemedQueueItem) =
+      oldItem.queueItem.queueId == newItem.queueItem.queueId
+
+    override fun areContentsTheSame(oldItem: ThemedQueueItem, newItem: ThemedQueueItem) =
+      oldItem == newItem
+
+  }
 }

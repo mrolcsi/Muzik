@@ -21,7 +21,6 @@ import androidx.transition.TransitionInflater
 import androidx.transition.TransitionListenerAdapter
 import dagger.android.support.DaggerFragment
 import hu.mrolcsi.muzik.R
-import hu.mrolcsi.muzik.common.DiffCallbacks
 import hu.mrolcsi.muzik.common.pager.PagerSnapHelperVerbose
 import hu.mrolcsi.muzik.common.pager.RVPagerSnapHelperListenable
 import hu.mrolcsi.muzik.common.pager.RVPagerStateListener
@@ -50,9 +49,9 @@ class PlayerFragment : DaggerFragment() {
   private var scrollState: Int = RecyclerView.SCROLL_STATE_IDLE
 
   private val queueAdapter = MVVMListAdapter(
-    diffCallback = DiffCallbacks.queueItemCallback,
-    itemIdSelector = { it.queueId },
-    viewHolderFactory = { parent, _ -> QueueItemHolder(parent, themeService) }
+    diffCallback = ThemedQueueItem.DiffCallback,
+    itemIdSelector = { it.queueItem.queueId },
+    viewHolderFactory = { parent, _ -> QueueItemHolder(parent) }
   )
 
   //region LIFECYCLE
@@ -64,10 +63,13 @@ class PlayerFragment : DaggerFragment() {
       requireContext().observeAndRunUiCommands(viewLifecycleOwner, this)
       findNavController().observeAndRunNavCommands(viewLifecycleOwner, this)
 
-      queue.observe(viewLifecycleOwner, queueAdapter)
+      queue.observe(viewLifecycleOwner, Observer {
+        queueAdapter.onChanged(it)
+        updatePager("onQueueChanged")
+      })
 
       currentQueueId.observe(viewLifecycleOwner, Observer {
-        updatePager()
+        updatePager("onCurrentQueueIdChanged")
       })
 
       albumArt.observe(viewLifecycleOwner, Observer {
@@ -168,13 +170,14 @@ class PlayerFragment : DaggerFragment() {
       setHasFixedSize(true)
       doOnNextLayout {
         // This could be more sophisticated
-        it.postDelayed(500) { updatePager() }
+        it.postDelayed(500) { updatePager("setupPagerWithDelay") }
       }
     }
 
     snapHelper = RVPagerSnapHelperListenable().attachToRecyclerView(rvQueue, object : RVPagerStateListener {
 
       override fun onPageScroll(pagesState: List<VisiblePageState>) {
+
         if (scrollState == RecyclerView.SCROLL_STATE_IDLE && pagesState.size == 1) {
           viewModel.currentTheme.value?.let { applyTheme(it) }
         }
@@ -184,8 +187,8 @@ class PlayerFragment : DaggerFragment() {
           val leftHolder = rvQueue.findContainingViewHolder(pagesState.first().view) as QueueItemHolder
           val rightHolder = rvQueue.findContainingViewHolder(pagesState.last().view) as QueueItemHolder
 
-          val leftTheme = leftHolder.usedTheme
-          val rightTheme = rightHolder.usedTheme
+          val leftTheme = leftHolder.model?.theme
+          val rightTheme = rightHolder.model?.theme
 
           if (leftTheme != null && rightTheme != null) {
 
@@ -231,19 +234,22 @@ class PlayerFragment : DaggerFragment() {
           // Skip to visible item in queue
           if (queueId != visibleId) {
             viewModel.skipToQueueItem(visibleId)
+          } else {
+            // Make RecyclerView visible after scrolling
+            showRecyclerView()
           }
         }
       }
     })
   }
 
-  private fun updatePager() {
+  private fun updatePager(caller: String) {
     // Scroll pager to current item
     val visiblePosition = snapHelper.findSnapPosition(rvQueue.layoutManager)
 
     // Skip if Pager is not ready yet
     if (visiblePosition < 0) {
-      Log.d(LOG_TAG, "updatePager(visiblePosition=$visiblePosition)")
+      rvQueue.postDelayed(300) { updatePager("updatePagerDelayed: visiblePosition < 0") }
       return
     }
 
@@ -256,6 +262,7 @@ class PlayerFragment : DaggerFragment() {
     Log.v(
       LOG_TAG,
       "updatePager(" +
+          "calledFrom=$caller, " +
           "visiblePosition=$visiblePosition, " +
           "visibleId=$visibleId, " +
           "queuePosition=$queuePosition, " +
@@ -264,22 +271,24 @@ class PlayerFragment : DaggerFragment() {
     )
 
     if (scrollState == RecyclerView.SCROLL_STATE_IDLE) {
-      if (queuePosition > RecyclerView.NO_POSITION && visibleId != queueId) {
-        if (abs(queuePosition - visiblePosition) > 1) {
-          rvQueue.scrollToPosition(queuePosition)
-        } else {
-          rvQueue.smoothScrollToPosition(queuePosition)
+      when {
+        visibleId == queueId ->
+          // Make RecyclerView visible (no need to scroll)
+          showRecyclerView()
+        queuePosition == RecyclerView.NO_POSITION ->
+          // Try again after the adapter settles?
+          rvQueue.postDelayed(300) { updatePager("updatePagerDelayed: SCROLL_STATE_IDLE") }
+        else -> {
+          // Scroll to now playing song
+          showRecyclerView()
+          if (abs(queuePosition - visiblePosition) > 1) {
+            Log.i(LOG_TAG, "Scroll to position: $visiblePosition -> $queuePosition")
+            rvQueue.scrollToPosition(queuePosition)
+          } else {
+            Log.i(LOG_TAG, "Smooth scroll to position: $visiblePosition -> $queuePosition")
+            rvQueue.smoothScrollToPosition(queuePosition)
+          }
         }
-        // Make view visible
-        ViewCompat.animate(rvQueue)
-          .alpha(1f)
-          .setDuration(context?.resources?.getInteger(R.integer.preferredAnimationDuration)?.toLong() ?: 300L)
-          .withEndAction { imgCoverArt?.alpha = 0.0f }
-          .start()
-      } else if (queuePosition == RecyclerView.NO_POSITION) {
-        // Try again after the adapter settles?
-        Log.v(LOG_TAG, "updatePager() DELAY CHANGE")
-        rvQueue.postDelayed(300) { updatePager() }
       }
     }
   }
@@ -294,6 +303,16 @@ class PlayerFragment : DaggerFragment() {
       val currentPosition = snapHelper.findSnapPosition(rvQueue.layoutManager)
       rvQueue.smoothScrollToPosition(currentPosition + 1)
     }
+  }
+
+  private fun showRecyclerView() {
+    if (rvQueue.alpha < 1f)
+      ViewCompat.animate(rvQueue)
+        .alpha(1f)
+        .setDuration(context?.resources?.getInteger(R.integer.preferredAnimationDuration)?.toLong() ?: 300L)
+        .withStartAction { Log.i(LOG_TAG, "Making RecyclerView visible...") }
+        .withEndAction { imgCoverArt?.alpha = 0.0f }
+        .start()
   }
 
   private fun applyTheme(it: Theme) {
