@@ -30,27 +30,29 @@
       android:id="@+id/imgCoverArt"
       android:layout_width="0dp"
       android:layout_height="0dp"
+      android:layout_marginBottom="16dp"
       android:contentDescription="@string/contentDescription_coverArt"
       android:scaleType="centerCrop"
       android:transitionName="coverArt"
+      app:layout_constraintBottom_toTopOf="@+id/sbSongProgress"
       app:layout_constraintDimensionRatio="1:1"
-      app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toTopOf="parent"
-      tools:src="@drawable/placeholder_cover_art" />
+      tools:src="@tools:sample/avatars[5]" />
 
     <androidx.recyclerview.widget.RecyclerView
       android:id="@+id/rvQueue"
       android:layout_width="0dp"
       android:layout_height="0dp"
       android:alpha="0.0"
-      app:layout_constraintBottom_toTopOf="@+id/sbSongProgress"
+      app:layout_constraintBottom_toBottomOf="@id/imgCoverArt"
       app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toTopOf="parent"
+      app:layout_constraintStart_toStartOf="@id/imgCoverArt"
+      app:layout_constraintTop_toTopOf="@id/imgCoverArt"
+      tools:alpha="1.0"
       tools:listitem="@layout/list_item_queue" />
 
-    <!-- Make sure Toolbar is above the Cover Art -->
+    <!--&lt;!&ndash; Make sure Toolbar is above the Cover Art &ndash;&gt;-->
 
     <androidx.appcompat.widget.Toolbar
       android:id="@+id/playerToolbar"
@@ -71,7 +73,9 @@
       android:id="@+id/sbSongProgress"
       android:layout_width="0dp"
       android:layout_height="wrap_content"
-      android:layout_marginBottom="32dp"
+      android:layout_marginStart="8dp"
+      android:layout_marginEnd="8dp"
+      android:layout_marginBottom="16dp"
       android:enabled="false"
       android:max="@{viewModel.duration}"
       android:onProgressChanged="@{(seekBar, progress, fromUser) -> viewModel.onSeek(progress, fromUser)}"
@@ -81,34 +85,35 @@
       android:progressBackgroundTint="@{foregroundColor}"
       android:progressTint="@{foregroundColor}"
       android:thumbTint="@{foregroundColor}"
-      app:layout_constraintBottom_toTopOf="@+id/btnPlayPause"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent" />
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toStartOf="@id/tvRemainingTime"
+      app:layout_constraintHorizontal_bias="0.5"
+      app:layout_constraintStart_toEndOf="@+id/tvElapsedTime" />
 
     <TextView
       android:id="@+id/tvElapsedTime"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_marginStart="16dp"
-      android:layout_marginTop="8dp"
       android:alpha="0.6"
       android:text="@{viewModel.elapsedTimeText}"
       android:textColor="@{foregroundColor}"
-      app:layout_constraintStart_toStartOf="@+id/sbSongProgress"
-      app:layout_constraintTop_toBottomOf="@+id/sbSongProgress"
+      app:layout_constraintBottom_toBottomOf="@id/sbSongProgress"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="@id/sbSongProgress"
       tools:text="01:23" />
 
     <TextView
       android:id="@+id/tvRemainingTime"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:layout_marginTop="8dp"
       android:layout_marginEnd="16dp"
       android:alpha="0.6"
       android:text="@{viewModel.remainingTimeText}"
       android:textColor="@{foregroundColor}"
-      app:layout_constraintEnd_toEndOf="@+id/sbSongProgress"
-      app:layout_constraintTop_toBottomOf="@+id/sbSongProgress"
+      app:layout_constraintBottom_toBottomOf="@id/sbSongProgress"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintTop_toTopOf="@id/sbSongProgress"
       tools:text="-02:11" />
 
     <TextView
@@ -135,8 +140,8 @@
 
     <ImageButton
       android:id="@+id/btnShuffle"
-      android:layout_width="32dp"
-      android:layout_height="32dp"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
       android:layout_marginStart="16dp"
       android:background="?attr/selectableItemBackgroundBorderless"
       android:contentDescription="@string/player_toggleShuffle"
@@ -144,10 +149,10 @@
       android:src="@{viewModel.shuffleDrawableRes}"
       android:tint="@{foregroundColor}"
       app:layout_constraintBottom_toBottomOf="@+id/btnPlayPause"
-      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintStart_toEndOf="@+id/imgCoverArt"
       app:layout_constraintTop_toTopOf="@+id/btnPlayPause"
       app:rippleColor="@{foregroundColor}"
-      tools:src="@drawable/ic_shuffle_none"
+      tools:src="@drawable/ic_shuffle_all"
       tools:tint="@android:color/white" />
 
     <ImageButton
@@ -178,7 +183,8 @@
       android:id="@+id/btnPlayPause"
       android:layout_width="72dp"
       android:layout_height="72dp"
-      android:layout_marginBottom="32dp"
+      android:layout_marginTop="8dp"
+      android:layout_marginBottom="8dp"
       android:background="@drawable/media_button_background"
       android:backgroundTint="@{foregroundColor}"
       android:contentDescription="@string/mediaControl_playPause"
@@ -193,8 +199,10 @@
       app:layout_constraintEnd_toStartOf="@+id/btnNext"
       app:layout_constraintHorizontal_bias="0.5"
       app:layout_constraintStart_toEndOf="@+id/btnPrevious"
+      app:layout_constraintTop_toTopOf="parent"
+      app:layout_constraintVertical_bias="0.7"
       app:rippleColor="@{backgroundColor}"
-      tools:src="@android:drawable/ic_media_play" />
+      app:srcCompat="@android:drawable/ic_media_play" />
 
     <ImageButton
       android:id="@+id/btnNext"
@@ -221,8 +229,8 @@
 
     <ImageButton
       android:id="@+id/btnRepeat"
-      android:layout_width="32dp"
-      android:layout_height="32dp"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
       android:layout_marginEnd="16dp"
       android:background="?attr/selectableItemBackgroundBorderless"
       android:contentDescription="@string/player_toggleRepeat"
@@ -233,8 +241,9 @@
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintTop_toTopOf="@+id/btnPlayPause"
       app:rippleColor="@{foregroundColor}"
-      tools:src="@drawable/ic_repeat_none"
+      tools:src="@drawable/ic_repeat_all"
       tools:tint="@android:color/white" />
 
   </androidx.constraintlayout.widget.ConstraintLayout>
+
 </layout>
