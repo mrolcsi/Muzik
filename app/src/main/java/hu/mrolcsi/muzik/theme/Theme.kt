@@ -19,6 +19,7 @@ data class Theme(
   @SerializedName("tertiaryBackgroundColor") val tertiaryBackgroundColor: Int,
   @SerializedName("tertiaryForegroundColor") val tertiaryForegroundColor: Int,
 
+  @Deprecated("use primaryBackgroundColor")
   @SerializedName("statusBarColor") var statusBarColor: Int = Color.TRANSPARENT
 ) {
 

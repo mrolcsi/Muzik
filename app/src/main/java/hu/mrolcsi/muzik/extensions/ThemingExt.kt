@@ -9,7 +9,7 @@ const val DISABLED_ALPHA = 0.5f
 const val DISABLED_OPACITY = (255 * DISABLED_ALPHA).toInt()
 
 fun Activity.applyStatusBarColor(color: Int) {
-  window?.statusBarColor = color
+//  window?.statusBarColor = color
 
   if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
     window?.decorView?.apply {
@@ -27,7 +27,7 @@ fun Activity.applyStatusBarColor(color: Int) {
 }
 
 fun Activity.applyNavigationBarColor(color: Int) {
-  window?.navigationBarColor = color
+//  window?.navigationBarColor = color
 
   if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
     window?.decorView?.apply {

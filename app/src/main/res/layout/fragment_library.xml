@@ -14,59 +14,27 @@
     android:id="@+id/libraryRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:animateLayoutChanges="true"
     android:background="@{theme.secondaryBackgroundColor}"
-    android:fitsSystemWindows="true"
     android:orientation="vertical"
     tools:context=".library.LibraryFragment">
 
-    <androidx.coordinatorlayout.widget.CoordinatorLayout
+    <fragment
+      android:id="@+id/libraryNavHost"
+      android:name="androidx.navigation.fragment.NavHostFragment"
       android:layout_width="0dp"
       android:layout_height="0dp"
-      android:fitsSystemWindows="true"
+      app:defaultNavHost="true"
       app:layout_constraintBottom_toTopOf="@+id/miniPlayer"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toTopOf="parent"
-      tools:context=".MainActivity">
-
-      <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/appBar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:stateListAnimator="@animator/appbar_elevation"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
-
-        <com.google.android.material.appbar.MaterialToolbar
-          android:id="@+id/libraryToolbar"
-          android:layout_width="match_parent"
-          android:layout_height="?attr/actionBarSize"
-          android:background="@{theme.primaryBackgroundColor}"
-          app:iconTint="@{theme.primaryForegroundColor}"
-          app:layout_scrollFlags="scroll|enterAlways|snap"
-          app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-          app:subtitleTextColor="@{theme.primaryForegroundColor}"
-          app:titleTextColor="@{theme.primaryForegroundColor}" />
-
-      </com.google.android.material.appbar.AppBarLayout>
-
-      <fragment
-        android:id="@+id/libraryNavHost"
-        android:name="androidx.navigation.fragment.NavHostFragment"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:defaultNavHost="true"
-        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
-        app:navGraph="@navigation/library_navigation" />
-
-    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+      app:navGraph="@navigation/library_navigation" />
 
     <fragment
       android:id="@+id/miniPlayer"
       android:name="hu.mrolcsi.muzik.library.miniplayer.MiniPlayerFragment"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:fitsSystemWindows="true"
       app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"

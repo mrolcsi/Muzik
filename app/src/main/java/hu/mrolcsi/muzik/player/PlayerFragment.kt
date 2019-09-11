@@ -1,8 +1,11 @@
 package hu.mrolcsi.muzik.player
 
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.util.Log
+import android.view.GestureDetector
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.graphics.ColorUtils
@@ -16,9 +19,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.transition.Transition
 import androidx.transition.TransitionInflater
-import androidx.transition.TransitionListenerAdapter
 import dagger.android.support.DaggerFragment
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.pager.PagerSnapHelperVerbose
@@ -29,8 +30,6 @@ import hu.mrolcsi.muzik.common.view.MVVMListAdapter
 import hu.mrolcsi.muzik.common.viewmodel.observeAndRunNavCommands
 import hu.mrolcsi.muzik.common.viewmodel.observeAndRunUiCommands
 import hu.mrolcsi.muzik.databinding.FragmentPlayerBinding
-import hu.mrolcsi.muzik.extensions.applyNavigationBarColor
-import hu.mrolcsi.muzik.extensions.applyStatusBarColor
 import hu.mrolcsi.muzik.theme.Theme
 import hu.mrolcsi.muzik.theme.ThemeService
 import kotlinx.android.synthetic.main.content_player.*
@@ -53,6 +52,30 @@ class PlayerFragment : DaggerFragment() {
     itemIdSelector = { it.queueItem.queueId },
     viewHolderFactory = { parent, _ -> QueueItemHolder(parent) }
   )
+
+  // Gesture Detection
+  private val mGestureDetector by lazy {
+    GestureDetector(requireContext(), object : GestureDetector.SimpleOnGestureListener() {
+
+      private val SWIPE_THRESHOLD = 100
+      private val SWIPE_VELOCITY_THRESHOLD = 100
+
+      override fun onFling(e1: MotionEvent, e2: MotionEvent, velocityX: Float, velocityY: Float): Boolean {
+        val diffY = e2.y - e1.y
+        val diffX = e2.x - e1.x
+        if (abs(diffX) < abs(diffY)) {
+          if (abs(diffY) > SWIPE_THRESHOLD && abs(velocityY) > SWIPE_VELOCITY_THRESHOLD) {
+            if (diffY > 0) {
+              // onSwipeDown
+              activity?.onBackPressed()
+              return true
+            }
+          }
+        }
+        return false
+      }
+    })
+  }
 
   //region LIFECYCLE
 
@@ -94,27 +117,11 @@ class PlayerFragment : DaggerFragment() {
       .inflateTransition(R.transition.slide_bottom)
       .setDuration(animationDuration)
       .excludeTarget(imgCoverArt, true)
-      .onTransitionEnd {
-        Log.v(LOG_TAG, "enterTransition.onTransitionEnd()")
-        context?.let {
-          viewModel.currentTheme.value?.let { theme ->
-            activity?.applyStatusBarColor(theme.statusBarColor)
-          }
-        }
-      }
 
     returnTransition = transitionInflater
       .inflateTransition(R.transition.slide_bottom)
       .setDuration(animationDuration)
       .excludeTarget(imgCoverArt, true)
-      .onTransitionEnd {
-        Log.v(LOG_TAG, "returnTransition.onTransitionStart()")
-        context?.let {
-          viewModel.currentTheme.value?.let { theme ->
-            activity?.applyStatusBarColor(theme.primaryBackgroundColor)
-          }
-        }
-      }
 
     sharedElementEnterTransition = transitionInflater
       .inflateTransition(android.R.transition.move)
@@ -123,13 +130,6 @@ class PlayerFragment : DaggerFragment() {
     sharedElementReturnTransition = transitionInflater
       .inflateTransition(android.R.transition.move)
       .setDuration(animationDuration)
-
-    if (savedInstanceState != null) {
-      // Re-apply status bar color after rotation
-      viewModel.currentTheme.value?.let { theme ->
-        activity?.applyStatusBarColor(theme.statusBarColor)
-      }
-    }
   }
 
   override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
@@ -149,12 +149,13 @@ class PlayerFragment : DaggerFragment() {
 
   private fun setupToolbar() {
     playerToolbar.run {
-      setupWithNavController(findNavController())
+      setupWithNavController(findNavController(), drawerLayout)
+      setNavigationIcon(R.drawable.ic_chevron_down)
 
       setOnMenuItemClickListener { item ->
         when (item?.itemId) {
           R.id.menuPlaylist -> {
-            drawer_layout.openDrawer(GravityCompat.END)
+            drawerLayout.openDrawer(GravityCompat.END)
             true
           }
           else -> super.onOptionsItemSelected(item)
@@ -171,6 +172,10 @@ class PlayerFragment : DaggerFragment() {
       doOnNextLayout {
         // This could be more sophisticated
         it.postDelayed(500) { updatePager("setupPagerWithDelay") }
+      }
+
+      setOnTouchListener { v, event ->
+        mGestureDetector.onTouchEvent(event) || v.onTouchEvent(event)
       }
     }
 
@@ -207,15 +212,8 @@ class PlayerFragment : DaggerFragment() {
 
             binding.backgroundColor = backgroundColor
             binding.foregroundColor = foregroundColor
-            activity?.applyNavigationBarColor(backgroundColor)
+            activity?.window?.setBackgroundDrawable(ColorDrawable(backgroundColor))
 
-            val statusBarColor = ColorUtils.blendARGB(
-              leftTheme.statusBarColor,
-              rightTheme.statusBarColor,
-              ratio
-            )
-
-            activity?.applyStatusBarColor(statusBarColor)
           }
         }
       }
@@ -317,18 +315,9 @@ class PlayerFragment : DaggerFragment() {
 
   private fun applyTheme(it: Theme) {
     Log.d(LOG_TAG, "Apply theme: $it")
-    activity?.applyStatusBarColor(it.statusBarColor)
-    activity?.applyNavigationBarColor(it.primaryBackgroundColor)
     binding.backgroundColor = it.primaryBackgroundColor
     binding.foregroundColor = it.primaryForegroundColor
   }
-
-  private fun Transition.onTransitionEnd(listener: (Transition) -> Unit) =
-    addListener(object : TransitionListenerAdapter() {
-      override fun onTransitionEnd(transition: Transition) {
-        listener.invoke(transition)
-      }
-    })
 
   companion object {
     private const val LOG_TAG = "PlayerFragment"

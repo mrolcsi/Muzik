@@ -8,6 +8,7 @@ import android.support.v4.media.MediaDescriptionCompat
 import android.view.View
 import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
+import androidx.databinding.library.baseAdapters.BR
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import com.google.android.exoplayer2.util.Log
@@ -31,7 +32,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.subjects.PublishSubject
 import javax.inject.Inject
-import kotlin.properties.Delegates
 
 class ArtistDetailsViewModelImpl @Inject constructor(
   context: Context,
@@ -46,21 +46,23 @@ class ArtistDetailsViewModelImpl @Inject constructor(
   ThemedViewModel by themedViewModel,
   ArtistDetailsViewModel {
 
-  override var artistItem: MediaItem? by Delegates.observable(null) { _, old: MediaItem?, new: MediaItem? ->
-    if (old != new && new != null) {
-      artistSubject.onNext(new)
-    }
-  }
-
   private val artistSubject = PublishSubject.create<MediaItem>()
 
   override val artistSongs = MutableLiveData<List<MediaItem>>()
 
   override val artistAlbums = MutableLiveData<List<MediaItem>>()
 
+  override var artistName: String? by boundStringOrNull(BR.artistName)
+
   override val artistPicture = MutableLiveData<Uri>()
 
+  override var isAlbumsVisible: Boolean by boundBoolean(BR.albumsVisible, false)
+
   private var songDescriptions: List<MediaDescriptionCompat>? = null
+
+  override fun setArguments(artistItem: MediaItem) {
+    artistSubject.onNext(artistItem)
+  }
 
   override fun onAlbumClick(albumItem: MediaItem, transitionedView: View) {
     if (albumItem.description.type == MediaType.MEDIA_ALBUM) {
@@ -78,7 +80,7 @@ class ArtistDetailsViewModelImpl @Inject constructor(
 
   override fun onSongClick(songItem: MediaItem, position: Int) {
 
-    artistItem?.description?.artist?.let { mediaService.setQueueTitle(it) }
+    artistName?.let { mediaService.setQueueTitle(it) }
 
     if (songItem.description.type == MediaType.MEDIA_OTHER) {
       songDescriptions?.let { mediaService.playAllShuffled(it) }
@@ -100,12 +102,14 @@ class ArtistDetailsViewModelImpl @Inject constructor(
   init {
     val publishedArtistSubject = artistSubject
       .filter { it.mediaId != null }
+      .doOnNext { artistName = it.description.artist }
       .observeOn(AndroidSchedulers.mainThread())
       .publish()
 
     // Get Albums
     publishedArtistSubject
       .switchMap { mediaRepo.getAlbumsByArtist(it.description.id) }
+      .doOnNext { isAlbumsVisible = it.isNotEmpty() }
       .subscribeBy(
         onNext = { artistAlbums.value = it },
         onError = { showError(this, it) }

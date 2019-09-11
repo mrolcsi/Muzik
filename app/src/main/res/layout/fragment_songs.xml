@@ -23,6 +23,7 @@
       app:bubbleSize="small"
       app:bubbleTextColor="@{theme.secondaryBackgroundColor}"
       app:dividerColor="@{theme.secondaryForegroundColor}"
+      app:dividerDrawable="@{@drawable/list_divider_inset}"
       app:handleColor="@{theme.secondaryForegroundColor}"
       app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
       app:showBubble="true"
@@ -32,5 +33,21 @@
       tools:listitem="@layout/list_item_song" />
 
   </FrameLayout>
+
+  <!--    <com.google.android.material.floatingactionbutton.FloatingActionButton-->
+  <!--      android:id="@+id/fabShuffleAll"-->
+  <!--      style="@style/Widget.MaterialComponents.FloatingActionButton"-->
+  <!--      android:layout_width="wrap_content"-->
+  <!--      android:layout_height="wrap_content"-->
+  <!--      android:layout_marginEnd="16dp"-->
+  <!--      android:layout_marginBottom="128dp"-->
+  <!--      android:backgroundTint="@{theme.primaryBackgroundColor}"-->
+  <!--      android:contentDescription="@string/mediaControl_shuffleAll"-->
+  <!--      android:onClick="@{() -> viewModel.onShuffleAllClicked()}"-->
+  <!--      android:tint="@{theme.primaryForegroundColor}"-->
+  <!--      app:layout_anchor="@id/rvSongs"-->
+  <!--      app:layout_anchorGravity="bottom|end"-->
+  <!--      app:rippleColor="@{theme.primaryForegroundColor}"-->
+  <!--      app:srcCompat="@drawable/ic_shuffle_all" />-->
 
 </layout>

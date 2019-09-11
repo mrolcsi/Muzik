@@ -6,7 +6,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.ViewCompat
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import androidx.navigation.ui.setupWithNavController
 import androidx.transition.TransitionInflater
 import dagger.android.support.DaggerFragment
 import hu.mrolcsi.muzik.R
@@ -123,5 +125,7 @@ class AlbumDetailsFragment : DaggerFragment() {
     rvSongs.adapter = songsAdapter
 
     ViewCompat.setTransitionName(imgCoverArt, args.transitionName)
+
+    albumDetailsToolbar.setupWithNavController(findNavController())
   }
 }

@@ -8,6 +8,8 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.ui.setupWithNavController
 import dagger.android.support.DaggerFragment
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.databinding.FragmentLibraryPagerBinding
@@ -30,6 +32,7 @@ class LibraryPagerFragment : DaggerFragment() {
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     libraryPager.adapter = LibraryPagerAdapter(requireContext(), childFragmentManager)
     libraryTabs.setupWithViewPager(libraryPager)
+    libraryPagerToolbar.setupWithNavController(findNavController())
   }
 
   class LibraryPagerAdapter(private val context: Context, fm: FragmentManager) :

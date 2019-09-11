@@ -6,6 +6,10 @@
   <data>
 
     <variable
+      name="viewModel"
+      type="hu.mrolcsi.muzik.library.artists.details.ArtistDetailsViewModel" />
+
+    <variable
       name="theme"
       type="androidx.lifecycle.LiveData&lt;hu.mrolcsi.muzik.theme.Theme&gt;" />
   </data>
@@ -58,6 +62,7 @@
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       app:constraint_referenced_ids="imgAlbums,lblAlbums,dividerAlbums,rvAlbums"
+      app:visibility="@{viewModel.albumsVisible}"
       tools:layout_editor_absoluteY="8dp" />
 
     <androidx.recyclerview.widget.RecyclerView
@@ -116,6 +121,7 @@
       android:nestedScrollingEnabled="true"
       android:orientation="vertical"
       app:dividerColor="@{theme.secondaryForegroundColor}"
+      app:dividerDrawable="@{@drawable/list_divider_inset}"
       app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
       app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintEnd_toEndOf="parent"

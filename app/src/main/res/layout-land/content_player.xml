@@ -54,14 +54,12 @@
 
     <!--&lt;!&ndash; Make sure Toolbar is above the Cover Art &ndash;&gt;-->
 
-    <androidx.appcompat.widget.Toolbar
+    <com.google.android.material.appbar.MaterialToolbar
       android:id="@+id/playerToolbar"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:elevation="@dimen/action_bar_elevation"
       android:minHeight="?attr/actionBarSize"
       android:theme="?attr/actionBarTheme"
-      app:elevation="@dimen/action_bar_elevation"
       app:iconTint="@{foregroundColor}"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
@@ -95,7 +93,7 @@
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_marginStart="16dp"
-      android:alpha="0.6"
+      android:alpha="0.68"
       android:text="@{viewModel.elapsedTimeText}"
       android:textColor="@{foregroundColor}"
       app:layout_constraintBottom_toBottomOf="@id/sbSongProgress"
@@ -108,7 +106,7 @@
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_marginEnd="16dp"
-      android:alpha="0.6"
+      android:alpha="0.8"
       android:text="@{viewModel.remainingTimeText}"
       android:textColor="@{foregroundColor}"
       app:layout_constraintBottom_toBottomOf="@id/sbSongProgress"

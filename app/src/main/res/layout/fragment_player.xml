@@ -19,9 +19,10 @@
   </data>
 
   <androidx.drawerlayout.widget.DrawerLayout
-    android:id="@+id/drawer_layout"
+    android:id="@+id/drawerLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     tools:openDrawer="end">
 
     <!-- Layout to contain contents of main body of screen (drawer will slide over this) -->
@@ -29,6 +30,7 @@
       android:id="@+id/content_player"
       layout="@layout/content_player"
       android:layout_width="match_parent"
+      android:fitsSystemWindows="true"
       android:layout_height="match_parent"
       app:backgroundColor="@{backgroundColor}"
       app:foregroundColor="@{foregroundColor}"
@@ -40,8 +42,8 @@
       android:name="hu.mrolcsi.muzik.player.playlist.PlaylistFragment"
       android:layout_width="@dimen/navigation_drawer_width"
       android:layout_height="match_parent"
-      android:layout_gravity="end"
       android:fitsSystemWindows="true"
+      android:layout_gravity="end"
       tools:layout="@layout/fragment_playlist" />
 
   </androidx.drawerlayout.widget.DrawerLayout>

@@ -24,6 +24,7 @@
     android:layout_height="match_parent"
     android:animateLayoutChanges="true"
     android:background="@{backgroundColor}"
+    android:fitsSystemWindows="true"
     tools:context=".player.PlayerFragment">
 
     <ImageView
@@ -31,6 +32,7 @@
       android:layout_width="0dp"
       android:layout_height="0dp"
       android:contentDescription="@string/contentDescription_coverArt"
+      android:fitsSystemWindows="true"
       android:scaleType="centerCrop"
       android:transitionName="coverArt"
       app:layout_constraintDimensionRatio="1:1"
@@ -44,6 +46,7 @@
       android:layout_width="0dp"
       android:layout_height="0dp"
       android:alpha="0.0"
+      android:fitsSystemWindows="true"
       app:layout_constraintBottom_toTopOf="@+id/sbSongProgress"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
@@ -52,14 +55,11 @@
 
     <!-- Make sure Toolbar is above the Cover Art -->
 
-    <androidx.appcompat.widget.Toolbar
+    <com.google.android.material.appbar.MaterialToolbar
       android:id="@+id/playerToolbar"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:elevation="@dimen/action_bar_elevation"
       android:minHeight="?attr/actionBarSize"
-      android:theme="?attr/actionBarTheme"
-      app:elevation="@dimen/action_bar_elevation"
       app:iconTint="@{foregroundColor}"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
@@ -91,7 +91,7 @@
       android:layout_height="wrap_content"
       android:layout_marginStart="16dp"
       android:layout_marginTop="8dp"
-      android:alpha="0.6"
+      android:alpha="0.8"
       android:text="@{viewModel.elapsedTimeText}"
       android:textColor="@{foregroundColor}"
       app:layout_constraintStart_toStartOf="@+id/sbSongProgress"
@@ -104,7 +104,7 @@
       android:layout_height="wrap_content"
       android:layout_marginTop="8dp"
       android:layout_marginEnd="16dp"
-      android:alpha="0.6"
+      android:alpha="0.8"
       android:text="@{viewModel.remainingTimeText}"
       android:textColor="@{foregroundColor}"
       app:layout_constraintEnd_toEndOf="@+id/sbSongProgress"

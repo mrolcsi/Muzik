@@ -55,7 +55,7 @@ class MainActivity : AppCompatActivity() {
           permission.granted -> createNavHost()
           else -> groupPermissionHint.visibility = View.VISIBLE
         }
-    }
+      }
   }
 
   private fun createNavHost() {
@@ -64,7 +64,7 @@ class MainActivity : AppCompatActivity() {
     // enable navigation
     val finalHost = NavHostFragment.create(R.navigation.main_navigation)
     supportFragmentManager.beginTransaction()
-      .replace(R.id.main_nav_host, finalHost)
+      .replace(R.id.mainNavHost, finalHost)
       .setPrimaryNavigationFragment(finalHost)
       .runOnCommit { groupPermissionHint.visibility = View.GONE }
       .commit()

@@ -17,9 +17,10 @@
   <androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@{theme.primaryBackgroundColor}">
+    android:background="@{theme.primaryBackgroundColor}"
+    android:fitsSystemWindows="true">
 
-    <androidx.appcompat.widget.Toolbar
+    <com.google.android.material.appbar.MaterialToolbar
       android:id="@+id/playlistToolbar"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
@@ -37,6 +38,7 @@
       android:layout_height="0dp"
       android:orientation="vertical"
       app:dividerColor="@{theme.primaryForegroundColor}"
+      app:dividerDrawable="@{@drawable/list_divider_inset}"
       app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
       app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintEnd_toEndOf="parent"

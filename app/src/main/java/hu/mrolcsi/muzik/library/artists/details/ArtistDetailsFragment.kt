@@ -1,17 +1,18 @@
 package hu.mrolcsi.muzik.library.artists.details
 
 import android.os.Bundle
-import android.support.v4.media.MediaBrowserCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import androidx.navigation.ui.setupWithNavController
 import androidx.recyclerview.widget.RecyclerView
 import dagger.android.support.DaggerFragment
 import hu.mrolcsi.muzik.common.MediaItemListAdapter
 import hu.mrolcsi.muzik.common.glide.GlideApp
+import hu.mrolcsi.muzik.common.glide.onLoadFailed
 import hu.mrolcsi.muzik.common.glide.onResourceReady
 import hu.mrolcsi.muzik.common.viewmodel.observeAndRunNavCommands
 import hu.mrolcsi.muzik.common.viewmodel.observeAndRunUiCommands
@@ -80,21 +81,16 @@ class ArtistDetailsFragment : DaggerFragment() {
       requireContext().observeAndRunUiCommands(viewLifecycleOwner, this)
       findNavController().observeAndRunNavCommands(viewLifecycleOwner, this)
 
-      artistItem = args.artistItem
-      artistItem?.let { loadHeader(it) }
+      setArguments(args.artistItem)
 
-      artistAlbums.observe(viewLifecycleOwner, Observer {
-        // Hide Albums section when list is empty
-        albumsGroup?.visibility = if (it.isEmpty()) View.GONE else View.VISIBLE
-
-        albumsAdapter.submitList(it)
-      })
-      artistSongs.observe(viewLifecycleOwner, Observer(songsAdapter::submitList))
+      artistAlbums.observe(viewLifecycleOwner, albumsAdapter)
+      artistSongs.observe(viewLifecycleOwner, songsAdapter)
 
       artistPicture.observe(viewLifecycleOwner, Observer { uri ->
         GlideApp.with(this@ArtistDetailsFragment)
           .asBitmap()
           .load(uri)
+          .onLoadFailed { appBar.setExpanded(false); false }
           .onResourceReady { appBar.setExpanded(true, true) }
           .into(imgArtist)
       })
@@ -103,6 +99,7 @@ class ArtistDetailsFragment : DaggerFragment() {
 
   override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) =
     FragmentArtistDetailsBinding.inflate(inflater, container, false).also {
+      it.viewModel = viewModel
       it.theme = viewModel.currentTheme
       it.lifecycleOwner = viewLifecycleOwner
     }.root
@@ -110,10 +107,7 @@ class ArtistDetailsFragment : DaggerFragment() {
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     rvAlbums.adapter = albumsAdapter
     rvSongs.adapter = songsAdapter
-  }
-
-  private fun loadHeader(artistItem: MediaBrowserCompat.MediaItem) {
-    collapsingToolbar.title = artistItem.description.title
+    collapsingToolbar.setupWithNavController(artistDetailsToolbar, findNavController())
   }
 
 }

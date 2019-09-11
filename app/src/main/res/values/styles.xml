@@ -1,31 +1,18 @@
 <resources>
 
   <!-- Base application theme. -->
-  <style name="FluxTheme"
-    parent="Theme.MaterialComponents.NoActionBar">
-    <item name="windowActionBar">false</item>
-    <item name="android:windowActionBar">false</item>
-    <item name="windowNoTitle">true</item>
-    <item name="android:windowNoTitle">true</item>
-
-    <item name="android:colorAccent">@color/primaryColor</item>
-    <item name="android:colorBackground">@color/backgroundColor</item>
-    <item name="android:colorButtonNormal">@color/primaryColor</item>
-    <item name="android:colorControlHighlight">@android:color/white</item>
-    <item name="android:colorPrimary">@color/primaryColor</item>
-    <item name="android:colorPrimaryDark">@color/primaryDarkColor</item>
-
-    <item name="android:navigationBarColor">@android:color/transparent</item>
-    <item name="android:statusBarColor">@android:color/transparent</item>
-    <item name="android:windowBackground">@android:color/transparent</item>
-
-    <item name="android:windowContentTransitions">true</item>
-
+  <style name="FluxTheme" parent="Theme.MaterialComponents.NoActionBar">
     <item name="colorAccent">@color/primaryColor</item>
     <item name="colorButtonNormal">@color/primaryColor</item>
     <item name="colorControlHighlight">@android:color/white</item>
     <item name="colorPrimary">@color/primaryColor</item>
-    <item name="colorPrimaryDark">@color/primaryDarkColor</item>
+    <item name="colorPrimaryDark">@android:color/transparent</item>
+
+    <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+    <item name="android:statusBarColor">@android:color/transparent</item>
+    <item name="android:navigationBarColor">@android:color/transparent</item>
+
+    <item name="android:windowContentTransitions">true</item>
 
     <item name="android:listDivider">@drawable/list_divider</item>
   </style>
