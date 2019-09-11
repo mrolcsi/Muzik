@@ -10,31 +10,18 @@ import hu.mrolcsi.muzik.common.ColoredDividerItemDecoration
 object RecyclerViewBindings {
 
   @JvmStatic
-  @BindingAdapter("showColoredDivider")
-  fun setShowColoredDivider(view: RecyclerView, showColoredDivider: Boolean) {
+  @BindingAdapter(value = ["showColoredDivider", "dividerColor", "dividerDrawable"], requireAll = false)
+  fun setShowColoredDivider(
+    view: RecyclerView,
+    showColoredDivider: Boolean, @ColorInt color: Int?,
+    drawable: Drawable?
+  ) {
     if (showColoredDivider) {
       for (i in 0 until view.itemDecorationCount) view.removeItemDecorationAt(i)
-      view.addItemDecoration(ColoredDividerItemDecoration(view.context, DividerItemDecoration.VERTICAL))
-    }
-  }
-
-  @JvmStatic
-  @BindingAdapter("dividerColor")
-  fun setDividerColor(view: RecyclerView, @ColorInt color: Int) {
-    for (i in 0 until view.itemDecorationCount) {
-      view.getItemDecorationAt(i).let {
-        (it as? ColoredDividerItemDecoration)?.setTint(color)
-      }
-    }
-  }
-
-  @JvmStatic
-  @BindingAdapter("dividerDrawable")
-  fun setDividerDrawable(view: RecyclerView, drawable: Drawable) {
-    for (i in 0 until view.itemDecorationCount) {
-      view.getItemDecorationAt(i).let {
-        (it as? ColoredDividerItemDecoration)?.setDrawable(drawable)
-      }
+      view.addItemDecoration(ColoredDividerItemDecoration(view.context, DividerItemDecoration.VERTICAL).apply {
+        drawable?.let { setDrawable(drawable) }
+        color?.let { setTint(it) }
+      })
     }
   }
 }
