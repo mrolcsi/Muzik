@@ -29,10 +29,9 @@
     <ImageView
       android:id="@+id/imgProtectionScrim"
       android:layout_width="match_parent"
-      android:layout_height="match_parent"
+      android:layout_height="?attr/listPreferredItemHeightLarge"
       android:layout_gravity="bottom"
       android:fitsSystemWindows="true"
-      android:maxHeight="?attr/listPreferredItemHeightLarge"
       android:tint="@{theme.secondaryBackgroundColor}"
       app:srcCompat="@drawable/protection_scrim"
       tools:ignore="ContentDescription"

@@ -13,6 +13,6 @@ interface AlbumsViewModel :
 
   var sortingMode: SortingMode
 
-  fun onAlbumClicked(albumItem: MediaBrowserCompat.MediaItem, transitionedView: View)
+  fun onAlbumClick(albumItem: MediaBrowserCompat.MediaItem, transitionedView: View)
 
 }

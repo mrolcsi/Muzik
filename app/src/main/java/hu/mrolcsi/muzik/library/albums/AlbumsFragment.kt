@@ -38,7 +38,7 @@ class AlbumsFragment : DaggerFragment() {
       ).apply {
         itemView.setOnClickListener { _ ->
           model?.let {
-            viewModel.onAlbumClicked(it, imgCoverArt)
+            viewModel.onAlbumClick(it, imgCoverArt)
           }
         }
       }

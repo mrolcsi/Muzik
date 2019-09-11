@@ -1,7 +1,6 @@
 package hu.mrolcsi.muzik.library.albums.details
 
 import android.content.Context
-import android.graphics.BitmapFactory
 import android.support.v4.media.MediaBrowserCompat.MediaItem
 import android.support.v4.media.MediaDescriptionCompat
 import androidx.core.os.bundleOf
@@ -25,7 +24,6 @@ import hu.mrolcsi.muzik.service.extensions.media.id
 import hu.mrolcsi.muzik.service.extensions.media.numberOfSongs
 import hu.mrolcsi.muzik.service.extensions.media.titleKey
 import hu.mrolcsi.muzik.service.extensions.media.trackNumber
-import hu.mrolcsi.muzik.service.extensions.media.type
 import hu.mrolcsi.muzik.theme.Theme
 import hu.mrolcsi.muzik.theme.ThemedViewModel
 import hu.mrolcsi.muzik.theme.ThemedViewModelImpl
@@ -69,24 +67,14 @@ class AlbumDetailsViewModelImpl @Inject constructor(
 
   override val albumTheme = MutableLiveData<Theme>()
 
-  private val shuffleAllItem = MediaItem(
-    MediaDescriptionCompat.Builder()
-      .setMediaId("shuffle/all")
-      .setTitle(context.getString(R.string.mediaControl_shuffleAll))
-      .setIconBitmap(BitmapFactory.decodeResource(context.resources, R.drawable.ic_shuffle_all))
-      .setExtras(bundleOf(MediaType.MEDIA_TYPE_KEY to MediaType.MEDIA_OTHER))
-      .build(),
-    0
-  )
-
   override fun onSongClick(songItem: MediaItem, position: Int) {
     albumItem?.description?.artist?.let { mediaService.setQueueTitle(it) }
+    songDescriptions?.let { mediaService.playAll(it, position - 2) }
+  }
 
-    if (songItem.description.type == MediaType.MEDIA_OTHER) {
-      songDescriptions?.let { mediaService.playAllShuffled(it) }
-    } else {
-      songDescriptions?.let { mediaService.playAll(it, position - 2) }
-    }
+  override fun onShuffleAllClick() {
+    albumItem?.description?.artist?.let { mediaService.setQueueTitle(it) }
+    songDescriptions?.let { mediaService.playAllShuffled(it) }
   }
 
   private var songDescriptions: List<MediaDescriptionCompat>? = null
@@ -99,7 +87,7 @@ class AlbumDetailsViewModelImpl @Inject constructor(
       .switchMap { mediaRepo.getSongsFromAlbum(it.description.id) }
       .map { songs -> songs.sortedBy { it.description.titleKey }.sortedBy { it.description.trackNumber } }
       .doOnNext { songs -> songDescriptions = songs.filter { it.isPlayable }.map { it.description } }
-      .map { it.addDiscIndicator().addShuffleAll() }
+      .map { it.addDiscIndicator() }
       .observeOn(AndroidSchedulers.mainThread())
       .subscribeBy(
         onNext = { items.value = it },
@@ -143,9 +131,5 @@ class AlbumDetailsViewModelImpl @Inject constructor(
         }
       }
     }
-  }.toList()
-
-  private fun List<MediaItem>.addShuffleAll(): List<MediaItem> = toMutableList().apply {
-    add(0, shuffleAllItem)
   }.toList()
 }

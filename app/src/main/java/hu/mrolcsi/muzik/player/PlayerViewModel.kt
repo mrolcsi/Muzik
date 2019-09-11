@@ -5,7 +5,7 @@ import android.support.v4.media.session.MediaSessionCompat
 import androidx.databinding.Bindable
 import androidx.lifecycle.LiveData
 import androidx.recyclerview.widget.DiffUtil
-import hu.mrolcsi.muzik.common.OnRepeatTouchListener
+import hu.mrolcsi.muzik.common.view.OnRepeatTouchListener
 import hu.mrolcsi.muzik.library.miniplayer.MiniPlayerViewModel
 import hu.mrolcsi.muzik.theme.Theme
 
@@ -23,8 +23,8 @@ interface PlayerViewModel : MiniPlayerViewModel {
   @get:Bindable
   val repeatDrawableRes: Int
 
-  fun onShuffleClicked()
-  fun onRepeatClicked()
+  fun onShuffleClick()
+  fun onRepeatClick()
 
   @get:Bindable
   val isSeekProgressVisible: Boolean

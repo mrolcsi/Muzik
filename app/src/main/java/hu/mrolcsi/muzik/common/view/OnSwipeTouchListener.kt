@@ -1,4 +1,4 @@
-package hu.mrolcsi.muzik.common
+package hu.mrolcsi.muzik.common.view
 
 import android.content.Context
 import android.view.GestureDetector

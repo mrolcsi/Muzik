@@ -25,6 +25,7 @@ class LibraryPagerFragment : DaggerFragment() {
 
   override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) =
     FragmentLibraryPagerBinding.inflate(inflater).also {
+      it.viewModel = viewModel
       it.theme = viewModel.currentTheme
       it.lifecycleOwner = viewLifecycleOwner
     }.root

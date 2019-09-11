@@ -64,7 +64,7 @@ open class MiniPlayerViewModelImpl @Inject constructor(
     }
   }
 
-  override fun onPreviousClicked() {
+  override fun onPreviousClick() {
     if (elapsedTime > 5) {
       // restart the song
       mediaService.seekTo(0)
@@ -73,11 +73,11 @@ open class MiniPlayerViewModelImpl @Inject constructor(
     }
   }
 
-  override fun onPlayPauseClicked() {
+  override fun onPlayPauseClick() {
     mediaService.playPause()
   }
 
-  override fun onNextClicked() {
+  override fun onNextClick() {
     mediaService.skipToNext()
   }
 

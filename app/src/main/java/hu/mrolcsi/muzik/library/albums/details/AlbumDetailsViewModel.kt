@@ -22,4 +22,6 @@ interface AlbumDetailsViewModel :
   val albumTheme: LiveData<Theme>
 
   fun onSongClick(songItem: MediaItem, position: Int)
+
+  fun onShuffleAllClick()
 }

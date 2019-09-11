@@ -12,6 +12,6 @@ interface SongsViewModel :
 
   var sortingMode: SortingMode
 
-  fun onSongClicked(songItem: MediaBrowserCompat.MediaItem, position: Int)
+  fun onSongClick(songItem: MediaBrowserCompat.MediaItem, position: Int)
 
 }

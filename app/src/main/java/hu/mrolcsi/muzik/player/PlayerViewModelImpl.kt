@@ -17,10 +17,10 @@ import androidx.databinding.library.baseAdapters.BR
 import androidx.lifecycle.MutableLiveData
 import com.bumptech.glide.request.target.Target
 import hu.mrolcsi.muzik.R
-import hu.mrolcsi.muzik.common.OnRepeatTouchListener
 import hu.mrolcsi.muzik.common.glide.GlideApp
 import hu.mrolcsi.muzik.common.glide.onResourceReady
 import hu.mrolcsi.muzik.common.glide.toSingle
+import hu.mrolcsi.muzik.common.view.OnRepeatTouchListener
 import hu.mrolcsi.muzik.common.viewmodel.ExecuteOnceNavCommandSource
 import hu.mrolcsi.muzik.common.viewmodel.ExecuteOnceUiCommandSource
 import hu.mrolcsi.muzik.common.viewmodel.ObservableImpl
@@ -67,12 +67,12 @@ class PlayerViewModelImpl @Inject constructor(
 
   private var userInitiatedChange = false
 
-  override fun onShuffleClicked() {
+  override fun onShuffleClick() {
     userInitiatedChange = true
     mediaService.toggleShuffle()
   }
 
-  override fun onRepeatClicked() {
+  override fun onRepeatClick() {
     userInitiatedChange = true
     mediaService.toggleRepeat()
   }

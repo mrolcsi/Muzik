@@ -40,7 +40,7 @@ class SongsFragment : DaggerFragment() {
       ).apply {
         itemView.setOnClickListener {
           model?.let {
-            viewModel.onSongClicked(it, adapterPosition)
+            viewModel.onSongClick(it, adapterPosition)
           }
         }
       }

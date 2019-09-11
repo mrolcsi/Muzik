@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.fragment.NavHostFragment
 import dagger.android.support.DaggerFragment
-import hu.mrolcsi.muzik.common.OnSwipeTouchListener
+import hu.mrolcsi.muzik.common.view.OnSwipeTouchListener
 import hu.mrolcsi.muzik.common.viewmodel.observeAndRunNavCommands
 import hu.mrolcsi.muzik.common.viewmodel.observeAndRunUiCommands
 import hu.mrolcsi.muzik.databinding.FragmentMiniplayerBinding

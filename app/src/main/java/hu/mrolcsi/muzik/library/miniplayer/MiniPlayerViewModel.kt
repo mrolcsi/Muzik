@@ -32,7 +32,7 @@ interface MiniPlayerViewModel : ThemedViewModel, Observable, UiCommandSource, Na
   val isNextEnabled: Boolean
 
   fun openPlayer(transitionedView: View)
-  fun onPreviousClicked()
-  fun onPlayPauseClicked()
-  fun onNextClicked()
+  fun onPreviousClick()
+  fun onPlayPauseClick()
+  fun onNextClick()
 }

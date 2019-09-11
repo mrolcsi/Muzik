@@ -1,4 +1,4 @@
-package hu.mrolcsi.muzik.common
+package hu.mrolcsi.muzik.common.viewmodel
 
 import androidx.lifecycle.Observer
 

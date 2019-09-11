@@ -61,9 +61,10 @@
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
+      android:id="@+id/nestedScrollView"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
-      app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
+      app:layout_behavior=".common.view.FabAwareScrollingViewBehavior">
 
       <include
         layout="@layout/fragment_artist_details_content"
@@ -71,6 +72,21 @@
         app:viewModel="@{viewModel}" />
 
     </androidx.core.widget.NestedScrollView>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+      android:id="@+id/fabShuffleAll"
+      style="@style/Widget.MaterialComponents.FloatingActionButton"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_gravity="bottom|end"
+      android:layout_marginEnd="16dp"
+      android:layout_marginBottom="16dp"
+      android:backgroundTint="@{theme.primaryBackgroundColor}"
+      android:contentDescription="@string/mediaControl_shuffleAll"
+      android:onClick="@{() -> viewModel.onShuffleAllClick()}"
+      android:tint="@{theme.primaryForegroundColor}"
+      app:rippleColor="@{theme.primaryForegroundColor}"
+      app:srcCompat="@drawable/ic_shuffle_all" />
 
   </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>

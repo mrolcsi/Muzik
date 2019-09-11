@@ -29,4 +29,6 @@ interface ArtistDetailsViewModel : ThemedViewModel, Observable, UiCommandSource,
   fun onAlbumClick(albumItem: MediaBrowserCompat.MediaItem, transitionedView: View)
 
   fun onSongClick(songItem: MediaBrowserCompat.MediaItem, position: Int)
+
+  fun onShuffleAllClick()
 }

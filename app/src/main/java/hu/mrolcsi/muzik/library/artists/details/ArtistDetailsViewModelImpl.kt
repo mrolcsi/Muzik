@@ -1,12 +1,10 @@
 package hu.mrolcsi.muzik.library.artists.details
 
 import android.content.Context
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.support.v4.media.MediaBrowserCompat.MediaItem
 import android.support.v4.media.MediaDescriptionCompat
 import android.view.View
-import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.databinding.library.baseAdapters.BR
 import androidx.lifecycle.MutableLiveData
@@ -79,25 +77,14 @@ class ArtistDetailsViewModelImpl @Inject constructor(
   }
 
   override fun onSongClick(songItem: MediaItem, position: Int) {
-
     artistName?.let { mediaService.setQueueTitle(it) }
-
-    if (songItem.description.type == MediaType.MEDIA_OTHER) {
-      songDescriptions?.let { mediaService.playAllShuffled(it) }
-    } else {
-      songDescriptions?.let { mediaService.playAll(it, position - 1) }
-    }
+    songDescriptions?.let { mediaService.playAll(it, position) }
   }
 
-  private val shuffleAllItem = MediaItem(
-    MediaDescriptionCompat.Builder()
-      .setMediaId("shuffle/all")
-      .setTitle(context.getString(R.string.mediaControl_shuffleAll))
-      .setIconBitmap(BitmapFactory.decodeResource(context.resources, R.drawable.ic_shuffle_all))
-      .setExtras(bundleOf(MediaType.MEDIA_TYPE_KEY to MediaType.MEDIA_OTHER))
-      .build(),
-    0
-  )
+  override fun onShuffleAllClick() {
+    artistName?.let { mediaService.setQueueTitle(it) }
+    songDescriptions?.let { mediaService.playAllShuffled(it) }
+  }
 
   init {
     val publishedArtistSubject = artistSubject
@@ -120,7 +107,6 @@ class ArtistDetailsViewModelImpl @Inject constructor(
       .switchMap { mediaRepo.getSongsByArtist(it.description.id) }
       .map { items -> items.sortedBy { it.description.titleKey } }
       .doOnNext { songs -> songDescriptions = songs.filter { it.isPlayable }.map { it.description } }
-      .map { it.toMutableList().apply { add(0, shuffleAllItem) }.toList() }
       .subscribeBy(
         onNext = { artistSongs.value = it },
         onError = { showError(this, it) }
