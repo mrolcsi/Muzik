@@ -69,7 +69,7 @@ class AlbumDetailsViewModelImpl @Inject constructor(
 
   override fun onSongClick(songItem: MediaItem, position: Int) {
     albumItem?.description?.artist?.let { mediaService.setQueueTitle(it) }
-    songDescriptions?.let { mediaService.playAll(it, position - 2) }
+    songDescriptions?.let { mediaService.playAll(it, position) }
   }
 
   override fun onShuffleAllClick() {
