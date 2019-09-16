@@ -25,11 +25,13 @@ class LibraryPagerViewModelImpl @Inject constructor(
   ThemedViewModel by themedViewModel,
   LibraryPagerViewModel {
 
-  private lateinit var songDescriptions: List<MediaDescriptionCompat>
+  private var songDescriptions: List<MediaDescriptionCompat>? = null
 
   override fun onShuffleAllClick() {
-    mediaService.setQueueTitle(context.getString(R.string.playlist_allSongs))
-    mediaService.playAllShuffled(songDescriptions)
+    songDescriptions?.let {
+      mediaService.setQueueTitle(context.getString(R.string.playlist_allSongs))
+      mediaService.playAllShuffled(it)
+    }
   }
 
   init {
