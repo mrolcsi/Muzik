@@ -42,14 +42,11 @@ class LibraryFragment : DaggerFragment() {
   private fun applyPrimaryBackgroundColor(color: Int) {
     Log.d(LOG_TAG, "Applying theme...")
 
-    // Window Background
-    activity?.window?.setBackgroundDrawable(ColorDrawable(color))
-
-    // Status Bar
-    activity?.applyStatusBarColor(color)
-
-    // Navigation
-    activity?.applyNavigationBarColor(color)
+    activity?.run {
+      window?.setBackgroundDrawable(ColorDrawable(color))
+      applyStatusBarColor(color)
+      applyNavigationBarColor(color)
+    }
   }
 
   companion object {

@@ -23,6 +23,7 @@ class QueueItemHolder(
   override var model: ThemedQueueItem? by Delegates.observable(null) { _, old: ThemedQueueItem?, new: ThemedQueueItem? ->
     if (old != new) {
       new?.let { bind(it) }
+      binding.executePendingBindings()
     }
   }
 

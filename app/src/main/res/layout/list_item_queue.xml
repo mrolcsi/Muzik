@@ -12,15 +12,15 @@
 
   <androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
-    android:fitsSystemWindows="true"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
 
     <ImageView
       android:id="@+id/imgCoverArt"
       android:layout_width="0dp"
-      android:fitsSystemWindows="true"
       android:layout_height="0dp"
       android:contentDescription="@string/contentDescription_coverArt"
+      android:fitsSystemWindows="true"
       android:scaleType="centerCrop"
       app:layout_constraintDimensionRatio="1:1"
       app:layout_constraintEnd_toEndOf="parent"

@@ -3,11 +3,10 @@ package hu.mrolcsi.muzik.player
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.util.Log
-import android.view.GestureDetector
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.ColorInt
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
@@ -32,7 +31,8 @@ import hu.mrolcsi.muzik.common.view.MVVMListAdapter
 import hu.mrolcsi.muzik.common.viewmodel.observeAndRunNavCommands
 import hu.mrolcsi.muzik.common.viewmodel.observeAndRunUiCommands
 import hu.mrolcsi.muzik.databinding.FragmentPlayerBinding
-import hu.mrolcsi.muzik.theme.Theme
+import hu.mrolcsi.muzik.extensions.applyNavigationBarColor
+import hu.mrolcsi.muzik.extensions.applyStatusBarColor
 import hu.mrolcsi.muzik.theme.ThemeService
 import kotlinx.android.synthetic.main.content_player.*
 import kotlinx.android.synthetic.main.fragment_player.*
@@ -54,30 +54,6 @@ class PlayerFragment : DaggerFragment() {
     itemIdSelector = { it.queueItem.queueId },
     viewHolderFactory = { parent, _ -> QueueItemHolder(parent) }
   )
-
-  // Gesture Detection
-  private val mGestureDetector by lazy {
-    GestureDetector(requireContext(), object : GestureDetector.SimpleOnGestureListener() {
-
-      private val SWIPE_THRESHOLD = 100
-      private val SWIPE_VELOCITY_THRESHOLD = 100
-
-      override fun onFling(e1: MotionEvent, e2: MotionEvent, velocityX: Float, velocityY: Float): Boolean {
-        val diffY = e2.y - e1.y
-        val diffX = e2.x - e1.x
-        if (abs(diffX) < abs(diffY)) {
-          if (abs(diffY) > SWIPE_THRESHOLD && abs(velocityY) > SWIPE_VELOCITY_THRESHOLD) {
-            if (diffY > 0) {
-              // onSwipeDown
-              activity?.onBackPressed()
-              return true
-            }
-          }
-        }
-        return false
-      }
-    })
-  }
 
   //region LIFECYCLE
 
@@ -176,10 +152,6 @@ class PlayerFragment : DaggerFragment() {
         // This could be more sophisticated
         it.postDelayed(500) { updatePager("setupPagerWithDelay") }
       }
-
-      setOnTouchListener { v, event ->
-        mGestureDetector.onTouchEvent(event) || v.onTouchEvent(event)
-      }
     }
 
     snapHelper = RVPagerSnapHelperListenable().attachToRecyclerView(rvQueue, object : RVPagerStateListener {
@@ -187,7 +159,7 @@ class PlayerFragment : DaggerFragment() {
       override fun onPageScroll(pagesState: List<VisiblePageState>) {
 
         if (scrollState == RecyclerView.SCROLL_STATE_IDLE && pagesState.size == 1) {
-          viewModel.currentTheme.value?.let { applyTheme(it) }
+          viewModel.currentTheme.value?.let { applyTheme(it.primaryBackgroundColor, it.primaryForegroundColor) }
         }
 
         // Blend colors while scrolling
@@ -213,10 +185,7 @@ class PlayerFragment : DaggerFragment() {
               ratio
             )
 
-            binding.backgroundColor = backgroundColor
-            binding.foregroundColor = foregroundColor
-            activity?.window?.setBackgroundDrawable(ColorDrawable(backgroundColor))
-
+            applyTheme(backgroundColor, foregroundColor)
           }
         }
       }
@@ -316,10 +285,15 @@ class PlayerFragment : DaggerFragment() {
         .start()
   }
 
-  private fun applyTheme(it: Theme) {
-    Log.d(LOG_TAG, "Apply theme: $it")
-    binding.backgroundColor = it.primaryBackgroundColor
-    binding.foregroundColor = it.primaryForegroundColor
+  private fun applyTheme(@ColorInt backgroundColor: Int, @ColorInt foregroundColor: Int) {
+    binding.backgroundColor = backgroundColor
+    binding.foregroundColor = foregroundColor
+
+    activity?.run {
+      window?.setBackgroundDrawable(ColorDrawable(backgroundColor))
+      applyStatusBarColor(backgroundColor)
+      applyNavigationBarColor(backgroundColor)
+    }
   }
 
   companion object {
