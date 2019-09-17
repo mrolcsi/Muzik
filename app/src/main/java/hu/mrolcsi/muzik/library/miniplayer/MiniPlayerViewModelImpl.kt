@@ -25,8 +25,10 @@ import hu.mrolcsi.muzik.service.extensions.media.isSkipToPreviousEnabled
 import hu.mrolcsi.muzik.service.extensions.media.title
 import hu.mrolcsi.muzik.theme.ThemedViewModel
 import hu.mrolcsi.muzik.theme.ThemedViewModelImpl
+import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 open class MiniPlayerViewModelImpl @Inject constructor(
@@ -93,6 +95,14 @@ open class MiniPlayerViewModelImpl @Inject constructor(
       .observeOn(AndroidSchedulers.mainThread())
       .subscribeBy(
         onNext = { updateMetadata(it) },
+        onError = { showError(this, it) }
+      ).disposeOnCleared()
+
+    Observable.interval(500, TimeUnit.MILLISECONDS)
+      .filter { mediaService.getCurrentPlaybackState() != null }
+      .map { mediaService.getCurrentPlaybackState()!! }
+      .subscribeBy(
+        onNext = { updateState(it) },
         onError = { showError(this, it) }
       ).disposeOnCleared()
   }

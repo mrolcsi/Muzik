@@ -169,6 +169,10 @@ class MediaServiceImpl @Inject constructor(
       .takeWhile { mediaBrowser.isConnected }
       .observeOn(AndroidSchedulers.mainThread())
 
+  override fun getCurrentPlaybackState() = controller?.playbackState ?: playbackStateSubject.value
+
+  override fun getCurrentMediaMetadata() = controller?.metadata ?: metadataSubject.value!!
+
   override fun setQueueTitle(title: CharSequence) {
     controller?.setQueueTitle(title)
   }

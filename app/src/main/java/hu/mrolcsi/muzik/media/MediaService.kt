@@ -19,6 +19,9 @@ interface MediaService {
   val queue: Observable<List<QueueItem>>
   val queueTitle: Observable<CharSequence>
 
+  fun getCurrentPlaybackState(): PlaybackStateCompat?
+  fun getCurrentMediaMetadata(): MediaMetadataCompat?
+
   fun observableSubscribe(parentId: String, options: Bundle? = null): Observable<List<MediaBrowserCompat.MediaItem>>
 
   fun playAll(descriptions: List<MediaDescriptionCompat>, startPosition: Int = 0)

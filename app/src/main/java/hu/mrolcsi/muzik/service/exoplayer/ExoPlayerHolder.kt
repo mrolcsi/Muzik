@@ -68,11 +68,6 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
         if (player.playbackState == Player.STATE_IDLE || player.playbackState == Player.STATE_ENDED) {
           mPlaybackPreparer.onPrepare(playWhenReady)
         }
-
-        // Start updater if it is enabled (Gets cancelled in onStop())
-        if (mProgressUpdater.isEnabled) {
-          mProgressUpdater.startUpdater()
-        }
       } else {
         Log.v(LOG_TAG, "onPause()")
 
@@ -85,8 +80,6 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
             .getPlayQueueDao()
             .saveLastPlayed(mLastPlayed)
         }
-
-        mProgressUpdater.stopUpdater()
       }
 
       player.playWhenReady = playWhenReady
@@ -111,9 +104,6 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
 
       // Rewind track
       player.seekTo(0)
-
-      // Cancel Handler
-      mProgressUpdater.stopUpdater()
 
       return true
     }
@@ -281,32 +271,6 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
   //endregion
 
   //region -- CUSTOM ACTIONS
-
-  private val mUpdaterActionProvider = object : MediaSessionConnector.CustomActionProvider {
-    override fun getCustomAction(player: Player?): PlaybackStateCompat.CustomAction {
-      return if (mProgressUpdater.isEnabled) {
-        PlaybackStateCompat.CustomAction
-          .Builder(ACTION_STOP_UPDATER, "Stop progress updater.", -1)
-          .build()
-      } else {
-        PlaybackStateCompat.CustomAction
-          .Builder(ACTION_START_UPDATER, "Start progress updater.", -1)
-          .build()
-      }
-    }
-
-    override fun onCustomAction(
-      player: Player?,
-      controlDispatcher: ControlDispatcher?,
-      action: String?,
-      extras: Bundle?
-    ) {
-      when (action) {
-        ACTION_START_UPDATER -> mProgressUpdater.startUpdater()
-        ACTION_STOP_UPDATER -> mProgressUpdater.stopUpdater()
-      }
-    }
-  }
 
   private val mPrepareFromDescriptionActionProvider = object : MediaSessionConnector.CustomActionProvider {
     override fun getCustomAction(player: Player?) = PlaybackStateCompat.CustomAction
@@ -537,19 +501,6 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
 
   //endregion
 
-  // Player state polling
-  private val mProgressUpdater = ProgressUpdater {
-    // Update session with the current position
-    val currentState = session.controller.playbackState
-    val newState = PlaybackStateCompat.Builder(currentState)
-      .setState(
-        currentState.state,
-        mPlayer.currentPosition,
-        mPlayer.playbackParameters.speed
-      ).build()
-    session.setPlaybackState(newState)
-  }
-
   // Last Played Settings
   private val mLastPlayed = LastPlayed()
 
@@ -574,7 +525,6 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
       setMediaMetadataProvider(mMetadataProvider)
       setPlaybackPreparer(mPlaybackPreparer)
       setCustomActionProviders(
-        mUpdaterActionProvider,
         mPrepareFromDescriptionActionProvider,
         mSetShuffleModeActionProvider
       )
