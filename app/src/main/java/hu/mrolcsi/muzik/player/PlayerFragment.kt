@@ -22,6 +22,8 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.TransitionInflater
 import dagger.android.support.DaggerFragment
 import hu.mrolcsi.muzik.R
+import hu.mrolcsi.muzik.common.glide.GlideApp
+import hu.mrolcsi.muzik.common.glide.onResourceReady
 import hu.mrolcsi.muzik.common.pager.PagerSnapHelperVerbose
 import hu.mrolcsi.muzik.common.pager.RVPagerSnapHelperListenable
 import hu.mrolcsi.muzik.common.pager.RVPagerStateListener
@@ -95,11 +97,12 @@ class PlayerFragment : DaggerFragment() {
         updatePager("onCurrentQueueIdChanged")
       })
 
-      albumArt.observe(viewLifecycleOwner, Observer {
-        imgCoverArt.setImageDrawable(it)
-        (view?.parent as? ViewGroup)?.doOnPreDraw {
-          startPostponedEnterTransition()
-        }
+      liveAlbumArtUri.observe(viewLifecycleOwner, Observer {
+        GlideApp.with(imgCoverArt)
+          .asDrawable()
+          .load(it)
+          .onResourceReady { (view?.parent as? ViewGroup)?.doOnPreDraw { startPostponedEnterTransition() } }
+          .into(imgCoverArt)
       })
     }
   }

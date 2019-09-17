@@ -1,9 +1,8 @@
 package hu.mrolcsi.muzik.player
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.drawable.Drawable
+import android.net.Uri
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
@@ -18,7 +17,6 @@ import androidx.lifecycle.MutableLiveData
 import com.bumptech.glide.request.target.Target
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.glide.GlideApp
-import hu.mrolcsi.muzik.common.glide.onResourceReady
 import hu.mrolcsi.muzik.common.glide.toSingle
 import hu.mrolcsi.muzik.common.view.OnRepeatTouchListener
 import hu.mrolcsi.muzik.common.viewmodel.ExecuteOnceNavCommandSource
@@ -57,7 +55,7 @@ class PlayerViewModelImpl @Inject constructor(
   mediaService
 ), PlayerViewModel {
 
-  override val albumArt = MutableLiveData<Drawable>()
+  override val liveAlbumArtUri = MutableLiveData<Uri>()
 
   override var elapsedTimeText: String? by boundStringOrNull(BR.elapsedTimeText)
   override var remainingTimeText: String? by boundStringOrNull(BR.remainingTimeText)
@@ -122,10 +120,6 @@ class PlayerViewModelImpl @Inject constructor(
     onDown = { isSeekProgressVisible = true },
     onUp = { isSeekProgressVisible = false }
   )
-
-  private val placeholderArt: Bitmap by lazy {
-    BitmapFactory.decodeResource(context.resources, R.drawable.placeholder_cover_art)
-  }
 
   init {
     mediaService.playbackState
@@ -203,7 +197,7 @@ class PlayerViewModelImpl @Inject constructor(
           .load(item.description.coverArtUri)
           .override(Target.SIZE_ORIGINAL)
           .toSingle()
-          .onErrorReturnItem(placeholderArt)
+          .onErrorReturnItem(BitmapFactory.decodeResource(context.resources, R.drawable.placeholder_cover_art))
           .map { item to it }
       }
       .concatMapSingle { (item, coverArt) ->
@@ -233,11 +227,7 @@ class PlayerViewModelImpl @Inject constructor(
 
     remainingTimeText = "-${(duration - elapsedTime).secondsToTimeStamp()}"
 
-    GlideApp.with(context)
-      .asDrawable()
-      .load(metadata.albumArtUri)
-      .onResourceReady { art -> albumArt.value = art }
-      .preload()
+    liveAlbumArtUri.value = metadata.albumArtUri
   }
 
   companion object {

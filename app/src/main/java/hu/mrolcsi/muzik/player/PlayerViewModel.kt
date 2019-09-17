@@ -1,6 +1,6 @@
 package hu.mrolcsi.muzik.player
 
-import android.graphics.drawable.Drawable
+import android.net.Uri
 import android.support.v4.media.session.MediaSessionCompat
 import androidx.databinding.Bindable
 import androidx.lifecycle.LiveData
@@ -11,7 +11,7 @@ import hu.mrolcsi.muzik.theme.Theme
 
 interface PlayerViewModel : MiniPlayerViewModel {
 
-  val albumArt: LiveData<Drawable>
+  val liveAlbumArtUri: LiveData<Uri>
 
   @get:Bindable
   val elapsedTimeText: String?
