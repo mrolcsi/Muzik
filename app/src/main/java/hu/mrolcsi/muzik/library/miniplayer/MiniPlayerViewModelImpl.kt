@@ -101,6 +101,7 @@ open class MiniPlayerViewModelImpl @Inject constructor(
     Observable.interval(500, TimeUnit.MILLISECONDS)
       .filter { mediaService.getCurrentPlaybackState() != null }
       .map { mediaService.getCurrentPlaybackState()!! }
+      .observeOn(AndroidSchedulers.mainThread())
       .subscribeBy(
         onNext = { updateState(it) },
         onError = { showError(this, it) }
