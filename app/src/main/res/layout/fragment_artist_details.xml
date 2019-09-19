@@ -17,23 +17,22 @@
   <androidx.coordinatorlayout.widget.CoordinatorLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
     tools:context=".library.artists.details.ArtistDetailsFragment">
 
     <com.google.android.material.appbar.AppBarLayout
       android:id="@+id/appBar"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:background="@{theme.primaryBackgroundColor}"
       android:fitsSystemWindows="true"
+      android:background="@{theme.primaryBackgroundColor}"
       app:expanded="false"
       app:statusBarForeground="@android:color/transparent">
 
       <com.google.android.material.appbar.CollapsingToolbarLayout
         android:id="@+id/collapsingToolbar"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
         android:fitsSystemWindows="true"
+        android:layout_height="match_parent"
         app:collapsedTitleTextColor="@{theme.primaryForegroundColor}"
         app:contentScrim="@{theme.primaryBackgroundColor}"
         app:expandedTitleTextColor="@{theme.secondaryForegroundColor}"

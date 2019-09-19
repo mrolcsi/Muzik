@@ -20,8 +20,7 @@
     <com.google.android.material.appbar.AppBarLayout
       android:id="@+id/appBar"
       android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:fitsSystemWindows="true">
+      android:layout_height="wrap_content">
 
       <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/libraryPagerToolbar"
@@ -49,7 +48,6 @@
       android:id="@+id/libraryPager"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
-      android:fitsSystemWindows="true"
       app:layout_behavior=".common.view.FabAwareScrollingViewBehavior" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
