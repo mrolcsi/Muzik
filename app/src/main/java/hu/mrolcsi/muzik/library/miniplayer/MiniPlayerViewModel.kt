@@ -1,8 +1,10 @@
 package hu.mrolcsi.muzik.library.miniplayer
 
+import android.net.Uri
 import android.view.View
 import androidx.databinding.Bindable
 import androidx.databinding.Observable
+import androidx.lifecycle.LiveData
 import hu.mrolcsi.muzik.common.viewmodel.NavCommandSource
 import hu.mrolcsi.muzik.common.viewmodel.UiCommandSource
 import hu.mrolcsi.muzik.theme.ThemedViewModel
@@ -14,7 +16,9 @@ interface MiniPlayerViewModel : ThemedViewModel, Observable, UiCommandSource, Na
   @get:Bindable
   val songArtist: String?
   @get:Bindable
-  val albumArtUri: String?
+  val coverArtTransitionName: String
+
+  val coverArtUri: LiveData<Uri>
 
   @get:Bindable
   val duration: Int

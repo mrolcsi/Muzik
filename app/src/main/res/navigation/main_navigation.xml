@@ -34,11 +34,6 @@
   <fragment
     android:id="@+id/navPlayer"
     android:name="hu.mrolcsi.muzik.player.PlayerFragment"
-    tools:layout="@layout/fragment_player_template">
-    <argument
-      android:name="transitionName"
-      app:argType="string"
-      android:defaultValue="coverArt" />
-  </fragment>
+    tools:layout="@layout/fragment_player" />
 
 </navigation>

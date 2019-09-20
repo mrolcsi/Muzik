@@ -3,15 +3,10 @@ package hu.mrolcsi.muzik.player
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.net.Uri
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
-import android.support.v4.media.session.PlaybackStateCompat.REPEAT_MODE_ALL
-import android.support.v4.media.session.PlaybackStateCompat.REPEAT_MODE_NONE
-import android.support.v4.media.session.PlaybackStateCompat.REPEAT_MODE_ONE
-import android.support.v4.media.session.PlaybackStateCompat.SHUFFLE_MODE_ALL
-import android.support.v4.media.session.PlaybackStateCompat.SHUFFLE_MODE_NONE
+import android.support.v4.media.session.PlaybackStateCompat.*
 import android.util.Log
 import android.widget.Toast
 import androidx.databinding.library.baseAdapters.BR
@@ -27,13 +22,7 @@ import hu.mrolcsi.muzik.common.viewmodel.ObservableImpl
 import hu.mrolcsi.muzik.extensions.secondsToTimeStamp
 import hu.mrolcsi.muzik.library.miniplayer.MiniPlayerViewModelImpl
 import hu.mrolcsi.muzik.media.MediaService
-import hu.mrolcsi.muzik.service.extensions.media.albumArtUri
-import hu.mrolcsi.muzik.service.extensions.media.coverArtUri
-import hu.mrolcsi.muzik.service.extensions.media.isPauseEnabled
-import hu.mrolcsi.muzik.service.extensions.media.isPlayEnabled
-import hu.mrolcsi.muzik.service.extensions.media.isPlaying
-import hu.mrolcsi.muzik.service.extensions.media.isSkipToNextEnabled
-import hu.mrolcsi.muzik.service.extensions.media.isSkipToPreviousEnabled
+import hu.mrolcsi.muzik.service.extensions.media.*
 import hu.mrolcsi.muzik.theme.ThemedViewModelImpl
 import io.reactivex.Observable
 import io.reactivex.Single
@@ -57,8 +46,6 @@ class PlayerViewModelImpl @Inject constructor(
   context,
   mediaService
 ), PlayerViewModel {
-
-  override val liveAlbumArtUri = MutableLiveData<Uri>()
 
   override var elapsedTimeText: String? by boundStringOrNull(BR.elapsedTimeText)
   override var remainingTimeText: String? by boundStringOrNull(BR.remainingTimeText)
@@ -101,9 +88,9 @@ class PlayerViewModelImpl @Inject constructor(
   }
 
   override val queue = MutableLiveData<List<ThemedQueueItem>>()
-  override val currentQueueId = MutableLiveData<Long>()
+  override val activeQueueId = MutableLiveData<Long>()
 
-  override fun getCurrentQueueId(): Long = currentQueueId.value ?: -1
+  override fun getActiveQueueId(): Long = activeQueueId.value ?: -1
 
   override fun skipToQueueItem(itemId: Long) {
     mediaService.skipToQueueItem(itemId)
@@ -125,6 +112,12 @@ class PlayerViewModelImpl @Inject constructor(
   )
 
   init {
+    mediaService.playbackState
+      .map { it.activeQueueItemId }
+      .distinctUntilChanged()
+      .subscribeBy { activeQueueId.value = it }
+      .disposeOnCleared()
+
     mediaService.shuffleMode
       .observeOn(AndroidSchedulers.mainThread())
       .subscribeBy(
@@ -224,8 +217,8 @@ class PlayerViewModelImpl @Inject constructor(
 
     isPlaying = playbackState.isPlaying
 
-    if (currentQueueId.value != playbackState.activeQueueItemId) {
-      currentQueueId.value = playbackState.activeQueueItemId
+    if (activeQueueId.value != playbackState.activeQueueItemId) {
+      activeQueueId.value = playbackState.activeQueueItemId
     }
   }
 
@@ -233,8 +226,6 @@ class PlayerViewModelImpl @Inject constructor(
     super.updateMetadata(metadata)
 
     remainingTimeText = "-${(duration - elapsedTime).secondsToTimeStamp()}"
-
-    liveAlbumArtUri.value = metadata.albumArtUri
   }
 
   companion object {

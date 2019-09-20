@@ -2,6 +2,7 @@ package hu.mrolcsi.muzik.player
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.view.ViewCompat
 import com.bumptech.glide.request.target.Target
 import hu.mrolcsi.muzik.common.glide.GlideApp
 import hu.mrolcsi.muzik.common.view.MVVMViewHolder
@@ -40,6 +41,8 @@ class QueueItemHolder(
       tvTitle.text = item.queueItem.description.title
       tvArtist.text = item.queueItem.description.subtitle
       tvAlbum.text = item.queueItem.description.description
+
+      ViewCompat.setTransitionName(imgCoverArt, "coverArt${item.queueItem.queueId}")
     }
   }
 

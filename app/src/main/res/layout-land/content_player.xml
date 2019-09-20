@@ -23,33 +23,27 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:animateLayoutChanges="true"
-    android:background="@android:color/transparent"
+    android:background="@{backgroundColor}"
     tools:context=".player.PlayerFragment">
 
-    <ImageView
-      android:id="@+id/imgCoverArt"
+    <Space
+      android:id="@+id/space"
       android:layout_width="0dp"
       android:layout_height="0dp"
       android:layout_marginBottom="16dp"
-      android:contentDescription="@string/contentDescription_coverArt"
-      android:scaleType="centerCrop"
-      android:transitionName="coverArt"
       app:layout_constraintBottom_toTopOf="@+id/sbSongProgress"
       app:layout_constraintDimensionRatio="1:1"
       app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toTopOf="parent"
-      tools:src="@tools:sample/avatars[5]" />
+      app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.recyclerview.widget.RecyclerView
       android:id="@+id/rvQueue"
       android:layout_width="0dp"
       android:layout_height="0dp"
-      android:alpha="0.0"
-      app:layout_constraintBottom_toBottomOf="@id/imgCoverArt"
+      app:layout_constraintBottom_toBottomOf="@id/space"
       app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="@id/imgCoverArt"
-      app:layout_constraintTop_toTopOf="@id/imgCoverArt"
-      tools:alpha="1.0"
+      app:layout_constraintStart_toStartOf="@id/space"
+      app:layout_constraintTop_toTopOf="@id/space"
       tools:listitem="@layout/list_item_queue" />
 
     <!--&lt;!&ndash; Make sure Toolbar is above the Cover Art &ndash;&gt;-->
@@ -129,10 +123,10 @@
       android:typeface="monospace"
       android:visibility="@{viewModel.seekProgressVisible}"
       app:elevation="@dimen/bottom_navigation_elevation"
-      app:layout_constraintBottom_toBottomOf="@+id/imgCoverArt"
-      app:layout_constraintEnd_toEndOf="@+id/imgCoverArt"
-      app:layout_constraintStart_toStartOf="@id/imgCoverArt"
-      app:layout_constraintTop_toTopOf="@+id/imgCoverArt"
+      app:layout_constraintBottom_toBottomOf="@+id/space"
+      app:layout_constraintEnd_toEndOf="@+id/space"
+      app:layout_constraintStart_toStartOf="@id/space"
+      app:layout_constraintTop_toTopOf="@+id/space"
       tools:text="01:24"
       tools:visibility="visible" />
 
@@ -147,7 +141,7 @@
       android:src="@{viewModel.shuffleDrawableRes}"
       android:tint="@{foregroundColor}"
       app:layout_constraintBottom_toBottomOf="@+id/btnPlayPause"
-      app:layout_constraintStart_toEndOf="@+id/imgCoverArt"
+      app:layout_constraintStart_toEndOf="@+id/space"
       app:layout_constraintTop_toTopOf="@+id/btnPlayPause"
       app:rippleColor="@{foregroundColor}"
       tools:src="@drawable/ic_shuffle_all"

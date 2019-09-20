@@ -1,6 +1,5 @@
 package hu.mrolcsi.muzik.player
 
-import android.net.Uri
 import android.support.v4.media.session.MediaSessionCompat
 import androidx.databinding.Bindable
 import androidx.lifecycle.LiveData
@@ -11,8 +10,6 @@ import hu.mrolcsi.muzik.library.miniplayer.MiniPlayerViewModel
 import hu.mrolcsi.muzik.theme.Theme
 
 interface PlayerViewModel : MiniPlayerViewModel {
-
-  val liveAlbumArtUri: LiveData<Uri>
 
   @get:Bindable
   val elapsedTimeText: String?
@@ -37,8 +34,8 @@ interface PlayerViewModel : MiniPlayerViewModel {
   fun onStopTrackingTouch()
 
   val queue: LiveData<List<ThemedQueueItem>>
-  val currentQueueId: LiveData<Long>
-  fun getCurrentQueueId(): Long
+  val activeQueueId: LiveData<Long>
+  fun getActiveQueueId(): Long
 
   fun skipToQueueItem(itemId: Long)
 

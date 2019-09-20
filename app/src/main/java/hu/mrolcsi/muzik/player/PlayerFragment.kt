@@ -9,7 +9,6 @@ import android.view.ViewGroup
 import androidx.annotation.ColorInt
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.GravityCompat
-import androidx.core.view.ViewCompat
 import androidx.core.view.doOnNextLayout
 import androidx.core.view.doOnPreDraw
 import androidx.core.view.postDelayed
@@ -18,11 +17,10 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.transition.Transition
 import androidx.transition.TransitionInflater
 import dagger.android.support.DaggerFragment
 import hu.mrolcsi.muzik.R
-import hu.mrolcsi.muzik.common.glide.GlideApp
-import hu.mrolcsi.muzik.common.glide.onResourceReady
 import hu.mrolcsi.muzik.common.pager.PagerSnapHelperVerbose
 import hu.mrolcsi.muzik.common.pager.RVPagerSnapHelperListenable
 import hu.mrolcsi.muzik.common.pager.RVPagerStateListener
@@ -41,8 +39,10 @@ import kotlin.math.abs
 
 class PlayerFragment : DaggerFragment() {
 
-  @Inject lateinit var viewModel: PlayerViewModel
-  @Inject lateinit var themeService: ThemeService
+  @Inject
+  lateinit var viewModel: PlayerViewModel
+  @Inject
+  lateinit var themeService: ThemeService
 
   private lateinit var binding: FragmentPlayerBinding
 
@@ -69,16 +69,8 @@ class PlayerFragment : DaggerFragment() {
         updatePager("onQueueChanged")
       })
 
-      currentQueueId.observe(viewLifecycleOwner, Observer {
-        updatePager("onCurrentQueueIdChanged")
-      })
-
-      liveAlbumArtUri.observe(viewLifecycleOwner, Observer {
-        GlideApp.with(imgCoverArt)
-          .asDrawable()
-          .load(it)
-          .onResourceReady { (view?.parent as? ViewGroup)?.doOnPreDraw { startPostponedEnterTransition() } }
-          .into(imgCoverArt)
+      activeQueueId.observe(viewLifecycleOwner, Observer {
+        updatePager("onActiveQueueIdChanged")
       })
     }
   }
@@ -95,19 +87,16 @@ class PlayerFragment : DaggerFragment() {
     enterTransition = transitionInflater
       .inflateTransition(R.transition.slide_bottom)
       .setDuration(animationDuration)
-      .excludeTarget(imgCoverArt, true)
 
-    returnTransition = transitionInflater
-      .inflateTransition(R.transition.slide_bottom)
-      .setDuration(animationDuration)
-      .excludeTarget(imgCoverArt, true)
+    (returnTransition as Transition)
+      .excludeChildren(rvQueue, true)
 
     sharedElementEnterTransition = transitionInflater
-      .inflateTransition(android.R.transition.move)
+      .inflateTransition(R.transition.cover_art_transition)
       .setDuration(animationDuration)
 
     sharedElementReturnTransition = transitionInflater
-      .inflateTransition(android.R.transition.move)
+      .inflateTransition(R.transition.cover_art_transition)
       .setDuration(animationDuration)
   }
 
@@ -195,7 +184,7 @@ class PlayerFragment : DaggerFragment() {
 
         if (state == RecyclerView.SCROLL_STATE_IDLE) {
           // check if item position is different from the now playing position
-          val queueId = viewModel.getCurrentQueueId()
+          val queueId = viewModel.getActiveQueueId()
           val pagerPosition = snapHelper.findSnapPosition(rvQueue.layoutManager)
           val visibleId = rvQueue.adapter?.getItemId(pagerPosition) ?: RecyclerView.NO_ID
 
@@ -226,7 +215,7 @@ class PlayerFragment : DaggerFragment() {
     val visibleId = rvQueue.adapter?.getItemId(visiblePosition) ?: RecyclerView.NO_ID
 
     // If Metadata has changed, then PlaybackState should have changed as well.
-    val queueId = viewModel.getCurrentQueueId()
+    val queueId = viewModel.getActiveQueueId()
     val queuePosition = queueAdapter.getItemPositionById(queueId)
 
     Log.v(
@@ -242,9 +231,11 @@ class PlayerFragment : DaggerFragment() {
 
     if (scrollState == RecyclerView.SCROLL_STATE_IDLE) {
       when {
-        visibleId == queueId ->
+        visibleId == queueId -> {
           // Make RecyclerView visible (no need to scroll)
           showRecyclerView()
+          (returnTransition as Transition).excludeTarget("coverArt$queueId", true)
+        }
         queuePosition == RecyclerView.NO_POSITION ->
           // Try again after the adapter settles?
           rvQueue.postDelayed(300) { updatePager("updatePagerDelayed: SCROLL_STATE_IDLE") }
@@ -276,13 +267,7 @@ class PlayerFragment : DaggerFragment() {
   }
 
   private fun showRecyclerView() {
-    if (rvQueue.alpha < 1f)
-      ViewCompat.animate(rvQueue)
-        .alpha(1f)
-        .setDuration(context?.resources?.getInteger(R.integer.preferredAnimationDuration)?.toLong() ?: 300L)
-        .withStartAction { Log.i(LOG_TAG, "Making RecyclerView visible...") }
-        .withEndAction { imgCoverArt?.alpha = 0.0f }
-        .start()
+    (view?.parent as? ViewGroup)?.doOnPreDraw { startPostponedEnterTransition() }
   }
 
   private fun applyTheme(@ColorInt backgroundColor: Int, @ColorInt foregroundColor: Int) {
