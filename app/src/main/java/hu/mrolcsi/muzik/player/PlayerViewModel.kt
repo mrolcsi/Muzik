@@ -5,6 +5,7 @@ import android.support.v4.media.session.MediaSessionCompat
 import androidx.databinding.Bindable
 import androidx.lifecycle.LiveData
 import androidx.recyclerview.widget.DiffUtil
+import hu.mrolcsi.muzik.common.DiffCallbacks
 import hu.mrolcsi.muzik.common.view.OnRepeatTouchListener
 import hu.mrolcsi.muzik.library.miniplayer.MiniPlayerViewModel
 import hu.mrolcsi.muzik.theme.Theme
@@ -52,11 +53,15 @@ data class ThemedQueueItem(
 
   companion object DiffCallback : DiffUtil.ItemCallback<ThemedQueueItem>() {
 
-    override fun areItemsTheSame(oldItem: ThemedQueueItem, newItem: ThemedQueueItem) =
-      oldItem.queueItem.queueId == newItem.queueItem.queueId
+    override fun areItemsTheSame(oldItem: ThemedQueueItem, newItem: ThemedQueueItem): Boolean {
+      return oldItem.queueItem.queueId == newItem.queueItem.queueId
+    }
 
-    override fun areContentsTheSame(oldItem: ThemedQueueItem, newItem: ThemedQueueItem) =
-      oldItem == newItem
+    override fun areContentsTheSame(oldItem: ThemedQueueItem, newItem: ThemedQueueItem): Boolean {
+      if (oldItem.theme != newItem.theme) return false
+
+      return DiffCallbacks.queueItemCallback.areContentsTheSame(oldItem.queueItem, newItem.queueItem)
+    }
 
   }
 }

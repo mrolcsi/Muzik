@@ -12,6 +12,7 @@ import android.support.v4.media.session.PlaybackStateCompat.REPEAT_MODE_NONE
 import android.support.v4.media.session.PlaybackStateCompat.REPEAT_MODE_ONE
 import android.support.v4.media.session.PlaybackStateCompat.SHUFFLE_MODE_ALL
 import android.support.v4.media.session.PlaybackStateCompat.SHUFFLE_MODE_NONE
+import android.util.Log
 import android.widget.Toast
 import androidx.databinding.library.baseAdapters.BR
 import androidx.lifecycle.MutableLiveData
@@ -175,7 +176,7 @@ class PlayerViewModelImpl @Inject constructor(
 
     mediaService.queue
       .distinctUntilChanged { t1, t2 -> t1.map { it.queueId } == t2.map { it.queueId } }
-      .flatMapSingle { queueItems -> queueItems.createThemes() }
+      .switchMapSingle { queueItems -> queueItems.createThemes() }
       .observeOn(AndroidSchedulers.mainThread())
       .subscribeBy(
         onNext = { queue.value = it },
@@ -185,6 +186,8 @@ class PlayerViewModelImpl @Inject constructor(
 
   private fun List<MediaSessionCompat.QueueItem>.createThemes() =
     Observable.fromIterable(this)
+      .doOnSubscribe { Log.d(LOG_TAG, "$this -> onSubscribe()") }
+      .doOnTerminate { Log.d(LOG_TAG, "$this -> onTerminate()") }
       .subscribeOn(Schedulers.computation())
       .concatMapSingle { item ->
         // Get coverArt

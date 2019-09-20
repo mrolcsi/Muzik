@@ -3,6 +3,7 @@ package hu.mrolcsi.muzik.library.songs
 import android.content.Context
 import android.support.v4.media.MediaBrowserCompat.MediaItem
 import android.support.v4.media.MediaDescriptionCompat
+import android.support.v4.media.MediaMetadataCompat
 import androidx.lifecycle.MutableLiveData
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.viewmodel.DataBindingViewModel
@@ -14,11 +15,15 @@ import hu.mrolcsi.muzik.media.MediaRepository
 import hu.mrolcsi.muzik.media.MediaService
 import hu.mrolcsi.muzik.service.extensions.media.artistKey
 import hu.mrolcsi.muzik.service.extensions.media.dateAdded
+import hu.mrolcsi.muzik.service.extensions.media.isNowPlaying
+import hu.mrolcsi.muzik.service.extensions.media.mediaId
 import hu.mrolcsi.muzik.service.extensions.media.titleKey
 import hu.mrolcsi.muzik.theme.ThemedViewModel
 import hu.mrolcsi.muzik.theme.ThemedViewModelImpl
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.Observables
 import io.reactivex.rxkotlin.subscribeBy
+import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
 import javax.inject.Inject
 import kotlin.properties.Delegates
@@ -56,10 +61,15 @@ class SongsViewModelImpl @Inject constructor(
   init {
     Observables.combineLatest(
       sortingModeSubject,
-      mediaRepo.getSongs()
+      mediaRepo.getSongs(),
+      mediaService.mediaMetadata
+        .distinctUntilChanged { t: MediaMetadataCompat -> t.mediaId }
+        .filter { it.mediaId != null }
     )
-      .map { (sorting, songs) -> songs.applySorting(sorting) }
+      .subscribeOn(Schedulers.io())
+      .map { (sorting, songs, metadata) -> songs.applyNowPlaying(metadata.mediaId).applySorting(sorting) }
       .doOnNext { songs -> songDescriptions = songs.filter { it.isPlayable }.map { it.description } }
+      .observeOn(AndroidSchedulers.mainThread())
       .subscribeBy(
         onNext = { items.value = it },
         onError = { showError(this, it) }
@@ -74,4 +84,10 @@ class SongsViewModelImpl @Inject constructor(
     }
   }
 
+}
+
+fun List<MediaItem>.applyNowPlaying(mediaId: String?): List<MediaItem> = this.map {
+  it.apply {
+    it.description.isNowPlaying = it.mediaId == mediaId
+  }
 }

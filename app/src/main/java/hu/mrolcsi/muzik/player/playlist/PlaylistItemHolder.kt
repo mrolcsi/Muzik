@@ -6,7 +6,7 @@ import androidx.core.view.isVisible
 import hu.mrolcsi.muzik.common.glide.GlideApp
 import hu.mrolcsi.muzik.common.view.MVVMViewHolder
 import hu.mrolcsi.muzik.extensions.millisecondsToTimeStamp
-import kotlinx.android.synthetic.main.list_item_playlist.view.*
+import kotlinx.android.synthetic.main.list_item_song.view.*
 import kotlin.properties.Delegates
 
 class PlaylistItemHolder(itemView: View) : MVVMViewHolder<PlaylistItem>(itemView) {

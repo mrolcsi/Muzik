@@ -122,7 +122,7 @@ class MediaServiceImpl @Inject constructor(
   private val queueSubject = BehaviorSubject.create<List<QueueItem>>()
   private val queueTitleSubject = BehaviorSubject.create<CharSequence>()
 
-  override val metadata: Observable<MediaMetadataCompat> = metadataSubject.hide()
+  override val mediaMetadata: Observable<MediaMetadataCompat> = metadataSubject.hide()
   override val playbackState: Observable<PlaybackStateCompat> = playbackStateSubject.hide()
   override val repeatMode: Observable<Int> = repeatModeSubject.hide()
   override val shuffleMode: Observable<Int> = shuffleModeSubject.hide()
@@ -265,9 +265,8 @@ class MediaServiceImpl @Inject constructor(
     }
   }
 
-  override fun getCurrentQueueId(): Long {
-    return controller?.playbackState?.activeQueueItemId ?: QueueItem.UNKNOWN_ID.toLong()
-  }
+  override fun getActiveQueueItemId(): Long =
+    controller?.playbackState?.activeQueueItemId ?: QueueItem.UNKNOWN_ID.toLong()
 
   override fun skipToQueueItem(id: Long) {
     controller?.transportControls?.skipToQueueItem(id)

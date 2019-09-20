@@ -3,6 +3,7 @@ package hu.mrolcsi.muzik.library.albums.details
 import android.content.Context
 import android.support.v4.media.MediaBrowserCompat.MediaItem
 import android.support.v4.media.MediaDescriptionCompat
+import android.support.v4.media.MediaMetadataCompat
 import androidx.core.os.bundleOf
 import androidx.databinding.library.baseAdapters.BR
 import androidx.lifecycle.MutableLiveData
@@ -13,6 +14,7 @@ import hu.mrolcsi.muzik.common.viewmodel.DataBindingViewModel
 import hu.mrolcsi.muzik.common.viewmodel.ExecuteOnceNavCommandSource
 import hu.mrolcsi.muzik.common.viewmodel.ExecuteOnceUiCommandSource
 import hu.mrolcsi.muzik.common.viewmodel.ObservableImpl
+import hu.mrolcsi.muzik.library.songs.applyNowPlaying
 import hu.mrolcsi.muzik.media.MediaRepository
 import hu.mrolcsi.muzik.media.MediaService
 import hu.mrolcsi.muzik.service.extensions.media.MediaType
@@ -21,6 +23,7 @@ import hu.mrolcsi.muzik.service.extensions.media.albumArtUri
 import hu.mrolcsi.muzik.service.extensions.media.albumYear
 import hu.mrolcsi.muzik.service.extensions.media.artist
 import hu.mrolcsi.muzik.service.extensions.media.id
+import hu.mrolcsi.muzik.service.extensions.media.mediaId
 import hu.mrolcsi.muzik.service.extensions.media.numberOfSongs
 import hu.mrolcsi.muzik.service.extensions.media.titleKey
 import hu.mrolcsi.muzik.service.extensions.media.trackNumber
@@ -28,8 +31,8 @@ import hu.mrolcsi.muzik.theme.Theme
 import hu.mrolcsi.muzik.theme.ThemedViewModel
 import hu.mrolcsi.muzik.theme.ThemedViewModelImpl
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.rxkotlin.Observables
 import io.reactivex.rxkotlin.subscribeBy
-import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import javax.inject.Inject
 import kotlin.properties.Delegates
@@ -80,12 +83,21 @@ class AlbumDetailsViewModelImpl @Inject constructor(
   private var songDescriptions: List<MediaDescriptionCompat>? = null
 
   init {
-    albumSubject
-      .subscribeOn(Schedulers.io())
-      .filter { it.mediaId != null }
-      .doOnNext { updateHeaderText(it) }
-      .switchMap { mediaRepo.getSongsFromAlbum(it.description.id) }
-      .map { songs -> songs.sortedBy { it.description.titleKey }.sortedBy { it.description.trackNumber } }
+    Observables.combineLatest(
+      albumSubject
+        .filter { it.mediaId != null }
+        .doOnNext { updateHeaderText(it) }
+        .switchMap { mediaRepo.getSongsFromAlbum(it.description.id) },
+      mediaService.mediaMetadata
+        .distinctUntilChanged { t: MediaMetadataCompat -> t.mediaId }
+        .filter { it.mediaId != null }
+    )
+      .map { (songs, metadata) ->
+        songs
+          .applyNowPlaying(metadata.mediaId)
+          .sortedBy { it.description.titleKey }
+          .sortedBy { it.description.trackNumber }
+      }
       .doOnNext { songs -> songDescriptions = songs.filter { it.isPlayable }.map { it.description } }
       .map { it.addDiscIndicator() }
       .observeOn(AndroidSchedulers.mainThread())

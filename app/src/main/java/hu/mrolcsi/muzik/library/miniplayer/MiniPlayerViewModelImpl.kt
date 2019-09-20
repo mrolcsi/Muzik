@@ -91,7 +91,7 @@ open class MiniPlayerViewModelImpl @Inject constructor(
         onError = { showError(this, it) }
       ).disposeOnCleared()
 
-    mediaService.metadata
+    mediaService.mediaMetadata
       .observeOn(AndroidSchedulers.mainThread())
       .subscribeBy(
         onNext = { updateMetadata(it) },

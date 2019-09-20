@@ -10,6 +10,8 @@ import android.support.v4.media.MediaMetadataCompat
 import hu.mrolcsi.muzik.service.extensions.media.MediaType.Companion.MEDIA_TYPE_KEY
 import hu.mrolcsi.muzik.service.extensions.media.MediaType.Companion.MEDIA_UNKNOWN
 
+const val EXTRA_NOW_PLAYING = "android.media.browse.extra.NOW_PLAYING"
+
 // Try to get ContentProvider columns first. If null, use MediaMetadata keys.
 
 @MediaType
@@ -104,3 +106,9 @@ inline val MediaDescriptionCompat.year: Long
   get() = this.extras?.getString(MediaStore.Audio.Media.YEAR)?.toLong()
     ?: this.extras?.getLong(MediaMetadataCompat.METADATA_KEY_YEAR)
     ?: -1
+
+inline var MediaDescriptionCompat.isNowPlaying: Boolean
+  get() = this.extras?.getBoolean(EXTRA_NOW_PLAYING) ?: false
+  set(value) {
+    this.extras?.putBoolean(EXTRA_NOW_PLAYING, value)
+  }

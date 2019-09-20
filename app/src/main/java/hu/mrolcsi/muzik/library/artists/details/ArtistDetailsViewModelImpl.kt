@@ -1,9 +1,9 @@
 package hu.mrolcsi.muzik.library.artists.details
 
-import android.content.Context
 import android.net.Uri
 import android.support.v4.media.MediaBrowserCompat.MediaItem
 import android.support.v4.media.MediaDescriptionCompat
+import android.support.v4.media.MediaMetadataCompat
 import android.view.View
 import androidx.core.view.ViewCompat
 import androidx.databinding.library.baseAdapters.BR
@@ -17,22 +17,24 @@ import hu.mrolcsi.muzik.common.viewmodel.ExecuteOnceUiCommandSource
 import hu.mrolcsi.muzik.common.viewmodel.ObservableImpl
 import hu.mrolcsi.muzik.discogs.DiscogsService
 import hu.mrolcsi.muzik.library.albums.details.AlbumDetailsFragmentArgs
+import hu.mrolcsi.muzik.library.songs.applyNowPlaying
 import hu.mrolcsi.muzik.media.MediaRepository
 import hu.mrolcsi.muzik.media.MediaService
 import hu.mrolcsi.muzik.service.extensions.media.MediaType
 import hu.mrolcsi.muzik.service.extensions.media.artist
 import hu.mrolcsi.muzik.service.extensions.media.id
+import hu.mrolcsi.muzik.service.extensions.media.mediaId
 import hu.mrolcsi.muzik.service.extensions.media.titleKey
 import hu.mrolcsi.muzik.service.extensions.media.type
 import hu.mrolcsi.muzik.theme.ThemedViewModel
 import hu.mrolcsi.muzik.theme.ThemedViewModelImpl
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.rxkotlin.Observables
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.subjects.PublishSubject
 import javax.inject.Inject
 
 class ArtistDetailsViewModelImpl @Inject constructor(
-  context: Context,
   observable: ObservableImpl,
   uiCommandSource: ExecuteOnceUiCommandSource,
   navCommandSource: ExecuteOnceNavCommandSource,
@@ -103,9 +105,13 @@ class ArtistDetailsViewModelImpl @Inject constructor(
       ).disposeOnCleared()
 
     // Get Songs
-    publishedArtistSubject
-      .switchMap { mediaRepo.getSongsByArtist(it.description.id) }
-      .map { items -> items.sortedBy { it.description.titleKey } }
+    Observables.combineLatest(
+      publishedArtistSubject.switchMap { mediaRepo.getSongsByArtist(it.description.id) },
+      mediaService.mediaMetadata
+        .distinctUntilChanged { t: MediaMetadataCompat -> t.mediaId }
+        .filter { it.mediaId != null }
+    )
+      .map { (songs, metadata) -> songs.applyNowPlaying(metadata.mediaId).sortedBy { it.description.titleKey } }
       .doOnNext { songs -> songDescriptions = songs.filter { it.isPlayable }.map { it.description } }
       .subscribeBy(
         onNext = { artistSongs.value = it },

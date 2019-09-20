@@ -1,28 +1,63 @@
 package hu.mrolcsi.muzik.common
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
+import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.session.MediaSessionCompat
 import androidx.recyclerview.widget.DiffUtil
-import hu.mrolcsi.muzik.database.playqueue.entities.PlayQueueEntry
 
 object DiffCallbacks {
 
-  private fun Bundle.isEqualTo(that: Bundle): Boolean {
-    if (this.size() != that.size())
-      return false
+  private fun MediaBrowserCompat.MediaItem.isEqualTo(that: MediaBrowserCompat.MediaItem): Boolean {
+    if (this.mediaId != that.mediaId) return false
+    if (this.flags != that.flags) return false
+    if (this.isBrowsable != that.isBrowsable) return false
+    if (this.isPlayable != that.isPlayable) return false
+    if (!this.description.isEqualTo(that.description)) return false
 
-    if (!this.keySet().containsAll(that.keySet()))
-      return false
+    return true
+  }
 
-    for (key in this.keySet()) {
-      val valueOne = this.get(key)
-      val valueTwo = that.get(key)
-      if (valueOne is Bundle && valueTwo is Bundle) {
-        if (!this.isEqualTo(valueTwo)) return false
-      } else if (valueOne != valueTwo) return false
+  private fun MediaDescriptionCompat.isEqualTo(that: MediaDescriptionCompat): Boolean {
+    if (this.mediaId != that.mediaId) return false
+    if (this.title != that.title) return false
+    if (this.subtitle != that.subtitle) return false
+    if (this.description != that.description) return false
+    if (this.iconBitmap != that.iconBitmap) return false
+    if (this.iconUri != that.iconUri) return false
+    if (this.mediaUri != that.mediaUri) return false
+    if (!this.extras.isEqualTo(that.extras)) return false
+
+    return true
+  }
+
+  private fun Bundle?.isEqualTo(that: Bundle?): Boolean {
+    when {
+      this == null && that == null -> return true
+      this != null && that == null -> return false
+      this == null && that != null -> return false
+      this != null && that != null -> {
+        if (this.size() != that.size())
+          return false
+
+        if (!this.keySet().containsAll(that.keySet()))
+          return false
+
+        for (key in this.keySet()) {
+          val valueOne = this.get(key)
+          val valueTwo = that.get(key)
+          if (valueOne is Bundle && valueTwo is Bundle) {
+            if (!this.isEqualTo(valueTwo)) return false
+          } else if (valueOne != valueTwo) return false
+        }
+      }
     }
+    return true
+  }
+
+  private fun MediaSessionCompat.QueueItem.isEqualTo(that: MediaSessionCompat.QueueItem): Boolean {
+    if (this.queueId != that.queueId) return false
+    if (!this.description.isEqualTo(that.description)) return false
 
     return true
   }
@@ -35,14 +70,12 @@ object DiffCallbacks {
       return oldItem.mediaId == newItem.mediaId
     }
 
-    @SuppressLint("DiffUtilEquals")
     override fun areContentsTheSame(
       oldItem: MediaBrowserCompat.MediaItem,
       newItem: MediaBrowserCompat.MediaItem
     ): Boolean {
-      // The 'extras' are only equal when both are null.
-      return if (oldItem.description.extras == newItem.description.extras) true
-      else oldItem.description.extras!!.isEqualTo(newItem.description.extras!!)
+      //return oldItem.isEqualTo(newItem)
+      return false
     }
   }
 
@@ -54,22 +87,14 @@ object DiffCallbacks {
       return oldItem.queueId == newItem.queueId
     }
 
-    @SuppressLint("DiffUtilEquals")
     override fun areContentsTheSame(
       oldItem: MediaSessionCompat.QueueItem,
       newItem: MediaSessionCompat.QueueItem
     ): Boolean {
-      // The 'extras' are only equal when both are null.
-      return if (oldItem.description.extras == newItem.description.extras) true
-      else oldItem.description.extras!!.isEqualTo(newItem.description.extras!!)
+      //return oldItem.isEqualTo(newItem)
+      return false
     }
 
-  }
-  val playQueueEntryCallback = object : DiffUtil.ItemCallback<PlayQueueEntry>() {
-    override fun areItemsTheSame(oldItem: PlayQueueEntry, newItem: PlayQueueEntry): Boolean =
-      oldItem._data == newItem._data
-
-    override fun areContentsTheSame(oldItem: PlayQueueEntry, newItem: PlayQueueEntry): Boolean = oldItem == newItem
   }
 
 }

@@ -12,7 +12,7 @@ import io.reactivex.Observable
 
 interface MediaService {
 
-  val metadata: Observable<MediaMetadataCompat>
+  val mediaMetadata: Observable<MediaMetadataCompat>
   val playbackState: Observable<PlaybackStateCompat>
   val repeatMode: Observable<Int>
   val shuffleMode: Observable<Int>
@@ -43,6 +43,6 @@ interface MediaService {
   fun toggleRepeat()
 
   fun setQueueTitle(title: CharSequence)
-  fun getCurrentQueueId(): Long
+  fun getActiveQueueItemId(): Long
   fun skipToQueueItem(id: Long)
 }
