@@ -10,13 +10,11 @@ import androidx.databinding.library.baseAdapters.BR
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import com.google.android.exoplayer2.util.Log
-import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.viewmodel.DataBindingViewModel
 import hu.mrolcsi.muzik.common.viewmodel.ExecuteOnceNavCommandSource
 import hu.mrolcsi.muzik.common.viewmodel.ExecuteOnceUiCommandSource
 import hu.mrolcsi.muzik.common.viewmodel.ObservableImpl
 import hu.mrolcsi.muzik.discogs.DiscogsService
-import hu.mrolcsi.muzik.library.albums.details.AlbumDetailsFragmentArgs
 import hu.mrolcsi.muzik.library.songs.applyNowPlaying
 import hu.mrolcsi.muzik.media.MediaRepository
 import hu.mrolcsi.muzik.media.MediaService
@@ -69,9 +67,7 @@ class ArtistDetailsViewModelImpl @Inject constructor(
       val transitionName = ViewCompat.getTransitionName(transitionedView)!!
       sendNavCommand {
         navigate(
-          R.id.navAlbumDetails,
-          AlbumDetailsFragmentArgs(albumItem, transitionName).toBundle(),
-          null,
+          ArtistDetailsFragmentDirections.actionToAlbumDetails(albumItem, transitionName),
           FragmentNavigatorExtras(transitionedView to transitionName)
         )
       }

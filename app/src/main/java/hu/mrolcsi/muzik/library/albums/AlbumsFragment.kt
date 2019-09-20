@@ -20,7 +20,6 @@ import hu.mrolcsi.muzik.databinding.FragmentAlbumsBinding
 import hu.mrolcsi.muzik.library.SortingMode
 import hu.mrolcsi.muzik.theme.ThemeService
 import kotlinx.android.synthetic.main.fragment_albums.*
-import kotlinx.android.synthetic.main.list_item_album_content.*
 import javax.inject.Inject
 
 class AlbumsFragment : DaggerFragment() {
@@ -36,9 +35,9 @@ class AlbumsFragment : DaggerFragment() {
         orientation = RecyclerView.VERTICAL,
         themeService = themeService
       ).apply {
-        itemView.setOnClickListener { _ ->
+        itemView.setOnClickListener { view ->
           model?.let {
-            viewModel.onAlbumClick(it, imgCoverArt)
+            viewModel.onAlbumClick(it, view.findViewById(R.id.imgCoverArt))
           }
         }
       }

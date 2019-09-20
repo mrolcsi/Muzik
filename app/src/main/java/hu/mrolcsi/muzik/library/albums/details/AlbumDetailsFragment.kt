@@ -9,7 +9,6 @@ import androidx.core.view.ViewCompat
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.ui.setupWithNavController
-import androidx.transition.TransitionInflater
 import dagger.android.support.DaggerFragment
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.MediaItemListAdapter
@@ -20,6 +19,7 @@ import hu.mrolcsi.muzik.common.view.MVVMViewHolder
 import hu.mrolcsi.muzik.databinding.FragmentAlbumDetailsBinding
 import hu.mrolcsi.muzik.databinding.ListItemDiscNumberBinding
 import hu.mrolcsi.muzik.databinding.ListItemSongBinding
+import hu.mrolcsi.muzik.extensions.applySharedElementTransition
 import hu.mrolcsi.muzik.library.songs.SongHolder
 import hu.mrolcsi.muzik.service.extensions.media.albumArtUri
 import kotlinx.android.synthetic.main.album_details_header.*
@@ -71,29 +71,10 @@ class AlbumDetailsFragment : DaggerFragment() {
 
     postponeEnterTransition()
 
-    val animationDuration = context?.resources?.getInteger(R.integer.preferredAnimationDuration)?.toLong() ?: 300L
-
-    enterTransition = TransitionInflater
-      .from(requireContext())
-      .inflateTransition(android.R.transition.move)
-      .setDuration(animationDuration)
-      .excludeTarget(imgCoverArt, true)
-
-    returnTransition = TransitionInflater
-      .from(requireContext())
-      .inflateTransition(android.R.transition.move)
-      .setDuration(animationDuration)
-      .excludeTarget(imgCoverArt, true)
-
-    sharedElementEnterTransition = TransitionInflater
-      .from(requireContext())
-      .inflateTransition(android.R.transition.move)
-      .setDuration(animationDuration)
-
-    sharedElementReturnTransition = TransitionInflater
-      .from(requireContext())
-      .inflateTransition(android.R.transition.move)
-      .setDuration(animationDuration)
+    applySharedElementTransition(
+      R.transition.cover_art_transition,
+      requireContext().resources.getInteger(R.integer.preferredAnimationDuration).toLong()
+    )
   }
 
   override fun onActivityCreated(savedInstanceState: Bundle?) {

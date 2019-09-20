@@ -1,8 +1,8 @@
 package hu.mrolcsi.muzik.library.artists
 
 import android.support.v4.media.MediaBrowserCompat
+import androidx.databinding.library.baseAdapters.BR
 import androidx.lifecycle.MutableLiveData
-import hu.mrolcsi.muzik.BR
 import hu.mrolcsi.muzik.common.viewmodel.DataBindingViewModel
 import hu.mrolcsi.muzik.common.viewmodel.ExecuteOnceNavCommandSource
 import hu.mrolcsi.muzik.common.viewmodel.ExecuteOnceUiCommandSource

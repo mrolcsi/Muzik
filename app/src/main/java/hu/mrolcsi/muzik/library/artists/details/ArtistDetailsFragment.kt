@@ -10,6 +10,7 @@ import androidx.navigation.fragment.navArgs
 import androidx.navigation.ui.setupWithNavController
 import androidx.recyclerview.widget.RecyclerView
 import dagger.android.support.DaggerFragment
+import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.MediaItemListAdapter
 import hu.mrolcsi.muzik.common.glide.GlideApp
 import hu.mrolcsi.muzik.common.glide.onLoadFailed
@@ -24,7 +25,6 @@ import hu.mrolcsi.muzik.theme.ThemeService
 import kotlinx.android.synthetic.main.artist_details_header.*
 import kotlinx.android.synthetic.main.fragment_artist_details.*
 import kotlinx.android.synthetic.main.fragment_artist_details_content.*
-import kotlinx.android.synthetic.main.list_item_album_content.*
 import javax.inject.Inject
 
 class ArtistDetailsFragment : DaggerFragment() {
@@ -42,9 +42,9 @@ class ArtistDetailsFragment : DaggerFragment() {
         orientation = RecyclerView.HORIZONTAL,
         themeService = themeService
       ).apply {
-        itemView.setOnClickListener {
+        itemView.setOnClickListener { view ->
           model?.let {
-            viewModel.onAlbumClick(it, imgCoverArt)
+            viewModel.onAlbumClick(it, view.findViewById(R.id.imgCoverArt))
           }
         }
       }

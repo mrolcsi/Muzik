@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.addCallback
 import androidx.annotation.ColorInt
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.GravityCompat
@@ -17,8 +18,6 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.transition.Transition
-import androidx.transition.TransitionInflater
 import dagger.android.support.DaggerFragment
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.pager.PagerSnapHelperVerbose
@@ -30,6 +29,7 @@ import hu.mrolcsi.muzik.common.viewmodel.observeAndRunNavCommands
 import hu.mrolcsi.muzik.common.viewmodel.observeAndRunUiCommands
 import hu.mrolcsi.muzik.databinding.FragmentPlayerBinding
 import hu.mrolcsi.muzik.extensions.applyNavigationBarColor
+import hu.mrolcsi.muzik.extensions.applySharedElementTransition
 import hu.mrolcsi.muzik.extensions.applyStatusBarColor
 import hu.mrolcsi.muzik.theme.ThemeService
 import kotlinx.android.synthetic.main.content_player.*
@@ -60,6 +60,13 @@ class PlayerFragment : DaggerFragment() {
   override fun onActivityCreated(savedInstanceState: Bundle?) {
     super.onActivityCreated(savedInstanceState)
 
+    activity?.onBackPressedDispatcher?.addCallback(this) {
+      if (drawerLayout.isDrawerOpen(GravityCompat.END))
+        drawerLayout.closeDrawer(GravityCompat.END)
+      else
+        findNavController().navigateUp()
+    }
+
     viewModel.apply {
       requireContext().observeAndRunUiCommands(viewLifecycleOwner, this)
       findNavController().observeAndRunNavCommands(viewLifecycleOwner, this)
@@ -80,24 +87,10 @@ class PlayerFragment : DaggerFragment() {
 
     postponeEnterTransition()
 
-    val animationDuration = context?.resources?.getInteger(R.integer.preferredAnimationDuration)?.toLong() ?: 300L
-
-    val transitionInflater = TransitionInflater.from(requireContext())
-
-    enterTransition = transitionInflater
-      .inflateTransition(R.transition.slide_bottom)
-      .setDuration(animationDuration)
-
-    (returnTransition as Transition)
-      .excludeChildren(rvQueue, true)
-
-    sharedElementEnterTransition = transitionInflater
-      .inflateTransition(R.transition.cover_art_transition)
-      .setDuration(animationDuration)
-
-    sharedElementReturnTransition = transitionInflater
-      .inflateTransition(R.transition.cover_art_transition)
-      .setDuration(animationDuration)
+    applySharedElementTransition(
+      R.transition.cover_art_transition,
+      requireContext().resources.getInteger(R.integer.preferredAnimationDuration).toLong()
+    )
   }
 
   override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
@@ -234,7 +227,6 @@ class PlayerFragment : DaggerFragment() {
         visibleId == queueId -> {
           // Make RecyclerView visible (no need to scroll)
           showRecyclerView()
-          (returnTransition as Transition).excludeTarget("coverArt$queueId", true)
         }
         queuePosition == RecyclerView.NO_POSITION ->
           // Try again after the adapter settles?
