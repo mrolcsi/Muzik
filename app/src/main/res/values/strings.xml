@@ -23,7 +23,7 @@
   <string name="error_renderer">An error occurred while playing the song. The song might be corrupted.</string>
   <string name="error_source">An error occurred while loading the song. Probably an unsupported format.</string>
   <string name="error_unexpected">An unexpected error occurred.</string>
-  <string name="library_grantAccessToSdCard">Grant Access to SD Card</string>
+  <string name="library_grantAccessToSdCard">Grant Access to storage</string>
   <string name="library_readExternalStorage_rationale">The app needs your permission to access your music collection. Please grant access by clicking on the button below, then answering \'Grant\'.</string>
   <string name="library_title">Library</string>
   <string name="mediaControl_next">Next</string>

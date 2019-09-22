@@ -21,9 +21,14 @@ import hu.mrolcsi.muzik.player.PlayerFragment
 import hu.mrolcsi.muzik.player.PlayerModule
 import hu.mrolcsi.muzik.player.playlist.PlaylistFragment
 import hu.mrolcsi.muzik.player.playlist.PlaylistModule
+import hu.mrolcsi.muzik.splash.SplashFragment
+import hu.mrolcsi.muzik.splash.SplashModule
 
 @Module
 abstract class FragmentsModule {
+
+  @ContributesAndroidInjector(modules = [SplashModule::class])
+  abstract fun contributeSplashFragment(): SplashFragment
 
   @ContributesAndroidInjector(modules = [LibraryModule::class])
   abstract fun contributeLibraryFragment(): LibraryFragment
