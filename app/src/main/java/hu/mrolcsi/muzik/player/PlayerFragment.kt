@@ -10,11 +10,13 @@ import androidx.activity.addCallback
 import androidx.annotation.ColorInt
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.GravityCompat
-import androidx.core.view.doOnNextLayout
 import androidx.core.view.doOnPreDraw
 import androidx.core.view.postDelayed
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.navigation.ui.setupWithNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -39,10 +41,10 @@ import kotlin.math.abs
 
 class PlayerFragment : DaggerFragment() {
 
-  @Inject
-  lateinit var viewModel: PlayerViewModel
-  @Inject
-  lateinit var themeService: ThemeService
+  private val args by navArgs<PlayerFragmentArgs>()
+
+  @Inject lateinit var viewModel: PlayerViewModel
+  @Inject lateinit var themeService: ThemeService
 
   private lateinit var binding: FragmentPlayerBinding
 
@@ -85,7 +87,7 @@ class PlayerFragment : DaggerFragment() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
-    postponeEnterTransition()
+    if (args.postponeEnterTransition) postponeEnterTransition()
 
     applySharedElementTransition(
       R.transition.cover_art_transition,
@@ -104,6 +106,34 @@ class PlayerFragment : DaggerFragment() {
     setupToolbar()
     setupPager()
     setupControls()
+
+    viewLifecycleOwner.lifecycle.addObserver(object : DefaultLifecycleObserver {
+
+      override fun onCreate(owner: LifecycleOwner) {
+        Log.d(LOG_TAG, "View Lifecycle: CREATED")
+      }
+
+      override fun onStart(owner: LifecycleOwner) {
+        Log.d(LOG_TAG, "View Lifecycle: STARTED")
+      }
+
+      override fun onResume(owner: LifecycleOwner) {
+        Log.d(LOG_TAG, "View Lifecycle: RESUMED")
+      }
+
+      override fun onPause(owner: LifecycleOwner) {
+        Log.d(LOG_TAG, "View Lifecycle: PAUSED")
+      }
+
+      override fun onStop(owner: LifecycleOwner) {
+        Log.d(LOG_TAG, "View Lifecycle: STOPPED")
+      }
+
+      override fun onDestroy(owner: LifecycleOwner) {
+        Log.d(LOG_TAG, "View Lifecycle: DESTROYED")
+        owner.lifecycle.removeObserver(this)
+      }
+    })
   }
 
   //endregion
@@ -130,10 +160,6 @@ class PlayerFragment : DaggerFragment() {
       layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
       adapter = queueAdapter
       setHasFixedSize(true)
-      doOnNextLayout {
-        // This could be more sophisticated
-        it.postDelayed(500) { updatePager("setupPagerWithDelay") }
-      }
     }
 
     snapHelper = RVPagerSnapHelperListenable().attachToRecyclerView(rvQueue, object : RVPagerStateListener {
@@ -196,6 +222,8 @@ class PlayerFragment : DaggerFragment() {
   }
 
   private fun updatePager(caller: String) {
+    Log.v(LOG_TAG, "updatePager(calledFrom = $caller)")
+
     // Scroll pager to current item
     val visiblePosition = snapHelper.findSnapPosition(rvQueue.layoutManager)
 
@@ -214,7 +242,6 @@ class PlayerFragment : DaggerFragment() {
     Log.v(
       LOG_TAG,
       "updatePager(" +
-          "calledFrom=$caller, " +
           "visiblePosition=$visiblePosition, " +
           "visibleId=$visibleId, " +
           "queuePosition=$queuePosition, " +
@@ -230,7 +257,7 @@ class PlayerFragment : DaggerFragment() {
         }
         queuePosition == RecyclerView.NO_POSITION ->
           // Try again after the adapter settles?
-          rvQueue.postDelayed(300) { updatePager("updatePagerDelayed: SCROLL_STATE_IDLE") }
+          rvQueue.postDelayed(300) { updatePager("updatePagerDelayed: queuePosition = -1") }
         else -> {
           // Scroll to now playing song
           showRecyclerView()

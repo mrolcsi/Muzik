@@ -2,9 +2,7 @@ package hu.mrolcsi.muzik.service
 
 import android.Manifest
 import android.app.Notification
-import android.app.PendingIntent
 import android.app.Service
-import android.app.TaskStackBuilder
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.AsyncTask
@@ -15,10 +13,12 @@ import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.media.session.MediaButtonReceiver
+import androidx.navigation.NavDeepLinkBuilder
 import com.bumptech.glide.request.target.Target
 import com.google.android.exoplayer2.ExoPlaybackException
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
+import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.glide.GlideApp
 import hu.mrolcsi.muzik.common.glide.onResourceReady
 import hu.mrolcsi.muzik.database.playqueue.PlayQueueDatabase
@@ -57,10 +57,12 @@ class MuzikPlayerService : MuzikBrowserService() {
 
     // Create a MediaSessionCompat
     mMediaSession = MediaSessionCompat(this, LOG_TAG).apply {
-      val playerActivityPendingIntent = TaskStackBuilder.create(this@MuzikPlayerService)
-        .addNextIntent(Intent(ACTION_OPEN_PLAYER))
-        .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)
-      setSessionActivity(playerActivityPendingIntent)
+      // Prepare Pending Intent to Player
+      val playerPendingIntent = NavDeepLinkBuilder(this@MuzikPlayerService)
+        .setGraph(R.navigation.main_navigation)
+        .setDestination(R.id.navPlayer)
+        .createPendingIntent()
+      setSessionActivity(playerPendingIntent)
 
       // Set the session's token so that client activities can communicate with it.
       setSessionToken(sessionToken)
@@ -219,7 +221,5 @@ class MuzikPlayerService : MuzikBrowserService() {
 
   companion object {
     private const val LOG_TAG = "MuzikPlayerService"
-
-    const val ACTION_OPEN_PLAYER = "hu.mrolcsi.muzik.OPEN_PLAYER"
   }
 }

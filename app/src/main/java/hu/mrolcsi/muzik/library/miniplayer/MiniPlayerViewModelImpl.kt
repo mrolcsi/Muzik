@@ -61,7 +61,7 @@ open class MiniPlayerViewModelImpl @Inject constructor(
     sendNavCommand {
       val transitionName = ViewCompat.getTransitionName(transitionedView)!!
       navigate(
-        LibraryFragmentDirections.actionLibraryToPlayer(),
+        LibraryFragmentDirections.actionLibraryToPlayer(true),
         FragmentNavigatorExtras(transitionedView to transitionName)
       )
     }

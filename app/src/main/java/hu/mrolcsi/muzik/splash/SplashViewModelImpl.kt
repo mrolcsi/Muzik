@@ -3,6 +3,7 @@ package hu.mrolcsi.muzik.splash
 import android.Manifest
 import androidx.databinding.library.baseAdapters.BR
 import com.tbruyelle.rxpermissions2.RxPermissions
+import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.viewmodel.DataBindingViewModel
 import hu.mrolcsi.muzik.common.viewmodel.ExecuteOnceNavCommandSource
 import hu.mrolcsi.muzik.common.viewmodel.ExecuteOnceUiCommandSource
@@ -43,7 +44,8 @@ class SplashViewModelImpl @Inject constructor(
       .subscribeBy { permission ->
         when {
           permission.granted -> sendNavCommand {
-            navigate(SplashFragmentDirections.actionToLibrary())
+            if (currentDestination?.id == R.id.navSplash)
+              navigate(SplashFragmentDirections.actionToLibrary())
           }
           permission.shouldShowRequestPermissionRationale ->
             isPermissionRationaleVisible = true

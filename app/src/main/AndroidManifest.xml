@@ -44,14 +44,9 @@
         <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
 
-      <intent-filter>
-        <action android:name="hu.mrolcsi.muzik.OPEN_PLAYER" />
+      <nav-graph android:value="@navigation/main_navigation" />
 
-        <category android:name="android.intent.category.DEFAULT" />
-      </intent-filter>
     </activity>
-
-    <activity android:name=".player.PlayerActivity" />
 
     <activity
       android:name="cat.ereza.customactivityoncrash.activity.DefaultErrorActivity"

@@ -51,6 +51,11 @@
   <fragment
     android:id="@+id/navPlayer"
     android:name="hu.mrolcsi.muzik.player.PlayerFragment"
-    tools:layout="@layout/fragment_player" />
+    tools:layout="@layout/fragment_player">
+    <argument
+      android:name="postponeEnterTransition"
+      app:argType="boolean"
+      android:defaultValue="false" />
+  </fragment>
 
 </navigation>
