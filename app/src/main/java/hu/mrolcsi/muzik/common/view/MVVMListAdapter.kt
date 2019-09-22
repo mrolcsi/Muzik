@@ -47,13 +47,4 @@ open class MVVMListAdapter<ItemViewModel, ViewHolder : MVVMViewHolder<in ItemVie
       }
     } ?: super.getItemId(position)
   }
-
-  fun getItemPositionById(id: Long): Int {
-    for (i in 0 until itemCount) {
-      if (getItemId(i) == id) {
-        return i
-      }
-    }
-    return RecyclerView.NO_POSITION
-  }
 }

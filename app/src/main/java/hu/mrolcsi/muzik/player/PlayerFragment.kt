@@ -75,11 +75,10 @@ class PlayerFragment : DaggerFragment() {
 
       queue.observe(viewLifecycleOwner, Observer {
         queueAdapter.onChanged(it)
-        updatePager("onQueueChanged")
       })
 
-      activeQueueId.observe(viewLifecycleOwner, Observer {
-        updatePager("onActiveQueueIdChanged")
+      activeQueuePosition.observe(viewLifecycleOwner, Observer {
+        updatePager("onActiveQueuePositionChanged", it)
       })
     }
   }
@@ -203,7 +202,7 @@ class PlayerFragment : DaggerFragment() {
 
         if (state == RecyclerView.SCROLL_STATE_IDLE) {
           // check if item position is different from the now playing position
-          val queueId = viewModel.getActiveQueueId()
+          val queueId = viewModel.activeQueueId
           val pagerPosition = snapHelper.findSnapPosition(rvQueue.layoutManager)
           val visibleId = rvQueue.adapter?.getItemId(pagerPosition) ?: RecyclerView.NO_ID
 
@@ -221,23 +220,22 @@ class PlayerFragment : DaggerFragment() {
     })
   }
 
-  private fun updatePager(caller: String) {
-    Log.v(LOG_TAG, "updatePager(calledFrom = $caller)")
+  private fun updatePager(caller: String, queuePosition: Int) {
+    Log.v(LOG_TAG, "updatePager(calledFrom = $caller, queuePosition = $queuePosition)")
 
     // Scroll pager to current item
     val visiblePosition = snapHelper.findSnapPosition(rvQueue.layoutManager)
 
     // Skip if Pager is not ready yet
     if (visiblePosition < 0) {
-      rvQueue.postDelayed(300) { updatePager("updatePagerDelayed: visiblePosition < 0") }
+      rvQueue.postDelayed(300) { updatePager("updatePagerDelayed: visiblePosition < 0", queuePosition) }
       return
     }
 
     val visibleId = rvQueue.adapter?.getItemId(visiblePosition) ?: RecyclerView.NO_ID
 
     // If Metadata has changed, then PlaybackState should have changed as well.
-    val queueId = viewModel.getActiveQueueId()
-    val queuePosition = queueAdapter.getItemPositionById(queueId)
+    val queueId = viewModel.activeQueueId
 
     Log.v(
       LOG_TAG,
@@ -257,7 +255,7 @@ class PlayerFragment : DaggerFragment() {
         }
         queuePosition == RecyclerView.NO_POSITION ->
           // Try again after the adapter settles?
-          rvQueue.postDelayed(300) { updatePager("updatePagerDelayed: queuePosition = -1") }
+          rvQueue.postDelayed(300) { updatePager("updatePagerDelayed: queuePosition = -1", queuePosition) }
         else -> {
           // Scroll to now playing song
           showRecyclerView()

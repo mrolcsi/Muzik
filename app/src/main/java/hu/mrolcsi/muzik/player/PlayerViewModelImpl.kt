@@ -6,7 +6,11 @@ import android.graphics.BitmapFactory
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
-import android.support.v4.media.session.PlaybackStateCompat.*
+import android.support.v4.media.session.PlaybackStateCompat.REPEAT_MODE_ALL
+import android.support.v4.media.session.PlaybackStateCompat.REPEAT_MODE_NONE
+import android.support.v4.media.session.PlaybackStateCompat.REPEAT_MODE_ONE
+import android.support.v4.media.session.PlaybackStateCompat.SHUFFLE_MODE_ALL
+import android.support.v4.media.session.PlaybackStateCompat.SHUFFLE_MODE_NONE
 import android.util.Log
 import android.widget.Toast
 import androidx.databinding.library.baseAdapters.BR
@@ -22,11 +26,17 @@ import hu.mrolcsi.muzik.common.viewmodel.ObservableImpl
 import hu.mrolcsi.muzik.extensions.secondsToTimeStamp
 import hu.mrolcsi.muzik.library.miniplayer.MiniPlayerViewModelImpl
 import hu.mrolcsi.muzik.media.MediaService
-import hu.mrolcsi.muzik.service.extensions.media.*
+import hu.mrolcsi.muzik.service.extensions.media.coverArtUri
+import hu.mrolcsi.muzik.service.extensions.media.isPauseEnabled
+import hu.mrolcsi.muzik.service.extensions.media.isPlayEnabled
+import hu.mrolcsi.muzik.service.extensions.media.isPlaying
+import hu.mrolcsi.muzik.service.extensions.media.isSkipToNextEnabled
+import hu.mrolcsi.muzik.service.extensions.media.isSkipToPreviousEnabled
 import hu.mrolcsi.muzik.theme.ThemedViewModelImpl
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.rxkotlin.Observables
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
@@ -88,9 +98,8 @@ class PlayerViewModelImpl @Inject constructor(
   }
 
   override val queue = MutableLiveData<List<ThemedQueueItem>>()
-  override val activeQueueId = MutableLiveData<Long>()
-
-  override fun getActiveQueueId(): Long = activeQueueId.value ?: -1
+  override var activeQueueId: Long = -1
+  override val activeQueuePosition = MutableLiveData<Int>()
 
   override fun skipToQueueItem(itemId: Long) {
     mediaService.skipToQueueItem(itemId)
@@ -112,12 +121,6 @@ class PlayerViewModelImpl @Inject constructor(
   )
 
   init {
-    mediaService.playbackState
-      .map { it.activeQueueItemId }
-      .distinctUntilChanged()
-      .subscribeBy { activeQueueId.value = it }
-      .disposeOnCleared()
-
     mediaService.shuffleMode
       .observeOn(AndroidSchedulers.mainThread())
       .subscribeBy(
@@ -167,12 +170,23 @@ class PlayerViewModelImpl @Inject constructor(
         onError = { showError(this, it) }
       ).disposeOnCleared()
 
-    mediaService.queue
-      .distinctUntilChanged { t1, t2 -> t1.map { it.queueId } == t2.map { it.queueId } }
-      .switchMapSingle { queueItems -> queueItems.createThemes() }
+    Observables.combineLatest(
+      mediaService.queue
+        .distinctUntilChanged()
+        .switchMapSingle { queueItems -> queueItems.createThemes() },
+      mediaService.playbackState
+        .map { it.activeQueueItemId }
+        .distinctUntilChanged()
+        .doOnNext { activeQueueId = it }
+    )
+      .distinctUntilChanged()
+      .doOnNext { (queue, activeQueueId) ->
+        val position = queue.indexOfFirst { it.queueItem.queueId == activeQueueId }
+        activeQueuePosition.postValue(position)
+      }
       .observeOn(AndroidSchedulers.mainThread())
       .subscribeBy(
-        onNext = { queue.value = it },
+        onNext = { queue.value = it.first },
         onError = { showError(this, it) }
       ).disposeOnCleared()
   }
@@ -216,10 +230,6 @@ class PlayerViewModelImpl @Inject constructor(
     isNextEnabled = playbackState.isSkipToNextEnabled
 
     isPlaying = playbackState.isPlaying
-
-    if (activeQueueId.value != playbackState.activeQueueItemId) {
-      activeQueueId.value = playbackState.activeQueueItemId
-    }
   }
 
   override fun updateMetadata(metadata: MediaMetadataCompat) {

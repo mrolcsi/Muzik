@@ -34,8 +34,8 @@ interface PlayerViewModel : MiniPlayerViewModel {
   fun onStopTrackingTouch()
 
   val queue: LiveData<List<ThemedQueueItem>>
-  val activeQueueId: LiveData<Long>
-  fun getActiveQueueId(): Long
+  val activeQueueId: Long
+  val activeQueuePosition: LiveData<Int>
 
   fun skipToQueueItem(itemId: Long)
 
