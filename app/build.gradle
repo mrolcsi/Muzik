@@ -3,6 +3,8 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'androidx.navigation.safeargs.kotlin'
+apply plugin: 'com.google.gms.google-services'
+apply plugin: 'io.fabric'
 
 apply from: "https://gist.githubusercontent.com/mrolcsi/588d5dd7a309fab501fc/raw/30b88f5217596c425c43d101dd29708a785b05f1/Version%2520code%2520and%2520name%2520generation%2520using%2520Gradle"
 
@@ -121,6 +123,10 @@ dependencies {
     implementation 'com.squareup.retrofit2:converter-gson:2.6.1'
     implementation 'com.google.code.gson:gson:2.8.5'
     implementation 'com.squareup.retrofit2:adapter-rxjava2:2.6.1'
+
+    // Firebase
+    implementation 'com.google.firebase:firebase-core:17.2.0'
+    implementation 'com.google.firebase:firebase-analytics:17.2.0'
 
     // Testing
     testImplementation 'junit:junit:4.12'
