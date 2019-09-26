@@ -33,9 +33,7 @@ interface PlayerViewModel : MiniPlayerViewModel {
   fun onSeek(progress: Int, fromUser: Boolean)
   fun onStopTrackingTouch()
 
-  val queue: LiveData<List<ThemedQueueItem>>
-  val activeQueueId: Long
-  val activeQueuePosition: LiveData<Int>
+  val queueState: LiveData<QueueState>
 
   fun skipToQueueItem(itemId: Long)
 
@@ -62,3 +60,8 @@ data class ThemedQueueItem(
 
   }
 }
+
+data class QueueState(
+  val queue: List<ThemedQueueItem>,
+  val activeQueueId: Long
+)

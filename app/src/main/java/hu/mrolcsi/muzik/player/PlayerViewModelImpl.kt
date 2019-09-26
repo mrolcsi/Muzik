@@ -11,7 +11,6 @@ import android.support.v4.media.session.PlaybackStateCompat.REPEAT_MODE_NONE
 import android.support.v4.media.session.PlaybackStateCompat.REPEAT_MODE_ONE
 import android.support.v4.media.session.PlaybackStateCompat.SHUFFLE_MODE_ALL
 import android.support.v4.media.session.PlaybackStateCompat.SHUFFLE_MODE_NONE
-import android.util.Log
 import android.widget.Toast
 import androidx.databinding.library.baseAdapters.BR
 import androidx.lifecycle.MutableLiveData
@@ -97,9 +96,7 @@ class PlayerViewModelImpl @Inject constructor(
     mediaService.seekTo(seekProgress * 1000L)
   }
 
-  override val queue = MutableLiveData<List<ThemedQueueItem>>()
-  override var activeQueueId: Long = -1
-  override val activeQueuePosition = MutableLiveData<Int>()
+  override val queueState = MutableLiveData<QueueState>()
 
   override fun skipToQueueItem(itemId: Long) {
     mediaService.skipToQueueItem(itemId)
@@ -177,24 +174,17 @@ class PlayerViewModelImpl @Inject constructor(
       mediaService.playbackState
         .map { it.activeQueueItemId }
         .distinctUntilChanged()
-        .doOnNext { activeQueueId = it }
     )
-      .distinctUntilChanged()
-      .doOnNext { (queue, activeQueueId) ->
-        val position = queue.indexOfFirst { it.queueItem.queueId == activeQueueId }
-        activeQueuePosition.postValue(position)
-      }
+      .map { (queue, activeQueueId) -> QueueState(queue, activeQueueId) }
       .observeOn(AndroidSchedulers.mainThread())
       .subscribeBy(
-        onNext = { queue.value = it.first },
+        onNext = { queueState.value = it },
         onError = { showError(this, it) }
       ).disposeOnCleared()
   }
 
   private fun List<MediaSessionCompat.QueueItem>.createThemes() =
     Observable.fromIterable(this)
-      .doOnSubscribe { Log.d(LOG_TAG, "$this -> onSubscribe()") }
-      .doOnTerminate { Log.d(LOG_TAG, "$this -> onTerminate()") }
       .subscribeOn(Schedulers.computation())
       .concatMapSingle { item ->
         // Get coverArt

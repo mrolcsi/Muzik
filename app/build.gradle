@@ -104,8 +104,8 @@ dependencies {
     debugImplementation "androidx.palette:palette-ktx:1.0.0"
 
     // Glide
-    implementation 'com.github.bumptech.glide:glide:4.9.0'
-    kapt 'com.github.bumptech.glide:compiler:4.9.0'
+    implementation 'com.github.bumptech.glide:glide:4.10.0'
+    kapt 'com.github.bumptech.glide:compiler:4.10.0'
 
     // Checkerboard Drawable
     debugImplementation 'com.github.duanhong169:checkerboarddrawable:1.0.2'
@@ -116,10 +116,10 @@ dependencies {
     implementation "androidx.room:room-rxjava2:2.2.0-rc01"
 
     // Retrofit & Gson
-    implementation 'com.squareup.retrofit2:retrofit:2.6.1'
-    implementation 'com.squareup.retrofit2:converter-gson:2.6.1'
+    implementation 'com.squareup.retrofit2:retrofit:2.6.2'
+    implementation 'com.squareup.retrofit2:converter-gson:2.6.2'
     implementation 'com.google.code.gson:gson:2.8.5'
-    implementation 'com.squareup.retrofit2:adapter-rxjava2:2.6.1'
+    implementation 'com.squareup.retrofit2:adapter-rxjava2:2.6.2'
 
     // Firebase & Crashlytics
     implementation 'com.google.firebase:firebase-core:17.2.0'
