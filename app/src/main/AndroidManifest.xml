@@ -48,11 +48,6 @@
 
     </activity>
 
-    <activity
-      android:name="cat.ereza.customactivityoncrash.activity.DefaultErrorActivity"
-      android:process=":error_activity"
-      android:theme="@style/Theme.MaterialComponents.Light.DarkActionBar" />
-
   </application>
 
 </manifest>
