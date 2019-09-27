@@ -10,6 +10,7 @@ import androidx.activity.addCallback
 import androidx.annotation.ColorInt
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.GravityCompat
+import androidx.core.view.ViewCompat
 import androidx.core.view.doOnPreDraw
 import androidx.core.view.postDelayed
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -281,6 +282,10 @@ class PlayerFragment : DaggerFragment() {
 
   private fun showRecyclerView() {
     (view?.parent as? ViewGroup)?.doOnPreDraw { startPostponedEnterTransition() }
+    ViewCompat.animate(rvQueue)
+      .alpha(1f)
+      .setDuration(context?.resources?.getInteger(R.integer.preferredAnimationDuration)?.toLong() ?: 300L)
+      .start()
   }
 
   private fun applyTheme(@ColorInt backgroundColor: Int, @ColorInt foregroundColor: Int) {

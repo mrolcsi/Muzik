@@ -13,9 +13,9 @@
     <action
       android:id="@+id/action_to_library"
       app:destination="@id/navLibrary"
-      app:launchSingleTop="true"
       app:enterAnim="@anim/fragment_open_enter"
       app:exitAnim="@anim/fragment_open_exit"
+      app:launchSingleTop="true"
       app:popEnterAnim="@anim/fragment_close_enter"
       app:popExitAnim="@anim/fragment_close_exit"
       app:popUpTo="@+id/main_navigation" />
@@ -23,11 +23,11 @@
     <action
       android:id="@+id/action_to_player"
       app:destination="@id/navPlayer"
-      app:enterAnim="@anim/fragment_open_enter"
+      app:enterAnim="@anim/slide_in_up"
       app:exitAnim="@anim/fragment_open_exit"
-      app:popEnterAnim="@anim/fragment_close_enter"
-      app:popExitAnim="@anim/fragment_close_exit"
       app:launchSingleTop="true"
+      app:popEnterAnim="@anim/fragment_close_enter"
+      app:popExitAnim="@anim/slide_out_down"
       app:popUpTo="@+id/main_navigation" />
 
   </fragment>
@@ -52,10 +52,12 @@
     android:id="@+id/navPlayer"
     android:name="hu.mrolcsi.muzik.player.PlayerFragment"
     tools:layout="@layout/fragment_player">
+
     <argument
       android:name="postponeEnterTransition"
-      app:argType="boolean"
-      android:defaultValue="false" />
+      android:defaultValue="false"
+      app:argType="boolean" />
+
   </fragment>
 
 </navigation>

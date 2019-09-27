@@ -40,6 +40,7 @@
       android:id="@+id/rvQueue"
       android:layout_width="0dp"
       android:layout_height="0dp"
+      android:alpha="0.0"
       app:layout_constraintBottom_toBottomOf="@id/space"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="@id/space"
