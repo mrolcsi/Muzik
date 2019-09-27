@@ -222,6 +222,11 @@ class PlayerFragment : DaggerFragment() {
   private fun updatePager(caller: String, queueId: Long) {
     Log.v(LOG_TAG, "updatePager(calledFrom = $caller, queueId = $queueId)")
 
+    if (queueId < 0) {
+      Log.v(LOG_TAG, "updatePager(queueId=$queueId) Update cancelled.")
+      return
+    }
+
     // Scroll pager to current item
     val visiblePosition = snapHelper.findSnapPosition(rvQueue.layoutManager)
 
