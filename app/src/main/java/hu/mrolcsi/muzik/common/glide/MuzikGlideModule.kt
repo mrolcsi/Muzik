@@ -74,28 +74,6 @@ fun <R> GlideRequest<R>.onResourceReady(callback: (resource: R) -> Unit): GlideR
   })
 }
 
-fun <R> GlideRequest<R>.onResourceReadyWithTarget(callback: (target: Target<R>, resource: R) -> Boolean): GlideRequest<R> {
-  return addListener(object : RequestListener<R> {
-    override fun onLoadFailed(
-      e: GlideException?,
-      model: Any,
-      target: Target<R>,
-      isFirstResource: Boolean
-    ): Boolean = false
-
-    override fun onResourceReady(
-      resource: R,
-      model: Any,
-      target: Target<R>,
-      dataSource: DataSource?,
-      isFirstResource: Boolean
-    ): Boolean {
-      return callback.invoke(target, resource)
-    }
-
-  })
-}
-
 fun <R> GlideRequest<R>.onLoadFailed(callback: (error: GlideException?) -> Boolean) =
   addListener(object : RequestListener<R> {
     override fun onResourceReady(
@@ -117,7 +95,26 @@ fun <R> GlideRequest<R>.onLoadFailed(callback: (error: GlideException?) -> Boole
   })
 
 fun <R> GlideRequest<R>.toSingle() = Single.create<R> { emitter ->
-  this.onResourceReady { emitter.onSuccess(it) }
-    .onLoadFailed { emitter.onError(it!!); false }
-    .preload()
+  this.addListener(object : RequestListener<R> {
+    override fun onLoadFailed(
+      e: GlideException?,
+      model: Any?,
+      target: Target<R>?,
+      isFirstResource: Boolean
+    ): Boolean {
+      emitter.onError(e!!)
+      return true
+    }
+
+    override fun onResourceReady(
+      resource: R,
+      model: Any?,
+      target: Target<R>?,
+      dataSource: DataSource?,
+      isFirstResource: Boolean
+    ): Boolean {
+      emitter.onSuccess(resource)
+      return true
+    }
+  }).preload()
 }
