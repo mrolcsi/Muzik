@@ -1,7 +1,6 @@
 package hu.mrolcsi.muzik.player
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
@@ -33,7 +32,6 @@ import hu.mrolcsi.muzik.service.extensions.media.isSkipToNextEnabled
 import hu.mrolcsi.muzik.service.extensions.media.isSkipToPreviousEnabled
 import hu.mrolcsi.muzik.theme.ThemedViewModelImpl
 import io.reactivex.Observable
-import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.Observables
 import io.reactivex.rxkotlin.subscribeBy
@@ -193,11 +191,7 @@ class PlayerViewModelImpl @Inject constructor(
           .load(item.description.coverArtUri)
           .override(Target.SIZE_ORIGINAL)
           .toSingle()
-          .onErrorResumeNext {
-            Single.create<Bitmap> { emitter ->
-              emitter.onSuccess(BitmapFactory.decodeResource(context.resources, R.drawable.placeholder_cover_art))
-            }
-          }
+          .onErrorReturn { BitmapFactory.decodeResource(context.resources, R.drawable.placeholder_cover_art) }
           .map { item to it }
       }
       .concatMapSingle { (item, coverArt) ->

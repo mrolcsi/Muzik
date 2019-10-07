@@ -2,6 +2,7 @@ package hu.mrolcsi.muzik.common.glide
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.util.Log
 import com.bumptech.glide.GlideBuilder
 import com.bumptech.glide.annotation.GlideModule
 import com.bumptech.glide.load.DataSource
@@ -44,6 +45,8 @@ class MuzikGlideModule : AppGlideModule() {
         .placeholder(null)
         .error(R.drawable.placeholder_cover_art)
     )
+
+    builder.setLogLevel(Log.ERROR)
   }
 
   companion object {
