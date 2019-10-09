@@ -33,6 +33,9 @@ inline val MediaDescriptionCompat.albumArtist: String?
   get() = this.extras?.getString("album_artist")  // MediaStore.Audio.AudioColumns.ALBUM_ARTIST
     ?: this.extras?.getString(MediaMetadataCompat.METADATA_KEY_ALBUM_ARTIST)
 
+inline val MediaDescriptionCompat.albumId: Long?
+  get() = this.extras?.getString(MediaStore.Audio.Media.ALBUM_ID)?.toLong()
+
 inline val MediaDescriptionCompat.albumKey: String?
   get() = this.extras?.getString(MediaStore.Audio.AlbumColumns.ALBUM_KEY)
 
@@ -49,6 +52,9 @@ inline val MediaDescriptionCompat.artist: String?
   get() = subtitle?.toString()
     ?: this.extras?.getString(MediaStore.Audio.ArtistColumns.ARTIST)
     ?: this.extras?.getString(MediaMetadataCompat.METADATA_KEY_ARTIST)
+
+inline val MediaDescriptionCompat.artistId: Long?
+  get() = this.extras?.getString(MediaStore.Audio.Media.ARTIST_ID)?.toLong()
 
 inline val MediaDescriptionCompat.artistKey: String?
   get() = this.extras?.getString(MediaStore.Audio.ArtistColumns.ARTIST_KEY)

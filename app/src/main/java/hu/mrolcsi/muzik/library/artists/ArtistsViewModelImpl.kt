@@ -9,6 +9,7 @@ import hu.mrolcsi.muzik.common.viewmodel.ExecuteOnceUiCommandSource
 import hu.mrolcsi.muzik.common.viewmodel.ObservableImpl
 import hu.mrolcsi.muzik.library.pager.LibraryPagerFragmentDirections
 import hu.mrolcsi.muzik.media.MediaRepository
+import hu.mrolcsi.muzik.service.extensions.media.id
 import hu.mrolcsi.muzik.theme.ThemedViewModel
 import hu.mrolcsi.muzik.theme.ThemedViewModelImpl
 import io.reactivex.rxkotlin.subscribeBy
@@ -43,7 +44,7 @@ class ArtistsViewModelImpl @Inject constructor(
   override fun onSelect(item: MediaBrowserCompat.MediaItem) {
     sendNavCommand {
       navigate(
-        LibraryPagerFragmentDirections.actionToArtistDetails(item)
+        LibraryPagerFragmentDirections.actionToArtistDetails(item.description.id)
       )
     }
   }

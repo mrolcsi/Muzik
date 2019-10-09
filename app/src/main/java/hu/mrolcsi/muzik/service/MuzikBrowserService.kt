@@ -234,10 +234,51 @@ abstract class MuzikBrowserService : MediaBrowserServiceCompat() {
       val mediaItems = emptyList<MediaBrowserCompat.MediaItem>().toMutableList()
 
       when (parentId) {
-        MEDIA_ROOT_ALBUMS -> {
+        MEDIA_ROOT_ARTIST_BY_ID -> {
+          // Load artist by id
+          options.getLong(OPTION_ARTIST_ID).takeIf { it > 0 }?.let { artistId ->
+            val selection = "${MediaStore.Audio.AudioColumns._ID} = ?"
+            val selectionArgs = arrayOf(artistId.toString())
+            if (useInternal) mediaItems.addAll(
+              gatherArtists(
+                MediaStore.Audio.Artists.INTERNAL_CONTENT_URI,
+                selection,
+                selectionArgs
+              )
+            )
+            if (useExternal) mediaItems.addAll(
+              gatherArtists(
+                MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI,
+                selection,
+                selectionArgs
+              )
+            )
+          }
+        }
+        MEDIA_ROOT_ALBUM_BY_ID -> {
+          // Load album by id
+          options.getLong(OPTION_ALBUM_ID).takeIf { it > 0 }?.let { albumId ->
+            val selection = "${MediaStore.Audio.AudioColumns._ID} = ?"
+            val selectionArgs = arrayOf(albumId.toString())
+            if (useInternal) mediaItems.addAll(
+              gatherAlbums(
+                MediaStore.Audio.Albums.INTERNAL_CONTENT_URI,
+                selection,
+                selectionArgs
+              )
+            )
+            if (useExternal) mediaItems.addAll(
+              gatherAlbums(
+                MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
+                selection,
+                selectionArgs
+              )
+            )
+          }
+        }
+        MEDIA_ROOT_ALBUMS_BY_ARTIST -> {
           // Load albums by artist
-          val artistId = options.getLong(OPTION_ARTIST_ID)
-          if (artistId > 0) {
+          options.getLong(OPTION_ARTIST_ID).takeIf { it > 0 }?.let { artistId ->
             val selection = "${MediaStore.Audio.AudioColumns.ARTIST_ID} = ?"
             val selectionArgs = arrayOf(artistId.toString())
             if (useInternal) mediaItems.addAll(
@@ -256,9 +297,9 @@ abstract class MuzikBrowserService : MediaBrowserServiceCompat() {
             )
           }
         }
-        MEDIA_ROOT_SONGS -> {
-          val artistId = options.getLong(OPTION_ARTIST_ID)
-          if (artistId > 0) {
+        MEDIA_ROOT_SONGS_BY_ARTIST -> {
+          // Load songs by artist
+          options.getLong(OPTION_ARTIST_ID).takeIf { it > 0 }?.let { artistId ->
             val selection = "${MediaStore.Audio.AudioColumns.ARTIST_ID} = ?"
             val selectionArgs = arrayOf(artistId.toString())
             if (useInternal) mediaItems.addAll(
@@ -276,9 +317,10 @@ abstract class MuzikBrowserService : MediaBrowserServiceCompat() {
               )
             )
           }
-
-          val albumId = options.getLong(OPTION_ALBUM_ID)
-          if (albumId > 0) {
+        }
+        MEDIA_ROOT_SONGS_FROM_ALBUM -> {
+          // Load songs from album
+          options.getLong(OPTION_ALBUM_ID).takeIf { it > 0 }?.let { albumId ->
             val selection = "${MediaStore.Audio.AudioColumns.ALBUM_ID} = ?"
             val selectionArgs = arrayOf(albumId.toString())
             if (useInternal) mediaItems.addAll(
@@ -299,9 +341,12 @@ abstract class MuzikBrowserService : MediaBrowserServiceCompat() {
         }
       }
 
-      emitter.onSuccess(mediaItems)
+      if (!emitter.isDisposed) {
+        emitter.onSuccess(mediaItems)
+      }
     }
       .subscribeOn(Schedulers.io())
+      .doOnDispose { result.sendResult(null) }
       .subscribeBy { result.sendResult(it) }
       .addTo(disposables)
 
@@ -338,14 +383,21 @@ abstract class MuzikBrowserService : MediaBrowserServiceCompat() {
     private const val LOG_TAG = "MuzikBrowserService"
 
     const val MEDIA_ROOT_ARTISTS = "media_artists"
+    const val MEDIA_ROOT_ARTIST_BY_ID = "media_artist_by_id"
+
     const val MEDIA_ROOT_ALBUMS = "media_albums"
+    const val MEDIA_ROOT_ALBUM_BY_ID = "media_album_by_id"
+    const val MEDIA_ROOT_ALBUMS_BY_ARTIST = "media_album_by_artist"
+
     const val MEDIA_ROOT_SONGS = "media_songs"
+    const val MEDIA_ROOT_SONGS_BY_ARTIST = "media_songs_by_artist"
+    const val MEDIA_ROOT_SONGS_FROM_ALBUM = "media_songs_from_album"
 
     const val OPTION_ARTIST_ID = "artist_id"
     const val OPTION_ALBUM_ID = "album_id"
     const val OPTION_SONG_ID = "song_id"
 
-    private const val MEDIA_ROOT_ID = MEDIA_ROOT_ARTISTS
+    private const val MEDIA_ROOT_ID = MEDIA_ROOT_ARTIST_BY_ID
 
     private const val EMPTY_MEDIA_ROOT_ID = "empty_root_id"
   }

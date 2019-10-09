@@ -1,9 +1,7 @@
 package hu.mrolcsi.muzik.discogs
 
 import android.net.Uri
-import android.support.v4.media.MediaBrowserCompat
 import com.google.android.exoplayer2.util.Log
-import hu.mrolcsi.muzik.service.extensions.media.artist
 import io.reactivex.Maybe
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
@@ -16,17 +14,17 @@ class DiscogsServiceImpl @Inject constructor(
 
   private val cache = HashMap<String, Uri>()
 
-  override fun getArtistPictureUrl(artistItem: MediaBrowserCompat.MediaItem): Maybe<Uri> {
-    val pictureUri = cache[artistItem.description.artist]
+  override fun getArtistPictureUrl(artistName: String?): Maybe<Uri> {
+    val pictureUri = cache[artistName]
     return if (pictureUri != null) {
       Maybe.just(pictureUri)
     } else {
-      fetchPictureUrl(artistItem)
+      fetchPictureUrl(artistName)
     }
   }
 
-  private fun fetchPictureUrl(artistItem: MediaBrowserCompat.MediaItem): Maybe<Uri> {
-    return artistItem.description.artist?.let { artist ->
+  private fun fetchPictureUrl(artistName: String?): Maybe<Uri> {
+    return artistName?.let { artist ->
       discogsApi.searchForArtist(artist = artist)
         .subscribeOn(Schedulers.io())
         .doOnError { Log.e("DiscogsService", "fetchPictureUrl($artist) Got error: $it") }

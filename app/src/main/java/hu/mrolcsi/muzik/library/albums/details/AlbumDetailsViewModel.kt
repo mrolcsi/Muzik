@@ -17,7 +17,9 @@ interface AlbumDetailsViewModel :
   @get:Bindable val yearText: String?
   @get:Bindable val numberOfSongsText: String?
 
-  var albumItem: MediaItem?
+  fun setArgument(albumId: Long)
+
+  val albumItem: LiveData<MediaItem>
 
   val albumTheme: LiveData<Theme>
 

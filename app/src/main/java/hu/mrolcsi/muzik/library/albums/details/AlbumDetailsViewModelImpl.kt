@@ -33,9 +33,8 @@ import hu.mrolcsi.muzik.theme.ThemedViewModelImpl
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.Observables
 import io.reactivex.rxkotlin.subscribeBy
-import io.reactivex.subjects.PublishSubject
+import io.reactivex.subjects.BehaviorSubject
 import javax.inject.Inject
-import kotlin.properties.Delegates
 
 class AlbumDetailsViewModelImpl @Inject constructor(
   observable: ObservableImpl,
@@ -60,23 +59,23 @@ class AlbumDetailsViewModelImpl @Inject constructor(
   override var yearText: String? by boundStringOrNull(BR.yearText)
   override var numberOfSongsText: String? by boundStringOrNull(BR.numberOfSongsText)
 
-  override var albumItem: MediaItem? by Delegates.observable(null) { _, old: MediaItem?, new: MediaItem? ->
-    if (old != new) new?.let {
-      albumSubject.onNext(it)
-    }
+  override fun setArgument(albumId: Long) {
+    albumSubject.onNext(albumId)
   }
 
-  private var albumSubject = PublishSubject.create<MediaItem>()
+  private val albumSubject = BehaviorSubject.create<Long>()
+
+  override var albumItem = MutableLiveData<MediaItem>()
 
   override val albumTheme = MutableLiveData<Theme>()
 
   override fun onSongClick(songItem: MediaItem, position: Int) {
-    albumItem?.description?.artist?.let { mediaService.setQueueTitle(it) }
+    albumItem.value?.description?.artist?.let { mediaService.setQueueTitle(it) }
     songDescriptions?.let { mediaService.playAll(it, position) }
   }
 
   override fun onShuffleAllClick() {
-    albumItem?.description?.artist?.let { mediaService.setQueueTitle(it) }
+    albumItem.value?.description?.artist?.let { mediaService.setQueueTitle(it) }
     songDescriptions?.let { mediaService.playAllShuffled(it) }
   }
 
@@ -85,7 +84,7 @@ class AlbumDetailsViewModelImpl @Inject constructor(
   init {
     Observables.combineLatest(
       albumSubject
-        .filter { it.mediaId != null }
+        .switchMap { mediaRepo.getAlbumById(it) }
         .doOnNext { updateHeaderText(it) }
         .switchMap { mediaRepo.getSongsFromAlbum(it.description.id) },
       mediaService.mediaMetadata
@@ -108,6 +107,8 @@ class AlbumDetailsViewModelImpl @Inject constructor(
   }
 
   private fun updateHeaderText(albumItem: MediaItem) {
+    this.albumItem.value = albumItem
+
     albumTitleText = albumItem.description.album
     artistText = albumItem.description.artist
     yearText = albumItem.description.albumYear

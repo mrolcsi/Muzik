@@ -12,7 +12,7 @@ import hu.mrolcsi.muzik.theme.ThemedViewModel
 
 interface ArtistDetailsViewModel : ThemedViewModel, Observable, UiCommandSource, NavCommandSource {
 
-  fun setArguments(artistItem: MediaBrowserCompat.MediaItem)
+  fun setArgument(artistId: Long)
 
   val artistSongs: LiveData<List<MediaBrowserCompat.MediaItem>>
 

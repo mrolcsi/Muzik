@@ -81,7 +81,7 @@ class ArtistDetailsFragment : DaggerFragment() {
       requireContext().observeAndRunUiCommands(viewLifecycleOwner, this)
       findNavController().observeAndRunNavCommands(viewLifecycleOwner, this)
 
-      setArguments(args.artistItem)
+      setArgument(args.artistId)
 
       artistAlbums.observe(viewLifecycleOwner, albumsAdapter)
       artistSongs.observe(viewLifecycleOwner, songsAdapter)

@@ -29,7 +29,7 @@ import hu.mrolcsi.muzik.theme.ThemedViewModelImpl
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.Observables
 import io.reactivex.rxkotlin.subscribeBy
-import io.reactivex.subjects.PublishSubject
+import io.reactivex.subjects.BehaviorSubject
 import javax.inject.Inject
 
 class ArtistDetailsViewModelImpl @Inject constructor(
@@ -44,7 +44,7 @@ class ArtistDetailsViewModelImpl @Inject constructor(
   ThemedViewModel by themedViewModel,
   ArtistDetailsViewModel {
 
-  private val artistSubject = PublishSubject.create<MediaItem>()
+  private val artistSubject = BehaviorSubject.create<Long>()
 
   override val artistSongs = MutableLiveData<List<MediaItem>>()
 
@@ -58,8 +58,8 @@ class ArtistDetailsViewModelImpl @Inject constructor(
 
   private var songDescriptions: List<MediaDescriptionCompat>? = null
 
-  override fun setArguments(artistItem: MediaItem) {
-    artistSubject.onNext(artistItem)
+  override fun setArgument(artistId: Long) {
+    artistSubject.onNext(artistId)
   }
 
   override fun onAlbumClick(albumItem: MediaItem, transitionedView: View) {
@@ -67,7 +67,7 @@ class ArtistDetailsViewModelImpl @Inject constructor(
       val transitionName = ViewCompat.getTransitionName(transitionedView)!!
       sendNavCommand {
         navigate(
-          ArtistDetailsFragmentDirections.actionToAlbumDetails(albumItem, transitionName),
+          ArtistDetailsFragmentDirections.actionToAlbumDetails(albumItem.description.id, transitionName),
           FragmentNavigatorExtras(transitionedView to transitionName)
         )
       }
@@ -85,15 +85,21 @@ class ArtistDetailsViewModelImpl @Inject constructor(
   }
 
   init {
-    val publishedArtistSubject = artistSubject
-      .filter { it.mediaId != null }
+    // Get artist item and url
+    artistSubject
+      .switchMap { mediaRepo.getArtistById(it) }
       .doOnNext { artistName = it.description.artist }
+      .switchMapMaybe { discogsService.getArtistPictureUrl(it.description.artist) }
+      .doOnNext { Log.d("ArtistDetailsVM", "Got uri: $it") }
       .observeOn(AndroidSchedulers.mainThread())
-      .publish()
+      .subscribeBy(
+        onNext = { artistPicture.value = it },
+        onError = { showError(this, it) }
+      ).disposeOnCleared()
 
     // Get Albums
-    publishedArtistSubject
-      .switchMap { mediaRepo.getAlbumsByArtist(it.description.id) }
+    artistSubject
+      .switchMap { mediaRepo.getAlbumsByArtist(it) }
       .doOnNext { isAlbumsVisible = it.isNotEmpty() }
       .subscribeBy(
         onNext = { artistAlbums.value = it },
@@ -102,7 +108,7 @@ class ArtistDetailsViewModelImpl @Inject constructor(
 
     // Get Songs
     Observables.combineLatest(
-      publishedArtistSubject.switchMap { mediaRepo.getSongsByArtist(it.description.id) },
+      artistSubject.switchMap { mediaRepo.getSongsByArtist(it) },
       mediaService.mediaMetadata
         .distinctUntilChanged { t: MediaMetadataCompat -> t.mediaId }
         .filter { it.mediaId != null }
@@ -113,17 +119,5 @@ class ArtistDetailsViewModelImpl @Inject constructor(
         onNext = { artistSongs.value = it },
         onError = { showError(this, it) }
       ).disposeOnCleared()
-
-    // Get URL for Artist picture
-    publishedArtistSubject
-      .switchMapMaybe { discogsService.getArtistPictureUrl(it) }
-      .observeOn(AndroidSchedulers.mainThread())
-      .doOnNext { Log.d("ArtistDetailsVM", "Got uri: $it") }
-      .subscribeBy(
-        onNext = { artistPicture.value = it },
-        onError = { showError(this, it) }
-      ).disposeOnCleared()
-
-    publishedArtistSubject.connect()
   }
 }

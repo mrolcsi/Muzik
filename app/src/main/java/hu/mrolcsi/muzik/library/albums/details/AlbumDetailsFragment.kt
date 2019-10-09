@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.ViewCompat
+import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.ui.setupWithNavController
@@ -13,8 +14,6 @@ import dagger.android.support.DaggerFragment
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.MediaItemListAdapter
 import hu.mrolcsi.muzik.common.glide.GlideApp
-import hu.mrolcsi.muzik.common.glide.onLoadFailed
-import hu.mrolcsi.muzik.common.glide.onResourceReady
 import hu.mrolcsi.muzik.common.view.MVVMViewHolder
 import hu.mrolcsi.muzik.databinding.FragmentAlbumDetailsBinding
 import hu.mrolcsi.muzik.databinding.ListItemDiscNumberBinding
@@ -69,8 +68,6 @@ class AlbumDetailsFragment : DaggerFragment() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
-    postponeEnterTransition()
-
     applySharedElementTransition(
       R.transition.cover_art_transition,
       requireContext().resources.getInteger(R.integer.preferredAnimationDuration).toLong()
@@ -82,16 +79,16 @@ class AlbumDetailsFragment : DaggerFragment() {
 
     viewModel.apply {
 
-      albumItem = args.albumItem
+      setArgument(args.albumId)
 
       items.observe(viewLifecycleOwner, songsAdapter)
 
-      GlideApp.with(imgCoverArt)
-        .asBitmap()
-        .load(args.albumItem.description.albumArtUri)
-        .onResourceReady { startPostponedEnterTransition() }
-        .onLoadFailed { startPostponedEnterTransition(); true }
-        .into(imgCoverArt)
+      albumItem.observe(viewLifecycleOwner, Observer {
+        GlideApp.with(imgCoverArt)
+          .asBitmap()
+          .load(it.description.albumArtUri)
+          .into(imgCoverArt)
+      })
     }
   }
 

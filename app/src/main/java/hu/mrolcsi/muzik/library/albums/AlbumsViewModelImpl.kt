@@ -15,6 +15,7 @@ import hu.mrolcsi.muzik.media.MediaRepository
 import hu.mrolcsi.muzik.service.extensions.media.MediaType
 import hu.mrolcsi.muzik.service.extensions.media.albumKey
 import hu.mrolcsi.muzik.service.extensions.media.artistKey
+import hu.mrolcsi.muzik.service.extensions.media.id
 import hu.mrolcsi.muzik.service.extensions.media.type
 import hu.mrolcsi.muzik.theme.ThemedViewModel
 import hu.mrolcsi.muzik.theme.ThemedViewModelImpl
@@ -51,7 +52,7 @@ class AlbumsViewModelImpl @Inject constructor(
       val transitionName = ViewCompat.getTransitionName(transitionedView)!!
       sendNavCommand {
         navigate(
-          LibraryPagerFragmentDirections.actionToAlbumDetails(albumItem, transitionName),
+          LibraryPagerFragmentDirections.actionToAlbumDetails(albumItem.description.id, transitionName),
           FragmentNavigatorExtras(transitionedView to transitionName)
         )
       }

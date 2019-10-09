@@ -31,7 +31,6 @@ import hu.mrolcsi.muzik.service.extensions.media.setQueueTitle
 import hu.mrolcsi.muzik.service.extensions.media.startProgressUpdater
 import hu.mrolcsi.muzik.service.extensions.media.stopProgressUpdater
 import io.reactivex.Observable
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.subjects.BehaviorSubject
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -167,7 +166,6 @@ class MediaServiceImpl @Inject constructor(
         })
     }
       .takeWhile { mediaBrowser.isConnected }
-      .observeOn(AndroidSchedulers.mainThread())
 
   override fun getCurrentPlaybackState() = controller?.playbackState ?: playbackStateSubject.value
 
