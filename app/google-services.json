@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "1090469903511",
+    "firebase_url": "https://muzik-fc6fe.firebaseio.com",
+    "project_id": "muzik-fc6fe",
+    "storage_bucket": "muzik-fc6fe.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1090469903511:android:0ab008065c2d80cb5a3dd2",
+        "android_client_info": {
+          "package_name": "hu.mrolcsi.muzik"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1090469903511-6ng4ncekv6gssdcch9i32cvrhndr8svs.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "hu.mrolcsi.muzik",
+            "certificate_hash": "59691b8cf7129b69dfa081e8622889cda6d262ab"
+          }
+        },
+        {
+          "client_id": "1090469903511-cjqjs6nibrlomlv11g1diph4jqgdanad.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCFKXgZ7uJoLmt_rwa7TPG2M1Ua-mhZIuw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1090469903511-cjqjs6nibrlomlv11g1diph4jqgdanad.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
