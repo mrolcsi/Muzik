@@ -7,7 +7,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Observer
+import androidx.navigation.findNavController
+import androidx.navigation.fragment.navArgs
 import dagger.android.support.DaggerFragment
+import hu.mrolcsi.muzik.R
+import hu.mrolcsi.muzik.common.viewmodel.observeAndRunNavCommands
 import hu.mrolcsi.muzik.databinding.FragmentLibraryBinding
 import hu.mrolcsi.muzik.extensions.applyNavigationBarColor
 import hu.mrolcsi.muzik.extensions.applyStatusBarColor
@@ -15,6 +19,8 @@ import hu.mrolcsi.muzik.theme.Theme
 import javax.inject.Inject
 
 class LibraryFragment : DaggerFragment() {
+
+  private val args: LibraryFragmentArgs by navArgs()
 
   @Inject lateinit var viewModel: LibraryViewModel
 
@@ -28,6 +34,12 @@ class LibraryFragment : DaggerFragment() {
     viewModel.currentTheme.observe(viewLifecycleOwner, Observer<Theme> {
       applyPrimaryBackgroundColor(it.primaryBackgroundColor)
     })
+
+    requireActivity()
+      .findNavController(R.id.libraryNavHost)
+      .observeAndRunNavCommands(viewLifecycleOwner, viewModel)
+
+    viewModel.navDirection = args.navDirections
   }
 
   override fun onResume() {

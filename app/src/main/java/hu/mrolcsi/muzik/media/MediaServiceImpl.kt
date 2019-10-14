@@ -3,7 +3,6 @@ package hu.mrolcsi.muzik.media
 import android.app.Application
 import android.content.ComponentName
 import android.os.Bundle
-import android.os.Looper
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
@@ -31,6 +30,7 @@ import hu.mrolcsi.muzik.service.extensions.media.setQueueTitle
 import hu.mrolcsi.muzik.service.extensions.media.startProgressUpdater
 import hu.mrolcsi.muzik.service.extensions.media.stopProgressUpdater
 import io.reactivex.Observable
+import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -135,7 +135,6 @@ class MediaServiceImpl @Inject constructor(
     options: Bundle?
   ): Observable<List<MediaBrowserCompat.MediaItem>> =
     Observable.create<List<MediaBrowserCompat.MediaItem>> { emitter ->
-      require(Looper.myLooper() != Looper.getMainLooper()) { "MediaStore query is not allowed on the main thread!" }
 
       mediaBrowser.subscribe(
         parentId,
@@ -165,6 +164,7 @@ class MediaServiceImpl @Inject constructor(
           }
         })
     }
+      .subscribeOn(Schedulers.single())
       .takeWhile { mediaBrowser.isConnected }
 
   override fun getCurrentPlaybackState() = controller?.playbackState ?: playbackStateSubject.value

@@ -14,6 +14,7 @@ import android.widget.Toast
 import androidx.databinding.library.baseAdapters.BR
 import androidx.lifecycle.MutableLiveData
 import com.bumptech.glide.request.target.Target
+import hu.mrolcsi.muzik.MainNavigationDirections
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.glide.GlideApp
 import hu.mrolcsi.muzik.common.glide.toSingle
@@ -21,8 +22,10 @@ import hu.mrolcsi.muzik.common.view.OnRepeatTouchListener
 import hu.mrolcsi.muzik.common.viewmodel.ExecuteOnceNavCommandSource
 import hu.mrolcsi.muzik.common.viewmodel.ExecuteOnceUiCommandSource
 import hu.mrolcsi.muzik.common.viewmodel.ObservableImpl
+import hu.mrolcsi.muzik.extensions.ParcelableNavDirections
 import hu.mrolcsi.muzik.extensions.secondsToTimeStamp
 import hu.mrolcsi.muzik.library.miniplayer.MiniPlayerViewModelImpl
+import hu.mrolcsi.muzik.library.pager.LibraryPagerFragmentDirections
 import hu.mrolcsi.muzik.media.MediaService
 import hu.mrolcsi.muzik.service.extensions.media.coverArtUri
 import hu.mrolcsi.muzik.service.extensions.media.isPauseEnabled
@@ -114,6 +117,26 @@ class PlayerViewModelImpl @Inject constructor(
     onDown = { isSeekProgressVisible = true },
     onUp = { isSeekProgressVisible = false }
   )
+
+  override fun onArtistClick(artistId: Long) {
+    sendNavCommand {
+      navigate(
+        MainNavigationDirections.actionGlobalToLibrary(
+          ParcelableNavDirections(LibraryPagerFragmentDirections.actionToArtistDetails(artistId))
+        )
+      )
+    }
+  }
+
+  override fun onAlbumClick(albumId: Long) {
+    sendNavCommand {
+      navigate(
+        MainNavigationDirections.actionGlobalToLibrary(
+          ParcelableNavDirections(LibraryPagerFragmentDirections.actionToAlbumDetails(albumId))
+        )
+      )
+    }
+  }
 
   init {
     mediaService.shuffleMode

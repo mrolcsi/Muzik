@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.activity.addCallback
 import androidx.annotation.ColorInt
 import androidx.core.graphics.ColorUtils
@@ -34,6 +35,8 @@ import hu.mrolcsi.muzik.databinding.FragmentPlayerBinding
 import hu.mrolcsi.muzik.extensions.applyNavigationBarColor
 import hu.mrolcsi.muzik.extensions.applySharedElementTransition
 import hu.mrolcsi.muzik.extensions.applyStatusBarColor
+import hu.mrolcsi.muzik.service.extensions.media.albumId
+import hu.mrolcsi.muzik.service.extensions.media.artistId
 import hu.mrolcsi.muzik.theme.ThemeService
 import kotlinx.android.synthetic.main.content_player.*
 import kotlinx.android.synthetic.main.fragment_player.*
@@ -55,7 +58,20 @@ class PlayerFragment : DaggerFragment() {
   private val queueAdapter = MVVMListAdapter(
     diffCallback = ThemedQueueItem.DiffCallback,
     itemIdSelector = { it.queueItem.queueId },
-    viewHolderFactory = { parent, _ -> QueueItemHolder(parent) }
+    viewHolderFactory = { parent, _ ->
+      QueueItemHolder(parent).apply {
+        itemView.findViewById<TextView>(R.id.tvArtist).setOnClickListener {
+          model?.queueItem?.description?.artistId?.let {
+            viewModel.onArtistClick(it)
+          }
+        }
+        itemView.findViewById<TextView>(R.id.tvAlbum).setOnClickListener {
+          model?.queueItem?.description?.albumId?.let {
+            viewModel.onAlbumClick(it)
+          }
+        }
+      }
+    }
   )
 
   //region LIFECYCLE

@@ -21,7 +21,7 @@
     android:clickable="true"
     android:elevation="@dimen/bottom_navigation_elevation"
     android:focusable="true"
-    android:foreground="?attr/selectableItemBackgroundBorderless"
+    android:foreground="?attr/selectableItemBackground"
     android:foregroundTint="@{theme.primaryForegroundColor}"
     app:elevation="@dimen/bottom_navigation_elevation">
 

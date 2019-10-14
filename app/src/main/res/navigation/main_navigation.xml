@@ -5,6 +5,15 @@
   android:id="@+id/main_navigation"
   app:startDestination="@id/navSplash">
 
+  <action
+    android:id="@+id/action_global_toLibrary"
+    app:destination="@id/navLibrary"
+    app:enterAnim="@anim/fragment_open_enter"
+    app:exitAnim="@anim/fragment_open_exit"
+    app:launchSingleTop="true"
+    app:popEnterAnim="@anim/fragment_close_enter"
+    app:popExitAnim="@anim/fragment_close_exit" />
+
   <fragment
     android:id="@+id/navSplash"
     android:name="hu.mrolcsi.muzik.splash.SplashFragment"
@@ -38,11 +47,18 @@
     android:label="@string/library_title"
     tools:layout="@layout/fragment_library">
 
+    <argument
+      android:name="navDirections"
+      android:defaultValue="@null"
+      app:argType="hu.mrolcsi.muzik.extensions.ParcelableNavDirections"
+      app:nullable="true" />
+
     <action
       android:id="@+id/action_library_to_player"
       app:destination="@id/navPlayer"
       app:enterAnim="@anim/slide_in_up"
       app:exitAnim="@anim/fragment_close_exit"
+      app:launchSingleTop="true"
       app:popEnterAnim="@anim/fragment_open_enter"
       app:popExitAnim="@anim/slide_out_down" />
 

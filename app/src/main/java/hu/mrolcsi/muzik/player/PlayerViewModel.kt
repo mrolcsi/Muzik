@@ -39,6 +39,9 @@ interface PlayerViewModel : MiniPlayerViewModel {
 
   val previousTouchListener: OnRepeatTouchListener
   val nextTouchListener: OnRepeatTouchListener
+
+  fun onArtistClick(artistId: Long)
+  fun onAlbumClick(albumId: Long)
 }
 
 data class ThemedQueueItem(

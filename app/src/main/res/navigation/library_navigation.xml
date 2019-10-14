@@ -48,6 +48,8 @@
       app:popEnterAnim="@anim/fragment_close_enter"
       app:popExitAnim="@anim/fragment_close_exit" />
 
+    <deepLink app:uri="muzik.mrolcsi.hu/artist/{artistId}" />
+
   </fragment>
 
   <fragment
@@ -64,6 +66,8 @@
       android:name="transitionName"
       android:defaultValue="coverArt"
       app:argType="string" />
+
+    <deepLink app:uri="muzik.mrolcsi.hu/album/{albumId}" />
 
   </fragment>
 
