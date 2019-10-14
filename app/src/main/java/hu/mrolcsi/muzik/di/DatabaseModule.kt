@@ -18,7 +18,8 @@ class DatabaseModule {
     Room.databaseBuilder(context, PlayQueueDatabase::class.java, PlayQueueDatabase.DATABASE_NAME)
       .addMigrations(
         PlayQueueMigrations.MIGRATION_1_2,
-        PlayQueueMigrations.MIGRATION_2_3
+        PlayQueueMigrations.MIGRATION_2_3,
+        PlayQueueMigrations.MIGRATION_3_4
       ).build()
 
   @Provides

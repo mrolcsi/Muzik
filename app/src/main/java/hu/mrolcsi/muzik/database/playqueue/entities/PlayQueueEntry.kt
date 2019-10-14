@@ -7,7 +7,9 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import hu.mrolcsi.muzik.service.extensions.media.album
+import hu.mrolcsi.muzik.service.extensions.media.albumId
 import hu.mrolcsi.muzik.service.extensions.media.artist
+import hu.mrolcsi.muzik.service.extensions.media.artistId
 import hu.mrolcsi.muzik.service.extensions.media.duration
 import hu.mrolcsi.muzik.service.extensions.media.id
 import hu.mrolcsi.muzik.service.extensions.media.mediaPath
@@ -18,7 +20,9 @@ data class PlayQueueEntry(
   @ColumnInfo(name = MediaStore.Audio.Media.DATA) val _data: String,
   @ColumnInfo(name = "media_id") val mediaId: Long,
   @ColumnInfo(name = MediaStore.Audio.Media.ARTIST) val artist: String?,
+  @ColumnInfo(name = MediaStore.Audio.Media.ARTIST_ID) val artistId: Long,
   @ColumnInfo(name = MediaStore.Audio.Media.ALBUM) val album: String?,
+  @ColumnInfo(name = MediaStore.Audio.Media.ALBUM_ID) val albumId: Long,
   @ColumnInfo(name = MediaStore.Audio.Media.TITLE) val title: String?,
   @ColumnInfo(name = MediaStore.Audio.Media.DURATION) val duration: Long?
 ) {
@@ -28,7 +32,9 @@ data class PlayQueueEntry(
     description.mediaPath.toString(),
     description.id,
     description.artist,
+    description.artistId ?: 0,
     description.album,
+    description.albumId ?: 0,
     description.title.toString(),
     description.duration
   )
@@ -41,10 +47,11 @@ data class PlayQueueEntry(
     .setExtras(
       bundleOf(
         // Store everything as String
-        MediaStore.Audio.AudioColumns._ID to mediaId.toString(),
-        MediaStore.Audio.AudioColumns.DURATION to duration.toString()
+        MediaStore.Audio.Media._ID to mediaId.toString(),
+        MediaStore.Audio.Media.ARTIST_ID to artistId.toString(),
+        MediaStore.Audio.Media.ALBUM_ID to albumId.toString(),
+        MediaStore.Audio.Media.DURATION to duration.toString()
       )
     ).build()
 
 }
-
