@@ -10,7 +10,7 @@ import hu.mrolcsi.muzik.database.playqueue.entities.PlayQueueEntry
 
 @Database(
   entities = [PlayQueueEntry::class, LastPlayed::class],
-  version = 4
+  version = 5
 )
 abstract class PlayQueueDatabase : RoomDatabase() {
 
@@ -37,7 +37,9 @@ abstract class PlayQueueDatabase : RoomDatabase() {
         .addMigrations(
           PlayQueueMigrations.MIGRATION_1_2,
           PlayQueueMigrations.MIGRATION_2_3,
-          PlayQueueMigrations.MIGRATION_3_4
+          PlayQueueMigrations.MIGRATION_3_4,
+          PlayQueueMigrations.MIGRATION_2_5,
+          PlayQueueMigrations.MIGRATION_4_5
         ).build()
     }
   }

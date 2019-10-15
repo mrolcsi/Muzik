@@ -19,7 +19,9 @@ class DatabaseModule {
       .addMigrations(
         PlayQueueMigrations.MIGRATION_1_2,
         PlayQueueMigrations.MIGRATION_2_3,
-        PlayQueueMigrations.MIGRATION_3_4
+        PlayQueueMigrations.MIGRATION_3_4,
+        PlayQueueMigrations.MIGRATION_2_5,
+        PlayQueueMigrations.MIGRATION_4_5
       ).build()
 
   @Provides

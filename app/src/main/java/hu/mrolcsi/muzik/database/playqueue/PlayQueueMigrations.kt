@@ -32,4 +32,16 @@ object PlayQueueMigrations {
       }
     }
   }
+
+  val MIGRATION_2_5 = object : Migration(2, 5) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+      database.execSQL("ALTER TABLE last_played ADD COLUMN queue_title TEXT NOT NULL DEFAULT ''")
+    }
+  }
+
+  val MIGRATION_4_5 = object : Migration(4, 5) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+      database.execSQL("ALTER TABLE last_played ADD COLUMN queue_title TEXT NOT NULL DEFAULT ''")
+    }
+  }
 }

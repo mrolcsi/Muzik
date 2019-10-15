@@ -1,6 +1,7 @@
 package hu.mrolcsi.muzik.service
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.Service
 import android.content.Intent
@@ -29,6 +30,7 @@ import hu.mrolcsi.muzik.service.exoplayer.notification.ExoNotificationManager
 import hu.mrolcsi.muzik.service.extensions.media.albumArtUri
 import hu.mrolcsi.muzik.service.extensions.media.isSkipToNextEnabled
 import hu.mrolcsi.muzik.service.extensions.media.prepareFromDescriptions
+import hu.mrolcsi.muzik.service.extensions.media.setQueueTitle
 import hu.mrolcsi.muzik.service.extensions.media.setShuffleMode
 import hu.mrolcsi.muzik.theme.ThemeService
 import javax.inject.Inject
@@ -49,6 +51,7 @@ class MuzikPlayerService : MuzikBrowserService() {
   private lateinit var mExoNotificationManager: ExoNotificationManager
   private var mIsForeground = false
 
+  @SuppressLint("WrongConstant")
   override fun onCreate() {
     super.onCreate()
     (application as MuzikApplication).androidInjector().inject(this)
@@ -180,11 +183,12 @@ class MuzikPlayerService : MuzikBrowserService() {
 
             mLastPlayed?.let { lastPlayed ->
               // Load last played songs (starting with last played position)
-              val queuePosition = if (lastPlayed.queuePosition in 0 until queue.size) lastPlayed.queuePosition else 0
+              val queuePosition = if (lastPlayed.queuePosition in queue.indices) lastPlayed.queuePosition else 0
               controller.prepareFromDescriptions(queue, queuePosition)
 
               controller.transportControls.setRepeatMode(lastPlayed.repeatMode)
               controller.transportControls.setShuffleMode(lastPlayed.shuffleMode, lastPlayed.shuffleSeed)
+              controller.setQueueTitle(lastPlayed.queueTitle)
             }
           }
         }

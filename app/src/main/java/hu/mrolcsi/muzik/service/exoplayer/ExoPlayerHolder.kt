@@ -511,6 +511,12 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
         ACTION_SET_QUEUE_TITLE -> {
           extras.getCharSequence(EXTRA_QUEUE_TITLE)?.let {
             mSessionConnector.mediaSession.setQueueTitle(it)
+            mLastPlayed.queueTitle = it.toString()
+            mDatabaseWorker.submit {
+              PlayQueueDatabase.getInstance(context)
+                .getPlayQueueDao()
+                .saveLastPlayed(mLastPlayed)
+            }
           }
           true
         }
