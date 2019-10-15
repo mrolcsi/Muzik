@@ -105,7 +105,7 @@ fun <R> GlideRequest<R>.toSingle() = Single.create<R> { emitter ->
       target: Target<R>?,
       isFirstResource: Boolean
     ): Boolean {
-      emitter.onError(e!!)
+      if (!emitter.isDisposed) emitter.onError(e!!)
       return true
     }
 
@@ -116,7 +116,7 @@ fun <R> GlideRequest<R>.toSingle() = Single.create<R> { emitter ->
       dataSource: DataSource?,
       isFirstResource: Boolean
     ): Boolean {
-      emitter.onSuccess(resource)
+      if (!emitter.isDisposed) emitter.onSuccess(resource)
       return true
     }
   }).preload()
