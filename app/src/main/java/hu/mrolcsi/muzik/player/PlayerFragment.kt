@@ -18,7 +18,6 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
 import androidx.navigation.ui.setupWithNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -33,19 +32,18 @@ import hu.mrolcsi.muzik.common.viewmodel.observeAndRunNavCommands
 import hu.mrolcsi.muzik.common.viewmodel.observeAndRunUiCommands
 import hu.mrolcsi.muzik.databinding.FragmentPlayerBinding
 import hu.mrolcsi.muzik.extensions.applyNavigationBarColor
-import hu.mrolcsi.muzik.extensions.applySharedElementTransition
 import hu.mrolcsi.muzik.extensions.applyStatusBarColor
 import hu.mrolcsi.muzik.service.extensions.media.albumId
 import hu.mrolcsi.muzik.service.extensions.media.artistId
 import hu.mrolcsi.muzik.theme.ThemeService
 import kotlinx.android.synthetic.main.content_player.*
 import kotlinx.android.synthetic.main.fragment_player.*
+import java.text.SimpleDateFormat
+import java.util.*
 import javax.inject.Inject
 import kotlin.math.abs
 
 class PlayerFragment : DaggerFragment() {
-
-  private val args by navArgs<PlayerFragmentArgs>()
 
   @Inject lateinit var viewModel: PlayerViewModel
   @Inject lateinit var themeService: ThemeService
@@ -96,17 +94,6 @@ class PlayerFragment : DaggerFragment() {
         updatePager("onQueueStateChanged", state.activeQueueId)
       })
     }
-  }
-
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-
-    if (args.postponeEnterTransition) postponeEnterTransition()
-
-    applySharedElementTransition(
-      R.transition.cover_art_transition,
-      requireContext().resources.getInteger(R.integer.preferredAnimationDuration).toLong()
-    )
   }
 
   override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
@@ -307,6 +294,11 @@ class PlayerFragment : DaggerFragment() {
       .alpha(1f)
       .setDuration(context?.resources?.getInteger(R.integer.preferredAnimationDuration)?.toLong() ?: 300L)
       .start()
+
+    Log.i(
+      "NavigateToPlayer",
+      "PlayerFragment - RecyclerView visible: ${SimpleDateFormat("HH:mm:ss:SSS").format(Calendar.getInstance().time)}"
+    )
   }
 
   private fun applyTheme(@ColorInt backgroundColor: Int, @ColorInt foregroundColor: Int) {
