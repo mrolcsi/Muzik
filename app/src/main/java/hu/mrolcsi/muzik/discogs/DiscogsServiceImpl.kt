@@ -4,9 +4,8 @@ import android.net.Uri
 import com.google.android.exoplayer2.util.Log
 import io.reactivex.Maybe
 import io.reactivex.schedulers.Schedulers
-import javax.inject.Inject
 
-class DiscogsServiceImpl @Inject constructor(
+class DiscogsServiceImpl constructor(
   private val discogsApi: DiscogsApi
 ) : DiscogsService {
 

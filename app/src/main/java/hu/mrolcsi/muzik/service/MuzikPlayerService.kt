@@ -24,7 +24,6 @@ import hu.mrolcsi.muzik.common.glide.GlideApp
 import hu.mrolcsi.muzik.common.glide.onResourceReady
 import hu.mrolcsi.muzik.database.playqueue.PlayQueueDatabase
 import hu.mrolcsi.muzik.database.playqueue.entities.LastPlayed
-import hu.mrolcsi.muzik.di.MuzikApplication
 import hu.mrolcsi.muzik.service.exoplayer.ExoPlayerHolder
 import hu.mrolcsi.muzik.service.exoplayer.notification.ExoNotificationManager
 import hu.mrolcsi.muzik.service.extensions.media.albumArtUri
@@ -33,12 +32,12 @@ import hu.mrolcsi.muzik.service.extensions.media.prepareFromDescriptions
 import hu.mrolcsi.muzik.service.extensions.media.setQueueTitle
 import hu.mrolcsi.muzik.service.extensions.media.setShuffleMode
 import hu.mrolcsi.muzik.theme.ThemeService
-import javax.inject.Inject
+import org.koin.android.ext.android.inject
 
 
 class MuzikPlayerService : MuzikBrowserService() {
 
-  @Inject lateinit var themeService: ThemeService
+  private val themeService: ThemeService by inject()
 
   // MediaSession and Player implementations
   private lateinit var mMediaSession: MediaSessionCompat
@@ -54,7 +53,6 @@ class MuzikPlayerService : MuzikBrowserService() {
   @SuppressLint("WrongConstant")
   override fun onCreate() {
     super.onCreate()
-    (application as MuzikApplication).androidInjector().inject(this)
 
     Log.i(LOG_TAG, "onCreate()")
 

@@ -18,12 +18,11 @@ import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import io.reactivex.subjects.Subject
-import javax.inject.Inject
 import kotlin.math.pow
 import kotlin.math.sqrt
 
 @SuppressLint("CheckResult")
-class ThemeServiceImpl @Inject constructor(
+class ThemeServiceImpl constructor(
   private val sharedPrefs: SharedPreferences,
   private val gson: Gson
 ) : ThemeService {

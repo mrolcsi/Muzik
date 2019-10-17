@@ -25,10 +25,9 @@ import io.reactivex.rxkotlin.Observables
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
-import javax.inject.Inject
 import kotlin.properties.Delegates
 
-class SongsViewModelImpl @Inject constructor(
+class SongsViewModelImpl constructor(
   val context: Context,
   observable: ObservableImpl,
   uiCommandSource: ExecuteOnceUiCommandSource,

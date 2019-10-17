@@ -6,23 +6,23 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import dagger.android.support.DaggerAppCompatActivity
 import hu.mrolcsi.muzik.R
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.debug.activity_theme_test.*
 import kotlinx.android.synthetic.debug.list_item_swatch.*
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import top.defaults.checkerboarddrawable.CheckerboardDrawable
-import javax.inject.Inject
 
-class ThemeTestActivity : DaggerAppCompatActivity() {
+class ThemeTestActivity : AppCompatActivity() {
 
-  @Inject lateinit var viewModel: ThemeTestViewModel
+  private val viewModel: ThemeTestViewModel by viewModel<ThemeTestViewModelImpl>()
 
   // Adapters
   private val mAllColorsAdapter = PaletteAdapter()

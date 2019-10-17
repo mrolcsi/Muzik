@@ -6,14 +6,13 @@ import androidx.lifecycle.MutableLiveData
 import hu.mrolcsi.muzik.common.viewmodel.RxViewModel
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
-import javax.inject.Inject
 
 interface ThemedViewModel {
   val previousTheme: Theme?
   val currentTheme: LiveData<Theme>
 }
 
-open class ThemedViewModelImpl @Inject constructor(
+open class ThemedViewModelImpl constructor(
   val themeService: ThemeService
 ) : RxViewModel(), ThemedViewModel {
 

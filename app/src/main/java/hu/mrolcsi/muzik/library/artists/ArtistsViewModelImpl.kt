@@ -13,9 +13,8 @@ import hu.mrolcsi.muzik.service.extensions.media.id
 import hu.mrolcsi.muzik.theme.ThemedViewModel
 import hu.mrolcsi.muzik.theme.ThemedViewModelImpl
 import io.reactivex.rxkotlin.subscribeBy
-import javax.inject.Inject
 
-class ArtistsViewModelImpl @Inject constructor(
+class ArtistsViewModelImpl constructor(
   observable: ObservableImpl,
   uiCommandSource: ExecuteOnceUiCommandSource,
   navCommandSource: ExecuteOnceNavCommandSource,

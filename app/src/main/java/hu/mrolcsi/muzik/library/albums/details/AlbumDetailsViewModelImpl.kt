@@ -34,9 +34,8 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.Observables
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.subjects.BehaviorSubject
-import javax.inject.Inject
 
-class AlbumDetailsViewModelImpl @Inject constructor(
+class AlbumDetailsViewModelImpl constructor(
   observable: ObservableImpl,
   uiCommandSource: ExecuteOnceUiCommandSource,
   navCommandSource: ExecuteOnceNavCommandSource,

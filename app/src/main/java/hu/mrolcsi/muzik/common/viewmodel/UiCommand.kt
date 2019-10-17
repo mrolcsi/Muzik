@@ -5,7 +5,6 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
-import javax.inject.Inject
 
 typealias UiCommand = Context.() -> Unit
 
@@ -25,7 +24,7 @@ interface UiCommandSource {
   fun sendUiCommand(command: UiCommand)
 }
 
-class ExecuteOnceUiCommandSource @Inject constructor() : UiCommandSource {
+class ExecuteOnceUiCommandSource : UiCommandSource {
   override val uiCommand = object : MutableLiveData<UiCommand>() {
     override fun postValue(value: UiCommand) {
       super.postValue(once(value))

@@ -8,25 +8,17 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
-import dagger.android.AndroidInjector
-import dagger.android.DispatchingAndroidInjector
-import dagger.android.HasAndroidInjector
-import dagger.android.support.AndroidSupportInjection
+import com.tbruyelle.rxpermissions2.RxPermissions
 import hu.mrolcsi.muzik.common.viewmodel.observeAndRunNavCommands
 import hu.mrolcsi.muzik.databinding.FragmentSplashBinding
-import javax.inject.Inject
+import org.koin.android.ext.android.get
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 
-class SplashFragment : Fragment(), HasAndroidInjector {
+class SplashFragment : Fragment() {
 
-  @Inject internal lateinit var androidInjector: DispatchingAndroidInjector<Any>
-
-  @Inject lateinit var viewModel: SplashViewModel
-
-  override fun androidInjector(): AndroidInjector<Any> = androidInjector
-
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-    AndroidSupportInjection.inject(this)
+  private val viewModel: SplashViewModel by viewModel<SplashViewModelImpl> {
+    parametersOf(get<RxPermissions> { parametersOf(this) })
   }
 
   override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =

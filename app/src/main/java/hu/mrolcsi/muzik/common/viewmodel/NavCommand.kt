@@ -5,7 +5,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.navigation.NavController
-import javax.inject.Inject
 
 typealias NavCommand = NavController.() -> Unit
 
@@ -25,7 +24,7 @@ interface NavCommandSource {
   fun sendNavCommand(command: NavCommand)
 }
 
-class ExecuteOnceNavCommandSource @Inject constructor() : NavCommandSource {
+class ExecuteOnceNavCommandSource : NavCommandSource {
   override val navCommand = object : MutableLiveData<NavCommand>() {
     override fun postValue(value: NavCommand) {
       super.postValue(once(value))

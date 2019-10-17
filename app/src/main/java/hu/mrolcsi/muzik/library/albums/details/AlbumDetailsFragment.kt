@@ -6,11 +6,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.ViewCompat
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.ui.setupWithNavController
-import dagger.android.support.DaggerFragment
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.MediaItemListAdapter
 import hu.mrolcsi.muzik.common.glide.GlideApp
@@ -23,13 +23,13 @@ import hu.mrolcsi.muzik.library.songs.SongHolder
 import hu.mrolcsi.muzik.service.extensions.media.albumArtUri
 import kotlinx.android.synthetic.main.album_details_header.*
 import kotlinx.android.synthetic.main.fragment_album_details.*
-import javax.inject.Inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class AlbumDetailsFragment : DaggerFragment() {
+class AlbumDetailsFragment : Fragment() {
 
   private val args by navArgs<AlbumDetailsFragmentArgs>()
 
-  @Inject lateinit var viewModel: AlbumDetailsViewModel
+  private val viewModel: AlbumDetailsViewModel by viewModel<AlbumDetailsViewModelImpl>()
 
   private val songsAdapter by lazy {
     object : MediaItemListAdapter<MVVMViewHolder<MediaItem>>(requireContext(), { parent, viewType ->

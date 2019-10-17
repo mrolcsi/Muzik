@@ -9,9 +9,9 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.forEach
+import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
-import dagger.android.support.DaggerFragment
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.MediaItemListAdapter
 import hu.mrolcsi.muzik.common.viewmodel.observeAndRunNavCommands
@@ -20,12 +20,13 @@ import hu.mrolcsi.muzik.databinding.FragmentAlbumsBinding
 import hu.mrolcsi.muzik.library.SortingMode
 import hu.mrolcsi.muzik.theme.ThemeService
 import kotlinx.android.synthetic.main.fragment_albums.*
-import javax.inject.Inject
+import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class AlbumsFragment : DaggerFragment() {
+class AlbumsFragment : Fragment() {
 
-  @Inject lateinit var viewModel: AlbumsViewModel
-  @Inject lateinit var themeService: ThemeService
+  private val viewModel: AlbumsViewModel by viewModel<AlbumsViewModelImpl>()
+  private val themeService: ThemeService by inject()
 
   private val albumsAdapter by lazy {
     MediaItemListAdapter(requireContext()) { parent, _ ->

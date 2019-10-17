@@ -10,18 +10,17 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
-import dagger.android.support.DaggerFragment
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.databinding.FragmentLibraryPagerBinding
 import hu.mrolcsi.muzik.library.albums.AlbumsFragment
 import hu.mrolcsi.muzik.library.artists.ArtistsFragment
 import hu.mrolcsi.muzik.library.songs.SongsFragment
 import kotlinx.android.synthetic.main.fragment_library_pager.*
-import javax.inject.Inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class LibraryPagerFragment : DaggerFragment() {
+class LibraryPagerFragment : Fragment() {
 
-  @Inject lateinit var viewModel: LibraryPagerViewModel
+  private val viewModel: LibraryPagerViewModel by viewModel<LibraryPagerViewModelImpl>()
 
   override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) =
     FragmentLibraryPagerBinding.inflate(inflater).also {

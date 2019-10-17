@@ -2,9 +2,8 @@ package hu.mrolcsi.muzik.common.viewmodel
 
 import androidx.databinding.Observable
 import androidx.databinding.PropertyChangeRegistry
-import javax.inject.Inject
 
-class ObservableImpl @Inject constructor() : Observable {
+class ObservableImpl : Observable {
 
   private val callbackRegistry: PropertyChangeRegistry by lazy { PropertyChangeRegistry() }
 

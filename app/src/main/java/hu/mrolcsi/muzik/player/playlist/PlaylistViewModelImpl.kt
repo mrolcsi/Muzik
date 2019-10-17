@@ -18,9 +18,8 @@ import hu.mrolcsi.muzik.theme.ThemedViewModelImpl
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.Observables
 import io.reactivex.rxkotlin.subscribeBy
-import javax.inject.Inject
 
-class PlaylistViewModelImpl @Inject constructor(
+class PlaylistViewModelImpl constructor(
   context: Context,
   observable: ObservableImpl,
   uiCommandSource: ExecuteOnceUiCommandSource,

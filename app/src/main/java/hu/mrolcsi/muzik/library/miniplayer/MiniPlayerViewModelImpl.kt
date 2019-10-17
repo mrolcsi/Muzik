@@ -31,9 +31,8 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
 
-open class MiniPlayerViewModelImpl @Inject constructor(
+open class MiniPlayerViewModelImpl constructor(
   observable: ObservableImpl,
   uiCommandSource: ExecuteOnceUiCommandSource,
   navCommandSource: ExecuteOnceNavCommandSource,

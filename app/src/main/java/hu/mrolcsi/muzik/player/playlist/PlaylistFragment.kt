@@ -4,16 +4,16 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import dagger.android.support.DaggerFragment
+import androidx.fragment.app.Fragment
 import hu.mrolcsi.muzik.common.view.MVVMListAdapter
 import hu.mrolcsi.muzik.databinding.FragmentPlaylistBinding
 import hu.mrolcsi.muzik.databinding.ListItemPlaylistBinding
 import kotlinx.android.synthetic.main.fragment_playlist.*
-import javax.inject.Inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class PlaylistFragment : DaggerFragment() {
+class PlaylistFragment : Fragment() {
 
-  @Inject lateinit var viewModel: PlaylistViewModel
+  private val viewModel: PlaylistViewModel by viewModel<PlaylistViewModelImpl>()
 
   private val playlistAdapter = MVVMListAdapter(
     diffCallback = PlaylistItem.DIFF_CALLBACK,

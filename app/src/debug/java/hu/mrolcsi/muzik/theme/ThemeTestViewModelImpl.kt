@@ -5,9 +5,8 @@ import hu.mrolcsi.muzik.common.viewmodel.DataBindingViewModel
 import hu.mrolcsi.muzik.common.viewmodel.ExecuteOnceNavCommandSource
 import hu.mrolcsi.muzik.common.viewmodel.ExecuteOnceUiCommandSource
 import hu.mrolcsi.muzik.common.viewmodel.ObservableImpl
-import javax.inject.Inject
 
-class ThemeTestViewModelImpl @Inject constructor(
+class ThemeTestViewModelImpl constructor(
   observable: ObservableImpl,
   uiCommandSource: ExecuteOnceUiCommandSource,
   navCommandSource: ExecuteOnceNavCommandSource,

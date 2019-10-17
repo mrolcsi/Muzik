@@ -12,9 +12,8 @@ import hu.mrolcsi.muzik.theme.ThemedViewModel
 import hu.mrolcsi.muzik.theme.ThemedViewModelImpl
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.subjects.PublishSubject
-import javax.inject.Inject
 
-class SplashViewModelImpl @Inject constructor(
+class SplashViewModelImpl constructor(
   observable: ObservableImpl,
   uiCommandSource: ExecuteOnceUiCommandSource,
   navCommandSource: ExecuteOnceNavCommandSource,

@@ -7,10 +7,9 @@ import hu.mrolcsi.muzik.common.viewmodel.NavCommandSource
 import hu.mrolcsi.muzik.extensions.ParcelableNavDirections
 import hu.mrolcsi.muzik.theme.ThemeService
 import hu.mrolcsi.muzik.theme.ThemedViewModelImpl
-import javax.inject.Inject
 import kotlin.properties.Delegates
 
-class LibraryViewModelImpl @Inject constructor(
+class LibraryViewModelImpl constructor(
   navCommandSource: ExecuteOnceNavCommandSource,
   themeService: ThemeService
 ) : ThemedViewModelImpl(themeService),

@@ -6,23 +6,23 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.navArgs
-import dagger.android.support.DaggerFragment
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.viewmodel.observeAndRunNavCommands
 import hu.mrolcsi.muzik.databinding.FragmentLibraryBinding
 import hu.mrolcsi.muzik.extensions.applyNavigationBarColor
 import hu.mrolcsi.muzik.extensions.applyStatusBarColor
 import hu.mrolcsi.muzik.theme.Theme
-import javax.inject.Inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class LibraryFragment : DaggerFragment() {
+class LibraryFragment : Fragment() {
 
   private val args: LibraryFragmentArgs by navArgs()
 
-  @Inject lateinit var viewModel: LibraryViewModel
+  private val viewModel: LibraryViewModel by viewModel<LibraryViewModelImpl>()
 
   override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) =
     FragmentLibraryBinding.inflate(inflater, container, false).apply {

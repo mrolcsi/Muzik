@@ -1,14 +1,35 @@
 package hu.mrolcsi.muzik.di
 
-import dagger.android.AndroidInjector
-import dagger.android.support.DaggerApplication
+import android.app.Application
+import org.koin.android.ext.koin.androidContext
+import org.koin.android.ext.koin.androidFileProperties
+import org.koin.android.ext.koin.androidLogger
+import org.koin.core.context.startKoin
 
-class MuzikApplication : DaggerApplication() {
+class MuzikApplication : Application() {
 
-  override fun applicationInjector(): AndroidInjector<out DaggerApplication> {
-    return DaggerApplicationComponent.builder()
-      .appModule(AppModule(this))
-      .build()
+  override fun onCreate() {
+    super.onCreate()
+
+    startKoin {
+      // use AndroidLogger as Koin Logger - default Level.INFO
+      androidLogger()
+
+      // use the Android context given there
+      androidContext(this@MuzikApplication)
+
+      // load properties from assets/koin.properties file
+      androidFileProperties()
+
+      // module list
+      modules(
+        listOf(
+          appModule,
+          dataModule,
+          networkModule,
+          viewModule
+        )
+      )
+    }
   }
-
 }

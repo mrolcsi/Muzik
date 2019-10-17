@@ -4,19 +4,19 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import dagger.android.support.DaggerFragment
 import hu.mrolcsi.muzik.common.MediaItemListAdapter
 import hu.mrolcsi.muzik.common.viewmodel.observeAndRunNavCommands
 import hu.mrolcsi.muzik.common.viewmodel.observeAndRunUiCommands
 import hu.mrolcsi.muzik.databinding.FragmentArtistsBinding
 import hu.mrolcsi.muzik.databinding.ListItemArtistBinding
 import kotlinx.android.synthetic.main.fragment_artists.*
-import javax.inject.Inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class ArtistsFragment : DaggerFragment() {
+class ArtistsFragment : Fragment() {
 
-  @Inject lateinit var viewModel: ArtistsViewModel
+  private val viewModel: ArtistsViewModel by viewModel<ArtistsViewModelImpl>()
 
   private val artistAdapter by lazy {
     MediaItemListAdapter(requireContext()) { parent, _ ->

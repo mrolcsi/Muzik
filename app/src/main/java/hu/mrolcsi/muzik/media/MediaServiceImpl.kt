@@ -32,11 +32,8 @@ import hu.mrolcsi.muzik.service.extensions.media.stopProgressUpdater
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class MediaServiceImpl @Inject constructor(
+class MediaServiceImpl constructor(
   private val app: Application
 ) : MediaService {
 

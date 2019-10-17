@@ -14,6 +14,7 @@ import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.doOnPreDraw
 import androidx.core.view.postDelayed
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
@@ -21,7 +22,6 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import dagger.android.support.DaggerFragment
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.pager.PagerSnapHelperVerbose
 import hu.mrolcsi.muzik.common.pager.RVPagerSnapHelperListenable
@@ -35,18 +35,16 @@ import hu.mrolcsi.muzik.extensions.applyNavigationBarColor
 import hu.mrolcsi.muzik.extensions.applyStatusBarColor
 import hu.mrolcsi.muzik.service.extensions.media.albumId
 import hu.mrolcsi.muzik.service.extensions.media.artistId
-import hu.mrolcsi.muzik.theme.ThemeService
 import kotlinx.android.synthetic.main.content_player.*
 import kotlinx.android.synthetic.main.fragment_player.*
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.text.SimpleDateFormat
 import java.util.*
-import javax.inject.Inject
 import kotlin.math.abs
 
-class PlayerFragment : DaggerFragment() {
+class PlayerFragment : Fragment() {
 
-  @Inject lateinit var viewModel: PlayerViewModel
-  @Inject lateinit var themeService: ThemeService
+  private val viewModel: PlayerViewModel by viewModel<PlayerViewModelImpl>()
 
   private lateinit var binding: FragmentPlayerBinding
 

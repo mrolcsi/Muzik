@@ -11,9 +11,8 @@ import hu.mrolcsi.muzik.media.MediaRepository
 import hu.mrolcsi.muzik.media.MediaService
 import hu.mrolcsi.muzik.theme.ThemedViewModel
 import hu.mrolcsi.muzik.theme.ThemedViewModelImpl
-import javax.inject.Inject
 
-class LibraryPagerViewModelImpl @Inject constructor(
+class LibraryPagerViewModelImpl constructor(
   observable: ObservableImpl,
   uiCommandSource: ExecuteOnceUiCommandSource,
   navCommandSource: ExecuteOnceNavCommandSource,

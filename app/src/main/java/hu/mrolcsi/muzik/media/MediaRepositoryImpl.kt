@@ -6,9 +6,8 @@ import hu.mrolcsi.muzik.service.MuzikBrowserService
 import hu.mrolcsi.muzik.service.MuzikBrowserService.Companion.OPTION_ALBUM_ID
 import hu.mrolcsi.muzik.service.MuzikBrowserService.Companion.OPTION_ARTIST_ID
 import io.reactivex.Observable
-import javax.inject.Inject
 
-class MediaRepositoryImpl @Inject constructor(
+class MediaRepositoryImpl constructor(
   private val mediaService: MediaService
 ) : MediaRepository {
 
