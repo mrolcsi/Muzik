@@ -4,10 +4,12 @@ import android.net.Uri
 import com.google.android.exoplayer2.util.Log
 import io.reactivex.Maybe
 import io.reactivex.schedulers.Schedulers
+import org.koin.core.KoinComponent
+import org.koin.core.inject
 
-class DiscogsServiceImpl constructor(
-  private val discogsApi: DiscogsApi
-) : DiscogsService {
+class DiscogsServiceImpl : DiscogsService, KoinComponent {
+
+  private val discogsApi: DiscogsApi by inject()
 
   // TODO: Disk cache?
 

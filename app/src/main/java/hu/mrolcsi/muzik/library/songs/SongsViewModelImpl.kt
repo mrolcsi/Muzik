@@ -25,19 +25,23 @@ import io.reactivex.rxkotlin.Observables
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
+import org.koin.core.KoinComponent
+import org.koin.core.inject
 import kotlin.properties.Delegates
 
 class SongsViewModelImpl constructor(
-  val context: Context,
   observable: ObservableImpl,
   uiCommandSource: ExecuteOnceUiCommandSource,
   navCommandSource: ExecuteOnceNavCommandSource,
-  themedViewModel: ThemedViewModelImpl,
-  mediaRepo: MediaRepository,
-  private val mediaService: MediaService
+  themedViewModel: ThemedViewModelImpl
 ) : DataBindingViewModel(observable, uiCommandSource, navCommandSource),
   ThemedViewModel by themedViewModel,
-  SongsViewModel {
+  SongsViewModel,
+  KoinComponent {
+
+  private val context: Context by inject()
+  private val mediaRepo: MediaRepository by inject()
+  private val mediaService: MediaService by inject()
 
   override val progressVisible: Boolean = false
   override val listViewVisible: Boolean = true

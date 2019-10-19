@@ -30,18 +30,22 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.Observables
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.subjects.BehaviorSubject
+import org.koin.core.KoinComponent
+import org.koin.core.inject
 
 class ArtistDetailsViewModelImpl constructor(
   observable: ObservableImpl,
   uiCommandSource: ExecuteOnceUiCommandSource,
   navCommandSource: ExecuteOnceNavCommandSource,
-  themedViewModel: ThemedViewModelImpl,
-  private val mediaRepo: MediaRepository,
-  private val discogsService: DiscogsService,
-  private val mediaService: MediaService
+  themedViewModel: ThemedViewModelImpl
 ) : DataBindingViewModel(observable, uiCommandSource, navCommandSource),
   ThemedViewModel by themedViewModel,
-  ArtistDetailsViewModel {
+  ArtistDetailsViewModel,
+  KoinComponent {
+
+  private val mediaRepo: MediaRepository by inject()
+  private val discogsService: DiscogsService by inject()
+  private val mediaService: MediaService by inject()
 
   private val artistSubject = BehaviorSubject.create<Long>()
 

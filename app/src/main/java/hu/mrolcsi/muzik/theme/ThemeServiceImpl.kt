@@ -18,14 +18,16 @@ import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import io.reactivex.subjects.Subject
+import org.koin.core.KoinComponent
+import org.koin.core.inject
 import kotlin.math.pow
 import kotlin.math.sqrt
 
 @SuppressLint("CheckResult")
-class ThemeServiceImpl constructor(
-  private val sharedPrefs: SharedPreferences,
-  private val gson: Gson
-) : ThemeService {
+class ThemeServiceImpl : ThemeService, KoinComponent {
+
+  private val sharedPrefs: SharedPreferences by inject()
+  private val gson: Gson by inject()
 
   private val pendingThemeSubject: Subject<Observable<Theme>> = PublishSubject.create()
   private val createThemeSubject: Subject<Bitmap> = PublishSubject.create()

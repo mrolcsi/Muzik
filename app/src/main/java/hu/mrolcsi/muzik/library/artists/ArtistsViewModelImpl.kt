@@ -13,16 +13,20 @@ import hu.mrolcsi.muzik.service.extensions.media.id
 import hu.mrolcsi.muzik.theme.ThemedViewModel
 import hu.mrolcsi.muzik.theme.ThemedViewModelImpl
 import io.reactivex.rxkotlin.subscribeBy
+import org.koin.core.KoinComponent
+import org.koin.core.inject
 
 class ArtistsViewModelImpl constructor(
   observable: ObservableImpl,
   uiCommandSource: ExecuteOnceUiCommandSource,
   navCommandSource: ExecuteOnceNavCommandSource,
-  themedViewModel: ThemedViewModelImpl,
-  mediaRepo: MediaRepository
+  themedViewModel: ThemedViewModelImpl
 ) : DataBindingViewModel(observable, uiCommandSource, navCommandSource),
   ThemedViewModel by themedViewModel,
-  ArtistsViewModel {
+  ArtistsViewModel,
+  KoinComponent {
+
+  private val mediaRepo: MediaRepository by inject()
 
   override var progressVisible: Boolean by boundBoolean(BR.progressVisible)
   override var listViewVisible: Boolean by boundBoolean(BR.listViewVisible)

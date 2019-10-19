@@ -34,18 +34,22 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.Observables
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.subjects.BehaviorSubject
+import org.koin.core.KoinComponent
+import org.koin.core.inject
 
 class AlbumDetailsViewModelImpl constructor(
   observable: ObservableImpl,
   uiCommandSource: ExecuteOnceUiCommandSource,
   navCommandSource: ExecuteOnceNavCommandSource,
-  private val themedViewModel: ThemedViewModelImpl,
-  private val context: Context,
-  private val mediaService: MediaService,
-  private val mediaRepo: MediaRepository
+  themedViewModel: ThemedViewModelImpl
 ) : DataBindingViewModel(observable, uiCommandSource, navCommandSource),
   ThemedViewModel by themedViewModel,
-  AlbumDetailsViewModel {
+  AlbumDetailsViewModel,
+  KoinComponent {
+
+  private val context: Context by inject()
+  private val mediaService: MediaService by inject()
+  private val mediaRepo: MediaRepository by inject()
 
   override val progressVisible: Boolean = false
   override val listViewVisible: Boolean = true
@@ -118,9 +122,7 @@ class AlbumDetailsViewModelImpl constructor(
     GlideApp.with(context)
       .asBitmap()
       .load(albumItem.description.albumArtUri)
-      .onResourceReady { albumArt ->
-        themedViewModel.themeService.createTheme(albumArt).subscribeBy { albumTheme.value = it }
-      }
+      .onResourceReady { albumArt -> themeService.createTheme(albumArt).subscribeBy { albumTheme.value = it } }
       .preload()
   }
 

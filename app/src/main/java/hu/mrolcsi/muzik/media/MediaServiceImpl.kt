@@ -32,10 +32,12 @@ import hu.mrolcsi.muzik.service.extensions.media.stopProgressUpdater
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
+import org.koin.core.KoinComponent
+import org.koin.core.inject
 
-class MediaServiceImpl constructor(
-  private val app: Application
-) : MediaService {
+class MediaServiceImpl : MediaService, KoinComponent {
+
+  private val app: Application by inject()
 
   private val connectionCallbacks: MediaBrowserCompat.ConnectionCallback =
     object : MediaBrowserCompat.ConnectionCallback() {

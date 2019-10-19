@@ -6,15 +6,20 @@ import androidx.lifecycle.MutableLiveData
 import hu.mrolcsi.muzik.common.viewmodel.RxViewModel
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
+import org.koin.core.KoinComponent
+import org.koin.core.inject
 
 interface ThemedViewModel {
+
+  val themeService: ThemeService
+
   val previousTheme: Theme?
   val currentTheme: LiveData<Theme>
 }
 
-open class ThemedViewModelImpl constructor(
-  val themeService: ThemeService
-) : RxViewModel(), ThemedViewModel {
+open class ThemedViewModelImpl : RxViewModel(), ThemedViewModel, KoinComponent {
+
+  override val themeService: ThemeService by inject()
 
   override var previousTheme: Theme? = null
   override val currentTheme = MutableLiveData<Theme>()

@@ -6,10 +6,12 @@ import hu.mrolcsi.muzik.service.MuzikBrowserService
 import hu.mrolcsi.muzik.service.MuzikBrowserService.Companion.OPTION_ALBUM_ID
 import hu.mrolcsi.muzik.service.MuzikBrowserService.Companion.OPTION_ARTIST_ID
 import io.reactivex.Observable
+import org.koin.core.KoinComponent
+import org.koin.core.inject
 
-class MediaRepositoryImpl constructor(
-  private val mediaService: MediaService
-) : MediaRepository {
+class MediaRepositoryImpl : MediaRepository, KoinComponent {
+
+  private val mediaService: MediaService by inject()
 
   override fun getArtists(): Observable<List<MediaBrowserCompat.MediaItem>> =
     mediaService.observableSubscribe(MuzikBrowserService.MEDIA_ROOT_ARTISTS)

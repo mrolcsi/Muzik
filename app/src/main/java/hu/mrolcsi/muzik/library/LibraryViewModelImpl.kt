@@ -5,14 +5,12 @@ import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.viewmodel.ExecuteOnceNavCommandSource
 import hu.mrolcsi.muzik.common.viewmodel.NavCommandSource
 import hu.mrolcsi.muzik.extensions.ParcelableNavDirections
-import hu.mrolcsi.muzik.theme.ThemeService
 import hu.mrolcsi.muzik.theme.ThemedViewModelImpl
 import kotlin.properties.Delegates
 
 class LibraryViewModelImpl constructor(
-  navCommandSource: ExecuteOnceNavCommandSource,
-  themeService: ThemeService
-) : ThemedViewModelImpl(themeService),
+  navCommandSource: ExecuteOnceNavCommandSource
+) : ThemedViewModelImpl(),
   NavCommandSource by navCommandSource,
   LibraryViewModel {
 

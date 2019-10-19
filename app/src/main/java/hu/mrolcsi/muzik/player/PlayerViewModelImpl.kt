@@ -39,22 +39,18 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.Observables
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
+import org.koin.core.inject
 
 class PlayerViewModelImpl constructor(
   observable: ObservableImpl,
   uiCommandSource: ExecuteOnceUiCommandSource,
   navCommandSource: ExecuteOnceNavCommandSource,
-  private val themedViewModel: ThemedViewModelImpl,
-  private val context: Context,
-  private val mediaService: MediaService
-) : MiniPlayerViewModelImpl(
-  observable,
-  uiCommandSource,
-  navCommandSource,
-  themedViewModel,
-  context,
-  mediaService
-), PlayerViewModel {
+  themedViewModel: ThemedViewModelImpl
+) : MiniPlayerViewModelImpl(observable, uiCommandSource, navCommandSource, themedViewModel),
+  PlayerViewModel {
+
+  private val context: Context by inject()
+  private val mediaService: MediaService by inject()
 
   override var elapsedTimeText: String? by boundStringOrNull(BR.elapsedTimeText)
   override var remainingTimeText: String? by boundStringOrNull(BR.remainingTimeText)
@@ -218,7 +214,7 @@ class PlayerViewModelImpl constructor(
       }
       .concatMapSingle { (item, coverArt) ->
         // Generate theme from coverArt
-        themedViewModel.themeService
+        themeService
           .createTheme(coverArt)
           .map { theme -> ThemedQueueItem(item, theme) }
       }.toList()

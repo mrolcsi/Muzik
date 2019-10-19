@@ -23,16 +23,21 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.Observables
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.subjects.BehaviorSubject
+import org.koin.core.KoinComponent
+import org.koin.core.inject
 import kotlin.properties.Delegates
 
 class AlbumsViewModelImpl constructor(
   observable: ObservableImpl,
   uiCommandSource: ExecuteOnceUiCommandSource,
   navCommandSource: ExecuteOnceNavCommandSource,
-  themedViewModel: ThemedViewModelImpl,
-  mediaRepo: MediaRepository
+  themedViewModel: ThemedViewModelImpl
 ) : DataBindingViewModel(observable, uiCommandSource, navCommandSource),
-  AlbumsViewModel, ThemedViewModel by themedViewModel {
+  ThemedViewModel by themedViewModel,
+  AlbumsViewModel,
+  KoinComponent {
+
+  private val mediaRepo: MediaRepository by inject()
 
   override val progressVisible: Boolean = false
   override val listViewVisible: Boolean = true

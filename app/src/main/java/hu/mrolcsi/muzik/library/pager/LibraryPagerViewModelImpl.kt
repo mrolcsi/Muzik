@@ -11,18 +11,22 @@ import hu.mrolcsi.muzik.media.MediaRepository
 import hu.mrolcsi.muzik.media.MediaService
 import hu.mrolcsi.muzik.theme.ThemedViewModel
 import hu.mrolcsi.muzik.theme.ThemedViewModelImpl
+import org.koin.core.KoinComponent
+import org.koin.core.inject
 
 class LibraryPagerViewModelImpl constructor(
   observable: ObservableImpl,
   uiCommandSource: ExecuteOnceUiCommandSource,
   navCommandSource: ExecuteOnceNavCommandSource,
-  themedViewModel: ThemedViewModelImpl,
-  mediaRepo: MediaRepository,
-  private val context: Context,
-  private val mediaService: MediaService
+  themedViewModel: ThemedViewModelImpl
 ) : DataBindingViewModel(observable, uiCommandSource, navCommandSource),
   ThemedViewModel by themedViewModel,
-  LibraryPagerViewModel {
+  LibraryPagerViewModel,
+  KoinComponent {
+
+  private val context: Context by inject()
+  private val mediaRepo: MediaRepository by inject()
+  private val mediaService: MediaService by inject()
 
   private var songDescriptions: List<MediaDescriptionCompat>? = null
 

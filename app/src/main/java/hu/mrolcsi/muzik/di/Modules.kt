@@ -41,9 +41,9 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 
 val appModule = module {
-  single<MediaService> { MediaServiceImpl(get()) }
-  single<DiscogsService> { DiscogsServiceImpl(get()) }
-  single<ThemeService> { ThemeServiceImpl(get(), get()) }
+  single<MediaService> { MediaServiceImpl() }
+  single<DiscogsService> { DiscogsServiceImpl() }
+  single<ThemeService> { ThemeServiceImpl() }
   single<SharedPreferences> { PreferenceManager.getDefaultSharedPreferences(get()) }
 }
 
@@ -59,7 +59,7 @@ val dataModule = module {
 
   single { get<PlayQueueDatabase>().getPlayQueueDao() }
 
-  single<MediaRepository> { MediaRepositoryImpl(get()) }
+  single<MediaRepository> { MediaRepositoryImpl() }
 }
 
 val networkModule = module {
@@ -88,18 +88,18 @@ val viewModule = module {
   factory { ObservableImpl() }
   factory { ExecuteOnceUiCommandSource() }
   factory { ExecuteOnceNavCommandSource() }
-  factory { ThemedViewModelImpl(get()) }
+  factory { ThemedViewModelImpl() }
   factory { (fragment: Fragment) -> RxPermissions(fragment) }
 
   viewModel { (rxPermissions: RxPermissions) -> SplashViewModelImpl(get(), get(), get(), get(), rxPermissions) }
-  viewModel { LibraryViewModelImpl(get(), get()) }
-  viewModel { LibraryPagerViewModelImpl(get(), get(), get(), get(), get(), get(), get()) }
-  viewModel { ArtistsViewModelImpl(get(), get(), get(), get(), get()) }
-  viewModel { ArtistDetailsViewModelImpl(get(), get(), get(), get(), get(), get(), get()) }
-  viewModel { AlbumsViewModelImpl(get(), get(), get(), get(), get()) }
-  viewModel { AlbumDetailsViewModelImpl(get(), get(), get(), get(), get(), get(), get()) }
-  viewModel { SongsViewModelImpl(get(), get(), get(), get(), get(), get(), get()) }
-  viewModel { MiniPlayerViewModelImpl(get(), get(), get(), get(), get(), get()) }
-  viewModel { PlayerViewModelImpl(get(), get(), get(), get(), get(), get()) }
-  viewModel { PlaylistViewModelImpl(get(), get(), get(), get(), get(), get(), get()) }
+  viewModel { LibraryViewModelImpl(get()) }
+  viewModel { LibraryPagerViewModelImpl(get(), get(), get(), get()) }
+  viewModel { ArtistsViewModelImpl(get(), get(), get(), get()) }
+  viewModel { ArtistDetailsViewModelImpl(get(), get(), get(), get()) }
+  viewModel { AlbumsViewModelImpl(get(), get(), get(), get()) }
+  viewModel { AlbumDetailsViewModelImpl(get(), get(), get(), get()) }
+  viewModel { SongsViewModelImpl(get(), get(), get(), get()) }
+  viewModel { MiniPlayerViewModelImpl(get(), get(), get(), get()) }
+  viewModel { PlayerViewModelImpl(get(), get(), get(), get()) }
+  viewModel { PlaylistViewModelImpl(get(), get(), get(), get(), get()) }
 }

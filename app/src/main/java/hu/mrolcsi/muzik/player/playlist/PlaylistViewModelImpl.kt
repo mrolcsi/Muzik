@@ -18,18 +18,22 @@ import hu.mrolcsi.muzik.theme.ThemedViewModelImpl
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.Observables
 import io.reactivex.rxkotlin.subscribeBy
+import org.koin.core.KoinComponent
+import org.koin.core.inject
 
 class PlaylistViewModelImpl constructor(
   context: Context,
   observable: ObservableImpl,
   uiCommandSource: ExecuteOnceUiCommandSource,
   navCommandSource: ExecuteOnceNavCommandSource,
-  themedViewModel: ThemedViewModelImpl,
-  playQueueDao: PlayQueueDao,
-  private val mediaService: MediaService
+  themedViewModel: ThemedViewModelImpl
 ) : DataBindingViewModel(observable, uiCommandSource, navCommandSource),
   ThemedViewModel by themedViewModel,
-  PlaylistViewModel {
+  PlaylistViewModel,
+  KoinComponent {
+
+  private val playQueueDao: PlayQueueDao by inject()
+  private val mediaService: MediaService by inject()
 
   override val progressVisible: Boolean = false
   override val listViewVisible: Boolean = true

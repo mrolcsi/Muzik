@@ -30,18 +30,22 @@ import hu.mrolcsi.muzik.theme.ThemedViewModelImpl
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
+import org.koin.core.KoinComponent
+import org.koin.core.inject
 import java.util.concurrent.TimeUnit
 
 open class MiniPlayerViewModelImpl constructor(
   observable: ObservableImpl,
   uiCommandSource: ExecuteOnceUiCommandSource,
   navCommandSource: ExecuteOnceNavCommandSource,
-  themedViewModel: ThemedViewModelImpl,
-  private val context: Context,
-  private val mediaService: MediaService
+  themedViewModel: ThemedViewModelImpl
 ) : DataBindingViewModel(observable, uiCommandSource, navCommandSource),
   ThemedViewModel by themedViewModel,
-  MiniPlayerViewModel {
+  MiniPlayerViewModel,
+  KoinComponent {
+
+  private val context: Context by inject()
+  private val mediaService: MediaService by inject()
 
   override var songTitle: String? by boundStringOrNull(BR.songTitle)
   override var songArtist: String? by boundStringOrNull(BR.songArtist)

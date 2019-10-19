@@ -17,7 +17,7 @@ import org.robolectric.RobolectricTestRunner
 import kotlin.random.Random
 
 @RunWith(RobolectricTestRunner::class)
-open class BaseTest : AutoCloseKoinTest() {
+abstract class BaseTest : AutoCloseKoinTest() {
 
   private val mockNavController = mockk<NavController>(relaxed = true)
 
@@ -35,7 +35,7 @@ open class BaseTest : AutoCloseKoinTest() {
     every { mockNavController.graph } returns stubGraph
   }
 
-  fun <T : Fragment> T.useMockNavController() = apply {
+  protected fun <T : Fragment> T.useMockNavController() = apply {
     viewLifecycleOwnerLiveData.observeForever { viewLifecycleOwner ->
       viewLifecycleOwner?.let {
         Navigation.setViewNavController(requireView(), mockNavController)
