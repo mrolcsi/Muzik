@@ -12,14 +12,19 @@
     <item name="android:statusBarColor">@android:color/transparent</item>
     <item name="android:navigationBarColor">@android:color/transparent</item>
 
-    <item name="android:windowContentTransitions">true</item>
-
     <item name="android:listDivider">@drawable/list_divider</item>
     <item name="android:selectableItemBackground">@drawable/selectable_item_background</item>
+    <item name="materialCardViewStyle">@style/CardViewStyle</item>
+
+    <item name="android:windowBackground">@android:color/holo_purple</item>
   </style>
 
   <style name="FluxTheme.Launcher">
     <item name="android:windowBackground">@drawable/launch_screen</item>
+  </style>
+
+  <style name="CardViewStyle" parent="Widget.MaterialComponents.CardView">
+    <item name="cardCornerRadius">4dp</item>
   </style>
 
   <!-- TODO: Light Theme -->

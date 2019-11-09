@@ -38,7 +38,7 @@ open class SongHolder(itemView: View, private val showTrackNumber: Boolean) :
         // Set track number
         val trackNumber = item.description.trackNumber % 1000
         tvTrackNumber?.isVisible = showTrackNumber && (trackNumber > 0)
-        imgCoverArt?.isVisible = !showTrackNumber
+        coverArtContainer?.isVisible = !showTrackNumber
         tvTrackNumber?.text = trackNumber.toString()
       } else {
         // Load album art

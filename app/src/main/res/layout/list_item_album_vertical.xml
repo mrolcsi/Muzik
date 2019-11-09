@@ -9,11 +9,10 @@
       type="androidx.lifecycle.LiveData&lt;hu.mrolcsi.muzik.theme.Theme&gt;" />
   </data>
 
-  <androidx.cardview.widget.CardView
+  <com.google.android.material.card.MaterialCardView
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="4dp"
-    android:background="?android:attr/selectableItemBackground"
     app:rippleColor="@{theme.primaryForegroundColor}">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -27,5 +26,5 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-  </androidx.cardview.widget.CardView>
+  </com.google.android.material.card.MaterialCardView>
 </layout>

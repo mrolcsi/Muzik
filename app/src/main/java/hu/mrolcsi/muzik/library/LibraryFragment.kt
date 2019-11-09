@@ -1,21 +1,15 @@
 package hu.mrolcsi.muzik.library
 
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.navArgs
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.viewmodel.observeAndRunNavCommands
 import hu.mrolcsi.muzik.databinding.FragmentLibraryBinding
-import hu.mrolcsi.muzik.extensions.applyNavigationBarColor
-import hu.mrolcsi.muzik.extensions.applyStatusBarColor
-import hu.mrolcsi.muzik.theme.Theme
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class LibraryFragment : Fragment() {
@@ -31,34 +25,11 @@ class LibraryFragment : Fragment() {
     }.root
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-    viewModel.currentTheme.observe(viewLifecycleOwner, Observer<Theme> {
-      applyPrimaryBackgroundColor(it.primaryBackgroundColor)
-    })
-
     requireActivity()
       .findNavController(R.id.libraryNavHost)
       .observeAndRunNavCommands(viewLifecycleOwner, viewModel)
 
     viewModel.navDirection = args.navDirections
-  }
-
-  override fun onResume() {
-    super.onResume()
-
-    // Apply StatusBar and NavigationBar colors again
-    viewModel.currentTheme.value?.let {
-      applyPrimaryBackgroundColor(it.primaryBackgroundColor)
-    }
-  }
-
-  private fun applyPrimaryBackgroundColor(color: Int) {
-    Log.d(LOG_TAG, "Applying theme...")
-
-    activity?.run {
-      window?.setBackgroundDrawable(ColorDrawable(color))
-      applyStatusBarColor(color)
-      applyNavigationBarColor(color)
-    }
   }
 
   companion object {

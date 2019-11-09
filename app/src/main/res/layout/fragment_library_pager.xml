@@ -15,21 +15,23 @@
 
   <androidx.coordinatorlayout.widget.CoordinatorLayout
     android:layout_width="0dp"
-    android:layout_height="0dp">
+    android:layout_height="0dp"
+    android:fitsSystemWindows="true">
 
     <com.google.android.material.appbar.AppBarLayout
       android:id="@+id/appBar"
       android:layout_width="match_parent"
-      android:layout_height="wrap_content">
+      android:layout_height="wrap_content"
+      android:background="@{theme.primaryBackgroundColor}"
+      android:fitsSystemWindows="true"
+      app:expanded="true">
 
       <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/libraryPagerToolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@{theme.primaryBackgroundColor}"
         app:iconTint="@{theme.primaryForegroundColor}"
-        app:layout_scrollFlags="scroll|enterAlways|snap"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        app:layout_scrollFlags="scroll|snap"
         app:subtitleTextColor="@{theme.primaryForegroundColor}"
         app:titleTextColor="@{theme.primaryForegroundColor}" />
 
@@ -58,11 +60,11 @@
       android:layout_gravity="bottom|end"
       android:layout_marginEnd="16dp"
       android:layout_marginBottom="16dp"
-      android:backgroundTint="@{theme.primaryBackgroundColor}"
+      android:backgroundTint="@{theme.primaryForegroundColor}"
       android:contentDescription="@string/mediaControl_shuffleAll"
       android:onClick="@{() -> viewModel.onShuffleAllClick()}"
-      android:tint="@{theme.primaryForegroundColor}"
-      app:rippleColor="@{theme.primaryForegroundColor}"
+      android:tint="@{theme.primaryBackgroundColor}"
+      app:rippleColor="@{theme.primaryBackgroundColor}"
       app:srcCompat="@drawable/ic_shuffle_all" />
 
   </androidx.coordinatorlayout.widget.CoordinatorLayout>

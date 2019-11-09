@@ -1,12 +1,10 @@
 package hu.mrolcsi.muzik.splash
 
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.tbruyelle.rxpermissions2.RxPermissions
 import hu.mrolcsi.muzik.common.viewmodel.observeAndRunNavCommands
@@ -31,9 +29,6 @@ class SplashFragment : Fragment() {
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     viewModel.apply {
       findNavController().observeAndRunNavCommands(viewLifecycleOwner, this)
-      currentTheme.observe(viewLifecycleOwner, Observer {
-        activity?.window?.setBackgroundDrawable(ColorDrawable(it.secondaryBackgroundColor))
-      })
     }
   }
 }

@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:app="http://schemas.android.com/apk/res-auto"
-  xmlns:tools="http://schemas.android.com/tools"
-  tools:showIn="@layout/fragment_album_details">
+  xmlns:tools="http://schemas.android.com/tools">
 
   <data>
 
@@ -24,62 +23,94 @@
     <ImageView
       android:id="@+id/imgCoverArt"
       android:layout_width="0dp"
-      android:layout_height="144dp"
+      android:layout_height="0dp"
       android:adjustViewBounds="true"
       android:contentDescription="@string/contentDescription_coverArt"
       android:scaleType="centerCrop"
       android:transitionName="coverArt"
       app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintDimensionRatio="1:1"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintHorizontal_bias="1.0"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toTopOf="parent"
-      app:layout_constraintVertical_bias="0.0"
+      app:layout_constraintWidth_percent="0.5"
       tools:srcCompat="@tools:sample/avatars" />
 
     <TextView
       android:id="@+id/tvArtist"
       android:layout_width="0dp"
-      android:layout_height="wrap_content"
-      android:layout_marginStart="8dp"
-      android:layout_marginTop="8dp"
+      android:layout_height="0dp"
+      android:layout_marginStart="16dp"
+      android:layout_marginTop="?attr/actionBarSize"
       android:layout_marginEnd="8dp"
+      android:layout_marginBottom="8dp"
+      android:gravity="bottom"
+      android:singleLine="false"
       android:text="@{viewModel.artistText}"
-      android:textAppearance="?android:attr/textAppearanceMedium"
+      android:textAppearance="?android:attr/textAppearanceLarge"
       android:textColor="@{theme.primaryForegroundColor}"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintHorizontal_bias="0.5"
-      app:layout_constraintStart_toEndOf="@+id/imgCoverArt"
-      app:layout_constraintTop_toBottomOf="@+id/tvNumberOfSongs"
+      app:autoSizeTextType="uniform"
+      app:layout_constraintBottom_toTopOf="@id/barrier"
+      app:layout_constraintEnd_toStartOf="@+id/imgCoverArt"
+      app:layout_constraintHorizontal_bias="0.0"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent"
+      app:layout_constraintVertical_bias="1.0"
       tools:text="Album Artist" />
 
     <TextView
       android:id="@+id/tvYear"
-      android:layout_width="0dp"
+      android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:layout_marginStart="8dp"
-      android:layout_marginTop="24dp"
+      android:layout_marginStart="16dp"
+      android:layout_marginBottom="8dp"
       android:text="@{viewModel.yearText}"
       android:textAppearance="?android:attr/textAppearanceSmall"
       android:textColor="@{theme.primaryForegroundColor}"
-      app:layout_constraintStart_toEndOf="@+id/imgCoverArt"
-      app:layout_constraintTop_toTopOf="parent"
+      app:layout_constraintBottom_toTopOf="@+id/imgProtectionScrim"
+      app:layout_constraintEnd_toStartOf="@+id/tvNumberOfSongs"
+      app:layout_constraintHorizontal_bias="0.0"
+      app:layout_constraintHorizontal_chainStyle="packed"
+      app:layout_constraintStart_toStartOf="parent"
       app:visibility="@{!TextUtils.isEmpty(viewModel.yearText)}"
-      tools:text="Year" />
+      tools:text="2019"
+      tools:visibility="visible" />
 
     <TextView
       android:id="@+id/tvNumberOfSongs"
-      android:layout_width="0dp"
+      android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_marginStart="8dp"
-      android:layout_marginTop="24dp"
-      android:layout_marginEnd="8dp"
+      android:layout_marginEnd="16dp"
+      android:layout_marginBottom="8dp"
       android:text="@{viewModel.numberOfSongsText}"
       android:textAppearance="?android:attr/textAppearanceSmall"
       android:textColor="@{theme.primaryForegroundColor}"
-      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintBottom_toTopOf="@+id/imgProtectionScrim"
+      app:layout_constraintEnd_toStartOf="@+id/imgCoverArt"
       app:layout_constraintStart_toEndOf="@+id/tvYear"
-      app:layout_constraintTop_toTopOf="parent"
       tools:text="12 songs" />
+
+    <ImageView
+      android:id="@+id/imgProtectionScrim"
+      android:layout_width="0dp"
+      android:layout_height="?attr/actionBarSize"
+      android:tint="@{theme.primaryBackgroundColor}"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="@+id/imgCoverArt"
+      app:srcCompat="@drawable/protection_scrim"
+      tools:ignore="ContentDescription"
+      tools:tint="?attr/colorPrimary" />
+
+    <androidx.constraintlayout.widget.Barrier
+      android:id="@+id/barrier"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      app:barrierDirection="top"
+      app:constraint_referenced_ids="tvYear,tvNumberOfSongs"
+      tools:layout_editor_absoluteY="82dp" />
 
   </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

@@ -12,28 +12,30 @@
 
   <androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:animateLayoutChanges="true"
+    android:layout_height="?attr/listPreferredItemHeight"
     android:background="?android:attr/selectableItemBackground"
-    android:minHeight="?attr/listPreferredItemHeight"
     app:rippleColor="@{theme.secondaryForegroundColor}">
 
-    <ImageView
-      android:id="@+id/imgCoverArt"
-      android:layout_width="0dp"
-      android:layout_height="0dp"
-      android:layout_marginTop="1dp"
-      android:layout_marginBottom="1dp"
-      android:contentDescription="@string/contentDescription_coverArt"
-      android:scaleType="centerCrop"
-      android:visibility="visible"
+    <com.google.android.material.card.MaterialCardView
+      android:id="@+id/coverArtContainer"
+      android:layout_width="?attr/listPreferredItemHeight"
+      android:layout_height="?attr/listPreferredItemHeight"
+      android:layout_marginStart="1dp"
+      app:cardBackgroundColor="@{theme.secondaryBackgroundColor}"
       app:layout_constraintBottom_toBottomOf="parent"
-      app:layout_constraintDimensionRatio="h,1:1"
       app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toTopOf="parent"
-      app:layout_constraintVertical_bias="0.0"
-      tools:srcCompat="@tools:sample/avatars"
-      tools:visibility="gone" />
+      app:layout_constraintTop_toTopOf="parent">
+
+      <ImageView
+        android:id="@+id/imgCoverArt"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@string/contentDescription_coverArt"
+        android:scaleType="centerCrop"
+        android:visibility="visible"
+        tools:srcCompat="@tools:sample/avatars" />
+
+    </com.google.android.material.card.MaterialCardView>
 
     <TextView
       android:id="@+id/tvTrackNumber"
@@ -55,7 +57,7 @@
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       app:barrierDirection="end"
-      app:constraint_referenced_ids="imgCoverArt,tvTrackNumber" />
+      app:constraint_referenced_ids="coverArtContainer,tvTrackNumber" />
 
     <ImageView
       android:id="@+id/imgNowPlaying"
@@ -80,7 +82,7 @@
       android:layout_height="wrap_content"
       android:layout_marginStart="8dp"
       android:layout_marginTop="8dp"
-      android:layout_marginEnd="16dp"
+      android:layout_marginEnd="24dp"
       android:textAppearance="?attr/textAppearanceListItem"
       android:textColor="@{theme.secondaryForegroundColor}"
       app:enableMarquee="@{true}"
@@ -96,8 +98,6 @@
     <TextView
       android:id="@+id/tvSongArtist"
       android:layout_width="0dp"
-      app:enableMarquee="@{true}"
-      app:marqueeDelay="@{@integer/preferredMarqueeDelay}"
       android:layout_height="wrap_content"
       android:layout_marginStart="8dp"
       android:layout_marginEnd="8dp"
@@ -105,17 +105,19 @@
       android:alpha="0.8"
       android:textAppearance="?attr/textAppearanceListItemSecondary"
       android:textColor="@{theme.secondaryForegroundColor}"
+      app:enableMarquee="@{true}"
       app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintEnd_toStartOf="@+id/tvDuration"
       app:layout_constraintStart_toEndOf="@+id/imgNowPlaying"
       app:layout_constraintTop_toBottomOf="@+id/tvSongTitle"
+      app:marqueeDelay="@{@integer/preferredMarqueeDelay}"
       tools:text="Song Artist" />
 
     <TextView
       android:id="@+id/tvDuration"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:layout_marginEnd="16dp"
+      android:layout_marginEnd="24dp"
       android:layout_marginBottom="8dp"
       android:alpha="0.8"
       android:textColor="@{theme.secondaryForegroundColor}"

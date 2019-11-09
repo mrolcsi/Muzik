@@ -19,7 +19,7 @@ interface ThemedViewModel {
 
 open class ThemedViewModelImpl : RxViewModel(), ThemedViewModel, KoinComponent {
 
-  override val themeService: ThemeService by inject()
+  final override val themeService: ThemeService by inject()
 
   override var previousTheme: Theme? = null
   override val currentTheme = MutableLiveData<Theme>()

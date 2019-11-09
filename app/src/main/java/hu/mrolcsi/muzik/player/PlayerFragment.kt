@@ -31,15 +31,11 @@ import hu.mrolcsi.muzik.common.view.MVVMListAdapter
 import hu.mrolcsi.muzik.common.viewmodel.observeAndRunNavCommands
 import hu.mrolcsi.muzik.common.viewmodel.observeAndRunUiCommands
 import hu.mrolcsi.muzik.databinding.FragmentPlayerBinding
-import hu.mrolcsi.muzik.extensions.applyNavigationBarColor
-import hu.mrolcsi.muzik.extensions.applyStatusBarColor
 import hu.mrolcsi.muzik.service.extensions.media.albumId
 import hu.mrolcsi.muzik.service.extensions.media.artistId
 import kotlinx.android.synthetic.main.content_player.*
 import kotlinx.android.synthetic.main.fragment_player.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import java.text.SimpleDateFormat
-import java.util.*
 import kotlin.math.abs
 
 class PlayerFragment : Fragment() {
@@ -292,22 +288,12 @@ class PlayerFragment : Fragment() {
       .alpha(1f)
       .setDuration(context?.resources?.getInteger(R.integer.preferredAnimationDuration)?.toLong() ?: 300L)
       .start()
-
-    Log.i(
-      "NavigateToPlayer",
-      "PlayerFragment - RecyclerView visible: ${SimpleDateFormat("HH:mm:ss:SSS").format(Calendar.getInstance().time)}"
-    )
   }
 
   private fun applyTheme(@ColorInt backgroundColor: Int, @ColorInt foregroundColor: Int) {
+    activity?.window?.setBackgroundDrawable(ColorDrawable(backgroundColor))
     binding.backgroundColor = backgroundColor
     binding.foregroundColor = foregroundColor
-
-    activity?.run {
-      window?.setBackgroundDrawable(ColorDrawable(backgroundColor))
-      applyStatusBarColor(backgroundColor)
-      applyNavigationBarColor(backgroundColor)
-    }
   }
 
   companion object {
