@@ -14,8 +14,13 @@
       type="int" />
 
     <variable
-      name="viewModel"
+      name="playerViewModel"
       type="hu.mrolcsi.muzik.player.PlayerViewModel" />
+
+    <variable
+      name="playlistViewModel"
+      type="hu.mrolcsi.muzik.player.playlist.PlaylistViewModel" />
+
   </data>
 
   <androidx.drawerlayout.widget.DrawerLayout
@@ -24,7 +29,6 @@
     android:layout_height="match_parent"
     tools:openDrawer="end">
 
-    <!-- Layout to contain contents of main body of screen (drawer will slide over this) -->
     <include
       android:id="@+id/content_player"
       layout="@layout/content_player"
@@ -32,16 +36,16 @@
       android:layout_height="match_parent"
       app:backgroundColor="@{backgroundColor}"
       app:foregroundColor="@{foregroundColor}"
-      app:viewModel="@{viewModel}" />
+      app:viewModel="@{playerViewModel}" />
 
-    <!-- Container for contents of drawer - use NavigationView to make configuration easier -->
-    <fragment
-      android:id="@+id/playlistFragment"
-      android:name="hu.mrolcsi.muzik.player.playlist.PlaylistFragment"
+    <include
+      layout="@layout/fragment_playlist"
       android:layout_width="@dimen/navigation_drawer_width"
       android:layout_height="match_parent"
       android:layout_gravity="end"
-      tools:layout="@layout/fragment_playlist" />
+      app:theme="@{playerViewModel.currentTheme}"
+      app:viewModel="@{playlistViewModel}" />
 
   </androidx.drawerlayout.widget.DrawerLayout>
+
 </layout>

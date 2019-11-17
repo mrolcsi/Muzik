@@ -6,10 +6,13 @@ import androidx.lifecycle.LiveData
 import androidx.recyclerview.widget.DiffUtil
 import hu.mrolcsi.muzik.common.DiffCallbacks
 import hu.mrolcsi.muzik.common.view.OnRepeatTouchListener
-import hu.mrolcsi.muzik.library.miniplayer.MiniPlayerViewModel
+import hu.mrolcsi.muzik.miniplayer.MiniPlayerViewModel
 import hu.mrolcsi.muzik.theme.Theme
 
 interface PlayerViewModel : MiniPlayerViewModel {
+
+  @get:Bindable
+  val noSongLoadedVisible: Boolean
 
   @get:Bindable
   val elapsedTimeText: String?

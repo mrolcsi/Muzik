@@ -1,11 +1,15 @@
 package hu.mrolcsi.muzik.library
 
+import androidx.lifecycle.LiveData
+import hu.mrolcsi.muzik.common.view.Page
 import hu.mrolcsi.muzik.common.viewmodel.NavCommandSource
-import hu.mrolcsi.muzik.extensions.ParcelableNavDirections
+import hu.mrolcsi.muzik.common.viewmodel.PermissionViewModel
 import hu.mrolcsi.muzik.theme.ThemedViewModel
 
-interface LibraryViewModel : ThemedViewModel, NavCommandSource {
+interface LibraryViewModel : PermissionViewModel, ThemedViewModel, NavCommandSource {
 
-  var navDirection: ParcelableNavDirections?
+  val pages: LiveData<List<Page>>
+
+  fun onShuffleAllClicked()
 
 }

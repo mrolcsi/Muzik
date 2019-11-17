@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <integer name="albumsColumnCount">2</integer>
-  <integer name="preferredAnimationDuration">300</integer>
+  <integer name="preferredAnimationDuration">@android:integer/config_shortAnimTime</integer>
   <integer name="preferredMarqueeDelay">6000</integer>
 </resources>

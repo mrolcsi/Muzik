@@ -17,7 +17,7 @@ import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.context.loadKoinModules
 import org.koin.dsl.module
 
-class PlayerFragmentTest : BaseTest() {
+class PlayerDialogFragmentTest : BaseTest() {
 
   private val mockViewModel: PlayerViewModel = mockk<PlayerViewModelImpl>(relaxed = true)
 
@@ -30,9 +30,9 @@ class PlayerFragmentTest : BaseTest() {
     }
   }
 
-  private fun withSut(action: PlayerFragment.() -> Unit) =
+  private fun withSut(action: PlayerDialogFragment.() -> Unit) =
     launchFragmentInContainer(themeResId = R.style.FluxTheme) {
-      PlayerFragment().useMockNavController()
+      PlayerDialogFragment().useMockNavController()
     }.onFragment(action)
 
   @Before

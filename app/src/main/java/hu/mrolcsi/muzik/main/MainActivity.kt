@@ -3,8 +3,10 @@ package hu.mrolcsi.muzik.main
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import hu.mrolcsi.muzik.R
+import hu.mrolcsi.muzik.databinding.ActivityMainBinding
 import hu.mrolcsi.muzik.extensions.updateNavigationIcons
 import hu.mrolcsi.muzik.extensions.updateStatusBarIcons
 import hu.mrolcsi.muzik.theme.ThemedViewModel
@@ -19,12 +21,17 @@ class MainActivity : AppCompatActivity() {
     setTheme(R.style.FluxTheme)
 
     super.onCreate(savedInstanceState)
-    setContentView(R.layout.activity_main)
+    DataBindingUtil.setContentView<ActivityMainBinding>(this, R.layout.activity_main).also {
+      it.theme = viewModel.currentTheme
+      it.lifecycleOwner = this
+    }
 
     viewModel.currentTheme.observe(this, Observer { theme ->
-      window.setBackgroundDrawable(ColorDrawable(theme.primaryBackgroundColor))
-      updateStatusBarIcons(theme.primaryBackgroundColor)
-      updateNavigationIcons(theme.primaryBackgroundColor)
+      window.apply {
+        setBackgroundDrawable(ColorDrawable(theme.primaryBackgroundColor))
+        updateStatusBarIcons(theme.primaryBackgroundColor)
+        updateNavigationIcons(theme.primaryBackgroundColor)
+      }
     })
   }
 

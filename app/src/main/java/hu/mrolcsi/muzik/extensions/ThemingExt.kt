@@ -1,18 +1,17 @@
 package hu.mrolcsi.muzik.extensions
 
-import android.app.Activity
 import android.os.Build
 import android.view.View
+import android.view.Window
 import androidx.core.graphics.ColorUtils
 
 const val DISABLED_ALPHA = 0.5f
 const val DISABLED_OPACITY = (255 * DISABLED_ALPHA).toInt()
 
-fun Activity.updateStatusBarIcons(color: Int) {
-//  window?.statusBarColor = color
+fun Window.updateStatusBarIcons(color: Int) {
 
   if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-    window?.decorView?.apply {
+    decorView.apply {
       val flags = systemUiVisibility
       systemUiVisibility =
         if (ColorUtils.calculateLuminance(color) < 0.5) {
@@ -26,11 +25,11 @@ fun Activity.updateStatusBarIcons(color: Int) {
   }
 }
 
-fun Activity.updateNavigationIcons(color: Int) {
+fun Window.updateNavigationIcons(color: Int) {
 //  window?.navigationBarColor = color
 
   if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-    window?.decorView?.apply {
+    decorView.apply {
       val flags = systemUiVisibility
       systemUiVisibility =
         if (ColorUtils.calculateLuminance(color) < 0.5) {

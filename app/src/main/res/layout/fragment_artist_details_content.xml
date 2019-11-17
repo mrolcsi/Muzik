@@ -7,7 +7,7 @@
 
     <variable
       name="viewModel"
-      type="hu.mrolcsi.muzik.library.artists.details.ArtistDetailsViewModel" />
+      type="hu.mrolcsi.muzik.artists.details.ArtistDetailsViewModel" />
 
     <variable
       name="theme"

@@ -2,6 +2,7 @@ package hu.mrolcsi.muzik.player
 
 import android.content.Context
 import android.graphics.BitmapFactory
+import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
@@ -14,7 +15,6 @@ import android.widget.Toast
 import androidx.databinding.library.baseAdapters.BR
 import androidx.lifecycle.MutableLiveData
 import com.bumptech.glide.request.target.Target
-import hu.mrolcsi.muzik.MainNavigationDirections
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.common.glide.GlideApp
 import hu.mrolcsi.muzik.common.glide.toSingle
@@ -22,11 +22,9 @@ import hu.mrolcsi.muzik.common.view.OnRepeatTouchListener
 import hu.mrolcsi.muzik.common.viewmodel.ExecuteOnceNavCommandSource
 import hu.mrolcsi.muzik.common.viewmodel.ExecuteOnceUiCommandSource
 import hu.mrolcsi.muzik.common.viewmodel.ObservableImpl
-import hu.mrolcsi.muzik.extensions.ParcelableNavDirections
 import hu.mrolcsi.muzik.extensions.secondsToTimeStamp
-import hu.mrolcsi.muzik.library.miniplayer.MiniPlayerViewModelImpl
-import hu.mrolcsi.muzik.library.pager.LibraryPagerFragmentDirections
 import hu.mrolcsi.muzik.media.MediaService
+import hu.mrolcsi.muzik.miniplayer.MiniPlayerViewModelImpl
 import hu.mrolcsi.muzik.service.extensions.media.coverArtUri
 import hu.mrolcsi.muzik.service.extensions.media.isPauseEnabled
 import hu.mrolcsi.muzik.service.extensions.media.isPlayEnabled
@@ -52,6 +50,8 @@ class PlayerViewModelImpl constructor(
   private val context: Context by inject()
   private val mediaService: MediaService by inject()
 
+  override var noSongLoadedVisible: Boolean by boundBoolean(BR.noSongLoadedVisible)
+
   override var elapsedTimeText: String? by boundStringOrNull(BR.elapsedTimeText)
   override var remainingTimeText: String? by boundStringOrNull(BR.remainingTimeText)
 
@@ -59,6 +59,13 @@ class PlayerViewModelImpl constructor(
   override var repeatDrawableRes: Int by boundInt(BR.repeatDrawableRes, R.drawable.ic_repeat_all)
 
   private var userInitiatedChange = false
+
+  private val emptyQueueItem = MediaSessionCompat.QueueItem(
+    MediaDescriptionCompat.Builder()
+      .setTitle(context.getString(R.string.player_noSongLoaded))
+      .build(),
+    0
+  )
 
   override fun onShuffleClick() {
     userInitiatedChange = true
@@ -115,21 +122,13 @@ class PlayerViewModelImpl constructor(
 
   override fun onArtistClick(artistId: Long) {
     sendNavCommand {
-      navigate(
-        MainNavigationDirections.actionGlobalToLibrary(
-          ParcelableNavDirections(LibraryPagerFragmentDirections.actionToArtistDetails(artistId))
-        )
-      )
+      navigate(PlayerDialogFragmentDirections.actionToArtistDetails(artistId))
     }
   }
 
   override fun onAlbumClick(albumId: Long) {
     sendNavCommand {
-      navigate(
-        MainNavigationDirections.actionGlobalToLibrary(
-          ParcelableNavDirections(LibraryPagerFragmentDirections.actionToAlbumDetails(albumId))
-        )
-      )
+      navigate(PlayerDialogFragmentDirections.actionToAlbumDetails(albumId))
     }
   }
 
@@ -185,10 +184,12 @@ class PlayerViewModelImpl constructor(
 
     Observables.combineLatest(
       mediaService.queue
+        .startWith(listOf(emptyQueueItem))
         .distinctUntilChanged()
         .switchMapSingle { queueItems -> queueItems.createThemes() },
       mediaService.playbackState
         .map { it.activeQueueItemId }
+        .doOnNext { noSongLoadedVisible = it < 0 }
         .distinctUntilChanged()
     )
       .map { (queue, activeQueueId) -> QueueState(queue, activeQueueId) }

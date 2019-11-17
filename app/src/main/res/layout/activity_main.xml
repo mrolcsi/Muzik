@@ -1,15 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:app="http://schemas.android.com/apk/res-auto"
-  android:layout_width="match_parent"
-  android:layout_height="match_parent">
+  xmlns:tools="http://schemas.android.com/tools">
 
-  <fragment
-    android:id="@+id/mainNavHost"
-    class="androidx.navigation.fragment.NavHostFragment"
+  <data>
+
+    <variable
+      name="theme"
+      type="androidx.lifecycle.LiveData&lt;hu.mrolcsi.muzik.theme.Theme&gt;" />
+  </data>
+
+  <androidx.constraintlayout.widget.ConstraintLayout
+    android:id="@+id/libraryRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    app:defaultNavHost="true"
-    app:navGraph="@navigation/main_navigation" />
+    android:background="@{theme.secondaryBackgroundColor}"
+    android:orientation="vertical"
+    tools:context=".library.LibraryFragment">
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+    <fragment
+      android:id="@+id/mainNavHost"
+      android:name="androidx.navigation.fragment.NavHostFragment"
+      android:layout_width="0dp"
+      android:layout_height="0dp"
+      app:defaultNavHost="true"
+      app:layout_constraintBottom_toTopOf="@+id/miniPlayer"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent"
+      app:navGraph="@navigation/main_navigation" />
+
+    <fragment
+      android:id="@+id/miniPlayer"
+      android:name="hu.mrolcsi.muzik.miniplayer.MiniPlayerFragment"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      tools:layout="@layout/fragment_miniplayer" />
+
+  </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
+

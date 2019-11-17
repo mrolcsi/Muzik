@@ -3,43 +3,13 @@
   xmlns:app="http://schemas.android.com/apk/res-auto"
   xmlns:tools="http://schemas.android.com/tools"
   android:id="@+id/main_navigation"
-  app:startDestination="@id/navSplash">
+  app:startDestination="@id/navLibrary">
 
   <action
-    android:id="@+id/action_global_toLibrary"
-    app:destination="@id/navLibrary"
-    app:enterAnim="@anim/fragment_open_enter"
-    app:exitAnim="@anim/fragment_open_exit"
-    app:launchSingleTop="true"
-    app:popEnterAnim="@anim/fragment_close_enter"
-    app:popExitAnim="@anim/fragment_close_exit" />
-
-  <fragment
-    android:id="@+id/navSplash"
-    android:name="hu.mrolcsi.muzik.splash.SplashFragment"
-    tools:layout="@layout/fragment_splash">
-
-    <action
-      android:id="@+id/action_to_library"
-      app:destination="@id/navLibrary"
-      app:enterAnim="@anim/fragment_open_enter"
-      app:exitAnim="@anim/fragment_open_exit"
-      app:launchSingleTop="true"
-      app:popEnterAnim="@anim/fragment_close_enter"
-      app:popExitAnim="@anim/fragment_close_exit"
-      app:popUpTo="@+id/main_navigation" />
-
-    <action
-      android:id="@+id/action_to_player"
-      app:destination="@id/navPlayer"
-      app:enterAnim="@anim/slide_in_up"
-      app:exitAnim="@anim/fragment_open_exit"
-      app:launchSingleTop="true"
-      app:popEnterAnim="@anim/fragment_close_enter"
-      app:popExitAnim="@anim/slide_out_down"
-      app:popUpTo="@+id/main_navigation" />
-
-  </fragment>
+    android:id="@+id/action_show_player"
+    app:destination="@id/navPlayer"
+    app:enterAnim="@anim/slide_in_up"
+    app:popExitAnim="@anim/slide_out_down" />
 
   <fragment
     android:id="@+id/navLibrary"
@@ -47,33 +17,82 @@
     android:label="@string/library_title"
     tools:layout="@layout/fragment_library">
 
-    <argument
-      android:name="navDirections"
-      android:defaultValue="@null"
-      app:argType="hu.mrolcsi.muzik.extensions.ParcelableNavDirections"
-      app:nullable="true" />
+    <action
+      android:id="@+id/action_toArtistDetails"
+      app:destination="@id/navArtistDetails"
+      app:enterAnim="@anim/fragment_open_enter"
+      app:exitAnim="@anim/fragment_open_exit"
+      app:popEnterAnim="@anim/fragment_close_enter"
+      app:popExitAnim="@anim/fragment_close_exit" />
 
     <action
-      android:id="@+id/action_library_to_player"
-      app:destination="@id/navPlayer"
-      app:enterAnim="@anim/slide_in_up"
-      app:exitAnim="@anim/fragment_close_exit"
-      app:launchSingleTop="true"
-      app:popEnterAnim="@anim/fragment_open_enter"
-      app:popExitAnim="@anim/slide_out_down" />
+      android:id="@+id/action_toAlbumDetails"
+      app:destination="@id/navAlbumDetails"
+      app:enterAnim="@anim/fragment_open_enter"
+      app:exitAnim="@anim/fragment_open_exit"
+      app:popEnterAnim="@anim/fragment_close_enter"
+      app:popExitAnim="@anim/fragment_close_exit" />
 
   </fragment>
 
   <fragment
-    android:id="@+id/navPlayer"
-    android:name="hu.mrolcsi.muzik.player.PlayerFragment"
-    tools:layout="@layout/fragment_player">
+    android:id="@+id/navArtistDetails"
+    android:name="hu.mrolcsi.muzik.artists.details.ArtistDetailsFragment"
+    android:label="@string/artistDetails_title"
+    tools:layout="@layout/fragment_artist_details">
 
     <argument
-      android:name="postponeEnterTransition"
-      android:defaultValue="false"
-      app:argType="boolean" />
+      android:name="artistId"
+      app:argType="long" />
+
+    <action
+      android:id="@+id/action_toAlbumDetails"
+      app:destination="@id/navAlbumDetails"
+      app:enterAnim="@anim/fragment_open_enter"
+      app:exitAnim="@anim/fragment_open_exit"
+      app:popEnterAnim="@anim/fragment_close_enter"
+      app:popExitAnim="@anim/fragment_close_exit" />
 
   </fragment>
+
+  <fragment
+    android:id="@+id/navAlbumDetails"
+    android:name="hu.mrolcsi.muzik.albums.details.AlbumDetailsFragment"
+    android:label="@string/albumDetails_title"
+    tools:layout="@layout/fragment_album_details">
+
+    <argument
+      android:name="albumId"
+      app:argType="long" />
+
+    <argument
+      android:name="transitionName"
+      android:defaultValue="coverArt"
+      app:argType="string" />
+
+  </fragment>
+
+  <dialog
+    android:id="@+id/navPlayer"
+    android:name="hu.mrolcsi.muzik.player.PlayerDialogFragment"
+    tools:layout="@layout/fragment_player">
+
+    <action
+      android:id="@+id/action_to_artistDetails"
+      app:destination="@id/navArtistDetails"
+      app:enterAnim="@anim/fragment_open_enter"
+      app:exitAnim="@anim/fragment_open_exit"
+      app:popEnterAnim="@anim/fragment_close_enter"
+      app:popExitAnim="@anim/fragment_close_exit" />
+
+    <action
+      android:id="@+id/action_to_albumDetails"
+      app:destination="@id/navAlbumDetails"
+      app:enterAnim="@anim/fragment_open_enter"
+      app:exitAnim="@anim/fragment_open_exit"
+      app:popEnterAnim="@anim/fragment_close_enter"
+      app:popExitAnim="@anim/fragment_close_exit" />
+
+  </dialog>
 
 </navigation>

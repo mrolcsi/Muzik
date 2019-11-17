@@ -6,40 +6,138 @@
   <data>
 
     <variable
+      name="viewModel"
+      type="hu.mrolcsi.muzik.library.LibraryViewModel" />
+
+    <variable
       name="theme"
       type="androidx.lifecycle.LiveData&lt;hu.mrolcsi.muzik.theme.Theme&gt;" />
   </data>
 
-  <androidx.constraintlayout.widget.ConstraintLayout
-    android:id="@+id/libraryRoot"
+  <androidx.coordinatorlayout.widget.CoordinatorLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@{theme.secondaryBackgroundColor}"
-    android:orientation="vertical"
-    tools:context=".library.LibraryFragment">
+    android:fitsSystemWindows="true">
 
-    <fragment
-      android:id="@+id/libraryNavHost"
-      android:name="androidx.navigation.fragment.NavHostFragment"
-      android:layout_width="0dp"
-      android:layout_height="0dp"
-      app:defaultNavHost="true"
-      app:layout_constraintBottom_toTopOf="@+id/miniPlayer"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toTopOf="parent"
-      app:navGraph="@navigation/library_navigation" />
-
-    <fragment
-      android:id="@+id/miniPlayer"
-      android:name="hu.mrolcsi.muzik.library.miniplayer.MiniPlayerFragment"
+    <com.google.android.material.appbar.AppBarLayout
+      android:id="@+id/appBar"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      app:layout_constraintBottom_toBottomOf="parent"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      tools:layout="@layout/fragment_miniplayer" />
+      android:background="@{theme.primaryBackgroundColor}"
+      android:fitsSystemWindows="true"
+      android:visibility="@{!viewModel.isPermissionRationaleVisible}"
+      app:expanded="true">
 
-  </androidx.constraintlayout.widget.ConstraintLayout>
+      <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/libraryPagerToolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        app:iconTint="@{theme.primaryForegroundColor}"
+        app:layout_scrollFlags="scroll|snap"
+        app:subtitleTextColor="@{theme.primaryForegroundColor}"
+        app:titleTextColor="@{theme.primaryForegroundColor}" />
+
+      <com.google.android.material.tabs.TabLayout
+        android:id="@+id/libraryTabs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@{theme.primaryBackgroundColor}"
+        app:layout_scrollFlags="scroll|enterAlways|snap"
+        app:tabIndicatorColor="@{theme.primaryForegroundColor}"
+        app:tabTextColor="@{theme.primaryForegroundColor}" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.viewpager.widget.ViewPager
+      android:id="@+id/libraryPager"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:visibility="@{!viewModel.isPermissionRationaleVisible}"
+      app:layout_behavior=".common.view.FabAwareScrollingViewBehavior" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+      android:id="@+id/fabShuffleAll"
+      style="@style/Widget.MaterialComponents.FloatingActionButton"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_gravity="bottom|end"
+      android:layout_marginEnd="16dp"
+      android:layout_marginBottom="16dp"
+      android:backgroundTint="@{theme.primaryForegroundColor}"
+      android:contentDescription="@string/mediaControl_shuffleAll"
+      android:onClick="@{() -> viewModel.onShuffleAllClicked()}"
+      android:tint="@{theme.primaryBackgroundColor}"
+      android:visibility="@{!viewModel.isPermissionRationaleVisible}"
+      app:rippleColor="@{theme.primaryBackgroundColor}"
+      app:srcCompat="@drawable/ic_shuffle_all" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:animateLayoutChanges="true"
+      android:visibility="@{viewModel.isPermissionRationaleVisible}">
+
+      <ImageView
+        android:id="@+id/imgSdCard"
+        android:layout_width="@android:dimen/notification_large_icon_width"
+        android:layout_height="@android:dimen/notification_large_icon_height"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:contentDescription="@string/contentDescription_missingPermission"
+        android:tint="@{theme.secondaryForegroundColor}"
+
+        app:layout_constraintBottom_toTopOf="@+id/lblPermissionHint"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed"
+        app:srcCompat="@drawable/ic_sd_card"
+        tools:visibility="visible" />
+
+      <TextView
+        android:id="@+id/lblPermissionHint"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="48dp"
+        android:singleLine="false"
+        android:text="@string/library_readExternalStorage_rationale"
+        android:textAlignment="center"
+        android:textAppearance="?attr/textAppearanceBody1"
+        android:textColor="@{theme.secondaryForegroundColor}"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toTopOf="@+id/btnRequestPermission"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imgSdCard"
+        tools:visibility="visible" />
+
+      <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnRequestPermission"
+        style="@style/Widget.MaterialComponents.Button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:backgroundTint="@{theme.secondaryForegroundColor}"
+        android:onClick="@{() -> viewModel.onRequestPermissionClicked()}"
+        android:text="@string/library_grantAccessToSdCard"
+        android:textColor="@{theme.secondaryBackgroundColor}"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/lblPermissionHint"
+        tools:visibility="visible" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+  </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
 </layout>
-

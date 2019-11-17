@@ -16,11 +16,24 @@
     <item name="android:selectableItemBackground">@drawable/selectable_item_background</item>
     <item name="materialCardViewStyle">@style/CardViewStyle</item>
 
-    <item name="android:windowBackground">@android:color/holo_purple</item>
+    <item name="android:windowBackground">@color/backgroundColor</item>
   </style>
 
   <style name="FluxTheme.Launcher">
     <item name="android:windowBackground">@drawable/launch_screen</item>
+  </style>
+
+  <style name="FullScreenDialogTheme" parent="Theme.MaterialComponents.Dialog">
+    <item name="android:windowIsFloating">false</item>
+    <item name="android:windowBackground">@color/backgroundColor</item>
+    <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+    <item name="android:statusBarColor">@android:color/transparent</item>
+    <item name="android:navigationBarColor">@android:color/transparent</item>
+  </style>
+
+  <style name="FullScreenDialogTheme.Transitions">
+    <item name="android:windowEnterAnimation">@anim/slide_in_up</item>
+    <item name="android:windowExitAnimation">@anim/slide_out_down</item>
   </style>
 
   <style name="CardViewStyle" parent="Widget.MaterialComponents.CardView">

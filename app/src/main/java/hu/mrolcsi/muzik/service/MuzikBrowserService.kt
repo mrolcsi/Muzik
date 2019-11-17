@@ -68,7 +68,10 @@ abstract class MuzikBrowserService : MediaBrowserServiceCompat() {
       emitter.onSuccess(mediaItems)
     }
       .subscribeOn(Schedulers.io())
-      .subscribeBy { result.sendResult(it) }
+      .subscribeBy(
+        onSuccess = { result.sendResult(it) },
+        onError = { result.sendResult(mutableListOf()) }
+      )
       .addTo(disposables)
 
     // Let it load in the background.
