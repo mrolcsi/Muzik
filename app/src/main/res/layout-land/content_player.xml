@@ -15,7 +15,7 @@
 
     <variable
       name="viewModel"
-      type="hu.mrolcsi.muzik.player.PlayerViewModel" />
+      type="hu.mrolcsi.muzik.ui.player.PlayerViewModel" />
   </data>
 
   <androidx.constraintlayout.widget.ConstraintLayout
@@ -23,7 +23,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/transparent"
-    tools:context=".player.PlayerDialogFragment">
+    tools:context="hu.mrolcsi.muzik.ui.player.PlayerDialogFragment">
 
     <Space
       android:id="@+id/space"

@@ -6,11 +6,11 @@
 
     <variable
       name="viewModel"
-      type="hu.mrolcsi.muzik.artists.details.ArtistDetailsViewModel" />
+      type="hu.mrolcsi.muzik.ui.artistDetails.ArtistDetailsViewModel" />
 
     <variable
       name="theme"
-      type="androidx.lifecycle.LiveData&lt;hu.mrolcsi.muzik.theme.Theme&gt;" />
+      type="androidx.lifecycle.LiveData&lt;hu.mrolcsi.muzik.data.model.theme.Theme&gt;" />
   </data>
 
   <androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -60,7 +60,7 @@
       android:id="@+id/nestedScrollView"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
-      app:layout_behavior=".common.view.FabAwareScrollingViewBehavior">
+      app:layout_behavior=".ui.common.FabAwareScrollingViewBehavior">
 
       <include
         layout="@layout/fragment_artist_details_content"

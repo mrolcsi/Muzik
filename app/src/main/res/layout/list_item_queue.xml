@@ -7,7 +7,7 @@
 
     <variable
       name="theme"
-      type="hu.mrolcsi.muzik.theme.Theme" />
+      type="hu.mrolcsi.muzik.data.model.theme.Theme" />
   </data>
 
   <androidx.constraintlayout.widget.ConstraintLayout

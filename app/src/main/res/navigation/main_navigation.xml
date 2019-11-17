@@ -13,7 +13,7 @@
 
   <fragment
     android:id="@+id/navLibrary"
-    android:name="hu.mrolcsi.muzik.library.LibraryFragment"
+    android:name="hu.mrolcsi.muzik.ui.library.LibraryFragment"
     android:label="@string/library_title"
     tools:layout="@layout/fragment_library">
 
@@ -37,7 +37,7 @@
 
   <fragment
     android:id="@+id/navArtistDetails"
-    android:name="hu.mrolcsi.muzik.artists.details.ArtistDetailsFragment"
+    android:name="hu.mrolcsi.muzik.ui.artistDetails.ArtistDetailsFragment"
     android:label="@string/artistDetails_title"
     tools:layout="@layout/fragment_artist_details">
 
@@ -57,7 +57,7 @@
 
   <fragment
     android:id="@+id/navAlbumDetails"
-    android:name="hu.mrolcsi.muzik.albums.details.AlbumDetailsFragment"
+    android:name="hu.mrolcsi.muzik.ui.albumDetails.AlbumDetailsFragment"
     android:label="@string/albumDetails_title"
     tools:layout="@layout/fragment_album_details">
 
@@ -74,7 +74,7 @@
 
   <dialog
     android:id="@+id/navPlayer"
-    android:name="hu.mrolcsi.muzik.player.PlayerDialogFragment"
+    android:name="hu.mrolcsi.muzik.ui.player.PlayerDialogFragment"
     tools:layout="@layout/fragment_player">
 
     <action

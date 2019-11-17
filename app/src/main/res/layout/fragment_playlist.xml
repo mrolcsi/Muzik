@@ -7,11 +7,11 @@
 
     <variable
       name="theme"
-      type="androidx.lifecycle.LiveData&lt;hu.mrolcsi.muzik.theme.Theme&gt;" />
+      type="androidx.lifecycle.LiveData&lt;hu.mrolcsi.muzik.data.model.theme.Theme&gt;" />
 
     <variable
       name="viewModel"
-      type="hu.mrolcsi.muzik.player.playlist.PlaylistViewModel" />
+      type="hu.mrolcsi.muzik.ui.playlist.PlaylistViewModel" />
   </data>
 
   <androidx.constraintlayout.widget.ConstraintLayout

@@ -7,7 +7,7 @@
 
     <variable
       name="theme"
-      type="androidx.lifecycle.LiveData&lt;hu.mrolcsi.muzik.theme.Theme&gt;" />
+      type="androidx.lifecycle.LiveData&lt;hu.mrolcsi.muzik.data.model.theme.Theme&gt;" />
   </data>
 
   <FrameLayout

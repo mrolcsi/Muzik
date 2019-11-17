@@ -1,10 +1,12 @@
 package hu.mrolcsi.muzik.theme
 
 import androidx.lifecycle.MutableLiveData
-import hu.mrolcsi.muzik.common.viewmodel.DataBindingViewModel
-import hu.mrolcsi.muzik.common.viewmodel.ExecuteOnceNavCommandSource
-import hu.mrolcsi.muzik.common.viewmodel.ExecuteOnceUiCommandSource
-import hu.mrolcsi.muzik.common.viewmodel.ObservableImpl
+import hu.mrolcsi.muzik.ui.base.DataBindingViewModel
+import hu.mrolcsi.muzik.ui.common.ExecuteOnceNavCommandSource
+import hu.mrolcsi.muzik.ui.common.ExecuteOnceUiCommandSource
+import hu.mrolcsi.muzik.ui.common.ObservableImpl
+import hu.mrolcsi.muzik.data.model.theme.Theme
+import hu.mrolcsi.muzik.data.service.theme.ThemeService
 
 class ThemeTestViewModelImpl constructor(
   observable: ObservableImpl,

@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
-import hu.mrolcsi.muzik.database.playqueue.PlayQueueDatabase
+import hu.mrolcsi.muzik.data.local.MuzikDatabase
 import io.reactivex.observers.TestObserver
 import org.junit.After
 import org.junit.Before
@@ -16,13 +16,13 @@ abstract class BaseDaoTest {
   @get:Rule
   val instantTaskExecutorRule = InstantTaskExecutorRule()
 
-  protected lateinit var db: PlayQueueDatabase
+  protected lateinit var db: MuzikDatabase
 
   @Before
   fun createDb() {
     val context = ApplicationProvider.getApplicationContext<Context>()
     db = Room.inMemoryDatabaseBuilder(
-      context, PlayQueueDatabase::class.java
+      context, MuzikDatabase::class.java
     ).build()
   }
 

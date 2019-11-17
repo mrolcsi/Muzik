@@ -7,11 +7,11 @@
 
     <variable
       name="viewModel"
-      type="hu.mrolcsi.muzik.albums.details.AlbumDetailsViewModel" />
+      type="hu.mrolcsi.muzik.ui.albumDetails.AlbumDetailsViewModel" />
 
     <variable
       name="theme"
-      type="androidx.lifecycle.LiveData&lt;hu.mrolcsi.muzik.theme.Theme&gt;" />
+      type="androidx.lifecycle.LiveData&lt;hu.mrolcsi.muzik.data.model.theme.Theme&gt;" />
   </data>
 
   <androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -66,12 +66,12 @@
       android:layout_width="match_parent"
       android:layout_height="match_parent"
       android:clipToPadding="false"
-      android:paddingTop="8dp"
       android:orientation="vertical"
+      android:paddingTop="8dp"
       app:dividerColor="@{theme.secondaryForegroundColor}"
       app:dividerDrawable="@{@drawable/list_divider_inset}"
       app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-      app:layout_behavior=".common.view.FabAwareScrollingViewBehavior"
+      app:layout_behavior=".ui.common.FabAwareScrollingViewBehavior"
       app:showColoredDivider="@{true}"
       tools:listitem="@layout/list_item_song" />
 

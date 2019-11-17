@@ -7,7 +7,7 @@
 
     <variable
       name="theme"
-      type="androidx.lifecycle.LiveData&lt;hu.mrolcsi.muzik.theme.Theme&gt;" />
+      type="androidx.lifecycle.LiveData&lt;hu.mrolcsi.muzik.data.model.theme.Theme&gt;" />
   </data>
 
   <androidx.constraintlayout.widget.ConstraintLayout
@@ -16,7 +16,7 @@
     android:layout_height="match_parent"
     android:background="@{theme.secondaryBackgroundColor}"
     android:orientation="vertical"
-    tools:context=".library.LibraryFragment">
+    tools:context=".ui.library.LibraryFragment">
 
     <fragment
       android:id="@+id/mainNavHost"
@@ -32,7 +32,7 @@
 
     <fragment
       android:id="@+id/miniPlayer"
-      android:name="hu.mrolcsi.muzik.miniplayer.MiniPlayerFragment"
+      android:name="hu.mrolcsi.muzik.ui.miniPlayer.MiniPlayerFragment"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       app:layout_constraintBottom_toBottomOf="parent"

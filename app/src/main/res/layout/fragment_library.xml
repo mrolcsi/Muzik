@@ -7,11 +7,11 @@
 
     <variable
       name="viewModel"
-      type="hu.mrolcsi.muzik.library.LibraryViewModel" />
+      type="hu.mrolcsi.muzik.ui.library.LibraryViewModel" />
 
     <variable
       name="theme"
-      type="androidx.lifecycle.LiveData&lt;hu.mrolcsi.muzik.theme.Theme&gt;" />
+      type="androidx.lifecycle.LiveData&lt;hu.mrolcsi.muzik.data.model.theme.Theme&gt;" />
   </data>
 
   <androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -53,7 +53,7 @@
       android:layout_width="match_parent"
       android:layout_height="match_parent"
       android:visibility="@{!viewModel.isPermissionRationaleVisible}"
-      app:layout_behavior=".common.view.FabAwareScrollingViewBehavior" />
+      app:layout_behavior=".ui.common.FabAwareScrollingViewBehavior" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
       android:id="@+id/fabShuffleAll"

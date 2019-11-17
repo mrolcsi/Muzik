@@ -1,8 +1,9 @@
 package hu.mrolcsi.muzik.database.playqueue.daos
 
 import hu.mrolcsi.muzik.database.BaseDaoTest
-import hu.mrolcsi.muzik.database.playqueue.entities.LastPlayed
-import hu.mrolcsi.muzik.database.playqueue.entities.PlayQueueEntry
+import hu.mrolcsi.muzik.data.model.playQueue.LastPlayed
+import hu.mrolcsi.muzik.data.local.playQueue.PlayQueueDao
+import hu.mrolcsi.muzik.data.model.playQueue.PlayQueueEntry
 import org.junit.Assert.assertEquals
 import org.junit.Test
 

@@ -15,11 +15,11 @@
 
     <variable
       name="playerViewModel"
-      type="hu.mrolcsi.muzik.player.PlayerViewModel" />
+      type="hu.mrolcsi.muzik.ui.player.PlayerViewModel" />
 
     <variable
       name="playlistViewModel"
-      type="hu.mrolcsi.muzik.player.playlist.PlaylistViewModel" />
+      type="hu.mrolcsi.muzik.ui.playlist.PlaylistViewModel" />
 
   </data>
 

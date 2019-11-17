@@ -9,11 +9,11 @@
 
     <variable
       name="viewModel"
-      type="hu.mrolcsi.muzik.albums.details.AlbumDetailsViewModel" />
+      type="hu.mrolcsi.muzik.ui.albumDetails.AlbumDetailsViewModel" />
 
     <variable
       name="theme"
-      type="androidx.lifecycle.LiveData&lt;hu.mrolcsi.muzik.theme.Theme&gt;" />
+      type="androidx.lifecycle.LiveData&lt;hu.mrolcsi.muzik.data.model.theme.Theme&gt;" />
   </data>
 
   <androidx.constraintlayout.widget.ConstraintLayout
