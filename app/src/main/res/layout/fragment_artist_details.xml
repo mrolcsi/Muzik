@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-  xmlns:app="http://schemas.android.com/apk/res-auto">
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:tools="http://schemas.android.com/tools">
 
   <data>
 
@@ -15,24 +16,27 @@
 
   <androidx.coordinatorlayout.widget.CoordinatorLayout
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fitsSystemWindows="true">
+    android:layout_height="match_parent">
 
     <com.google.android.material.appbar.AppBarLayout
       android:id="@+id/appBar"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:background="@{theme.primaryBackgroundColor}"
-      android:fitsSystemWindows="true"
-      app:expanded="false">
+      app:expanded="false"
+      tools:expanded="true">
 
       <com.google.android.material.appbar.CollapsingToolbarLayout
         android:id="@+id/collapsingToolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         app:collapsedTitleTextColor="@{theme.primaryForegroundColor}"
         app:contentScrim="@{theme.primaryBackgroundColor}"
-        app:expandedTitleTextColor="@{theme.secondaryForegroundColor}"
+        app:expandedTitleGravity="center|bottom"
+        app:expandedTitleMarginEnd="8dp"
+        app:expandedTitleMarginStart="8dp"
+        app:expandedTitleTextAppearance="?android:textAppearanceLarge"
+        app:expandedTitleTextColor="@{@android:color/transparent}"
         app:layout_scrollFlags="scroll|exitUntilCollapsed"
         app:scrimAnimationDuration="@integer/preferredAnimationDuration"
         app:title="@{viewModel.artistName}">
@@ -43,7 +47,8 @@
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
           app:layout_collapseMode="parallax"
-          app:theme="@{theme}" />
+          app:theme="@{theme}"
+          app:viewModel="@{viewModel}" />
 
         <com.google.android.material.appbar.MaterialToolbar
           android:id="@+id/artistDetailsToolbar"

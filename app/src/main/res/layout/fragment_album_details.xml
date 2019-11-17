@@ -17,15 +17,13 @@
   <androidx.coordinatorlayout.widget.CoordinatorLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@{theme.secondaryBackgroundColor}"
-    android:fitsSystemWindows="true">
+    android:background="@{theme.secondaryBackgroundColor}">
 
     <com.google.android.material.appbar.AppBarLayout
       android:id="@+id/appBar"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:background="@{theme.primaryBackgroundColor}"
-      android:fitsSystemWindows="true">
+      android:background="@{theme.primaryBackgroundColor}">
 
       <com.google.android.material.appbar.CollapsingToolbarLayout
         android:id="@+id/collapsingToolbar"
@@ -33,12 +31,14 @@
         android:layout_height="match_parent"
         app:collapsedTitleTextColor="@{theme.primaryForegroundColor}"
         app:contentScrim="@{theme.primaryBackgroundColor}"
-        app:expandedTitleMarginBottom="16dp"
-        app:expandedTitleMarginStart="16dp"
-        app:expandedTitleTextColor="@{theme.primaryForegroundColor}"
+        app:expandedTitleGravity="center|bottom"
+        app:expandedTitleMarginEnd="8dp"
+        app:expandedTitleMarginStart="8dp"
+        app:expandedTitleTextAppearance="?android:textAppearanceLarge"
+        app:expandedTitleTextColor="@{@android:color/transparent}"
         app:layout_scrollFlags="scroll|exitUntilCollapsed"
         app:scrimAnimationDuration="@integer/preferredAnimationDuration"
-        tools:title="Album Name">
+        app:title="@{viewModel.albumTitleText}">
 
         <include
           android:id="@+id/backdrop"
@@ -54,8 +54,7 @@
           android:layout_width="match_parent"
           android:layout_height="?attr/actionBarSize"
           app:iconTint="@{theme.primaryForegroundColor}"
-          app:layout_collapseMode="pin"
-          app:title="@{viewModel.albumTitleText}" />
+          app:layout_collapseMode="pin" />
 
       </com.google.android.material.appbar.CollapsingToolbarLayout>
 

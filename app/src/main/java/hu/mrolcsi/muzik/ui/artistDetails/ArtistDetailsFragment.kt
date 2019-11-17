@@ -10,6 +10,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.ui.setupWithNavController
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.request.target.Target
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.data.service.theme.ThemeService
 import hu.mrolcsi.muzik.databinding.FragmentArtistDetailsBinding
@@ -91,6 +92,7 @@ class ArtistDetailsFragment : Fragment() {
         GlideApp.with(this@ArtistDetailsFragment)
           .asBitmap()
           .load(uri)
+          .override(Target.SIZE_ORIGINAL)
           .onLoadFailed { appBar.setExpanded(false); false }
           .onResourceReady { appBar.setExpanded(true, true) }
           .into(imgArtist)

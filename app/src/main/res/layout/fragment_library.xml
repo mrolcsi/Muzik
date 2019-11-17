@@ -16,15 +16,13 @@
 
   <androidx.coordinatorlayout.widget.CoordinatorLayout
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fitsSystemWindows="true">
+    android:layout_height="match_parent">
 
     <com.google.android.material.appbar.AppBarLayout
       android:id="@+id/appBar"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:background="@{theme.primaryBackgroundColor}"
-      android:fitsSystemWindows="true"
       android:visibility="@{!viewModel.isPermissionRationaleVisible}"
       app:expanded="true">
 

@@ -3,36 +3,39 @@ package hu.mrolcsi.muzik.injection
 import android.Manifest
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
+import android.util.Log
 import androidx.fragment.app.Fragment
 import androidx.room.Room
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.tbruyelle.rxpermissions2.RxPermissions
-import hu.mrolcsi.muzik.ui.albums.AlbumsViewModelImpl
-import hu.mrolcsi.muzik.ui.albumDetails.AlbumDetailsViewModelImpl
-import hu.mrolcsi.muzik.ui.artists.ArtistsViewModelImpl
-import hu.mrolcsi.muzik.ui.artistDetails.ArtistDetailsViewModelImpl
+import hu.mrolcsi.muzik.data.local.MuzikDatabase
+import hu.mrolcsi.muzik.data.local.MuzikDatabaseMigrations
+import hu.mrolcsi.muzik.data.manager.media.MediaManager
+import hu.mrolcsi.muzik.data.manager.media.MediaManagerImpl
 import hu.mrolcsi.muzik.data.remote.AnnotationExclusionStrategy
+import hu.mrolcsi.muzik.data.remote.discogs.DiscogsApi
+import hu.mrolcsi.muzik.data.repository.media.MediaRepository
+import hu.mrolcsi.muzik.data.repository.media.MediaRepositoryImpl
+import hu.mrolcsi.muzik.data.service.discogs.DiscogsService
+import hu.mrolcsi.muzik.data.service.discogs.DiscogsServiceImpl
+import hu.mrolcsi.muzik.data.service.theme.ThemeService
+import hu.mrolcsi.muzik.data.service.theme.ThemeServiceImpl
+import hu.mrolcsi.muzik.ui.albumDetails.AlbumDetailsViewModelImpl
+import hu.mrolcsi.muzik.ui.albums.AlbumsViewModelImpl
+import hu.mrolcsi.muzik.ui.artistDetails.ArtistDetailsViewModelImpl
+import hu.mrolcsi.muzik.ui.artists.ArtistsViewModelImpl
+import hu.mrolcsi.muzik.ui.base.ThemedViewModelImpl
 import hu.mrolcsi.muzik.ui.common.ExecuteOnceNavCommandSource
 import hu.mrolcsi.muzik.ui.common.ExecuteOnceUiCommandSource
 import hu.mrolcsi.muzik.ui.common.ObservableImpl
-import hu.mrolcsi.muzik.data.local.MuzikDatabase
-import hu.mrolcsi.muzik.data.local.MuzikDatabaseMigrations
-import hu.mrolcsi.muzik.data.remote.discogs.DiscogsApi
-import hu.mrolcsi.muzik.data.service.discogs.DiscogsService
-import hu.mrolcsi.muzik.data.service.discogs.DiscogsServiceImpl
 import hu.mrolcsi.muzik.ui.library.LibraryViewModelImpl
-import hu.mrolcsi.muzik.data.repository.media.MediaRepository
-import hu.mrolcsi.muzik.data.repository.media.MediaRepositoryImpl
-import hu.mrolcsi.muzik.data.manager.media.MediaManager
-import hu.mrolcsi.muzik.data.manager.media.MediaManagerImpl
 import hu.mrolcsi.muzik.ui.miniPlayer.MiniPlayerViewModelImpl
 import hu.mrolcsi.muzik.ui.player.PlayerViewModelImpl
 import hu.mrolcsi.muzik.ui.playlist.PlaylistViewModelImpl
 import hu.mrolcsi.muzik.ui.songs.SongsViewModelImpl
-import hu.mrolcsi.muzik.data.service.theme.ThemeService
-import hu.mrolcsi.muzik.data.service.theme.ThemeServiceImpl
-import hu.mrolcsi.muzik.ui.base.ThemedViewModelImpl
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.parameter.parametersOf
 import org.koin.core.qualifier.named
@@ -71,10 +74,26 @@ val networkModule = module {
       .create()
   }
 
+  single {
+    val loggingInterceptor = HttpLoggingInterceptor(
+      object : HttpLoggingInterceptor.Logger {
+        override fun log(message: String) {
+          Log.v("HTTP", message)
+        }
+      }).apply {
+      level = HttpLoggingInterceptor.Level.BODY
+    }
+
+    OkHttpClient.Builder()
+      .addInterceptor(loggingInterceptor)
+      .build()
+  }
+
   single<Retrofit.Builder> {
     Retrofit.Builder()
       .addConverterFactory(GsonConverterFactory.create(get()))
       .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+      .client(get<OkHttpClient>())
   }
 
   single<DiscogsApi> {

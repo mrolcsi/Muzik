@@ -8,30 +8,73 @@
     <variable
       name="theme"
       type="androidx.lifecycle.LiveData&lt;hu.mrolcsi.muzik.data.model.theme.Theme&gt;" />
+
+    <variable
+      name="viewModel"
+      type="hu.mrolcsi.muzik.ui.artistDetails.ArtistDetailsViewModel" />
   </data>
 
-  <androidx.coordinatorlayout.widget.CoordinatorLayout
+  <androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
     <ImageView
       android:id="@+id/imgArtist"
-      android:layout_width="match_parent"
+      android:layout_width="0dp"
       android:layout_height="wrap_content"
       android:adjustViewBounds="true"
       android:contentDescription="@string/contentDescription_artistPicture"
-      android:scaleType="fitXY"
-      app:srcCompat="@drawable/transparent" />
+      android:scaleType="fitCenter"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent"
+      app:srcCompat="@drawable/transparent"
+      tools:srcCompat="@tools:sample/backgrounds/scenic[11]" />
 
     <ImageView
-      android:id="@+id/imgProtectionScrim"
-      android:layout_width="match_parent"
-      android:layout_height="?attr/listPreferredItemHeightLarge"
-      android:layout_gravity="bottom"
-      android:tint="@{theme.secondaryBackgroundColor}"
+      android:id="@+id/imgProtectionScrimTop"
+      android:layout_width="0dp"
+      android:layout_height="?attr/actionBarSize"
+      android:rotation="180"
+      android:tint="@{theme.primaryBackgroundColor}"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent"
       app:srcCompat="@drawable/protection_scrim"
       tools:ignore="ContentDescription"
       tools:tint="?attr/colorPrimary" />
 
-  </androidx.coordinatorlayout.widget.CoordinatorLayout>
+    <ImageView
+      android:id="@+id/imgProtectionScrimBottom"
+      android:layout_width="match_parent"
+      android:layout_height="?attr/listPreferredItemHeightLarge"
+      android:tint="@{theme.secondaryBackgroundColor}"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:srcCompat="@drawable/protection_scrim"
+      tools:ignore="ContentDescription"
+      tools:tint="?attr/colorPrimary" />
+
+    <TextView
+      android:id="@+id/tvTitle"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="16dp"
+      android:layout_marginEnd="16dp"
+      android:layout_marginBottom="24dp"
+      android:ellipsize="end"
+      android:gravity="center"
+      android:text="@{viewModel.artistName}"
+      android:textAppearance="?android:attr/textAppearanceLarge"
+      android:textColor="@{theme.secondaryForegroundColor}"
+      android:textStyle="bold"
+      app:layout_constrainedHeight="true"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      tools:text="@tools:sample/lorem[9]" />
+
+  </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
