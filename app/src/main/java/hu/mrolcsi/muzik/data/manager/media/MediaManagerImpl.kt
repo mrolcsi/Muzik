@@ -22,13 +22,13 @@ import android.support.v4.media.session.PlaybackStateCompat.STATE_STOPPED
 import android.support.v4.media.session.PlaybackStateCompat.ShuffleMode
 import android.util.Log
 import androidx.core.os.bundleOf
-import hu.mrolcsi.muzik.data.service.media.MuzikPlayerService
 import hu.mrolcsi.muzik.data.model.media.addQueueItems
 import hu.mrolcsi.muzik.data.model.media.clearQueue
 import hu.mrolcsi.muzik.data.model.media.playFromDescriptions
 import hu.mrolcsi.muzik.data.model.media.setQueueTitle
 import hu.mrolcsi.muzik.data.model.media.startProgressUpdater
 import hu.mrolcsi.muzik.data.model.media.stopProgressUpdater
+import hu.mrolcsi.muzik.data.service.media.MuzikPlayerService
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject

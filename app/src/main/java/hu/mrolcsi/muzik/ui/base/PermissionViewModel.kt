@@ -1,49 +1,19 @@
 package hu.mrolcsi.muzik.ui.base
 
 import androidx.databinding.Bindable
-import androidx.databinding.library.baseAdapters.BR
-import com.tbruyelle.rxpermissions2.RxPermissions
-import hu.mrolcsi.muzik.ui.common.ExecuteOnceNavCommandSource
-import hu.mrolcsi.muzik.ui.common.ExecuteOnceUiCommandSource
-import hu.mrolcsi.muzik.ui.common.ObservableImpl
-import io.reactivex.Observable
-import io.reactivex.subjects.PublishSubject
-import androidx.databinding.Observable as DataBindingObservable
+import androidx.databinding.Observable
+import hu.mrolcsi.muzik.ui.common.LiveEvent
 
-interface PermissionViewModel : DataBindingObservable {
+interface PermissionViewModel : Observable {
 
   @get:Bindable
   val isPermissionRationaleVisible: Boolean
 
-  fun <T> requirePermissions(permissions: Array<String>, onPermissionGranted: () -> Observable<T>): Observable<T>
+  val requestPermissionEvent: LiveEvent<Array<String>>
 
-  fun onRequestPermissionClicked()
-}
+  fun requestPermission()
 
-open class RxPermissionViewModel(
-  observable: ObservableImpl,
-  uiCommandSource: ExecuteOnceUiCommandSource,
-  navCommandSource: ExecuteOnceNavCommandSource,
-  private val rxPermissions: RxPermissions
-) : DataBindingViewModel(observable, uiCommandSource, navCommandSource),
-  PermissionViewModel {
+  fun onPermissionGranted()
 
-  override var isPermissionRationaleVisible: Boolean by boundBoolean(BR.permissionRationaleVisible)
-
-  private val requestPermissionSubject = PublishSubject.create<Unit>()
-
-  override fun onRequestPermissionClicked() {
-    requestPermissionSubject.onNext(Unit)
-  }
-
-  override fun <T> requirePermissions(
-    permissions: Array<String>,
-    onPermissionGranted: () -> Observable<T>
-  ): Observable<T> =
-    requestPermissionSubject
-      .startWith(Unit)
-      .switchMap { rxPermissions.requestEachCombined(*permissions) }
-      .doOnNext { isPermissionRationaleVisible = it.shouldShowRequestPermissionRationale }
-      .filter { it.granted }
-      .switchMap { onPermissionGranted() }
+  fun onPermissionDenied(shouldShowPermissionRationale: Boolean)
 }

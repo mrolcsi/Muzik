@@ -125,7 +125,7 @@
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
         android:backgroundTint="@{theme.secondaryForegroundColor}"
-        android:onClick="@{() -> viewModel.onRequestPermissionClicked()}"
+        android:onClick="@{() -> viewModel.requestPermission()}"
         android:text="@string/library_grantAccessToSdCard"
         android:textColor="@{theme.secondaryBackgroundColor}"
         app:layout_constraintBottom_toBottomOf="parent"

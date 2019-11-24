@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaDescriptionCompat
+import android.util.Log
 import androidx.core.content.ContentResolverCompat
 import androidx.media.MediaBrowserServiceCompat
 import hu.mrolcsi.muzik.BuildConfig
@@ -47,7 +48,7 @@ abstract class MuzikBrowserService : MediaBrowserServiceCompat() {
       return
     }
 
-    Single.create<MutableList<MediaBrowserCompat.MediaItem>> { emitter ->
+    Single.fromCallable<MutableList<MediaBrowserCompat.MediaItem>> {
       val mediaItems = emptyList<MediaBrowserCompat.MediaItem>().toMutableList()
 
       when (parentId) {
@@ -65,12 +66,15 @@ abstract class MuzikBrowserService : MediaBrowserServiceCompat() {
         }
       }
 
-      emitter.onSuccess(mediaItems)
+      mediaItems
     }
       .subscribeOn(Schedulers.io())
       .subscribeBy(
         onSuccess = { result.sendResult(it) },
-        onError = { result.sendResult(mutableListOf()) }
+        onError = {
+          Log.e("MediaBrowserService", "onLoadChildren($parentId)\n$it")
+          result.sendResult(null)
+        }
       )
       .addTo(disposables)
 
@@ -233,12 +237,12 @@ abstract class MuzikBrowserService : MediaBrowserServiceCompat() {
       return
     }
 
-    Single.create<MutableList<MediaBrowserCompat.MediaItem>> { emitter ->
+    Single.fromCallable<MutableList<MediaBrowserCompat.MediaItem>> {
       val mediaItems = emptyList<MediaBrowserCompat.MediaItem>().toMutableList()
 
       when (parentId) {
         MEDIA_ROOT_ARTIST_BY_ID -> {
-          // Load artist by id
+          // Load artist by an id
           options.getLong(OPTION_ARTIST_ID).takeIf { it > 0 }?.let { artistId ->
             val selection = "${MediaStore.Audio.AudioColumns._ID} = ?"
             val selectionArgs = arrayOf(artistId.toString())
@@ -259,7 +263,7 @@ abstract class MuzikBrowserService : MediaBrowserServiceCompat() {
           }
         }
         MEDIA_ROOT_ALBUM_BY_ID -> {
-          // Load album by id
+          // Load album by an id
           options.getLong(OPTION_ALBUM_ID).takeIf { it > 0 }?.let { albumId ->
             val selection = "${MediaStore.Audio.AudioColumns._ID} = ?"
             val selectionArgs = arrayOf(albumId.toString())
@@ -280,7 +284,7 @@ abstract class MuzikBrowserService : MediaBrowserServiceCompat() {
           }
         }
         MEDIA_ROOT_ALBUMS_BY_ARTIST -> {
-          // Load albums by artist
+          // Load albums by an artist
           options.getLong(OPTION_ARTIST_ID).takeIf { it > 0 }?.let { artistId ->
             val selection = "${MediaStore.Audio.AudioColumns.ARTIST_ID} = ?"
             val selectionArgs = arrayOf(artistId.toString())
@@ -301,7 +305,7 @@ abstract class MuzikBrowserService : MediaBrowserServiceCompat() {
           }
         }
         MEDIA_ROOT_SONGS_BY_ARTIST -> {
-          // Load songs by artist
+          // Load songs by an artist
           options.getLong(OPTION_ARTIST_ID).takeIf { it > 0 }?.let { artistId ->
             val selection = "${MediaStore.Audio.AudioColumns.ARTIST_ID} = ?"
             val selectionArgs = arrayOf(artistId.toString())
@@ -322,7 +326,7 @@ abstract class MuzikBrowserService : MediaBrowserServiceCompat() {
           }
         }
         MEDIA_ROOT_SONGS_FROM_ALBUM -> {
-          // Load songs from album
+          // Load songs from an album
           options.getLong(OPTION_ALBUM_ID).takeIf { it > 0 }?.let { albumId ->
             val selection = "${MediaStore.Audio.AudioColumns.ALBUM_ID} = ?"
             val selectionArgs = arrayOf(albumId.toString())
@@ -344,13 +348,16 @@ abstract class MuzikBrowserService : MediaBrowserServiceCompat() {
         }
       }
 
-      if (!emitter.isDisposed) {
-        emitter.onSuccess(mediaItems)
-      }
+      mediaItems
     }
       .subscribeOn(Schedulers.io())
-      .doOnDispose { result.sendResult(null) }
-      .subscribeBy { result.sendResult(it) }
+      .subscribeBy(
+        onSuccess = { result.sendResult(it) },
+        onError = {
+          Log.e("MediaBrowserService", "onLoadChildren($parentId, $options)\n$it")
+          result.sendResult(null)
+        }
+      )
       .addTo(disposables)
 
     result.detach()

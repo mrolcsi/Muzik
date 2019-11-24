@@ -37,7 +37,6 @@ import hu.mrolcsi.muzik.ui.songs.SongsViewModelImpl
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.androidx.viewmodel.dsl.viewModel
-import org.koin.core.parameter.parametersOf
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import retrofit2.Retrofit
@@ -118,9 +117,7 @@ val viewModule = module {
     )
   }
 
-  viewModel { (fragment: Fragment) ->
-    LibraryViewModelImpl(get(), get(), get(), get(), get { parametersOf(fragment) })
-  }
+  viewModel { LibraryViewModelImpl(get(), get(), get(), get()) }
   viewModel { ArtistsViewModelImpl(get(), get(), get(), get()) }
   viewModel { ArtistDetailsViewModelImpl(get(), get(), get(), get()) }
   viewModel { AlbumsViewModelImpl(get(), get(), get(), get()) }
