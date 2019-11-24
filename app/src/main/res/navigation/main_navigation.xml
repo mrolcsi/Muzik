@@ -14,7 +14,6 @@
   <fragment
     android:id="@+id/navLibrary"
     android:name="hu.mrolcsi.muzik.ui.library.LibraryFragment"
-    android:label="@string/library_title"
     tools:layout="@layout/fragment_library">
 
     <action
@@ -38,7 +37,6 @@
   <fragment
     android:id="@+id/navArtistDetails"
     android:name="hu.mrolcsi.muzik.ui.artistDetails.ArtistDetailsFragment"
-    android:label="@string/artistDetails_title"
     tools:layout="@layout/fragment_artist_details">
 
     <argument
@@ -58,7 +56,6 @@
   <fragment
     android:id="@+id/navAlbumDetails"
     android:name="hu.mrolcsi.muzik.ui.albumDetails.AlbumDetailsFragment"
-    android:label="@string/albumDetails_title"
     tools:layout="@layout/fragment_album_details">
 
     <argument

@@ -21,8 +21,7 @@
   <androidx.constraintlayout.widget.ConstraintLayout
     android:id="@+id/playerRoot"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="hu.mrolcsi.muzik.ui.player.PlayerDialogFragment">
+    android:layout_height="match_parent">
 
     <androidx.recyclerview.widget.RecyclerView
       android:id="@+id/rvQueue"
@@ -33,6 +32,7 @@
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toTopOf="parent"
+      tools:alpha="1.0"
       tools:listitem="@layout/list_item_queue" />
 
     <!-- Make sure Toolbar is above the Cover Art -->

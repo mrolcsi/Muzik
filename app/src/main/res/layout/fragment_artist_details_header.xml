@@ -16,7 +16,8 @@
 
   <androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:fitsSystemWindows="true">
 
     <ImageView
       android:id="@+id/imgArtist"
@@ -30,12 +31,13 @@
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toTopOf="parent"
       app:srcCompat="@drawable/transparent"
-      tools:srcCompat="@tools:sample/backgrounds/scenic[11]" />
+      tools:srcCompat="@drawable/placeholder_artist"
+      tools:tint="@color/primaryColor" />
 
     <ImageView
       android:id="@+id/imgProtectionScrimTop"
       android:layout_width="0dp"
-      android:layout_height="?attr/actionBarSize"
+      android:layout_height="48dp"
       android:rotation="180"
       android:tint="@{theme.primaryBackgroundColor}"
       app:layout_constraintEnd_toEndOf="parent"
@@ -48,7 +50,7 @@
     <ImageView
       android:id="@+id/imgProtectionScrimBottom"
       android:layout_width="match_parent"
-      android:layout_height="?attr/listPreferredItemHeightLarge"
+      android:layout_height="48dp"
       android:tint="@{theme.secondaryBackgroundColor}"
       app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintEnd_toEndOf="parent"

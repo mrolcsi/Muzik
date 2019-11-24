@@ -6,10 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.ui.setupWithNavController
+import hu.mrolcsi.muzik.databinding.FragmentLibraryBinding
 import hu.mrolcsi.muzik.ui.common.ConfigurableFragmentPagerAdapter
 import hu.mrolcsi.muzik.ui.common.observeAndRunNavCommands
-import hu.mrolcsi.muzik.databinding.FragmentLibraryBinding
 import kotlinx.android.synthetic.main.fragment_library.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -33,7 +32,6 @@ class LibraryFragment : Fragment() {
     })
 
     libraryTabs.setupWithViewPager(libraryPager)
-    libraryPagerToolbar.setupWithNavController(findNavController())
     findNavController().observeAndRunNavCommands(viewLifecycleOwner, viewModel)
   }
 }

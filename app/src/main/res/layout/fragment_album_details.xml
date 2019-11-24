@@ -17,13 +17,15 @@
   <androidx.coordinatorlayout.widget.CoordinatorLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@{theme.secondaryBackgroundColor}">
+    android:background="@{theme.secondaryBackgroundColor}"
+    android:fitsSystemWindows="true">
 
     <com.google.android.material.appbar.AppBarLayout
       android:id="@+id/appBar"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:background="@{theme.primaryBackgroundColor}">
+      android:background="@{theme.primaryBackgroundColor}"
+      android:fitsSystemWindows="true">
 
       <com.google.android.material.appbar.CollapsingToolbarLayout
         android:id="@+id/collapsingToolbar"
@@ -42,7 +44,7 @@
 
         <include
           android:id="@+id/backdrop"
-          layout="@layout/album_details_header"
+          layout="@layout/fragment_album_details_header"
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
           app:layout_collapseMode="parallax"

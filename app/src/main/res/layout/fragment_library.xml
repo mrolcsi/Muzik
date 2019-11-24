@@ -27,20 +27,22 @@
       app:expanded="true">
 
       <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/libraryPagerToolbar"
+        android:id="@+id/libraryToolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         app:iconTint="@{theme.primaryForegroundColor}"
-        app:layout_scrollFlags="scroll|snap"
+        app:layout_scrollFlags="scroll|enterAlways|snap"
         app:subtitleTextColor="@{theme.primaryForegroundColor}"
-        app:titleTextColor="@{theme.primaryForegroundColor}" />
+        app:title="@string/library_title"
+        app:titleTextColor="@{theme.primaryForegroundColor}"
+        tools:title="@string/library_title" />
 
       <com.google.android.material.tabs.TabLayout
         android:id="@+id/libraryTabs"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@{theme.primaryBackgroundColor}"
-        app:layout_scrollFlags="scroll|enterAlways|snap"
+        android:visibility="@{!viewModel.isPermissionRationaleVisible}"
         app:tabIndicatorColor="@{theme.primaryForegroundColor}"
         app:tabTextColor="@{theme.primaryForegroundColor}" />
 
@@ -61,19 +63,20 @@
       android:layout_gravity="bottom|end"
       android:layout_marginEnd="16dp"
       android:layout_marginBottom="16dp"
-      android:backgroundTint="@{theme.primaryForegroundColor}"
+      android:backgroundTint="@{theme.secondaryForegroundColor}"
       android:contentDescription="@string/mediaControl_shuffleAll"
       android:onClick="@{() -> viewModel.onShuffleAllClicked()}"
-      android:tint="@{theme.primaryBackgroundColor}"
+      android:tint="@{theme.secondaryBackgroundColor}"
       android:visibility="@{!viewModel.isPermissionRationaleVisible}"
-      app:rippleColor="@{theme.primaryBackgroundColor}"
+      app:rippleColor="@{theme.secondaryBackgroundColor}"
       app:srcCompat="@drawable/ic_shuffle_all" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
       android:layout_width="match_parent"
       android:layout_height="match_parent"
       android:animateLayoutChanges="true"
-      android:visibility="@{viewModel.isPermissionRationaleVisible}">
+      android:visibility="@{viewModel.isPermissionRationaleVisible}"
+      tools:visibility="gone">
 
       <ImageView
         android:id="@+id/imgSdCard"
@@ -87,7 +90,6 @@
 
         app:layout_constraintBottom_toTopOf="@+id/lblPermissionHint"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="packed"
@@ -109,7 +111,6 @@
         android:textSize="18sp"
         app:layout_constraintBottom_toTopOf="@+id/btnRequestPermission"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imgSdCard"
         tools:visibility="visible" />
@@ -129,7 +130,6 @@
         android:textColor="@{theme.secondaryBackgroundColor}"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/lblPermissionHint"
         tools:visibility="visible" />

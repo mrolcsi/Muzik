@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
@@ -23,9 +24,9 @@ import hu.mrolcsi.muzik.ui.common.glide.onResourceReady
 import hu.mrolcsi.muzik.ui.common.observeAndRunNavCommands
 import hu.mrolcsi.muzik.ui.common.observeAndRunUiCommands
 import hu.mrolcsi.muzik.ui.songs.SongHolder
-import kotlinx.android.synthetic.main.artist_details_header.*
 import kotlinx.android.synthetic.main.fragment_artist_details.*
 import kotlinx.android.synthetic.main.fragment_artist_details_content.*
+import kotlinx.android.synthetic.main.fragment_artist_details_header.*
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -111,6 +112,12 @@ class ArtistDetailsFragment : Fragment() {
     rvAlbums.adapter = albumsAdapter
     rvSongs.adapter = songsAdapter
     collapsingToolbar.setupWithNavController(artistDetailsToolbar, findNavController())
+
+    // Fix height of AppBarLayout with fitsSystemWindows="true"
+    ViewCompat.setOnApplyWindowInsetsListener(appBar) { _, insets ->
+      (artistDetailsToolbar.layoutParams as ViewGroup.MarginLayoutParams).topMargin = insets.systemWindowInsetTop
+      insets.consumeSystemWindowInsets()
+    }
   }
 
 }

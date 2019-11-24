@@ -11,12 +11,12 @@
     <item name="android:windowDrawsSystemBarBackgrounds">true</item>
     <item name="android:statusBarColor">@android:color/transparent</item>
     <item name="android:navigationBarColor">@android:color/transparent</item>
+    <item name="android:windowBackground">@color/backgroundColor</item>
 
     <item name="android:listDivider">@drawable/list_divider</item>
     <item name="android:selectableItemBackground">@drawable/selectable_item_background</item>
-    <item name="materialCardViewStyle">@style/CardViewStyle</item>
 
-    <item name="android:windowBackground">@color/backgroundColor</item>
+    <item name="materialCardViewStyle">@style/CardViewStyle</item>
   </style>
 
   <style name="FluxTheme.Launcher">
@@ -25,7 +25,7 @@
 
   <style name="FullScreenDialogTheme" parent="Theme.MaterialComponents.Dialog">
     <item name="android:windowIsFloating">false</item>
-    <item name="android:windowBackground">@color/backgroundColor</item>
+    <item name="android:windowBackground">@null</item>
     <item name="android:windowDrawsSystemBarBackgrounds">true</item>
     <item name="android:statusBarColor">@android:color/transparent</item>
     <item name="android:navigationBarColor">@android:color/transparent</item>
@@ -37,7 +37,7 @@
   </style>
 
   <style name="CardViewStyle" parent="Widget.MaterialComponents.CardView">
-    <item name="cardCornerRadius">4dp</item>
+    <item name="cardCornerRadius">0dp</item>
   </style>
 
   <!-- TODO: Light Theme -->

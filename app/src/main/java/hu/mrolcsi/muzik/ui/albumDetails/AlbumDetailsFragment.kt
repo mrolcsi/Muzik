@@ -12,17 +12,17 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.ui.setupWithNavController
 import hu.mrolcsi.muzik.R
-import hu.mrolcsi.muzik.ui.common.MediaItemListAdapter
-import hu.mrolcsi.muzik.ui.common.glide.GlideApp
-import hu.mrolcsi.muzik.ui.common.MVVMViewHolder
+import hu.mrolcsi.muzik.data.model.media.albumArtUri
 import hu.mrolcsi.muzik.databinding.FragmentAlbumDetailsBinding
 import hu.mrolcsi.muzik.databinding.ListItemDiscNumberBinding
 import hu.mrolcsi.muzik.databinding.ListItemSongBinding
+import hu.mrolcsi.muzik.ui.common.MVVMViewHolder
+import hu.mrolcsi.muzik.ui.common.MediaItemListAdapter
 import hu.mrolcsi.muzik.ui.common.extensions.applySharedElementTransition
-import hu.mrolcsi.muzik.data.model.media.albumArtUri
+import hu.mrolcsi.muzik.ui.common.glide.GlideApp
 import hu.mrolcsi.muzik.ui.songs.SongHolder
-import kotlinx.android.synthetic.main.album_details_header.*
 import kotlinx.android.synthetic.main.fragment_album_details.*
+import kotlinx.android.synthetic.main.fragment_album_details_header.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class AlbumDetailsFragment : Fragment() {
@@ -105,5 +105,11 @@ class AlbumDetailsFragment : Fragment() {
     ViewCompat.setTransitionName(imgCoverArt, args.transitionName)
 
     albumDetailsToolbar.setupWithNavController(findNavController())
+
+    // Fix height of AppBarLayout with fitsSystemWindows="true"
+    ViewCompat.setOnApplyWindowInsetsListener(appBar) { _, insets ->
+      (albumDetailsToolbar.layoutParams as ViewGroup.MarginLayoutParams).topMargin = insets.systemWindowInsetTop
+      insets.consumeSystemWindowInsets()
+    }
   }
 }

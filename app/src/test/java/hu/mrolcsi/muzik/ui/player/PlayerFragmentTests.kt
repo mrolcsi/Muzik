@@ -4,13 +4,13 @@ import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.MutableLiveData
 import hu.mrolcsi.muzik.BaseTest
 import hu.mrolcsi.muzik.R
-import hu.mrolcsi.muzik.ui.playlist.PlaylistViewModelImpl
 import hu.mrolcsi.muzik.data.model.theme.Theme
+import hu.mrolcsi.muzik.ui.playlist.PlaylistViewModelImpl
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import kotlinx.android.synthetic.main.content_player.*
+import kotlinx.android.synthetic.main.fragment_player_content.*
 import org.junit.Before
 import org.junit.Test
 import org.koin.androidx.viewmodel.dsl.viewModel
