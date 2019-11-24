@@ -17,6 +17,7 @@ import hu.mrolcsi.muzik.data.service.theme.ThemeService
 import hu.mrolcsi.muzik.databinding.FragmentArtistDetailsBinding
 import hu.mrolcsi.muzik.databinding.ListItemSongBinding
 import hu.mrolcsi.muzik.ui.albums.AlbumHolder
+import hu.mrolcsi.muzik.ui.common.HideViewOnOffsetChangedListener
 import hu.mrolcsi.muzik.ui.common.MediaItemListAdapter
 import hu.mrolcsi.muzik.ui.common.glide.GlideApp
 import hu.mrolcsi.muzik.ui.common.glide.onLoadFailed
@@ -118,6 +119,8 @@ class ArtistDetailsFragment : Fragment() {
       (artistDetailsToolbar.layoutParams as ViewGroup.MarginLayoutParams).topMargin = insets.systemWindowInsetTop
       insets.consumeSystemWindowInsets()
     }
+
+    appBar.addOnOffsetChangedListener(HideViewOnOffsetChangedListener(tvArtistName))
   }
 
 }

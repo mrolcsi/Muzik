@@ -16,6 +16,7 @@ import hu.mrolcsi.muzik.data.model.media.albumArtUri
 import hu.mrolcsi.muzik.databinding.FragmentAlbumDetailsBinding
 import hu.mrolcsi.muzik.databinding.ListItemDiscNumberBinding
 import hu.mrolcsi.muzik.databinding.ListItemSongBinding
+import hu.mrolcsi.muzik.ui.common.HideViewOnOffsetChangedListener
 import hu.mrolcsi.muzik.ui.common.MVVMViewHolder
 import hu.mrolcsi.muzik.ui.common.MediaItemListAdapter
 import hu.mrolcsi.muzik.ui.common.extensions.applySharedElementTransition
@@ -111,5 +112,7 @@ class AlbumDetailsFragment : Fragment() {
       (albumDetailsToolbar.layoutParams as ViewGroup.MarginLayoutParams).topMargin = insets.systemWindowInsetTop
       insets.consumeSystemWindowInsets()
     }
+
+    appBar.addOnOffsetChangedListener(HideViewOnOffsetChangedListener(tvAlbumTitle))
   }
 }

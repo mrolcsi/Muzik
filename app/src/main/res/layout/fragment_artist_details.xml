@@ -32,16 +32,10 @@
         android:id="@+id/collapsingToolbar"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:collapsedTitleTextColor="@{theme.primaryForegroundColor}"
         app:contentScrim="@{theme.primaryBackgroundColor}"
-        app:expandedTitleGravity="center|bottom"
-        app:expandedTitleMarginEnd="8dp"
-        app:expandedTitleMarginStart="8dp"
-        app:expandedTitleTextAppearance="?android:textAppearanceLarge"
-        app:expandedTitleTextColor="@{@android:color/transparent}"
         app:layout_scrollFlags="scroll|exitUntilCollapsed"
         app:scrimAnimationDuration="@integer/preferredAnimationDuration"
-        app:title="@{viewModel.artistName}">
+        app:titleEnabled="false">
 
         <include
           android:id="@+id/backdrop"
@@ -57,7 +51,21 @@
           android:layout_width="match_parent"
           android:layout_height="?attr/actionBarSize"
           app:iconTint="@{theme.primaryForegroundColor}"
-          app:layout_collapseMode="pin" />
+          app:layout_collapseMode="pin">
+
+          <TextView
+            android:id="@+id/tvArtistName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="@{viewModel.artistName}"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@{theme.primaryForegroundColor}"
+            android:textStyle="bold" />
+
+        </com.google.android.material.appbar.MaterialToolbar>
 
       </com.google.android.material.appbar.CollapsingToolbarLayout>
 
@@ -82,13 +90,13 @@
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_marginEnd="16dp"
-      android:backgroundTint="@{theme.primaryForegroundColor}"
+      android:backgroundTint="@{theme.secondaryForegroundColor}"
       android:contentDescription="@string/mediaControl_shuffleAll"
       android:onClick="@{() -> viewModel.onShuffleAllClick()}"
-      android:tint="@{theme.primaryBackgroundColor}"
+      android:tint="@{theme.secondaryBackgroundColor}"
       app:layout_anchor="@id/appBar"
       app:layout_anchorGravity="bottom|end"
-      app:rippleColor="@{theme.primaryBackgroundColor}"
+      app:rippleColor="@{theme.secondaryBackgroundColor}"
       app:srcCompat="@drawable/ic_shuffle_all" />
 
   </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -54,8 +54,8 @@
       android:tint="@{theme.secondaryBackgroundColor}"
       app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintHeight_percent="0.5"
       app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@+id/barrier"
       app:srcCompat="@drawable/protection_scrim"
       tools:ignore="ContentDescription"
       tools:tint="?attr/colorPrimary" />
@@ -147,6 +147,15 @@
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toBottomOf="@+id/tvArtist"
       tools:text="@tools:sample/lorem[9]" />
+
+    <androidx.constraintlayout.widget.Barrier
+      android:id="@+id/barrier"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      app:barrierDirection="top"
+      app:constraint_referenced_ids="tvNumberOfSongs,lblDivider,tvYear"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent" />
 
   </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

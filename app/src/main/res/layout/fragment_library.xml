@@ -31,11 +31,19 @@
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         app:iconTint="@{theme.primaryForegroundColor}"
-        app:layout_scrollFlags="scroll|enterAlways|snap"
-        app:subtitleTextColor="@{theme.primaryForegroundColor}"
-        app:title="@string/library_title"
-        app:titleTextColor="@{theme.primaryForegroundColor}"
-        tools:title="@string/library_title" />
+        app:layout_scrollFlags="scroll|enterAlways|snap">
+
+        <TextView
+          android:id="@+id/lblLibraryTitle"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_gravity="center"
+          android:text="@string/library_title"
+          android:textAppearance="?android:attr/textAppearanceLarge"
+          android:textColor="@{theme.primaryForegroundColor}"
+          android:textStyle="bold" />
+
+      </com.google.android.material.appbar.MaterialToolbar>
 
       <com.google.android.material.tabs.TabLayout
         android:id="@+id/libraryTabs"
