@@ -83,16 +83,16 @@
       android:layout_marginStart="8dp"
       android:layout_marginTop="8dp"
       android:layout_marginEnd="16dp"
+      android:ellipsize="end"
+      android:maxLines="1"
       android:textAppearance="?attr/textAppearanceListItem"
       android:textColor="@{theme.primaryForegroundColor}"
-      app:enableMarquee="@{true}"
       app:layout_constraintBottom_toTopOf="@+id/tvSongArtist"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toEndOf="@+id/imgNowPlaying"
       app:layout_constraintTop_toTopOf="parent"
       app:layout_constraintVertical_chainStyle="packed"
       app:layout_goneMarginBottom="8dp"
-      app:marqueeDelay="@{@integer/preferredMarqueeDelay}"
       tools:text="Song Title" />
 
     <TextView
@@ -103,14 +103,14 @@
       android:layout_marginEnd="8dp"
       android:layout_marginBottom="8dp"
       android:alpha="0.8"
+      android:ellipsize="end"
+      android:maxLines="1"
       android:textAppearance="?attr/textAppearanceListItemSecondary"
       android:textColor="@{theme.primaryForegroundColor}"
-      app:enableMarquee="@{true}"
       app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintEnd_toStartOf="@+id/tvDuration"
       app:layout_constraintStart_toEndOf="@+id/imgNowPlaying"
       app:layout_constraintTop_toBottomOf="@+id/tvSongTitle"
-      app:marqueeDelay="@{@integer/preferredMarqueeDelay}"
       tools:text="Song Artist" />
 
     <TextView
