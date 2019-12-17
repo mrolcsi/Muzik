@@ -11,6 +11,7 @@ import com.tbruyelle.rxpermissions2.RxPermissions
 import hu.mrolcsi.muzik.databinding.FragmentLibraryBinding
 import hu.mrolcsi.muzik.ui.common.ConfigurableFragmentPagerAdapter
 import hu.mrolcsi.muzik.ui.common.observeAndRunNavCommands
+import hu.mrolcsi.muzik.ui.common.setupIcons
 import io.reactivex.rxkotlin.subscribeBy
 import kotlinx.android.synthetic.main.fragment_library.*
 import org.koin.android.ext.android.inject
@@ -39,13 +40,17 @@ class LibraryFragment : Fragment() {
         }
     })
 
-    viewModel.pages.observe(viewLifecycleOwner, ConfigurableFragmentPagerAdapter(
-      childFragmentManager
-    ).also {
+    val adapter = ConfigurableFragmentPagerAdapter(childFragmentManager).also {
       libraryPager.adapter = it
+    }
+
+    viewModel.pages.observe(viewLifecycleOwner, Observer {
+      adapter.onChanged(it)
+      libraryTabs.setupIcons(adapter)
     })
 
     libraryTabs.setupWithViewPager(libraryPager)
+
     findNavController().observeAndRunNavCommands(viewLifecycleOwner, viewModel)
   }
 }

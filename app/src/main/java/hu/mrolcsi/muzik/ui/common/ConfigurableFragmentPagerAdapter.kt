@@ -1,5 +1,6 @@
 package hu.mrolcsi.muzik.ui.common
 
+import android.graphics.drawable.Drawable
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
@@ -8,6 +9,7 @@ import androidx.viewpager.widget.PagerAdapter
 
 open class ConfigurableFragmentPagerAdapter(fm: FragmentManager) :
   FragmentPagerAdapter(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT),
+  IconPagerAdapter,
   Observer<List<Page>> {
 
   protected val pages: MutableList<Page> = ArrayList(4)
@@ -20,6 +22,8 @@ open class ConfigurableFragmentPagerAdapter(fm: FragmentManager) :
     .takeIf { it >= 0 } ?: PagerAdapter.POSITION_NONE
 
   override fun getPageTitle(position: Int) = pages[position].title
+
+  override fun getIconDrawable(position: Int) = pages[position].icon
 
   override fun getCount() = pages.size
 
@@ -50,5 +54,6 @@ open class ConfigurableFragmentPagerAdapter(fm: FragmentManager) :
 
 data class Page(
   val title: String,
+  val icon: Drawable?,
   val fragment: Fragment
 )

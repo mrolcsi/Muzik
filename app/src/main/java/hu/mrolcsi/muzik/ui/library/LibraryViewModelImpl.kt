@@ -3,6 +3,7 @@ package hu.mrolcsi.muzik.ui.library
 import android.Manifest
 import android.content.Context
 import android.support.v4.media.MediaDescriptionCompat
+import androidx.core.content.ContextCompat
 import androidx.databinding.library.baseAdapters.BR
 import androidx.lifecycle.MutableLiveData
 import hu.mrolcsi.muzik.R
@@ -64,9 +65,21 @@ class LibraryViewModelImpl constructor(
           isPermissionRationaleVisible = false
 
           pages.value = listOf(
-            Page(context.getString(R.string.artists_title), ArtistsFragment()),
-            Page(context.getString(R.string.albums_title), AlbumsFragment()),
-            Page(context.getString(R.string.songs_title), SongsFragment())
+            Page(
+              context.getString(R.string.artists_title),
+              ContextCompat.getDrawable(context, R.drawable.ic_artist),
+              ArtistsFragment()
+            ),
+            Page(
+              context.getString(R.string.albums_title),
+              ContextCompat.getDrawable(context, R.drawable.ic_album),
+              AlbumsFragment()
+            ),
+            Page(
+              context.getString(R.string.songs_title),
+              ContextCompat.getDrawable(context, R.drawable.ic_song),
+              SongsFragment()
+            )
           )
         },
         onError = {

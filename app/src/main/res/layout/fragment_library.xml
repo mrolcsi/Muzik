@@ -26,32 +26,15 @@
       android:visibility="@{!viewModel.isPermissionRationaleVisible}"
       app:expanded="true">
 
-      <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/libraryToolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        app:iconTint="@{theme.primaryForegroundColor}"
-        app:layout_scrollFlags="scroll|enterAlways|snap">
-
-        <TextView
-          android:id="@+id/lblLibraryTitle"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:layout_gravity="center"
-          android:text="@string/library_title"
-          android:textAppearance="?android:attr/textAppearanceLarge"
-          android:textColor="@{theme.primaryForegroundColor}"
-          android:textStyle="bold" />
-
-      </com.google.android.material.appbar.MaterialToolbar>
-
       <com.google.android.material.tabs.TabLayout
         android:id="@+id/libraryTabs"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@{theme.primaryBackgroundColor}"
         android:visibility="@{!viewModel.isPermissionRationaleVisible}"
+        app:tabIconTint="@{theme.primaryForegroundColor}"
         app:tabIndicatorColor="@{theme.primaryForegroundColor}"
+        app:tabInlineLabel="true"
         app:tabTextColor="@{theme.primaryForegroundColor}" />
 
     </com.google.android.material.appbar.AppBarLayout>
