@@ -6,20 +6,24 @@ import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
 import androidx.lifecycle.MutableLiveData
 import hu.mrolcsi.muzik.R
+import hu.mrolcsi.muzik.data.manager.media.MediaManager
+import hu.mrolcsi.muzik.data.model.media.artistKey
+import hu.mrolcsi.muzik.data.model.media.coverArtUri
+import hu.mrolcsi.muzik.data.model.media.dateAdded
+import hu.mrolcsi.muzik.data.model.media.duration
+import hu.mrolcsi.muzik.data.model.media.id
+import hu.mrolcsi.muzik.data.model.media.mediaId
+import hu.mrolcsi.muzik.data.model.media.titleKey
+import hu.mrolcsi.muzik.data.model.media.trackNumber
+import hu.mrolcsi.muzik.data.repository.media.MediaRepository
 import hu.mrolcsi.muzik.ui.base.DataBindingViewModel
+import hu.mrolcsi.muzik.ui.base.ThemedViewModel
+import hu.mrolcsi.muzik.ui.base.ThemedViewModelImpl
 import hu.mrolcsi.muzik.ui.common.ExecuteOnceNavCommandSource
 import hu.mrolcsi.muzik.ui.common.ExecuteOnceUiCommandSource
 import hu.mrolcsi.muzik.ui.common.ObservableImpl
+import hu.mrolcsi.muzik.ui.common.extensions.millisecondsToTimeStamp
 import hu.mrolcsi.muzik.ui.library.SortingMode
-import hu.mrolcsi.muzik.data.repository.media.MediaRepository
-import hu.mrolcsi.muzik.data.manager.media.MediaManager
-import hu.mrolcsi.muzik.data.model.media.artistKey
-import hu.mrolcsi.muzik.data.model.media.dateAdded
-import hu.mrolcsi.muzik.data.model.media.isNowPlaying
-import hu.mrolcsi.muzik.data.model.media.mediaId
-import hu.mrolcsi.muzik.data.model.media.titleKey
-import hu.mrolcsi.muzik.ui.base.ThemedViewModel
-import hu.mrolcsi.muzik.ui.base.ThemedViewModelImpl
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.Observables
 import io.reactivex.rxkotlin.subscribeBy
@@ -47,7 +51,7 @@ class SongsViewModelImpl constructor(
   override val listViewVisible: Boolean = true
   override val emptyViewVisible: Boolean = false
 
-  override val items = MutableLiveData<List<MediaItem>>()
+  override val items = MutableLiveData<List<SongItem>>()
   override var sortingMode: SortingMode by Delegates.observable(SortingMode.SORT_BY_TITLE) { _, old, new ->
     if (old != new) sortingModeSubject.onNext(new)
   }
@@ -56,22 +60,24 @@ class SongsViewModelImpl constructor(
 
   private var songDescriptions: List<MediaDescriptionCompat>? = null
 
-  override fun onSongClick(songItem: MediaItem, position: Int) {
+  override fun onSongClick(songItem: SongItem, position: Int) {
     mediaManager.setQueueTitle(context.getString(R.string.playlist_allSongs))
     songDescriptions?.let { mediaManager.playAll(it, position) }
   }
 
   init {
     Observables.combineLatest(
-      sortingModeSubject,
-      mediaRepo.getSongs(),
+      Observables.combineLatest(
+        sortingModeSubject,
+        mediaRepo.getSongs()
+      ).map { (sorting, songs) -> songs.applySorting(sorting) },
       mediaManager.mediaMetadata
         .distinctUntilChanged { t: MediaMetadataCompat -> t.mediaId }
         .filter { it.mediaId != null }
     )
       .subscribeOn(Schedulers.io())
-      .map { (sorting, songs, metadata) -> songs.applyNowPlaying(metadata.mediaId).applySorting(sorting) }
-      .doOnNext { songs -> songDescriptions = songs.filter { it.isPlayable }.map { it.description } }
+      .doOnNext { (songs, _) -> songDescriptions = songs.filter { it.isPlayable }.map { it.description } }
+      .map { (songs, metadata) -> songs.asSongItems(context, metadata.mediaId) }
       .observeOn(AndroidSchedulers.mainThread())
       .subscribeBy(
         onNext = { items.value = it },
@@ -86,11 +92,16 @@ class SongsViewModelImpl constructor(
       SortingMode.SORT_BY_DATE -> sortedByDescending { it.description.dateAdded }
     }
   }
-
 }
 
-fun List<MediaItem>.applyNowPlaying(mediaId: String?): List<MediaItem> = this.map {
-  it.apply {
-    it.description.isNowPlaying = it.mediaId == mediaId
-  }
+fun List<MediaItem>.asSongItems(context: Context, nowPlayingId: String?) = map { item ->
+  SongItem(
+    item.description.id,
+    item.description.coverArtUri,
+    item.description.trackNumber.takeIf { it > -1 }?.toString(),
+    item.mediaId == nowPlayingId,
+    item.description.subtitle ?: context.getText(R.string.songs_unknownArtist),
+    item.description.title ?: context.getText(R.string.songs_noTitle),
+    item.description.duration.takeIf { it > 0 }?.millisecondsToTimeStamp().orEmpty()
+  )
 }

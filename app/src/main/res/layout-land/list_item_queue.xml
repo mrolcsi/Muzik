@@ -6,8 +6,8 @@
   <data>
 
     <variable
-      name="theme"
-      type="hu.mrolcsi.muzik.data.model.theme.Theme" />
+      name="model"
+      type="hu.mrolcsi.muzik.ui.player.QueueItem" />
   </data>
 
   <androidx.constraintlayout.widget.ConstraintLayout
@@ -25,11 +25,13 @@
       android:paddingEnd="4dp"
       android:paddingBottom="4dp"
       android:scaleType="centerCrop"
+      android:transitionName="@{model.transitionName}"
       app:elevation="@dimen/action_bar_elevation"
       app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintDimensionRatio="1:1"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toTopOf="parent"
+      app:srcUri="@{model.coverArtUri}"
       tools:src="@tools:sample/avatars" />
 
     <TextView
@@ -43,9 +45,10 @@
       android:paddingTop="4dp"
       android:paddingEnd="4dp"
       android:paddingBottom="4dp"
+      android:text="@{model.titleText}"
       android:textAlignment="center"
       android:textAppearance="?android:attr/textAppearanceLarge"
-      android:textColor="@{theme.primaryForegroundColor}"
+      android:textColor="@{model.theme.primaryForegroundColor}"
       app:enableMarquee="@{true}"
       app:layout_constrainedWidth="true"
       app:layout_constraintBottom_toTopOf="@+id/tvArtist"
@@ -66,14 +69,15 @@
       android:layout_marginEnd="16dp"
       android:alpha="0.8"
       android:background="?attr/selectableItemBackground"
-      android:backgroundTint="@{theme.primaryForegroundColor}"
+      android:backgroundTint="@{model.theme.primaryForegroundColor}"
       android:paddingStart="4dp"
       android:paddingTop="4dp"
       android:paddingEnd="4dp"
       android:paddingBottom="4dp"
+      android:text="@{model.artistText}"
       android:textAlignment="center"
       android:textAppearance="?android:attr/textAppearanceMedium"
-      android:textColor="@{theme.primaryForegroundColor}"
+      android:textColor="@{model.theme.primaryForegroundColor}"
       app:enableMarquee="@{true}"
       app:layout_constrainedWidth="true"
       app:layout_constraintBottom_toTopOf="@+id/tvAlbum"
@@ -93,9 +97,10 @@
       android:layout_marginBottom="8dp"
       android:alpha="0.8"
       android:background="?attr/selectableItemBackground"
-      android:backgroundTint="@{theme.primaryForegroundColor}"
+      android:backgroundTint="@{model.theme.primaryForegroundColor}"
+      android:text="@{model.albumText}"
       android:textAlignment="center"
-      android:textColor="@{theme.primaryForegroundColor}"
+      android:textColor="@{model.theme.primaryForegroundColor}"
       app:enableMarquee="@{true}"
       app:layout_constrainedWidth="true"
       app:layout_constraintBottom_toBottomOf="parent"

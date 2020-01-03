@@ -1,8 +1,8 @@
 package hu.mrolcsi.muzik.ui.base
 
+import android.util.Log
 import androidx.databinding.Observable
 import com.afollestad.materialdialogs.MaterialDialog
-import com.google.android.exoplayer2.util.Log
 import hu.mrolcsi.muzik.ui.common.ExecuteOnceNavCommandSource
 import hu.mrolcsi.muzik.ui.common.ExecuteOnceUiCommandSource
 import hu.mrolcsi.muzik.ui.common.NavCommandSource

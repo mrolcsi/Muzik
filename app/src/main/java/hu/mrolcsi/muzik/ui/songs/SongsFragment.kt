@@ -5,18 +5,17 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.forEach
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import hu.mrolcsi.muzik.R
-import hu.mrolcsi.muzik.ui.common.MediaItemListAdapter
+import hu.mrolcsi.muzik.databinding.FragmentSongsBinding
+import hu.mrolcsi.muzik.ui.common.MVVMListAdapter
+import hu.mrolcsi.muzik.ui.common.ThemedViewHolder
 import hu.mrolcsi.muzik.ui.common.observeAndRunNavCommands
 import hu.mrolcsi.muzik.ui.common.observeAndRunUiCommands
-import hu.mrolcsi.muzik.databinding.FragmentSongsBinding
-import hu.mrolcsi.muzik.databinding.ListItemSongBinding
 import hu.mrolcsi.muzik.ui.library.SortingMode
 import kotlinx.android.synthetic.main.fragment_songs.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -26,25 +25,19 @@ class SongsFragment : Fragment() {
   private val viewModel: SongsViewModel by viewModel<SongsViewModelImpl>()
 
   private val songsAdapter by lazy {
-    MediaItemListAdapter(requireContext()) { parent, _ ->
-      SongHolder(
-        itemView = ListItemSongBinding.inflate(
-          LayoutInflater.from(parent.context),
-          parent,
-          false
-        ).apply {
+    MVVMListAdapter(
+      itemIdSelector = { it.id },
+      viewHolderFactory = { parent, _ ->
+        ThemedViewHolder<SongItem>(
+          parent = parent,
+          layoutId = R.layout.list_item_song_cover_art,
+          viewLifecycleOwner = viewLifecycleOwner,
           theme = viewModel.currentTheme
-          lifecycleOwner = viewLifecycleOwner
-        }.root,
-        showTrackNumber = false
-      ).apply {
-        itemView.setOnClickListener {
-          model?.let {
-            viewModel.onSongClick(it, adapterPosition)
-          }
+        ) { model, holder ->
+          viewModel.onSongClick(model, holder.adapterPosition)
         }
       }
-    }
+    )
   }
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -96,25 +89,26 @@ class SongsFragment : Fragment() {
     }
   }
 
-  override fun onOptionsItemSelected(item: MenuItem): Boolean {
-    item.isChecked = true
-    return when (item.itemId) {
-      R.id.menuSortByArtist -> {
-        viewModel.sortingMode = SortingMode.SORT_BY_ARTIST
-        songsAdapter.sorting = SortingMode.SORT_BY_ARTIST
-        true
-      }
-      R.id.menuSortByTitle -> {
-        viewModel.sortingMode = SortingMode.SORT_BY_TITLE
-        songsAdapter.sorting = SortingMode.SORT_BY_TITLE
-        true
-      }
-      R.id.menuSortByDate -> {
-        viewModel.sortingMode = SortingMode.SORT_BY_DATE
-        songsAdapter.sorting = SortingMode.SORT_BY_DATE
-        true
-      }
-      else -> super.onOptionsItemSelected(item)
-    }
-  }
+  // TODO: reintroduce sorting
+//  override fun onOptionsItemSelected(item: MenuItem): Boolean {
+//    item.isChecked = true
+//    return when (item.itemId) {
+//      R.id.menuSortByArtist -> {
+//        viewModel.sortingMode = SortingMode.SORT_BY_ARTIST
+//        songsAdapter.sorting = SortingMode.SORT_BY_ARTIST
+//        true
+//      }
+//      R.id.menuSortByTitle -> {
+//        viewModel.sortingMode = SortingMode.SORT_BY_TITLE
+//        songsAdapter.sorting = SortingMode.SORT_BY_TITLE
+//        true
+//      }
+//      R.id.menuSortByDate -> {
+//        viewModel.sortingMode = SortingMode.SORT_BY_DATE
+//        songsAdapter.sorting = SortingMode.SORT_BY_DATE
+//        true
+//      }
+//      else -> super.onOptionsItemSelected(item)
+//    }
+//  }
 }

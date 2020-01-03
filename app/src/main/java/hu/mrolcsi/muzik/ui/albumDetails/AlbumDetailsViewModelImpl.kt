@@ -4,16 +4,15 @@ import android.content.Context
 import android.support.v4.media.MediaBrowserCompat.MediaItem
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
-import androidx.core.os.bundleOf
 import androidx.databinding.library.baseAdapters.BR
 import androidx.lifecycle.MutableLiveData
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.data.manager.media.MediaManager
-import hu.mrolcsi.muzik.data.model.media.MediaType
 import hu.mrolcsi.muzik.data.model.media.album
 import hu.mrolcsi.muzik.data.model.media.albumArtUri
 import hu.mrolcsi.muzik.data.model.media.albumYear
 import hu.mrolcsi.muzik.data.model.media.artist
+import hu.mrolcsi.muzik.data.model.media.discNumber
 import hu.mrolcsi.muzik.data.model.media.id
 import hu.mrolcsi.muzik.data.model.media.mediaId
 import hu.mrolcsi.muzik.data.model.media.numberOfSongs
@@ -21,6 +20,7 @@ import hu.mrolcsi.muzik.data.model.media.titleKey
 import hu.mrolcsi.muzik.data.model.media.trackNumber
 import hu.mrolcsi.muzik.data.model.theme.Theme
 import hu.mrolcsi.muzik.data.repository.media.MediaRepository
+import hu.mrolcsi.muzik.ui.albums.DiscNumberItem
 import hu.mrolcsi.muzik.ui.base.DataBindingViewModel
 import hu.mrolcsi.muzik.ui.base.ThemedViewModel
 import hu.mrolcsi.muzik.ui.base.ThemedViewModelImpl
@@ -29,7 +29,7 @@ import hu.mrolcsi.muzik.ui.common.ExecuteOnceUiCommandSource
 import hu.mrolcsi.muzik.ui.common.ObservableImpl
 import hu.mrolcsi.muzik.ui.common.glide.GlideApp
 import hu.mrolcsi.muzik.ui.common.glide.onResourceReady
-import hu.mrolcsi.muzik.ui.songs.applyNowPlaying
+import hu.mrolcsi.muzik.ui.songs.asSongItems
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.Observables
 import io.reactivex.rxkotlin.subscribeBy
@@ -55,7 +55,7 @@ class AlbumDetailsViewModelImpl constructor(
   override val listViewVisible: Boolean = true
   override val emptyViewVisible: Boolean = false
 
-  override val items = MutableLiveData<List<MediaItem>>()
+  override val items = MutableLiveData<List<AlbumDetailItem>>()
 
   override var albumTitleText: String? by boundStringOrNull(BR.albumTitleText)
   override var artistText: String? by boundStringOrNull(BR.artistText)
@@ -89,19 +89,26 @@ class AlbumDetailsViewModelImpl constructor(
       albumSubject
         .switchMap { mediaRepo.getAlbumById(it) }
         .doOnNext { updateHeaderText(it) }
-        .switchMap { mediaRepo.getSongsFromAlbum(it.description.id) },
+        .switchMap { mediaRepo.getSongsFromAlbum(it.description.id) }
+        .map { songs ->
+          songs
+            .sortedBy { it.description.titleKey }
+            .sortedBy { it.description.discNumber * 1000 + it.description.trackNumber }
+        },
       mediaManager.mediaMetadata
         .distinctUntilChanged { t: MediaMetadataCompat -> t.mediaId }
         .filter { it.mediaId != null }
     )
+      .doOnNext { (songs, _) -> songDescriptions = songs.filter { it.isPlayable }.map { it.description } }
       .map { (songs, metadata) ->
         songs
-          .applyNowPlaying(metadata.mediaId)
-          .sortedBy { it.description.titleKey }
-          .sortedBy { it.description.trackNumber }
+          .groupBy { it.description.discNumber }
+          .flatMap { (discNumber, songs) ->
+            val songItems = songs.asSongItems(context, metadata.mediaId)
+            if (discNumber > 0) listOf(DiscNumberItem(discNumber, discNumber.toString())) + songItems
+            else songItems
+          }
       }
-      .doOnNext { songs -> songDescriptions = songs.filter { it.isPlayable }.map { it.description } }
-      .map { it.addDiscIndicator() }
       .observeOn(AndroidSchedulers.mainThread())
       .subscribeBy(
         onNext = { items.value = it },
@@ -125,25 +132,4 @@ class AlbumDetailsViewModelImpl constructor(
       .onResourceReady { albumArt -> themeService.createTheme(albumArt).subscribeBy { albumTheme.value = it } }
       .preload()
   }
-
-  private fun List<MediaItem>.addDiscIndicator(): List<MediaItem> = toMutableList().apply {
-    if (last().description.trackNumber > 1000) {
-      // Add disc number indicators
-      val numDiscs = last().description.trackNumber / 1000
-      if (numDiscs > 0) {
-        for (i in 1..numDiscs) {
-          val index = indexOfFirst { it.description.trackNumber > 1000 }
-          val item = MediaItem(
-            MediaDescriptionCompat.Builder()
-              .setMediaId("disc/$i")
-              .setTitle(i.toString())
-              .setExtras(bundleOf(MediaType.MEDIA_TYPE_KEY to MediaType.MEDIA_OTHER))
-              .build(),
-            MediaItem.FLAG_BROWSABLE
-          )
-          add(index, item)
-        }
-      }
-    }
-  }.toList()
 }

@@ -8,6 +8,10 @@
     <variable
       name="theme"
       type="androidx.lifecycle.LiveData&lt;hu.mrolcsi.muzik.data.model.theme.Theme&gt;" />
+
+    <variable
+      name="model"
+      type="hu.mrolcsi.muzik.ui.albums.DiscNumberItem" />
   </data>
 
   <androidx.constraintlayout.widget.ConstraintLayout
@@ -36,6 +40,7 @@
       android:id="@+id/tvDiscNumber"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
+      android:text="@{model.discNumberText}"
       android:layout_marginStart="4dp"
       android:textAppearance="?android:attr/textAppearanceSmall"
       android:textColor="@{theme.secondaryForegroundColor}"

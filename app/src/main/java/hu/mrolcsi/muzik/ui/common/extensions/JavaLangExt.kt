@@ -29,7 +29,11 @@ fun Int.secondsToTimeStamp(): String {
   }
 }
 
-fun Long.millisecondsToTimeStamp(): String {
+fun Long?.millisecondsToTimeStamp(): String {
+  if (this == null) {
+    return "??:??"
+  }
+
   if (this < -1) {
     return "??:??"
   }

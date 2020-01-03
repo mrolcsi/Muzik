@@ -1,24 +1,25 @@
 package hu.mrolcsi.muzik.ui.albums
 
+import android.content.Context
 import android.support.v4.media.MediaBrowserCompat.MediaItem
 import android.view.View
 import androidx.core.view.ViewCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.fragment.FragmentNavigatorExtras
+import hu.mrolcsi.muzik.R
+import hu.mrolcsi.muzik.data.model.media.albumArtUri
+import hu.mrolcsi.muzik.data.model.media.albumKey
+import hu.mrolcsi.muzik.data.model.media.artistKey
+import hu.mrolcsi.muzik.data.model.media.id
+import hu.mrolcsi.muzik.data.repository.media.MediaRepository
 import hu.mrolcsi.muzik.ui.base.DataBindingViewModel
+import hu.mrolcsi.muzik.ui.base.ThemedViewModel
+import hu.mrolcsi.muzik.ui.base.ThemedViewModelImpl
 import hu.mrolcsi.muzik.ui.common.ExecuteOnceNavCommandSource
 import hu.mrolcsi.muzik.ui.common.ExecuteOnceUiCommandSource
 import hu.mrolcsi.muzik.ui.common.ObservableImpl
 import hu.mrolcsi.muzik.ui.library.LibraryFragmentDirections
 import hu.mrolcsi.muzik.ui.library.SortingMode
-import hu.mrolcsi.muzik.data.repository.media.MediaRepository
-import hu.mrolcsi.muzik.data.model.media.MediaType
-import hu.mrolcsi.muzik.data.model.media.albumKey
-import hu.mrolcsi.muzik.data.model.media.artistKey
-import hu.mrolcsi.muzik.data.model.media.id
-import hu.mrolcsi.muzik.data.model.media.type
-import hu.mrolcsi.muzik.ui.base.ThemedViewModel
-import hu.mrolcsi.muzik.ui.base.ThemedViewModelImpl
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.Observables
 import io.reactivex.rxkotlin.subscribeBy
@@ -37,13 +38,14 @@ class AlbumsViewModelImpl constructor(
   AlbumsViewModel,
   KoinComponent {
 
+  private val context: Context by inject()
   private val mediaRepo: MediaRepository by inject()
 
   override val progressVisible: Boolean = false
   override val listViewVisible: Boolean = true
   override val emptyViewVisible: Boolean = false
 
-  override val items = MutableLiveData<List<MediaItem>>()
+  override val items = MutableLiveData<List<AlbumItem>>()
 
   override var sortingMode: SortingMode by Delegates.observable(SortingMode.SORT_BY_TITLE) { _, old, new ->
     if (old != new) sortingModeSubject.onNext(new)
@@ -51,15 +53,13 @@ class AlbumsViewModelImpl constructor(
 
   private var sortingModeSubject = BehaviorSubject.createDefault(SortingMode.SORT_BY_TITLE)
 
-  override fun onAlbumClick(albumItem: MediaItem, transitionedView: View) {
-    if (albumItem.description.type == MediaType.MEDIA_ALBUM) {
-      val transitionName = ViewCompat.getTransitionName(transitionedView)!!
-      sendNavCommand {
-        navigate(
-          LibraryFragmentDirections.actionToAlbumDetails(albumItem.description.id, transitionName),
-          FragmentNavigatorExtras(transitionedView to transitionName)
-        )
-      }
+  override fun onAlbumClick(item: AlbumItem, transitionedView: View) {
+    val transitionName = ViewCompat.getTransitionName(transitionedView)!!
+    sendNavCommand {
+      navigate(
+        LibraryFragmentDirections.actionToAlbumDetails(item.id, transitionName),
+        FragmentNavigatorExtras(transitionedView to transitionName)
+      )
     }
   }
 
@@ -69,6 +69,7 @@ class AlbumsViewModelImpl constructor(
       mediaRepo.getAlbums()
     )
       .map { (sortingMode, albums) -> albums.applySorting(sortingMode) }
+      .map { it.asAlbumItems(context) }
       .observeOn(AndroidSchedulers.mainThread())
       .subscribeBy(
         onNext = { items.value = it },
@@ -84,4 +85,13 @@ class AlbumsViewModelImpl constructor(
     }
   }
 
+}
+
+fun List<MediaItem>.asAlbumItems(context: Context) = map { item ->
+  AlbumItem(
+    item.description.id,
+    item.description.title ?: context.getText(R.string.songs_noTitle),
+    item.description.subtitle ?: context.getText(R.string.songs_unknownArtist),
+    item.description.albumArtUri
+  )
 }

@@ -30,7 +30,7 @@
       app:showColoredDivider="@{true}"
       app:showTrack="true"
       app:trackColor="@{theme.secondaryForegroundColor}"
-      tools:listitem="@layout/list_item_song" />
+      tools:listitem="@layout/list_item_song_cover_art" />
 
   </FrameLayout>
 

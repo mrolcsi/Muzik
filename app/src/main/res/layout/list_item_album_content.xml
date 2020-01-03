@@ -7,14 +7,14 @@
 
     <variable
       name="theme"
-      type="androidx.lifecycle.LiveData&lt;hu.mrolcsi.muzik.data.model.theme.Theme&gt;" />
+      type="hu.mrolcsi.muzik.data.model.theme.Theme" />
 
     <variable
-      name="item"
-      type="android.support.v4.media.MediaBrowserCompat.MediaItem" />
+      name="model"
+      type="hu.mrolcsi.muzik.ui.albums.AlbumItem" />
   </data>
 
-  <merge tools:showIn="@layout/list_item_album_horizontal">
+  <merge>
 
     <ImageView
       android:id="@+id/imgCoverArt"
@@ -23,6 +23,7 @@
       android:adjustViewBounds="true"
       android:contentDescription="@string/contentDescription_coverArt"
       android:scaleType="centerCrop"
+      android:transitionName="@{model.transitionName}"
       app:layout_constraintBottom_toTopOf="@+id/tvAlbumTitle"
       app:layout_constraintDimensionRatio="1:1"
       app:layout_constraintEnd_toEndOf="parent"
@@ -37,10 +38,11 @@
       android:layout_marginStart="8dp"
       android:layout_marginTop="8dp"
       android:layout_marginEnd="16dp"
+      android:ellipsize="end"
       android:maxLines="1"
+      android:text="@{model.albumText}"
       android:textAppearance="?attr/textAppearanceListItem"
       android:textColor="@{theme.primaryForegroundColor}"
-      android:ellipsize="end"
       app:layout_constraintBottom_toTopOf="@+id/tvAlbumArtist"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
@@ -55,10 +57,11 @@
       android:layout_marginEnd="16dp"
       android:layout_marginBottom="8dp"
       android:alpha="0.8"
+      android:ellipsize="end"
       android:maxLines="1"
+      android:text="@{model.artistText}"
       android:textAppearance="?attr/textAppearanceListItemSecondary"
       android:textColor="@{theme.primaryForegroundColor}"
-      android:ellipsize="end"
       app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"

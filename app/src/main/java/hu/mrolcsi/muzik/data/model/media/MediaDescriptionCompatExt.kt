@@ -70,6 +70,15 @@ inline val MediaDescriptionCompat.dateAdded: Long
   get() = this.extras?.getString(MediaStore.Audio.Media.DATE_ADDED)?.toLong()?.times(1000)
     ?: -1
 
+inline val MediaDescriptionCompat.discNumber: Long
+  get() {
+    val trackNumberExtra =
+      this.extras?.getString(MediaStore.Audio.Media.TRACK)?.toLong()
+        ?: this.extras?.getLong(MediaMetadataCompat.METADATA_KEY_TRACK_NUMBER)
+
+    return trackNumberExtra?.let { trackNumber -> (trackNumber / 1000).takeIf { it > 0 } } ?: -1
+  }
+
 inline val MediaDescriptionCompat.duration: Long
   get() = this.extras?.getString(MediaStore.Audio.Media.DURATION)?.toLong()
     ?: this.extras?.getLong(MediaMetadataCompat.METADATA_KEY_DURATION)
@@ -104,9 +113,13 @@ inline val MediaDescriptionCompat.titleKey: String?
   get() = this.extras?.getString(MediaStore.Audio.Media.TITLE_KEY)
 
 inline val MediaDescriptionCompat.trackNumber: Long
-  get() = this.extras?.getString(MediaStore.Audio.Media.TRACK)?.toLong()
-    ?: this.extras?.getLong(MediaMetadataCompat.METADATA_KEY_TRACK_NUMBER)
-    ?: -1L
+  get() {
+    val trackNumberExtra =
+      this.extras?.getString(MediaStore.Audio.Media.TRACK)?.toLong()
+        ?: this.extras?.getLong(MediaMetadataCompat.METADATA_KEY_TRACK_NUMBER)
+
+    return trackNumberExtra?.let { trackNumber -> (trackNumber.rem(1000)) } ?: -1
+  }
 
 inline val MediaDescriptionCompat.year: Long
   get() = this.extras?.getString(MediaStore.Audio.Media.YEAR)?.toLong()

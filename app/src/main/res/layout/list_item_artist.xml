@@ -8,6 +8,10 @@
     <variable
       name="theme"
       type="androidx.lifecycle.LiveData&lt;hu.mrolcsi.muzik.data.model.theme.Theme&gt;" />
+
+    <variable
+      name="model"
+      type="hu.mrolcsi.muzik.ui.artists.ArtistItem" />
   </data>
 
   <androidx.constraintlayout.widget.ConstraintLayout
@@ -26,6 +30,7 @@
       android:layout_marginEnd="8dp"
       android:ellipsize="end"
       android:maxLines="1"
+      android:text="@{model.artistText}"
       android:textAppearance="?attr/textAppearanceListItem"
       android:textColor="@{theme.secondaryForegroundColor}"
       app:layout_constraintEnd_toStartOf="@+id/imgChevronRight"
@@ -41,6 +46,7 @@
       android:layout_marginEnd="8dp"
       android:layout_marginBottom="16dp"
       android:alpha="0.8"
+      android:text="@{model.numberOfSongsText}"
       android:textAppearance="?attr/textAppearanceListItemSecondary"
       android:textColor="@{theme.secondaryForegroundColor}"
       app:layout_constraintBottom_toBottomOf="parent"

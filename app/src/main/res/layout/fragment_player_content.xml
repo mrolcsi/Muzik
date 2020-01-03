@@ -28,6 +28,7 @@
       android:layout_width="0dp"
       android:layout_height="0dp"
       android:alpha="0.0"
+      app:hasFixedSize="@{true}"
       app:layout_constraintBottom_toTopOf="@+id/sbSongProgress"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"

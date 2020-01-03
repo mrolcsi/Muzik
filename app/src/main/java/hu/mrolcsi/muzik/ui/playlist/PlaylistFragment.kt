@@ -5,9 +5,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import hu.mrolcsi.muzik.ui.common.MVVMListAdapter
+import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.databinding.FragmentPlaylistBinding
-import hu.mrolcsi.muzik.databinding.ListItemPlaylistBinding
+import hu.mrolcsi.muzik.ui.common.MVVMListAdapter
+import hu.mrolcsi.muzik.ui.common.ThemedViewHolder
 import kotlinx.android.synthetic.main.fragment_playlist.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -16,22 +17,15 @@ class PlaylistFragment : Fragment() {
   private val viewModel: PlaylistViewModel by viewModel<PlaylistViewModelImpl>()
 
   private val playlistAdapter = MVVMListAdapter(
-    diffCallback = PlaylistItem.DIFF_CALLBACK,
-    itemIdSelector = { it.entry._id },
+    itemIdSelector = { it.id },
     viewHolderFactory = { parent, _ ->
-      PlaylistItemHolder(
-        ListItemPlaylistBinding.inflate(
-          LayoutInflater.from(parent.context),
-          parent,
-          false
-        ).apply {
-          theme = viewModel.currentTheme
-          lifecycleOwner = viewLifecycleOwner
-        }.root
-      ).apply {
-        itemView.setOnClickListener {
-          model?.let { viewModel.onSelect(it) }
-        }
+      ThemedViewHolder<PlaylistItem>(
+        parent,
+        R.layout.list_item_playlist,
+        viewLifecycleOwner,
+        viewModel.currentTheme
+      ) { model, _ ->
+        viewModel.onSelect(model)
       }
     }
   )

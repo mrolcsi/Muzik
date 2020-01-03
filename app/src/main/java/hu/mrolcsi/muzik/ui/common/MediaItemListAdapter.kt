@@ -4,16 +4,17 @@ import android.content.Context
 import android.support.v4.media.MediaBrowserCompat
 import com.l4digital.fastscroll.FastScroller
 import hu.mrolcsi.muzik.R
-import hu.mrolcsi.muzik.ui.common.extensions.toKeyString
-import hu.mrolcsi.muzik.ui.library.SortingMode
 import hu.mrolcsi.muzik.data.model.media.artist
 import hu.mrolcsi.muzik.data.model.media.dateAdded
+import hu.mrolcsi.muzik.ui.common.extensions.toKeyString
+import hu.mrolcsi.muzik.ui.library.SortingMode
 import java.util.*
 
 open class MediaItemListAdapter<VH : MVVMViewHolder<MediaBrowserCompat.MediaItem>>(
   private val context: Context,
   viewHolderFactory: ViewHolderFactory<VH>
 ) : MVVMListAdapter<MediaBrowserCompat.MediaItem, VH>(
+  itemIdSelector = { it.mediaId.hashCode().toLong() },
   diffCallback = DiffCallbacks.mediaItemCallback,
   viewHolderFactory = viewHolderFactory
 ), FastScroller.SectionIndexer {

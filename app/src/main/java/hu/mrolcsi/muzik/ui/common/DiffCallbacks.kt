@@ -1,10 +1,26 @@
 package hu.mrolcsi.muzik.ui.common
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.session.MediaSessionCompat
 import androidx.recyclerview.widget.DiffUtil
+
+class SimpleDiffCallback<T>(
+  private val keySelector: (T) -> Any
+) : DiffUtil.ItemCallback<T>() {
+
+  override fun areItemsTheSame(oldItem: T, newItem: T): Boolean {
+    return keySelector.invoke(oldItem) == keySelector.invoke(newItem)
+  }
+
+  @SuppressLint("DiffUtilEquals")
+  override fun areContentsTheSame(oldItem: T, newItem: T): Boolean {
+    return oldItem == newItem
+  }
+
+}
 
 object DiffCallbacks {
 

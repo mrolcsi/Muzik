@@ -6,7 +6,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.activity.addCallback
 import androidx.annotation.ColorInt
 import androidx.core.graphics.ColorUtils
@@ -20,12 +19,13 @@ import androidx.navigation.ui.setupWithNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.muzik.R
-import hu.mrolcsi.muzik.data.model.media.albumId
-import hu.mrolcsi.muzik.data.model.media.artistId
 import hu.mrolcsi.muzik.databinding.FragmentPlayerBinding
-import hu.mrolcsi.muzik.databinding.ListItemPlaylistBinding
+import hu.mrolcsi.muzik.databinding.ListItemQueueBinding
 import hu.mrolcsi.muzik.ui.base.FullScreenDialogFragment
+import hu.mrolcsi.muzik.ui.common.BoundMVVMViewHolder
 import hu.mrolcsi.muzik.ui.common.MVVMListAdapter
+import hu.mrolcsi.muzik.ui.common.MVVMViewHolder
+import hu.mrolcsi.muzik.ui.common.ThemedViewHolder
 import hu.mrolcsi.muzik.ui.common.extensions.updateNavigationIcons
 import hu.mrolcsi.muzik.ui.common.extensions.updateStatusBarIcons
 import hu.mrolcsi.muzik.ui.common.observeAndRunNavCommands
@@ -35,7 +35,6 @@ import hu.mrolcsi.muzik.ui.common.pager.RVPagerSnapHelperListenable
 import hu.mrolcsi.muzik.ui.common.pager.RVPagerStateListener
 import hu.mrolcsi.muzik.ui.common.pager.VisiblePageState
 import hu.mrolcsi.muzik.ui.playlist.PlaylistItem
-import hu.mrolcsi.muzik.ui.playlist.PlaylistItemHolder
 import hu.mrolcsi.muzik.ui.playlist.PlaylistViewModel
 import hu.mrolcsi.muzik.ui.playlist.PlaylistViewModelImpl
 import kotlinx.android.synthetic.main.fragment_player.*
@@ -55,41 +54,39 @@ class PlayerDialogFragment : FullScreenDialogFragment() {
   private var scrollState: Int = RecyclerView.SCROLL_STATE_IDLE
 
   private val queueAdapter = MVVMListAdapter(
-    diffCallback = ThemedQueueItem,
-    itemIdSelector = { it.queueItem.queueId },
+    itemIdSelector = { it.queueId },
     viewHolderFactory = { parent, _ ->
-      QueueItemHolder(parent).apply {
-        itemView.findViewById<TextView>(R.id.tvArtist).setOnClickListener {
-          model?.queueItem?.description?.artistId?.let {
-            playerViewModel.onArtistClick(it)
+      BoundMVVMViewHolder<QueueItem>(
+        parent = parent,
+        layoutId = R.layout.list_item_queue,
+        onModelChange = { model ->
+          (this as? ListItemQueueBinding)?.let { binding ->
+            binding.tvArtist.setOnClickListener(
+              View.OnClickListener {
+                playerViewModel.onArtistClick(model.artistId!!)
+              }.takeIf { model.artistId != null }
+            )
+            binding.tvAlbum.setOnClickListener(
+              View.OnClickListener {
+                playerViewModel.onAlbumClick(model.albumId!!)
+              }.takeIf { model.albumId != null }
+            )
           }
         }
-        itemView.findViewById<TextView>(R.id.tvAlbum).setOnClickListener {
-          model?.queueItem?.description?.albumId?.let {
-            playerViewModel.onAlbumClick(it)
-          }
-        }
-      }
+      )
     }
   )
 
   private val playlistAdapter = MVVMListAdapter(
-    diffCallback = PlaylistItem.DIFF_CALLBACK,
-    itemIdSelector = { it.entry._id },
+    itemIdSelector = { it.id },
     viewHolderFactory = { parent, _ ->
-      PlaylistItemHolder(
-        ListItemPlaylistBinding.inflate(
-          LayoutInflater.from(parent.context),
-          parent,
-          false
-        ).apply {
-          theme = playlistViewModel.currentTheme
-          lifecycleOwner = viewLifecycleOwner
-        }.root
-      ).apply {
-        itemView.setOnClickListener {
-          model?.let { playlistViewModel.onSelect(it) }
-        }
+      ThemedViewHolder<PlaylistItem>(
+        parent,
+        R.layout.list_item_playlist,
+        viewLifecycleOwner,
+        playlistViewModel.currentTheme
+      ) { model, _ ->
+        playlistViewModel.onSelect(model)
       }
     }
   )
@@ -161,6 +158,7 @@ class PlayerDialogFragment : FullScreenDialogFragment() {
 
     snapHelper = RVPagerSnapHelperListenable().attachToRecyclerView(rvQueue, object : RVPagerStateListener {
 
+      @Suppress("UNCHECKED_CAST")
       override fun onPageScroll(pagesState: List<VisiblePageState>) {
 
         if (scrollState == RecyclerView.SCROLL_STATE_IDLE && pagesState.size == 1) {
@@ -169,8 +167,8 @@ class PlayerDialogFragment : FullScreenDialogFragment() {
 
         // Blend colors while scrolling
         if (pagesState.size == 2) {  // between 2 pages -> blend colors
-          val leftHolder = rvQueue.findContainingViewHolder(pagesState.first().view) as QueueItemHolder
-          val rightHolder = rvQueue.findContainingViewHolder(pagesState.last().view) as QueueItemHolder
+          val leftHolder = rvQueue.findContainingViewHolder(pagesState.first().view) as MVVMViewHolder<QueueItem>
+          val rightHolder = rvQueue.findContainingViewHolder(pagesState.last().view) as MVVMViewHolder<QueueItem>
 
           val leftTheme = leftHolder.model?.theme
           val rightTheme = rightHolder.model?.theme
@@ -236,7 +234,7 @@ class PlayerDialogFragment : FullScreenDialogFragment() {
     }
 
     val visibleId = queueAdapter.getItemId(visiblePosition)
-    val queuePosition = queueAdapter.currentList.indexOfFirst { it.queueItem.queueId == queueId }
+    val queuePosition = queueAdapter.currentList.indexOfFirst { it.queueId == queueId }
 
     Log.v(
       LOG_TAG,

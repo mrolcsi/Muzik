@@ -1,13 +1,11 @@
 package hu.mrolcsi.muzik.ui.player
 
-import android.support.v4.media.session.MediaSessionCompat
+import android.net.Uri
 import androidx.databinding.Bindable
 import androidx.lifecycle.LiveData
-import androidx.recyclerview.widget.DiffUtil
-import hu.mrolcsi.muzik.ui.common.DiffCallbacks
+import hu.mrolcsi.muzik.data.model.theme.Theme
 import hu.mrolcsi.muzik.ui.common.OnRepeatTouchListener
 import hu.mrolcsi.muzik.ui.miniPlayer.MiniPlayerViewModel
-import hu.mrolcsi.muzik.data.model.theme.Theme
 
 interface PlayerViewModel : MiniPlayerViewModel {
 
@@ -47,27 +45,21 @@ interface PlayerViewModel : MiniPlayerViewModel {
   fun onAlbumClick(albumId: Long)
 }
 
-data class ThemedQueueItem(
-  val queueItem: MediaSessionCompat.QueueItem,
+data class QueueItem(
+  val queueId: Long,
+  val artistId: Long?,
+  val albumId: Long?,
+  val titleText: CharSequence,
+  val artistText: CharSequence,
+  val albumText: CharSequence,
+  val coverArtUri: Uri?,
   val theme: Theme
 ) {
 
-  companion object DiffCallback : DiffUtil.ItemCallback<ThemedQueueItem>() {
-
-    override fun areItemsTheSame(oldItem: ThemedQueueItem, newItem: ThemedQueueItem): Boolean {
-      return oldItem.queueItem.queueId == newItem.queueItem.queueId
-    }
-
-    override fun areContentsTheSame(oldItem: ThemedQueueItem, newItem: ThemedQueueItem): Boolean {
-      if (oldItem.theme != newItem.theme) return false
-
-      return DiffCallbacks.queueItemCallback.areContentsTheSame(oldItem.queueItem, newItem.queueItem)
-    }
-
-  }
+  val transitionName = "coverArt$queueId"
 }
 
 data class QueueState(
-  val queue: List<ThemedQueueItem>,
+  val queue: List<QueueItem>,
   val activeQueueId: Long
 )

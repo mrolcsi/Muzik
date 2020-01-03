@@ -82,7 +82,7 @@
       app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
       app:layout_behavior=".ui.common.FabAwareScrollingViewBehavior"
       app:showColoredDivider="@{true}"
-      tools:listitem="@layout/list_item_song" />
+      tools:listitem="@layout/list_item_song_cover_art" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
       android:id="@+id/fabShuffleAll"

@@ -1,7 +1,7 @@
 package hu.mrolcsi.muzik.ui.artistDetails
 
+import android.content.Context
 import android.net.Uri
-import android.support.v4.media.MediaBrowserCompat.MediaItem
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.view.View
@@ -10,22 +10,22 @@ import androidx.databinding.library.baseAdapters.BR
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import com.google.android.exoplayer2.util.Log
+import hu.mrolcsi.muzik.data.manager.media.MediaManager
+import hu.mrolcsi.muzik.data.model.media.artist
+import hu.mrolcsi.muzik.data.model.media.mediaId
+import hu.mrolcsi.muzik.data.model.media.titleKey
+import hu.mrolcsi.muzik.data.repository.media.MediaRepository
+import hu.mrolcsi.muzik.data.service.discogs.DiscogsService
+import hu.mrolcsi.muzik.ui.albums.AlbumItem
+import hu.mrolcsi.muzik.ui.albums.asAlbumItems
 import hu.mrolcsi.muzik.ui.base.DataBindingViewModel
+import hu.mrolcsi.muzik.ui.base.ThemedViewModel
+import hu.mrolcsi.muzik.ui.base.ThemedViewModelImpl
 import hu.mrolcsi.muzik.ui.common.ExecuteOnceNavCommandSource
 import hu.mrolcsi.muzik.ui.common.ExecuteOnceUiCommandSource
 import hu.mrolcsi.muzik.ui.common.ObservableImpl
-import hu.mrolcsi.muzik.data.service.discogs.DiscogsService
-import hu.mrolcsi.muzik.data.repository.media.MediaRepository
-import hu.mrolcsi.muzik.data.manager.media.MediaManager
-import hu.mrolcsi.muzik.data.model.media.MediaType
-import hu.mrolcsi.muzik.data.model.media.artist
-import hu.mrolcsi.muzik.data.model.media.id
-import hu.mrolcsi.muzik.data.model.media.mediaId
-import hu.mrolcsi.muzik.data.model.media.titleKey
-import hu.mrolcsi.muzik.data.model.media.type
-import hu.mrolcsi.muzik.ui.songs.applyNowPlaying
-import hu.mrolcsi.muzik.ui.base.ThemedViewModel
-import hu.mrolcsi.muzik.ui.base.ThemedViewModelImpl
+import hu.mrolcsi.muzik.ui.songs.SongItem
+import hu.mrolcsi.muzik.ui.songs.asSongItems
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.Observables
 import io.reactivex.rxkotlin.subscribeBy
@@ -43,15 +43,16 @@ class ArtistDetailsViewModelImpl constructor(
   ArtistDetailsViewModel,
   KoinComponent {
 
+  private val context: Context by inject()
   private val mediaRepo: MediaRepository by inject()
   private val discogsService: DiscogsService by inject()
   private val mediaManager: MediaManager by inject()
 
   private val artistSubject = BehaviorSubject.create<Long>()
 
-  override val artistSongs = MutableLiveData<List<MediaItem>>()
+  override val artistSongs = MutableLiveData<List<SongItem>>()
 
-  override val artistAlbums = MutableLiveData<List<MediaItem>>()
+  override val artistAlbums = MutableLiveData<List<AlbumItem>>()
 
   override var artistName: String? by boundStringOrNull(BR.artistName)
 
@@ -65,19 +66,17 @@ class ArtistDetailsViewModelImpl constructor(
     artistSubject.onNext(artistId)
   }
 
-  override fun onAlbumClick(albumItem: MediaItem, transitionedView: View) {
-    if (albumItem.description.type == MediaType.MEDIA_ALBUM) {
-      val transitionName = ViewCompat.getTransitionName(transitionedView)!!
-      sendNavCommand {
-        navigate(
-          ArtistDetailsFragmentDirections.actionToAlbumDetails(albumItem.description.id, transitionName),
-          FragmentNavigatorExtras(transitionedView to transitionName)
-        )
-      }
+  override fun onAlbumClick(albumItem: AlbumItem, transitionedView: View) {
+    val transitionName = ViewCompat.getTransitionName(transitionedView)!!
+    sendNavCommand {
+      navigate(
+        ArtistDetailsFragmentDirections.actionToAlbumDetails(albumItem.id, transitionName),
+        FragmentNavigatorExtras(transitionedView to transitionName)
+      )
     }
   }
 
-  override fun onSongClick(songItem: MediaItem, position: Int) {
+  override fun onSongClick(songItem: SongItem, position: Int) {
     artistName?.let { mediaManager.setQueueTitle(it) }
     songDescriptions?.let { mediaManager.playAll(it, position) }
   }
@@ -104,6 +103,7 @@ class ArtistDetailsViewModelImpl constructor(
     artistSubject
       .switchMap { mediaRepo.getAlbumsByArtist(it) }
       .doOnNext { isAlbumsVisible = it.isNotEmpty() }
+      .map { it.asAlbumItems(context) }
       .subscribeBy(
         onNext = { artistAlbums.value = it },
         onError = { showError(this, it) }
@@ -111,13 +111,15 @@ class ArtistDetailsViewModelImpl constructor(
 
     // Get Songs
     Observables.combineLatest(
-      artistSubject.switchMap { mediaRepo.getSongsByArtist(it) },
+      artistSubject
+        .switchMap { mediaRepo.getSongsByArtist(it) }
+        .map { songs -> songs.sortedBy { it.description.titleKey } },
       mediaManager.mediaMetadata
         .distinctUntilChanged { t: MediaMetadataCompat -> t.mediaId }
         .filter { it.mediaId != null }
     )
-      .map { (songs, metadata) -> songs.applyNowPlaying(metadata.mediaId).sortedBy { it.description.titleKey } }
-      .doOnNext { songs -> songDescriptions = songs.filter { it.isPlayable }.map { it.description } }
+      .doOnNext { (songs, _) -> songDescriptions = songs.filter { it.isPlayable }.map { it.description } }
+      .map { (songs, metadata) -> songs.asSongItems(context, metadata.mediaId) }
       .subscribeBy(
         onNext = { artistSongs.value = it },
         onError = { showError(this, it) }

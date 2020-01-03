@@ -1,9 +1,7 @@
 package hu.mrolcsi.muzik.ui.common
 
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.annotation.LayoutRes
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -13,19 +11,18 @@ typealias ViewHolderFactory<VH> = (parent: ViewGroup, viewType: Int) -> VH
 
 abstract class MVVMViewHolder<T>(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-  constructor(@LayoutRes layoutRes: Int, parent: ViewGroup) : this(
-    LayoutInflater.from(parent.context)
-      .inflate(layoutRes, parent, false)
-  )
-
   abstract var model: T?
 }
 
 open class MVVMListAdapter<ItemViewModel, ViewHolder : MVVMViewHolder<in ItemViewModel>>(
-  diffCallback: DiffUtil.ItemCallback<ItemViewModel>,
-  private val itemIdSelector: ((item: ItemViewModel) -> Long)? = null,
+  private val itemIdSelector: (item: ItemViewModel) -> Long,
+  diffCallback: DiffUtil.ItemCallback<ItemViewModel> = SimpleDiffCallback { itemIdSelector(it) },
   private val viewHolderFactory: ViewHolderFactory<ViewHolder>
 ) : ListAdapter<ItemViewModel, ViewHolder>(diffCallback), Observer<List<ItemViewModel>> {
+
+  init {
+    this.setHasStableIds(true)
+  }
 
   override fun onChanged(items: List<ItemViewModel>?) {
     submitList(items)
@@ -39,12 +36,12 @@ open class MVVMListAdapter<ItemViewModel, ViewHolder : MVVMViewHolder<in ItemVie
   }
 
   override fun getItemId(position: Int): Long {
-    return itemIdSelector?.let {
+    return itemIdSelector.let {
       try {
         itemIdSelector.invoke(getItem(position))
       } catch (e: IndexOutOfBoundsException) {
         super.getItemId(position)
       }
-    } ?: super.getItemId(position)
+    }
   }
 }

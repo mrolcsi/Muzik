@@ -4,31 +4,33 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import androidx.core.view.ViewCompat
+import androidx.databinding.library.baseAdapters.BR
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.ui.setupWithNavController
-import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.request.target.Target
 import hu.mrolcsi.muzik.R
-import hu.mrolcsi.muzik.data.service.theme.ThemeService
 import hu.mrolcsi.muzik.databinding.FragmentArtistDetailsBinding
-import hu.mrolcsi.muzik.databinding.ListItemSongBinding
-import hu.mrolcsi.muzik.ui.albums.AlbumHolder
+import hu.mrolcsi.muzik.ui.albums.AlbumItem
+import hu.mrolcsi.muzik.ui.common.BoundMVVMViewHolder
 import hu.mrolcsi.muzik.ui.common.HideViewOnOffsetChangedListener
-import hu.mrolcsi.muzik.ui.common.MediaItemListAdapter
+import hu.mrolcsi.muzik.ui.common.MVVMListAdapter
+import hu.mrolcsi.muzik.ui.common.ThemedViewHolder
 import hu.mrolcsi.muzik.ui.common.glide.GlideApp
 import hu.mrolcsi.muzik.ui.common.glide.onLoadFailed
 import hu.mrolcsi.muzik.ui.common.glide.onResourceReady
 import hu.mrolcsi.muzik.ui.common.observeAndRunNavCommands
 import hu.mrolcsi.muzik.ui.common.observeAndRunUiCommands
-import hu.mrolcsi.muzik.ui.songs.SongHolder
+import hu.mrolcsi.muzik.ui.songs.SongItem
+import io.reactivex.rxkotlin.subscribeBy
 import kotlinx.android.synthetic.main.fragment_artist_details.*
 import kotlinx.android.synthetic.main.fragment_artist_details_content.*
 import kotlinx.android.synthetic.main.fragment_artist_details_header.*
-import org.koin.android.ext.android.inject
+import kotlinx.android.synthetic.main.list_item_album_content.view.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class ArtistDetailsFragment : Fragment() {
@@ -36,45 +38,52 @@ class ArtistDetailsFragment : Fragment() {
   private val args: ArtistDetailsFragmentArgs by navArgs()
 
   private val viewModel: ArtistDetailsViewModel by viewModel<ArtistDetailsViewModelImpl>()
-  private val themeService: ThemeService by inject()
 
   private val albumsAdapter by lazy {
-    MediaItemListAdapter(requireContext()) { parent, _ ->
-      AlbumHolder(
-        parent = parent,
-        viewLifecycleOwner = viewLifecycleOwner,
-        orientation = RecyclerView.HORIZONTAL,
-        themeService = themeService
-      ).apply {
-        itemView.setOnClickListener { view ->
-          model?.let {
-            viewModel.onAlbumClick(it, view.findViewById(R.id.imgCoverArt))
+    MVVMListAdapter(
+      itemIdSelector = { it.id },
+      viewHolderFactory = { parent, _ ->
+        BoundMVVMViewHolder<AlbumItem>(
+          parent = parent,
+          layoutId = R.layout.list_item_album_horizontal,
+          onItemClickListener = { model, holder ->
+            viewModel.onAlbumClick(model, holder.itemView.imgCoverArt)
+          },
+          onModelChange = { model ->
+            // Load album art
+            val imgCoverArt = this.root.findViewById<ImageView>(R.id.imgCoverArt)
+            GlideApp.with(imgCoverArt)
+              .asBitmap()
+              .load(model.albumArtUri)
+              .onResourceReady { albumArt ->
+                viewModel.themeService
+                  .createTheme(albumArt)
+                  .subscribeBy {
+                    setVariable(BR.theme, it)
+                    executePendingBindings()
+                  }
+              }
+              .into(imgCoverArt)
           }
-        }
+        )
       }
-    }
+    )
   }
 
   private val songsAdapter by lazy {
-    MediaItemListAdapter(requireContext()) { parent, _ ->
-      SongHolder(
-        itemView = ListItemSongBinding.inflate(
-          LayoutInflater.from(parent.context),
-          parent,
-          false
-        ).apply {
+    MVVMListAdapter(
+      itemIdSelector = { it.id },
+      viewHolderFactory = { parent, _ ->
+        ThemedViewHolder<SongItem>(
+          parent = parent,
+          layoutId = R.layout.list_item_song_cover_art,
+          viewLifecycleOwner = viewLifecycleOwner,
           theme = viewModel.currentTheme
-          lifecycleOwner = viewLifecycleOwner
-        }.root,
-        showTrackNumber = false
-      ).apply {
-        itemView.setOnClickListener {
-          model?.let {
-            viewModel.onSongClick(it, adapterPosition)
-          }
+        ) { model, holder ->
+          viewModel.onSongClick(model, holder.adapterPosition)
         }
       }
-    }
+    )
   }
 
   override fun onActivityCreated(savedInstanceState: Bundle?) {

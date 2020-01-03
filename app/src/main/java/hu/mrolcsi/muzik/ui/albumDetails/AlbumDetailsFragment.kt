@@ -1,7 +1,6 @@
 package hu.mrolcsi.muzik.ui.albumDetails
 
 import android.os.Bundle
-import android.support.v4.media.MediaBrowserCompat.MediaItem
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,17 +13,20 @@ import androidx.navigation.ui.setupWithNavController
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.data.model.media.albumArtUri
 import hu.mrolcsi.muzik.databinding.FragmentAlbumDetailsBinding
-import hu.mrolcsi.muzik.databinding.ListItemDiscNumberBinding
-import hu.mrolcsi.muzik.databinding.ListItemSongBinding
+import hu.mrolcsi.muzik.ui.albums.DiscNumberItem
 import hu.mrolcsi.muzik.ui.common.HideViewOnOffsetChangedListener
+import hu.mrolcsi.muzik.ui.common.MVVMListAdapter
 import hu.mrolcsi.muzik.ui.common.MVVMViewHolder
-import hu.mrolcsi.muzik.ui.common.MediaItemListAdapter
+import hu.mrolcsi.muzik.ui.common.ThemedViewHolder
 import hu.mrolcsi.muzik.ui.common.extensions.applySharedElementTransition
 import hu.mrolcsi.muzik.ui.common.glide.GlideApp
-import hu.mrolcsi.muzik.ui.songs.SongHolder
+import hu.mrolcsi.muzik.ui.songs.SongItem
 import kotlinx.android.synthetic.main.fragment_album_details.*
 import kotlinx.android.synthetic.main.fragment_album_details_header.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
+
+const val VIEW_TYPE_DISC_NUMBER = 3482
+const val VIEW_TYPE_SONG = 8664
 
 class AlbumDetailsFragment : Fragment() {
 
@@ -32,37 +34,34 @@ class AlbumDetailsFragment : Fragment() {
 
   private val viewModel: AlbumDetailsViewModel by viewModel<AlbumDetailsViewModelImpl>()
 
+  @Suppress("UNCHECKED_CAST")
   private val songsAdapter by lazy {
-    object : MediaItemListAdapter<MVVMViewHolder<MediaItem>>(requireContext(), { parent, viewType ->
-      if (viewType == DiscHeaderHolder.VIEW_TYPE) {
-        DiscHeaderHolder(
-          ListItemDiscNumberBinding.inflate(layoutInflater, parent, false).apply {
-            theme = viewModel.albumTheme
-            lifecycleOwner = viewLifecycleOwner
-          }.root
-        )
-      } else {
-        SongHolder(
-          itemView = ListItemSongBinding.inflate(
-            LayoutInflater.from(parent.context),
+    object : MVVMListAdapter<AlbumDetailItem, MVVMViewHolder<AlbumDetailItem>>(
+      itemIdSelector = { it.id },
+      viewHolderFactory = { parent, viewType ->
+        if (viewType == VIEW_TYPE_DISC_NUMBER) {
+          ThemedViewHolder<DiscNumberItem>(
             parent,
-            false
-          ).apply {
-            theme = viewModel.albumTheme
-            lifecycleOwner = viewLifecycleOwner
-          }.root,
-          showTrackNumber = true
-        ).apply {
-          itemView.setOnClickListener {
-            model?.let {
-              viewModel.onSongClick(it, adapterPosition)
-            }
-          }
+            R.layout.list_item_disc_number,
+            viewLifecycleOwner,
+            viewModel.albumTheme
+          ) as MVVMViewHolder<AlbumDetailItem>
+        } else {
+          ThemedViewHolder<SongItem>(
+            parent,
+            R.layout.list_item_song_track_number,
+            viewLifecycleOwner,
+            viewModel.albumTheme
+          ) as MVVMViewHolder<AlbumDetailItem>
         }
       }
-    }) {
+    ) {
       override fun getItemViewType(position: Int) =
-        if (getItem(position).isBrowsable) DiscHeaderHolder.VIEW_TYPE else SongHolder.VIEW_TYPE
+        when (getItem(position)) {
+          is DiscNumberItem -> VIEW_TYPE_DISC_NUMBER
+          is SongItem -> VIEW_TYPE_SONG
+          else -> -1
+        }
     }
   }
 

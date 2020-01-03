@@ -6,11 +6,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import hu.mrolcsi.muzik.ui.common.MediaItemListAdapter
+import hu.mrolcsi.muzik.R
+import hu.mrolcsi.muzik.databinding.FragmentArtistsBinding
+import hu.mrolcsi.muzik.ui.common.MVVMListAdapter
+import hu.mrolcsi.muzik.ui.common.ThemedViewHolder
 import hu.mrolcsi.muzik.ui.common.observeAndRunNavCommands
 import hu.mrolcsi.muzik.ui.common.observeAndRunUiCommands
-import hu.mrolcsi.muzik.databinding.FragmentArtistsBinding
-import hu.mrolcsi.muzik.databinding.ListItemArtistBinding
 import kotlinx.android.synthetic.main.fragment_artists.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -19,24 +20,19 @@ class ArtistsFragment : Fragment() {
   private val viewModel: ArtistsViewModel by viewModel<ArtistsViewModelImpl>()
 
   private val artistAdapter by lazy {
-    MediaItemListAdapter(requireContext()) { parent, _ ->
-      ArtistHolder(
-        ListItemArtistBinding.inflate(
-          LayoutInflater.from(parent.context),
-          parent,
-          false
-        ).apply {
-          lifecycleOwner = viewLifecycleOwner
+    MVVMListAdapter(
+      itemIdSelector = { it.id },
+      viewHolderFactory = { parent, _ ->
+        ThemedViewHolder<ArtistItem>(
+          parent = parent,
+          layoutId = R.layout.list_item_artist,
+          viewLifecycleOwner = viewLifecycleOwner,
           theme = viewModel.currentTheme
-        }
-      ).apply {
-        itemView.setOnClickListener {
-          model?.let {
-            viewModel.onSelect(it)
-          }
+        ) { model, _ ->
+          viewModel.onSelect(model)
         }
       }
-    }
+    )
   }
 
   override fun onActivityCreated(savedInstanceState: Bundle?) {

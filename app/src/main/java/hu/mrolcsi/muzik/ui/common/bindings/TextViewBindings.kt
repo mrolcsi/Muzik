@@ -1,6 +1,7 @@
 package hu.mrolcsi.muzik.ui.common.bindings
 
 import android.text.TextUtils
+import android.view.KeyEvent
 import android.widget.TextView
 import androidx.core.view.postDelayed
 import androidx.databinding.BindingAdapter
@@ -28,6 +29,12 @@ object TextViewBindings {
       view.setSingleLine(false)
       view.ellipsize = null
     }
+  }
+
+  @JvmStatic
+  @BindingAdapter("onEditorAction")
+  fun setOnEditorAction(view: TextView, consumer: (Int, KeyEvent?) -> Boolean) {
+    view.setOnEditorActionListener { _, actionId, event -> consumer(actionId, event) }
   }
 
 }
