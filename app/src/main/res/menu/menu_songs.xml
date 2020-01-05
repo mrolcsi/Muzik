@@ -1,30 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-  <item android:id="@+id/menuSort"
-    android:icon="@drawable/ic_sort"
-    android:title="@string/sortBy">
+  <group
+    android:id="@+id/menuSortBy"
+    android:checkableBehavior="single">
 
-    <menu>
+    <item
+      android:id="@+id/menuSortByArtist"
+      android:title="@string/sortBy_artist" />
 
-      <group
-        android:id="@+id/menuSortBy"
-        android:checkableBehavior="single">
+    <item
+      android:id="@+id/menuSortByTitle"
+      android:checked="true"
+      android:title="@string/sortBy_title" />
 
-        <item android:id="@+id/menuSortByArtist"
-          android:title="@string/sortBy_artist"/>
+    <item
+      android:id="@+id/menuSortByDate"
+      android:title="@string/sortBy_dateAdded" />
 
-        <item android:id="@+id/menuSortByTitle"
-          android:checked="true"
-          android:title="@string/sortBy_title"/>
-
-        <item android:id="@+id/menuSortByDate"
-          android:title="@string/sortBy_dateAdded"/>
-
-      </group>
-
-    </menu>
-
-  </item>
+  </group>
 
 </menu>

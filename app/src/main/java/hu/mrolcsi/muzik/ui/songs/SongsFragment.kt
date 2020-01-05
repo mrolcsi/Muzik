@@ -1,13 +1,10 @@
 package hu.mrolcsi.muzik.ui.songs
 
-import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.forEach
+import androidx.appcompat.widget.PopupMenu
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import hu.mrolcsi.muzik.R
@@ -32,19 +29,17 @@ class SongsFragment : Fragment() {
           parent = parent,
           layoutId = R.layout.list_item_song_cover_art,
           viewLifecycleOwner = viewLifecycleOwner,
-          theme = viewModel.currentTheme
-        ) { model, holder ->
-          viewModel.onSongClick(model, holder.adapterPosition)
-        }
+          theme = viewModel.currentTheme,
+          onItemClickListener = { model, holder ->
+            viewModel.onSongClick(model, holder.adapterPosition)
+          },
+          onModelChange = {
+            this.root.setOnLongClickListener { showSortingMenu(it); true }
+          }
+        )
       },
       sectionTextSelector = { viewModel.getSectionText(it) }
     )
-  }
-
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-
-    setHasOptionsMenu(true)
   }
 
   override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -69,44 +64,28 @@ class SongsFragment : Fragment() {
     rvSongs.adapter = songsAdapter
   }
 
-  override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-    super.onCreateOptionsMenu(menu, inflater)
-    inflater.inflate(R.menu.menu_songs, menu)
-
-    // Apply currentTheme to items
-    val color = viewModel.currentTheme.value?.primaryForegroundColor ?: Color.WHITE
-    menu.forEach {
-      it.icon.setTint(color)
+  private fun showSortingMenu(anchor: View) {
+    PopupMenu(requireContext(), anchor).apply {
+      inflate(R.menu.menu_songs)
+      setOnMenuItemClickListener { item ->
+        item.isChecked = true
+        when (item.itemId) {
+          R.id.menuSortByArtist -> {
+            viewModel.sortingMode = SortingMode.SORT_BY_ARTIST
+            true
+          }
+          R.id.menuSortByTitle -> {
+            viewModel.sortingMode = SortingMode.SORT_BY_TITLE
+            true
+          }
+          R.id.menuSortByDate -> {
+            viewModel.sortingMode = SortingMode.SORT_BY_DATE
+            true
+          }
+          else -> super.onOptionsItemSelected(item)
+        }
+      }
+      show()
     }
   }
-
-  override fun onPrepareOptionsMenu(menu: Menu) {
-    super.onPrepareOptionsMenu(menu)
-
-    when (viewModel.sortingMode) {
-      SortingMode.SORT_BY_ARTIST -> menu.findItem(R.id.menuSortByArtist).isChecked = true
-      SortingMode.SORT_BY_TITLE -> menu.findItem(R.id.menuSortByTitle).isChecked = true
-      SortingMode.SORT_BY_DATE -> menu.findItem(R.id.menuSortByDate).isChecked = true
-    }
-  }
-
-  // TODO: reintroduce sorting
-//  override fun onOptionsItemSelected(item: MenuItem): Boolean {
-//    item.isChecked = true
-//    return when (item.itemId) {
-//      R.id.menuSortByArtist -> {
-//        viewModel.sortingMode = SortingMode.SORT_BY_ARTIST
-//        true
-//      }
-//      R.id.menuSortByTitle -> {
-//        viewModel.sortingMode = SortingMode.SORT_BY_TITLE
-//        true
-//      }
-//      R.id.menuSortByDate -> {
-//        viewModel.sortingMode = SortingMode.SORT_BY_DATE
-//        true
-//      }
-//      else -> super.onOptionsItemSelected(item)
-//    }
-//  }
 }

@@ -1,14 +1,11 @@
 package hu.mrolcsi.muzik.ui.albums
 
-import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import androidx.core.view.forEach
+import androidx.appcompat.widget.PopupMenu
 import androidx.databinding.library.baseAdapters.BR
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -55,17 +52,13 @@ class AlbumsFragment : Fragment() {
                 }
                 .into(imgCoverArt)
             }
+
+            this.root.setOnLongClickListener { showSortingMenu(it); true }
           }
         )
       },
       sectionTextSelector = { viewModel.getSectionText(it) }
     )
-  }
-
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-
-    setHasOptionsMenu(true)
   }
 
   override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -90,44 +83,24 @@ class AlbumsFragment : Fragment() {
     rvAlbums.adapter = albumsAdapter
   }
 
-  override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-    super.onCreateOptionsMenu(menu, inflater)
-    inflater.inflate(R.menu.menu_albums, menu)
-
-    // Apply theme to items
-    val color = viewModel.currentTheme.value?.primaryForegroundColor ?: Color.WHITE
-    menu.forEach {
-      it.icon.setTint(color)
-    }
-  }
-
-  override fun onPrepareOptionsMenu(menu: Menu) {
-    super.onPrepareOptionsMenu(menu)
-
-    when (viewModel.sortingMode) {
-      SortingMode.SORT_BY_ARTIST -> menu.findItem(R.id.menuSortByArtist).isChecked = true
-      SortingMode.SORT_BY_TITLE -> menu.findItem(R.id.menuSortByTitle).isChecked = true
-      else -> {
-        // nothing
+  private fun showSortingMenu(anchor: View) {
+    PopupMenu(requireContext(), anchor).apply {
+      inflate(R.menu.menu_albums)
+      setOnMenuItemClickListener { item ->
+        item.isChecked = true
+        when (item.itemId) {
+          R.id.menuSortByArtist -> {
+            viewModel.sortingMode = SortingMode.SORT_BY_ARTIST
+            true
+          }
+          R.id.menuSortByTitle -> {
+            viewModel.sortingMode = SortingMode.SORT_BY_TITLE
+            true
+          }
+          else -> super.onOptionsItemSelected(item)
+        }
       }
+      show()
     }
   }
-
-  // TODO: reintroduce sorting
-//  override fun onOptionsItemSelected(item: MenuItem): Boolean {
-//    item.isChecked = true
-//    return when (item.itemId) {
-//      R.id.menuSortByArtist -> {
-//        viewModel.sortingMode = SortingMode.SORT_BY_ARTIST
-//        albumsAdapter.sorting = SortingMode.SORT_BY_ARTIST
-//        true
-//      }
-//      R.id.menuSortByTitle -> {
-//        viewModel.sortingMode = SortingMode.SORT_BY_TITLE
-//        albumsAdapter.sorting = SortingMode.SORT_BY_TITLE
-//        true
-//      }
-//      else -> super.onOptionsItemSelected(item)
-//    }
-//  }
 }
