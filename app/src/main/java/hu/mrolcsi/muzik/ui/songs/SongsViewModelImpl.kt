@@ -23,6 +23,7 @@ import hu.mrolcsi.muzik.ui.common.ExecuteOnceNavCommandSource
 import hu.mrolcsi.muzik.ui.common.ExecuteOnceUiCommandSource
 import hu.mrolcsi.muzik.ui.common.ObservableImpl
 import hu.mrolcsi.muzik.ui.common.extensions.millisecondsToTimeStamp
+import hu.mrolcsi.muzik.ui.common.extensions.toKeyString
 import hu.mrolcsi.muzik.ui.library.SortingMode
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.Observables
@@ -31,7 +32,11 @@ import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
 import org.koin.core.KoinComponent
 import org.koin.core.inject
+import java.util.*
 import kotlin.properties.Delegates
+
+private const val WEEK_IN_MILLISECONDS = 7 * 24 * 60 * 60 * 1000L
+private const val MONTH_IN_MILLISECONDS = 30 * 24 * 60 * 60 * 1000L
 
 class SongsViewModelImpl constructor(
   observable: ObservableImpl,
@@ -92,6 +97,22 @@ class SongsViewModelImpl constructor(
       SortingMode.SORT_BY_DATE -> sortedByDescending { it.description.dateAdded }
     }
   }
+
+  override fun getSectionText(item: SongItem): CharSequence {
+    return when (sortingMode) {
+      SortingMode.SORT_BY_ARTIST -> item.artistText.toKeyString().first().toUpperCase().toString()
+      SortingMode.SORT_BY_TITLE -> item.titleText.toString().toKeyString().first().toUpperCase().toString()
+      SortingMode.SORT_BY_DATE -> {
+        val newThreshold = Calendar.getInstance().timeInMillis - WEEK_IN_MILLISECONDS
+        val recentThreshold = Calendar.getInstance().timeInMillis - MONTH_IN_MILLISECONDS
+        when {
+          item.dateAdded > newThreshold -> context.getString(R.string.dateAdded_new)
+          item.dateAdded > recentThreshold -> context.getString(R.string.dateAdded_recent)
+          else -> context.getString(R.string.dateAdded_old)
+        }
+      }
+    }
+  }
 }
 
 fun List<MediaItem>.asSongItems(context: Context, nowPlayingId: String?) = map { item ->
@@ -102,6 +123,7 @@ fun List<MediaItem>.asSongItems(context: Context, nowPlayingId: String?) = map {
     item.mediaId == nowPlayingId,
     item.description.subtitle ?: context.getText(R.string.songs_unknownArtist),
     item.description.title ?: context.getText(R.string.songs_noTitle),
-    item.description.duration.takeIf { it > 0 }?.millisecondsToTimeStamp().orEmpty()
+    item.description.duration.takeIf { it > 0 }?.millisecondsToTimeStamp().orEmpty(),
+    item.description.dateAdded
   )
 }

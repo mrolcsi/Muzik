@@ -18,6 +18,7 @@ import hu.mrolcsi.muzik.ui.base.ThemedViewModelImpl
 import hu.mrolcsi.muzik.ui.common.ExecuteOnceNavCommandSource
 import hu.mrolcsi.muzik.ui.common.ExecuteOnceUiCommandSource
 import hu.mrolcsi.muzik.ui.common.ObservableImpl
+import hu.mrolcsi.muzik.ui.common.extensions.toKeyString
 import hu.mrolcsi.muzik.ui.library.LibraryFragmentDirections
 import hu.mrolcsi.muzik.ui.library.SortingMode
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -51,7 +52,7 @@ class AlbumsViewModelImpl constructor(
     if (old != new) sortingModeSubject.onNext(new)
   }
 
-  private var sortingModeSubject = BehaviorSubject.createDefault(SortingMode.SORT_BY_TITLE)
+  private val sortingModeSubject = BehaviorSubject.createDefault(SortingMode.SORT_BY_TITLE)
 
   override fun onAlbumClick(item: AlbumItem, transitionedView: View) {
     val transitionName = ViewCompat.getTransitionName(transitionedView)!!
@@ -85,6 +86,12 @@ class AlbumsViewModelImpl constructor(
     }
   }
 
+  override fun getSectionText(item: AlbumItem): CharSequence =
+    when (sortingMode) {
+      SortingMode.SORT_BY_ARTIST -> item.artistText.toKeyString().first().toUpperCase().toString()
+      SortingMode.SORT_BY_TITLE -> item.albumText.toString().toKeyString().first().toUpperCase().toString()
+      else -> throw IllegalArgumentException("Invalid sorting mode!")
+    }
 }
 
 fun List<MediaItem>.asAlbumItems(context: Context) = map { item ->

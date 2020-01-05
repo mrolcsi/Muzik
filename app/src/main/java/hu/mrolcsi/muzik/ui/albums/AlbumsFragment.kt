@@ -15,7 +15,7 @@ import androidx.navigation.fragment.findNavController
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.databinding.FragmentAlbumsBinding
 import hu.mrolcsi.muzik.ui.common.BoundMVVMViewHolder
-import hu.mrolcsi.muzik.ui.common.MVVMListAdapter
+import hu.mrolcsi.muzik.ui.common.IndexedMVVMListAdapter
 import hu.mrolcsi.muzik.ui.common.glide.GlideApp
 import hu.mrolcsi.muzik.ui.common.glide.onResourceReady
 import hu.mrolcsi.muzik.ui.common.observeAndRunNavCommands
@@ -31,7 +31,7 @@ class AlbumsFragment : Fragment() {
   private val viewModel: AlbumsViewModel by viewModel<AlbumsViewModelImpl>()
 
   private val albumsAdapter by lazy {
-    MVVMListAdapter(
+    IndexedMVVMListAdapter(
       itemIdSelector = { it.id },
       viewHolderFactory = { parent, _ ->
         BoundMVVMViewHolder<AlbumItem>(
@@ -57,7 +57,8 @@ class AlbumsFragment : Fragment() {
             }
           }
         )
-      }
+      },
+      sectionTextSelector = { viewModel.getSectionText(it) }
     )
   }
 

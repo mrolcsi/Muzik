@@ -12,7 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.databinding.FragmentSongsBinding
-import hu.mrolcsi.muzik.ui.common.MVVMListAdapter
+import hu.mrolcsi.muzik.ui.common.IndexedMVVMListAdapter
 import hu.mrolcsi.muzik.ui.common.ThemedViewHolder
 import hu.mrolcsi.muzik.ui.common.observeAndRunNavCommands
 import hu.mrolcsi.muzik.ui.common.observeAndRunUiCommands
@@ -25,7 +25,7 @@ class SongsFragment : Fragment() {
   private val viewModel: SongsViewModel by viewModel<SongsViewModelImpl>()
 
   private val songsAdapter by lazy {
-    MVVMListAdapter(
+    IndexedMVVMListAdapter(
       itemIdSelector = { it.id },
       viewHolderFactory = { parent, _ ->
         ThemedViewHolder<SongItem>(
@@ -36,7 +36,8 @@ class SongsFragment : Fragment() {
         ) { model, holder ->
           viewModel.onSongClick(model, holder.adapterPosition)
         }
-      }
+      },
+      sectionTextSelector = { viewModel.getSectionText(it) }
     )
   }
 
@@ -95,17 +96,14 @@ class SongsFragment : Fragment() {
 //    return when (item.itemId) {
 //      R.id.menuSortByArtist -> {
 //        viewModel.sortingMode = SortingMode.SORT_BY_ARTIST
-//        songsAdapter.sorting = SortingMode.SORT_BY_ARTIST
 //        true
 //      }
 //      R.id.menuSortByTitle -> {
 //        viewModel.sortingMode = SortingMode.SORT_BY_TITLE
-//        songsAdapter.sorting = SortingMode.SORT_BY_TITLE
 //        true
 //      }
 //      R.id.menuSortByDate -> {
 //        viewModel.sortingMode = SortingMode.SORT_BY_DATE
-//        songsAdapter.sorting = SortingMode.SORT_BY_DATE
 //        true
 //      }
 //      else -> super.onOptionsItemSelected(item)

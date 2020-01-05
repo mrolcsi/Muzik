@@ -10,5 +10,6 @@ data class SongItem(
   val isPlaying: Boolean,
   val artistText: CharSequence,
   val titleText: CharSequence,
-  val durationText: CharSequence
+  val durationText: CharSequence,
+  val dateAdded: Long
 ) : AlbumDetailItem

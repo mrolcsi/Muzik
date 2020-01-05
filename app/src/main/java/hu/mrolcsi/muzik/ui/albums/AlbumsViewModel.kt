@@ -16,6 +16,8 @@ interface AlbumsViewModel :
 
   fun onAlbumClick(item: AlbumItem, transitionedView: View)
 
+  fun getSectionText(item: AlbumItem): CharSequence
+
 }
 
 data class DiscNumberItem(

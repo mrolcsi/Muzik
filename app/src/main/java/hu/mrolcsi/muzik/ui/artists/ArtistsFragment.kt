@@ -8,7 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.databinding.FragmentArtistsBinding
-import hu.mrolcsi.muzik.ui.common.MVVMListAdapter
+import hu.mrolcsi.muzik.ui.common.IndexedMVVMListAdapter
 import hu.mrolcsi.muzik.ui.common.ThemedViewHolder
 import hu.mrolcsi.muzik.ui.common.observeAndRunNavCommands
 import hu.mrolcsi.muzik.ui.common.observeAndRunUiCommands
@@ -20,7 +20,7 @@ class ArtistsFragment : Fragment() {
   private val viewModel: ArtistsViewModel by viewModel<ArtistsViewModelImpl>()
 
   private val artistAdapter by lazy {
-    MVVMListAdapter(
+    IndexedMVVMListAdapter(
       itemIdSelector = { it.id },
       viewHolderFactory = { parent, _ ->
         ThemedViewHolder<ArtistItem>(
@@ -31,7 +31,8 @@ class ArtistsFragment : Fragment() {
         ) { model, _ ->
           viewModel.onSelect(model)
         }
-      }
+      },
+      sectionTextSelector = { viewModel.getSectionText(it) }
     )
   }
 

@@ -15,6 +15,7 @@ import hu.mrolcsi.muzik.ui.base.ThemedViewModelImpl
 import hu.mrolcsi.muzik.ui.common.ExecuteOnceNavCommandSource
 import hu.mrolcsi.muzik.ui.common.ExecuteOnceUiCommandSource
 import hu.mrolcsi.muzik.ui.common.ObservableImpl
+import hu.mrolcsi.muzik.ui.common.extensions.toKeyString
 import hu.mrolcsi.muzik.ui.library.LibraryFragmentDirections
 import io.reactivex.rxkotlin.subscribeBy
 import org.koin.core.KoinComponent
@@ -77,4 +78,8 @@ class ArtistsViewModelImpl constructor(
       numberOfSongsText
     )
   }
+
+  override fun getSectionText(artistItem: ArtistItem): CharSequence =
+    artistItem.artistText.toKeyString().first().toUpperCase().toString()
+
 }

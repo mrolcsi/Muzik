@@ -14,4 +14,5 @@ interface SongsViewModel :
 
   fun onSongClick(songItem: SongItem, position: Int)
 
+  fun getSectionText(item: SongItem): CharSequence
 }
