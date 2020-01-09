@@ -1,6 +1,7 @@
 package hu.mrolcsi.muzik.ui.common.extensions
 
 import android.provider.MediaStore.UNKNOWN_STRING
+import java.util.*
 
 private const val TIME_FORMAT_SHORT = "%02d:%02d"
 private const val TIME_FORMAT_LONG = "%02d:%02d:%02d"
@@ -66,7 +67,7 @@ fun String.toKeyString(): String {
     return "\u0001"
   }
 
-  key = key.trim { it <= ' ' }.toLowerCase()
+  key = key.trim { it <= ' ' }.toLowerCase(Locale.ROOT)
   if (key.startsWith("the ")) {
     key = key.substring(4)
   }

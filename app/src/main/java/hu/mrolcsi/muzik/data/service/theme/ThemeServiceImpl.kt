@@ -15,6 +15,8 @@ import hu.mrolcsi.muzik.data.model.theme.Theme
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
@@ -32,6 +34,7 @@ class ThemeServiceImpl : ThemeService, KoinComponent {
 
   private val pendingThemeSubject: Subject<Observable<Theme>> = PublishSubject.create()
   private val createThemeSubject: Subject<Bitmap> = PublishSubject.create()
+  private val disposables = CompositeDisposable()
 
   private val themeCache = LruCache<Int, Theme>(50)
 
@@ -51,14 +54,15 @@ class ThemeServiceImpl : ThemeService, KoinComponent {
     createThemeSubject
       .observeOn(Schedulers.computation())
       .distinctUntilChanged { bitmap -> bitmap.bitmapHash() }
-      .flatMapSingle { createTheme(it) }
+      .doOnNext { disposables.dispose() }
+      .switchMapSingle { createTheme(it) }
       .doOnNext { Log.d(LOG_TAG, "Updating theme: $it") }
       .doOnNext { sharedPrefs.edit().putString(LAST_USED_THEME, gson.toJson(it)).apply() }
       .observeOn(AndroidSchedulers.mainThread())
       .subscribeBy(
         onNext = { pendingThemeSubject.onNext(Observable.just(it)) },
         onError = { Log.e(LOG_TAG, Log.getStackTraceString(it)) }
-      )
+      ).addTo(disposables)
 
     loadSavedTheme()
   }

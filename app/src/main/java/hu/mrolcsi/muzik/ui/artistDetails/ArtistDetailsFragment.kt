@@ -1,6 +1,7 @@
 package hu.mrolcsi.muzik.ui.artistDetails
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -26,6 +27,8 @@ import hu.mrolcsi.muzik.ui.common.glide.onResourceReady
 import hu.mrolcsi.muzik.ui.common.observeAndRunNavCommands
 import hu.mrolcsi.muzik.ui.common.observeAndRunUiCommands
 import hu.mrolcsi.muzik.ui.songs.SongItem
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.subscribeBy
 import kotlinx.android.synthetic.main.fragment_artist_details.*
 import kotlinx.android.synthetic.main.fragment_artist_details_content.*
@@ -34,6 +37,8 @@ import kotlinx.android.synthetic.main.list_item_album_content.view.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class ArtistDetailsFragment : Fragment() {
+
+  private val disposables = CompositeDisposable()
 
   private val args: ArtistDetailsFragmentArgs by navArgs()
 
@@ -58,10 +63,13 @@ class ArtistDetailsFragment : Fragment() {
               .onResourceReady { albumArt ->
                 viewModel.themeService
                   .createTheme(albumArt)
-                  .subscribeBy {
-                    setVariable(BR.theme, it)
-                    executePendingBindings()
-                  }
+                  .subscribeBy(
+                    onSuccess = {
+                      setVariable(BR.theme, it)
+                      executePendingBindings()
+                    },
+                    onError = { Log.e("ArtistDetailsFragment", Log.getStackTraceString(it)) }
+                  ).addTo(disposables)
               }
               .into(imgCoverArt)
           }
@@ -132,4 +140,8 @@ class ArtistDetailsFragment : Fragment() {
     appBar.addOnOffsetChangedListener(HideViewOnOffsetChangedListener(tvArtistName))
   }
 
+  override fun onDestroyView() {
+    super.onDestroyView()
+    disposables.dispose()
+  }
 }

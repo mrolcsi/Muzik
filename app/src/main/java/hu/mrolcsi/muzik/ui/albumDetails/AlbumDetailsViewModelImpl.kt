@@ -129,7 +129,14 @@ class AlbumDetailsViewModelImpl constructor(
     GlideApp.with(context)
       .asBitmap()
       .load(albumItem.description.albumArtUri)
-      .onResourceReady { albumArt -> themeService.createTheme(albumArt).subscribeBy { albumTheme.value = it } }
+      .onResourceReady { albumArt ->
+        themeService.createTheme(albumArt)
+          .subscribeBy(
+            onSuccess = { albumTheme.value = it },
+            onError = { showError(this, it) }
+          )
+          .disposeOnCleared()
+      }
       .preload()
   }
 }

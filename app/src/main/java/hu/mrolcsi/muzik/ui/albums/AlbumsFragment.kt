@@ -1,6 +1,7 @@
 package hu.mrolcsi.muzik.ui.albums
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,12 +19,16 @@ import hu.mrolcsi.muzik.ui.common.glide.onResourceReady
 import hu.mrolcsi.muzik.ui.common.observeAndRunNavCommands
 import hu.mrolcsi.muzik.ui.common.observeAndRunUiCommands
 import hu.mrolcsi.muzik.ui.library.SortingMode
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.subscribeBy
 import kotlinx.android.synthetic.main.fragment_albums.*
 import kotlinx.android.synthetic.main.list_item_album_content.view.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class AlbumsFragment : Fragment() {
+
+  private val disposables = CompositeDisposable()
 
   private val viewModel: AlbumsViewModel by viewModel<AlbumsViewModelImpl>()
 
@@ -45,10 +50,13 @@ class AlbumsFragment : Fragment() {
                 .onResourceReady { albumArt ->
                   viewModel.themeService
                     .createTheme(albumArt)
-                    .subscribeBy {
-                      setVariable(BR.theme, it)
-                      executePendingBindings()
-                    }
+                    .subscribeBy(
+                      onSuccess = {
+                        setVariable(BR.theme, it)
+                        executePendingBindings()
+                      },
+                      onError = { Log.e("AlbumsFragment", Log.getStackTraceString(it)) }
+                    ).addTo(disposables)
                 }
                 .into(imgCoverArt)
             }
@@ -81,6 +89,11 @@ class AlbumsFragment : Fragment() {
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     rvAlbums.adapter = albumsAdapter
+  }
+
+  override fun onDestroyView() {
+    super.onDestroyView()
+    disposables.dispose()
   }
 
   private fun showSortingMenu(anchor: View) {

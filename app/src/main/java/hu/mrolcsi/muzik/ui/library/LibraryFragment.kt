@@ -1,6 +1,7 @@
 package hu.mrolcsi.muzik.ui.library
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,6 +13,8 @@ import hu.mrolcsi.muzik.databinding.FragmentLibraryBinding
 import hu.mrolcsi.muzik.ui.common.ConfigurableFragmentPagerAdapter
 import hu.mrolcsi.muzik.ui.common.observeAndRunNavCommands
 import hu.mrolcsi.muzik.ui.common.setupIcons
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.subscribeBy
 import kotlinx.android.synthetic.main.fragment_library.*
 import org.koin.android.ext.android.inject
@@ -19,6 +22,8 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
 class LibraryFragment : Fragment() {
+
+  private val disposables = CompositeDisposable()
 
   private val rxPermissions: RxPermissions by inject { parametersOf(this) }
 
@@ -34,10 +39,13 @@ class LibraryFragment : Fragment() {
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     viewModel.requestPermissionEvent.observe(viewLifecycleOwner, Observer {
       rxPermissions.requestEachCombined(*it)
-        .subscribeBy { permission ->
-          if (permission.granted) viewModel.onPermissionGranted()
-          else viewModel.onPermissionDenied(permission.shouldShowRequestPermissionRationale)
-        }
+        .subscribeBy(
+          onNext = { permission ->
+            if (permission.granted) viewModel.onPermissionGranted()
+            else viewModel.onPermissionDenied(permission.shouldShowRequestPermissionRationale)
+          },
+          onError = { Log.e("LibraryFragment", Log.getStackTraceString(it)) }
+        ).addTo(disposables)
     })
 
     val adapter = ConfigurableFragmentPagerAdapter(childFragmentManager).also {
@@ -52,5 +60,10 @@ class LibraryFragment : Fragment() {
     libraryTabs.setupWithViewPager(libraryPager)
 
     findNavController().observeAndRunNavCommands(viewLifecycleOwner, viewModel)
+  }
+
+  override fun onDestroyView() {
+    super.onDestroyView()
+    disposables.dispose()
   }
 }

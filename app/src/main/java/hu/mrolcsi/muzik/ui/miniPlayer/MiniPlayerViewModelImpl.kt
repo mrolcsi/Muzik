@@ -11,10 +11,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import hu.mrolcsi.muzik.MainNavigationDirections
 import hu.mrolcsi.muzik.R
-import hu.mrolcsi.muzik.ui.base.DataBindingViewModel
-import hu.mrolcsi.muzik.ui.common.ExecuteOnceNavCommandSource
-import hu.mrolcsi.muzik.ui.common.ExecuteOnceUiCommandSource
-import hu.mrolcsi.muzik.ui.common.ObservableImpl
 import hu.mrolcsi.muzik.data.manager.media.MediaManager
 import hu.mrolcsi.muzik.data.model.media.albumArtUri
 import hu.mrolcsi.muzik.data.model.media.artist
@@ -25,11 +21,16 @@ import hu.mrolcsi.muzik.data.model.media.isPlaying
 import hu.mrolcsi.muzik.data.model.media.isSkipToNextEnabled
 import hu.mrolcsi.muzik.data.model.media.isSkipToPreviousEnabled
 import hu.mrolcsi.muzik.data.model.media.title
+import hu.mrolcsi.muzik.ui.base.DataBindingViewModel
 import hu.mrolcsi.muzik.ui.base.ThemedViewModel
 import hu.mrolcsi.muzik.ui.base.ThemedViewModelImpl
+import hu.mrolcsi.muzik.ui.common.ExecuteOnceNavCommandSource
+import hu.mrolcsi.muzik.ui.common.ExecuteOnceUiCommandSource
+import hu.mrolcsi.muzik.ui.common.ObservableImpl
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
+import io.reactivex.schedulers.Schedulers
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 import java.util.concurrent.TimeUnit
@@ -102,7 +103,7 @@ open class MiniPlayerViewModelImpl constructor(
         onError = { showError(this, it) }
       ).disposeOnCleared()
 
-    Observable.interval(500, TimeUnit.MILLISECONDS)
+    Observable.interval(500, TimeUnit.MILLISECONDS, Schedulers.single())
       .filter { mediaManager.getCurrentPlaybackState() != null }
       .map { mediaManager.getCurrentPlaybackState()!! }
       .observeOn(AndroidSchedulers.mainThread())

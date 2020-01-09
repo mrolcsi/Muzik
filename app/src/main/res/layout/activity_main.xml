@@ -18,7 +18,7 @@
     android:orientation="vertical"
     tools:context=".ui.library.LibraryFragment">
 
-    <fragment
+    <androidx.fragment.app.FragmentContainerView
       android:id="@+id/mainNavHost"
       android:name="androidx.navigation.fragment.NavHostFragment"
       android:layout_width="0dp"
@@ -30,7 +30,7 @@
       app:layout_constraintTop_toTopOf="parent"
       app:navGraph="@navigation/main_navigation" />
 
-    <fragment
+    <androidx.fragment.app.FragmentContainerView
       android:id="@+id/miniPlayer"
       android:name="hu.mrolcsi.muzik.ui.miniPlayer.MiniPlayerFragment"
       android:layout_width="match_parent"
