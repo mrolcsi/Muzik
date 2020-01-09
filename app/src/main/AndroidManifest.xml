@@ -16,6 +16,10 @@
     android:supportsRtl="true"
     android:theme="@style/FluxTheme">
 
+    <meta-data
+      android:name="firebase_analytics_collection_deactivated"
+      android:value="@bool/FIREBASE_ANALYTICS_DEACTIVATED" />
+
     <service
       android:name="hu.mrolcsi.muzik.data.service.media.MuzikPlayerService"
       android:permission="hu.mrolcsi.muzik.USE_SERVICE">
