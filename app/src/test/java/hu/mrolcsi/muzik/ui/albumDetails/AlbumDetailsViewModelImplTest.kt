@@ -61,8 +61,8 @@ class AlbumDetailsViewModelImplTest : BaseTest() {
     val albumItem = TestData.createAlbumMediaItem(albumId, "Test Album", "Artist")
 
     val songs = listOf(
-      TestData.createSongMediaItem(1001, "MEDIA_ID_S1", "Disc 1 Song 1", "Artist", -1, 1, 11000),
-      TestData.createSongMediaItem(1002, "MEDIA_ID_S2", "Disc 1 Song 2", "Artist", -1, 2, 12000)
+      TestData.createSongMediaItem(1001, "MEDIA_ID_S1", "Disc 1 Song 1", "Artist", -1, 1, 11000, 100),
+      TestData.createSongMediaItem(1002, "MEDIA_ID_S2", "Disc 1 Song 2", "Artist", -1, 2, 12000, 200)
     )
 
     every { mockMediaRepo.getAlbumById(albumId) } returns Observable.just(albumItem)
@@ -72,8 +72,8 @@ class AlbumDetailsViewModelImplTest : BaseTest() {
       setArgument(albumId)
 
       val expected = listOf(
-        SongItem(1001, songs[0].description.coverArtUri, "1", false, "Artist", "Disc 1 Song 1", "00:11"),
-        SongItem(1002, songs[1].description.coverArtUri, "2", false, "Artist", "Disc 1 Song 2", "00:12")
+        SongItem(1001, songs[0].description.coverArtUri, "1", false, "Artist", "Disc 1 Song 1", "00:11", 100 * 1000),
+        SongItem(1002, songs[1].description.coverArtUri, "2", false, "Artist", "Disc 1 Song 2", "00:12", 200 * 1000)
       )
 
       assertEquals(expected, items.value)
@@ -87,10 +87,10 @@ class AlbumDetailsViewModelImplTest : BaseTest() {
     val albumItem = TestData.createAlbumMediaItem(albumId, "Test Album", "Artist")
 
     val songs = listOf(
-      TestData.createSongMediaItem(1001, "MEDIA_ID_D1S1", "Disc 1 Song 1", "Artist", 1, 1, 11000),
-      TestData.createSongMediaItem(1002, "MEDIA_ID_D1S2", "Disc 1 Song 2", "Artist", 1, 2, 12000),
-      TestData.createSongMediaItem(2001, "MEDIA_ID_D2S1", "Disc 2 Song 1", "Artist", 2, 1, 21000),
-      TestData.createSongMediaItem(2002, "MEDIA_ID_D2S2", "Disc 2 Song 2", "Artist", 2, 2, 22000)
+      TestData.createSongMediaItem(1001, "MEDIA_ID_D1S1", "Disc 1 Song 1", "Artist", 1, 1, 11000, 100),
+      TestData.createSongMediaItem(1002, "MEDIA_ID_D1S2", "Disc 1 Song 2", "Artist", 1, 2, 12000, 200),
+      TestData.createSongMediaItem(2001, "MEDIA_ID_D2S1", "Disc 2 Song 1", "Artist", 2, 1, 21000, 300),
+      TestData.createSongMediaItem(2002, "MEDIA_ID_D2S2", "Disc 2 Song 2", "Artist", 2, 2, 22000, 400)
     )
 
     every { mockMediaRepo.getAlbumById(albumId) } returns Observable.just(albumItem)
@@ -107,11 +107,11 @@ class AlbumDetailsViewModelImplTest : BaseTest() {
 
       val expected = listOf(
         DiscNumberItem(1, "1"),
-        SongItem(1001, songs[0].description.coverArtUri, "1", false, "Artist", "Disc 1 Song 1", "00:11"),
-        SongItem(1002, songs[1].description.coverArtUri, "2", false, "Artist", "Disc 1 Song 2", "00:12"),
+        SongItem(1001, songs[0].description.coverArtUri, "1", false, "Artist", "Disc 1 Song 1", "00:11", 100 * 1000),
+        SongItem(1002, songs[1].description.coverArtUri, "2", false, "Artist", "Disc 1 Song 2", "00:12", 200 * 1000),
         DiscNumberItem(2, "2"),
-        SongItem(2001, songs[2].description.coverArtUri, "1", false, "Artist", "Disc 2 Song 1", "00:21"),
-        SongItem(2002, songs[3].description.coverArtUri, "2", false, "Artist", "Disc 2 Song 2", "00:22")
+        SongItem(2001, songs[2].description.coverArtUri, "1", false, "Artist", "Disc 2 Song 1", "00:21", 300 * 1000),
+        SongItem(2002, songs[3].description.coverArtUri, "2", false, "Artist", "Disc 2 Song 2", "00:22", 400 * 1000)
       )
 
       assertEquals(expected, items.value)

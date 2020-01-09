@@ -8,6 +8,7 @@ import hu.mrolcsi.muzik.data.model.theme.Theme
 import hu.mrolcsi.muzik.ui.playlist.PlaylistViewModelImpl
 import io.mockk.MockKAnnotations
 import io.mockk.every
+import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.android.synthetic.main.fragment_player_content.*
@@ -19,13 +20,14 @@ import org.koin.dsl.module
 
 class PlayerDialogFragmentTest : BaseTest() {
 
-  private val mockViewModel: PlayerViewModel = mockk<PlayerViewModelImpl>(relaxed = true)
+  @RelaxedMockK
+  private lateinit var mockViewModel: PlayerViewModelImpl
 
   private val testModule = module(override = true) {
-    viewModel { mockViewModel as PlayerViewModelImpl }
+    viewModel { mockViewModel }
     viewModel {
       mockk<PlaylistViewModelImpl>(relaxed = true) {
-        every { currentTheme } returns MutableLiveData<Theme>(mockk(relaxed = true))
+        every { currentTheme } returns MutableLiveData<Theme>(Theme.DEFAULT_THEME)
       }
     }
   }
@@ -39,6 +41,8 @@ class PlayerDialogFragmentTest : BaseTest() {
   fun setUp() {
     MockKAnnotations.init(this)
     loadKoinModules(testModule)
+
+    every { mockViewModel.currentTheme } returns MutableLiveData<Theme>(Theme.DEFAULT_THEME)
   }
 
   @Test

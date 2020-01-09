@@ -31,6 +31,7 @@ object TestData {
     discNumber: Int = -1,
     trackNumber: Int = -1,
     durationMs: Long = -1,
+    dateAddedSeconds: Long = -1,
     isPlayable: Boolean = true
   ): MediaBrowserCompat.MediaItem {
     return mockk {
@@ -44,6 +45,7 @@ object TestData {
           MediaStore.Audio.Media.ARTIST to artist,
           MediaStore.Audio.Media.ARTIST_KEY to artist.toKeyString(),
           MediaStore.Audio.Media.DURATION to durationMs.toString(),
+          MediaStore.Audio.Media.DATE_ADDED to dateAddedSeconds.toString(),
           MediaStore.Audio.Media.TRACK to run {
             if (trackNumber > 0)
               if (discNumber > 0) discNumber * 1000 + trackNumber
