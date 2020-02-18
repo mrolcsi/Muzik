@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.core.view.ViewCompat
 import androidx.databinding.library.baseAdapters.BR
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -17,6 +16,7 @@ import com.bumptech.glide.request.target.Target
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.databinding.FragmentArtistDetailsBinding
 import hu.mrolcsi.muzik.ui.albums.AlbumItem
+import hu.mrolcsi.muzik.ui.base.RxFragment
 import hu.mrolcsi.muzik.ui.common.BoundMVVMViewHolder
 import hu.mrolcsi.muzik.ui.common.HideViewOnOffsetChangedListener
 import hu.mrolcsi.muzik.ui.common.MVVMListAdapter
@@ -27,8 +27,6 @@ import hu.mrolcsi.muzik.ui.common.glide.onResourceReady
 import hu.mrolcsi.muzik.ui.common.observeAndRunNavCommands
 import hu.mrolcsi.muzik.ui.common.observeAndRunUiCommands
 import hu.mrolcsi.muzik.ui.songs.SongItem
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.subscribeBy
 import kotlinx.android.synthetic.main.fragment_artist_details.*
 import kotlinx.android.synthetic.main.fragment_artist_details_content.*
@@ -36,9 +34,7 @@ import kotlinx.android.synthetic.main.fragment_artist_details_header.*
 import kotlinx.android.synthetic.main.list_item_album_content.view.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class ArtistDetailsFragment : Fragment() {
-
-  private val disposables = CompositeDisposable()
+class ArtistDetailsFragment : RxFragment() {
 
   private val args: ArtistDetailsFragmentArgs by navArgs()
 
@@ -69,7 +65,7 @@ class ArtistDetailsFragment : Fragment() {
                       executePendingBindings()
                     },
                     onError = { Log.e("ArtistDetailsFragment", Log.getStackTraceString(it)) }
-                  ).addTo(disposables)
+                  ).disposeOnDestroy()
               }
               .into(imgCoverArt)
           }
@@ -138,10 +134,5 @@ class ArtistDetailsFragment : Fragment() {
     }
 
     appBar.addOnOffsetChangedListener(HideViewOnOffsetChangedListener(tvArtistName))
-  }
-
-  override fun onDestroyView() {
-    super.onDestroyView()
-    disposables.dispose()
   }
 }

@@ -110,8 +110,8 @@ dependencies {
     implementation "androidx.palette:palette-ktx:1.0.0"
 
     // Glide
-    implementation 'com.github.bumptech.glide:glide:4.10.0'
-    kapt 'com.github.bumptech.glide:compiler:4.10.0'
+    implementation 'com.github.bumptech.glide:glide:4.11.0'
+    kapt 'com.github.bumptech.glide:compiler:4.11.0'
 
     // Checkerboard Drawable
     debugImplementation 'com.github.duanhong169:checkerboarddrawable:1.0.2'
@@ -128,7 +128,7 @@ dependencies {
     implementation 'com.squareup.retrofit2:adapter-rxjava2:2.7.1'
 
     // OkHttp Logging Interceptor
-    implementation 'com.squareup.okhttp3:logging-interceptor:4.3.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.4.0'
 
     // Firebase & Crashlytics
     implementation 'com.google.firebase:firebase-core:17.2.1'
@@ -149,7 +149,7 @@ dependencies {
     testImplementation 'androidx.test.ext:junit-ktx:1.1.1'
     testImplementation 'androidx.test:core:1.2.0'
     testImplementation 'androidx.test:runner:1.2.0'
-    testImplementation 'com.squareup.okhttp3:mockwebserver:4.3.0'
+    testImplementation 'com.squareup.okhttp3:mockwebserver:4.4.0'
     testImplementation 'junit:junit:4.13'
 
     androidTestImplementation 'androidx.arch.core:core-testing:2.1.0'

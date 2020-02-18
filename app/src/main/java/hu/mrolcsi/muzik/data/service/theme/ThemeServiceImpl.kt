@@ -23,8 +23,6 @@ import io.reactivex.subjects.PublishSubject
 import io.reactivex.subjects.Subject
 import org.koin.core.KoinComponent
 import org.koin.core.inject
-import kotlin.math.pow
-import kotlin.math.sqrt
 
 @SuppressLint("CheckResult")
 class ThemeServiceImpl : ThemeService, KoinComponent {
@@ -52,9 +50,8 @@ class ThemeServiceImpl : ThemeService, KoinComponent {
       .observeOn(AndroidSchedulers.mainThread())
 
     createThemeSubject
-      .observeOn(Schedulers.computation())
+      .subscribeOn(Schedulers.computation())
       .distinctUntilChanged { bitmap -> bitmap.bitmapHash() }
-      .doOnNext { disposables.dispose() }
       .switchMapSingle { createTheme(it) }
       .doOnNext { Log.d(LOG_TAG, "Updating theme: $it") }
       .doOnNext { sharedPrefs.edit().putString(LAST_USED_THEME, gson.toJson(it)).apply() }
@@ -96,14 +93,6 @@ class ThemeServiceImpl : ThemeService, KoinComponent {
         .generate()
 
       val theme = createTheme(mainPalette)
-
-      val statusBarPalette = Palette.from(bitmap)
-        .clearFilters()
-        .setRegion(0, 0, bitmap.width, 48)    // approx.
-        .generate()
-
-      theme.statusBarColor = statusBarPalette.swatches.maxBy { it.population }?.rgb
-        ?: theme.primaryBackgroundColor
 
       themeCache.put(hashCode, theme)
 
@@ -197,16 +186,6 @@ class ThemeServiceImpl : ThemeService, KoinComponent {
       }
     }
     return hash
-  }
-
-  private fun distanceEuclidean(color1: Int, color2: Int): Double {
-    // https://en.wikipedia.org/wiki/Color_difference#Euclidean
-
-    val redDistance = (Color.red(color2) - Color.red(color1).toDouble()).pow(2.0)
-    val greenDistance = (Color.green(color2) - Color.green(color1).toDouble()).pow(2.0)
-    val blueDistance = (Color.blue(color2) - Color.blue(color1).toDouble()).pow(2.0)
-
-    return sqrt(redDistance + greenDistance + blueDistance)
   }
 
   companion object {
