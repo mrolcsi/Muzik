@@ -1,5 +1,6 @@
 package hu.mrolcsi.muzik
 
+import android.os.Build
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
@@ -14,9 +15,11 @@ import org.junit.Before
 import org.junit.runner.RunWith
 import org.koin.test.AutoCloseKoinTest
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 import kotlin.random.Random
 
 @RunWith(RobolectricTestRunner::class)
+@Config(sdk = [Build.VERSION_CODES.P])
 abstract class BaseTest : AutoCloseKoinTest() {
 
   private val mockNavController = mockk<NavController>(relaxed = true)
