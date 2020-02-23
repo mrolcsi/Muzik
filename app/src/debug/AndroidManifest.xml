@@ -3,13 +3,15 @@
   xmlns:tools="http://schemas.android.com/tools"
   package="hu.mrolcsi.muzik">
 
-  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-  <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
   <application tools:ignore="AllowBackup,GoogleAppIndexingWarning,UnpackedNativeCode">
 
-    <activity android:name=".theme.ThemeTestActivity"
-      android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
+    <activity
+      android:name=".theme.ThemeTestActivity"
+      android:exported="true"
+      android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
 
   </application>
 

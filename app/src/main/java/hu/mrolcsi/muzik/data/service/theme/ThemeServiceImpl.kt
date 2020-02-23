@@ -1,181 +1,126 @@
 package hu.mrolcsi.muzik.data.service.theme
 
-import android.annotation.SuppressLint
 import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.os.Looper
-import android.util.Log
 import android.util.LruCache
+import androidx.core.content.edit
 import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.get
+import androidx.core.graphics.luminance
 import androidx.palette.graphics.Palette
 import com.google.gson.Gson
 import hu.mrolcsi.muzik.data.model.theme.Theme
 import io.reactivex.Observable
 import io.reactivex.Single
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.addTo
-import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import io.reactivex.subjects.Subject
 import org.koin.core.KoinComponent
 import org.koin.core.inject
+import timber.log.Timber
+import kotlin.math.abs
 
-@SuppressLint("CheckResult")
 class ThemeServiceImpl : ThemeService, KoinComponent {
 
   private val sharedPrefs: SharedPreferences by inject()
   private val gson: Gson by inject()
 
-  private val pendingThemeSubject: Subject<Observable<Theme>> = PublishSubject.create()
-  private val createThemeSubject: Subject<Bitmap> = PublishSubject.create()
-  private val disposables = CompositeDisposable()
-
   private val themeCache = LruCache<Int, Theme>(50)
 
-  override val currentTheme: Observable<Theme>
+  private var lastUsedTheme: Theme?
+    get() = sharedPrefs.getString(LAST_USED_THEME, null)?.let {
+      gson.fromJson(it, Theme::class.java)
+    }
+    set(value) = sharedPrefs.edit {
+      putString(LAST_USED_THEME, gson.toJson(value))
+    }
 
-  private val mPaletteFiler = Palette.Filter { _, hsl -> hsl[1] > 0.4 }
+  private val pendingThemeSubject: Subject<Observable<Theme>> = PublishSubject.create()
 
-  init {
-    currentTheme = pendingThemeSubject
+  override val currentTheme: Observable<Theme> =
+    pendingThemeSubject
       .switchMap { it }
-      .doOnNext { Log.d(LOG_TAG, "Theme ready: $it") }
+      .doOnNext { Timber.d("Theme ready: $it") }
       .replay(1)
       .apply { connect() }
       .hide()
-      .observeOn(AndroidSchedulers.mainThread())
-
-    createThemeSubject
-      .subscribeOn(Schedulers.computation())
-      .distinctUntilChanged { bitmap -> bitmap.bitmapHash() }
-      .switchMapSingle { createTheme(it) }
-      .doOnNext { Log.d(LOG_TAG, "Updating theme: $it") }
-      .doOnNext { sharedPrefs.edit().putString(LAST_USED_THEME, gson.toJson(it)).apply() }
-      .observeOn(AndroidSchedulers.mainThread())
-      .subscribeBy(
-        onNext = { pendingThemeSubject.onNext(Observable.just(it)) },
-        onError = { Log.e(LOG_TAG, Log.getStackTraceString(it)) }
-      ).addTo(disposables)
-
-    loadSavedTheme()
-  }
-
-  private fun loadSavedTheme() {
-    val savedTheme = sharedPrefs.getString(LAST_USED_THEME, null)?.let {
-      gson.fromJson(it, Theme::class.java)
-    }
-
-    pendingThemeSubject.onNext(Observable.just(savedTheme ?: Theme.DEFAULT_THEME))
-  }
 
   override fun updateTheme(bitmap: Bitmap) {
-    createThemeSubject.onNext(bitmap)
+    createTheme(bitmap)
+      .subscribeOn(Schedulers.computation())
+      .doOnSuccess {
+        Timber.d("Updating theme: $it")
+        lastUsedTheme = it
+      }
+      .toObservable()
+      .also(pendingThemeSubject::onNext)
   }
 
-  override fun createTheme(bitmap: Bitmap) = Single.create<Theme> { emitter ->
+  override fun createTheme(bitmap: Bitmap) = Single.fromCallable {
     require(Looper.myLooper() != Looper.getMainLooper()) { "Theme creation is not allowed on the main thread!" }
 
     // Calculate hash for this bitmap
     val hashCode = bitmap.bitmapHash()
 
-    val cachedTheme = themeCache[hashCode]
+    return@fromCallable themeCache[hashCode] ?: createThemeInternal(bitmap).also { themeCache.put(hashCode, it) }
 
-    if (cachedTheme != null) {
-      emitter.onSuccess(cachedTheme)
-    } else {
-      val mainPalette = Palette.from(bitmap)
-        .clearFilters()
-        //.addFilter(mPaletteFiler)
-        .generate()
+  }.subscribeOn(Schedulers.computation())
 
-      val theme = createTheme(mainPalette)
+  private fun createThemeInternal(bitmap: Bitmap): Theme {
+    val sourcePalette = Palette.from(bitmap)
+      .clearFilters()
+      //.addFilter(mPaletteFiler)
+      .generate()
 
-      themeCache.put(hashCode, theme)
-
-      emitter.onSuccess(theme)
-    }
-  }.subscribeOn(Schedulers.computation()).observeOn(AndroidSchedulers.mainThread())
-
-  private fun createTheme(sourcePalette: Palette): Theme {
-
-    val swatches = sourcePalette.swatches.sortedByDescending { it.population }
-
-    // Primary colors
-    val primaryBackgroundColor = swatches[0]?.rgb ?: Color.BLACK
-    val primaryForegroundColor = findForegroundColor(primaryBackgroundColor, sourcePalette)
-
-    val dominantHsl = sourcePalette.dominantSwatch?.hsl
-      ?: FloatArray(3).apply {
-        ColorUtils.colorToHSL(primaryBackgroundColor, this)
+    // Merge similar colors
+    val source = sourcePalette.swatches.map { it.rgb to it.population }.toMutableList()
+    val swatches = mutableListOf<Pair<Int, Int>>()
+    while (source.isNotEmpty()) {
+      // Pick first color
+      var pick = source.first().also { source.remove(it) }
+      source.toList().forEach {
+        // Check for similar colors
+        if (areColorsSimilar(pick.first, it.first)) {
+          // Blend picked color with current
+          pick = ColorUtils.blendARGB(pick.first, it.first, 0.5f) to pick.second + it.second
+          // Remove used color from the source
+          source.remove(it)
+        }
       }
-
-    // Increase luminance for dark colors, decrease for light colors
-    //val luminanceDiff = if (dominantHsl[2] < 0.5) (1 - dominantHsl[2]) / 3f else -(dominantHsl[2] / 3f)
-    val luminanceDiff = if (dominantHsl[2] < 0.5) 0.1f else -0.1f
-
-    // Secondary colors
-    dominantHsl[2] += luminanceDiff
-    val secondaryBackgroundColor = try {
-      swatches[1]?.rgb ?: ColorUtils.HSLToColor(dominantHsl)
-    } catch (e: IndexOutOfBoundsException) {
-      ColorUtils.HSLToColor(dominantHsl)
+      swatches.add(pick)
     }
-    val secondaryForegroundColor = findForegroundColor(secondaryBackgroundColor, sourcePalette)
 
-    // Tertiary colors
-    dominantHsl[2] += 2 * luminanceDiff
-    val tertiaryBackgroundColor = try {
-      swatches[2]?.rgb ?: ColorUtils.HSLToColor(dominantHsl)
-    } catch (e: IndexOutOfBoundsException) {
-      ColorUtils.HSLToColor(dominantHsl)
-    }
-    val tertiaryForegroundColor = findForegroundColor(tertiaryBackgroundColor, sourcePalette)
+    val colors = swatches
+      .sortedByDescending { it.second }
+      .map { it.first }
+      .toMutableList()
+
+    val primaryBackground = colors.first().also { colors.remove(it) }
+    val primaryForeground = findForegroundColor(primaryBackground, colors).also { colors.remove(it) }
+
+    val secondaryBackground = colors.firstOrNull()?.also { colors.remove(it) } ?: primaryBackground
+    val secondaryForeground = findForegroundColor(secondaryBackground, colors).also { colors.remove(it) }
 
     return Theme(
       sourcePalette,
-      primaryBackgroundColor,
-      primaryForegroundColor,
-      secondaryBackgroundColor,
-      secondaryForegroundColor,
-      tertiaryBackgroundColor,
-      tertiaryForegroundColor
+      primaryBackground,
+      primaryForeground,
+      secondaryBackground,
+      secondaryForeground
     )
   }
 
-  private fun findForegroundColor(backgroundColor: Int, sourcePalette: Palette): Int {
-    var foregroundColor = sourcePalette.swatches.filter {
-
-      // Ignore completely black or completely white swatches
-      val isAllowed = mPaletteFiler.isAllowed(it.rgb, it.hsl)
-
-      // Also ignore swatches that don't have a minimum contrast
-      val hasEnoughContrast =
-        ColorUtils.calculateContrast(it.rgb, backgroundColor) > MINIMUM_CONTRAST_RATIO
-
-      isAllowed && hasEnoughContrast
-    }.maxBy {
-      //ColorUtils.calculateContrast(it.rgb, backgroundColor)
-      //distanceEuclidean(it.rgb, backgroundColor)
-      it.population
-    }?.rgb
-
-    if (foregroundColor == null) {
-      // Use first available color
-      foregroundColor = sourcePalette.swatches.maxBy {
-        ColorUtils.calculateContrast(it.rgb, backgroundColor)
-      }?.rgb ?:
-          // Use inverse of background color as a fallback
-          invertColor(backgroundColor)
-    }
-
-    return foregroundColor
-  }
-
-  private fun invertColor(color: Int): Int = color xor 0x00ffffff
+  private fun findForegroundColor(backgroundColor: Int, colors: List<Int>): Int =
+    colors
+      .firstOrNull { ColorUtils.calculateContrast(it, backgroundColor) > MINIMUM_CONTRAST_RATIO }
+      ?: colors.firstOrNull { ColorUtils.calculateContrast(it, backgroundColor) > MINIMUM_CONTRAST_RATIO }
+      ?: colors.maxBy { ColorUtils.calculateContrast(it, backgroundColor) }
+      ?: run {
+        if (backgroundColor.luminance < 0.5) Color.WHITE
+        else Color.BLACK
+      }
 
   private fun Bitmap.bitmapHash(): Int {
     val prime = 31 //or a higher prime at your choice
@@ -188,14 +133,17 @@ class ThemeServiceImpl : ThemeService, KoinComponent {
     return hash
   }
 
-  companion object {
-    private const val LOG_TAG = "ThemeService"
+  private fun areColorsSimilar(first: Int, second: Int): Boolean =
+    abs(Color.red(first) - Color.red(second)) <= SIMILARITY_THRESHOLD &&
+        abs(Color.green(first) - Color.green(second)) <= SIMILARITY_THRESHOLD &&
+        abs(Color.blue(first) - Color.blue(second)) <= SIMILARITY_THRESHOLD
 
+  companion object {
     private const val MINIMUM_CONTRAST_RATIO = 4
 
     private const val LAST_USED_THEME = "lastUsedTheme"
 
+    private const val SIMILARITY_THRESHOLD = 16
   }
 
 }
-

@@ -74,6 +74,9 @@ dependencies {
     implementation 'com.l4digital.fastscroll:fastscroll:2.0.1'
     implementation 'com.afollestad.material-dialogs:core:3.1.1'
 
+    // Timber
+    implementation 'com.jakewharton.timber:timber:4.7.1'
+
     // Media
     implementation 'androidx.media:media:1.1.0'
 

@@ -7,13 +7,17 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import hu.mrolcsi.muzik.R
+import hu.mrolcsi.muzik.databinding.ActivityThemeTestBinding
+import hu.mrolcsi.muzik.ui.common.glide.GlideApp
+import hu.mrolcsi.muzik.ui.miniPlayer.MiniPlayerViewModel
+import hu.mrolcsi.muzik.ui.miniPlayer.MiniPlayerViewModelImpl
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.debug.activity_theme_test.*
 import kotlinx.android.synthetic.debug.list_item_swatch.*
@@ -22,18 +26,28 @@ import top.defaults.checkerboarddrawable.CheckerboardDrawable
 
 class ThemeTestActivity : AppCompatActivity() {
 
-  private val viewModel: ThemeTestViewModel by viewModel<ThemeTestViewModelImpl>()
+  private val viewModel: MiniPlayerViewModel by viewModel<MiniPlayerViewModelImpl>()
 
   // Adapters
   private val mAllColorsAdapter = PaletteAdapter()
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    setContentView(R.layout.activity_theme_test)
+    DataBindingUtil.setContentView<ActivityThemeTestBinding>(this, R.layout.activity_theme_test).also {
+      it.lifecycleOwner = this
+      it.viewModel = viewModel
+    }
 
     root.background = CheckerboardDrawable.create()
 
-    viewModel.theme.observe(this, Observer { theme ->
+    viewModel.coverArtUri.observe(this, Observer { uri ->
+      GlideApp.with(this)
+        .asBitmap()
+        .load(uri)
+        .into(imgInput)
+    })
+
+    viewModel.currentTheme.observe(this, Observer { theme ->
       // Source Palette
       theme.sourcePalette?.let { palette ->
         tvPaletteLightVibrant.setBackgroundColor(palette.lightVibrantSwatch?.rgb ?: Color.TRANSPARENT)
@@ -54,12 +68,9 @@ class ThemeTestActivity : AppCompatActivity() {
       tvPrimary.setTextColor(theme.primaryForegroundColor)
       tvSecondary.setBackgroundColor(theme.secondaryBackgroundColor)
       tvSecondary.setTextColor(theme.secondaryForegroundColor)
-      tvTertiary.setBackgroundColor(theme.tertiaryBackgroundColor)
-      tvTertiary.setTextColor(theme.tertiaryForegroundColor)
     })
 
     rvAllColors.apply {
-      layoutManager = LinearLayoutManager(this@ThemeTestActivity, RecyclerView.HORIZONTAL, false)
       adapter = mAllColorsAdapter
     }
   }
@@ -81,11 +92,17 @@ class ThemeTestActivity : AppCompatActivity() {
 
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: SwatchHolder, position: Int) {
-      val item = getItem(position)
-      holder.tvSwatch.setBackgroundColor(item?.rgb ?: Color.TRANSPARENT)
-      holder.tvSwatch.setTextColor(item?.titleTextColor ?: Color.BLACK)
-      holder.tvSwatch.text =
-        "H=${item?.hsl?.get(0)?.toString()}\nS=${item?.hsl?.get(1)?.toString()}\nL=${item?.hsl?.get(2)?.toString()}"
+      val item = getItem(position)!!
+      holder.tvSwatch.setBackgroundColor(item.rgb)
+      holder.tvSwatch.setTextColor(item.titleTextColor)
+      val rgbText = "R=${Color.red(item.rgb)}\nG=${Color.green(item.rgb)}\nB=${Color.blue(item.rgb)}"
+      val hslText = "H=${item.hsl[0]}\nS=${item.hsl[1]}\nL=${item.hsl[2]}"
+      holder.tvSwatch.text = rgbText
+      holder.tvSwatch.setOnClickListener {
+        if (holder.tvSwatch.text == rgbText)
+          holder.tvSwatch.text = hslText
+        else holder.tvSwatch.text = rgbText
+      }
     }
 
     private class SwatchHolder(override val containerView: View) :

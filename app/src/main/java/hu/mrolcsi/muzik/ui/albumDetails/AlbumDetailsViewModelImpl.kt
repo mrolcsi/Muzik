@@ -28,11 +28,12 @@ import hu.mrolcsi.muzik.ui.common.ExecuteOnceNavCommandSource
 import hu.mrolcsi.muzik.ui.common.ExecuteOnceUiCommandSource
 import hu.mrolcsi.muzik.ui.common.ObservableImpl
 import hu.mrolcsi.muzik.ui.common.glide.GlideApp
-import hu.mrolcsi.muzik.ui.common.glide.onResourceReady
+import hu.mrolcsi.muzik.ui.common.glide.toSingle
 import hu.mrolcsi.muzik.ui.songs.asSongItems
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.Observables
 import io.reactivex.rxkotlin.subscribeBy
+import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
 import org.koin.core.KoinComponent
 import org.koin.core.inject
@@ -99,6 +100,7 @@ class AlbumDetailsViewModelImpl constructor(
         .distinctUntilChanged { t: MediaMetadataCompat -> t.mediaId }
         .filter { it.mediaId != null }
     )
+      .subscribeOn(Schedulers.computation())
       .doOnNext { (songs, _) -> songDescriptions = songs.filter { it.isPlayable }.map { it.description } }
       .map { (songs, metadata) ->
         songs
@@ -129,14 +131,13 @@ class AlbumDetailsViewModelImpl constructor(
     GlideApp.with(context)
       .asBitmap()
       .load(albumItem.description.albumArtUri)
-      .onResourceReady { albumArt ->
-        themeService.createTheme(albumArt)
-          .subscribeBy(
-            onSuccess = { albumTheme.value = it },
-            onError = { showError(this, it) }
-          )
-          .disposeOnCleared()
-      }
-      .preload()
+      .toSingle()
+      .flatMap { themeService.createTheme(it) }
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribeBy(
+        onSuccess = { albumTheme.value = it },
+        onError = { showError(this, it) }
+      )
+      .disposeOnCleared()
   }
 }
