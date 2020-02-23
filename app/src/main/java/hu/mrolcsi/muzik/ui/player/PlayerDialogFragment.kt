@@ -10,29 +10,21 @@ import androidx.annotation.ColorInt
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
-import androidx.core.view.doOnPreDraw
-import androidx.core.view.postDelayed
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager2.widget.ViewPager2
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.databinding.FragmentPlayerBinding
 import hu.mrolcsi.muzik.databinding.ListItemQueueBinding
 import hu.mrolcsi.muzik.ui.base.FullScreenDialogFragment
 import hu.mrolcsi.muzik.ui.common.BoundMVVMViewHolder
 import hu.mrolcsi.muzik.ui.common.MVVMListAdapter
-import hu.mrolcsi.muzik.ui.common.MVVMViewHolder
 import hu.mrolcsi.muzik.ui.common.ThemedViewHolder
 import hu.mrolcsi.muzik.ui.common.extensions.updateNavigationIcons
 import hu.mrolcsi.muzik.ui.common.extensions.updateStatusBarIcons
 import hu.mrolcsi.muzik.ui.common.observeAndRunNavCommands
 import hu.mrolcsi.muzik.ui.common.observeAndRunUiCommands
-import hu.mrolcsi.muzik.ui.common.pager.PagerSnapHelperVerbose
-import hu.mrolcsi.muzik.ui.common.pager.RVPagerSnapHelperListenable
-import hu.mrolcsi.muzik.ui.common.pager.RVPagerStateListener
-import hu.mrolcsi.muzik.ui.common.pager.VisiblePageState
 import hu.mrolcsi.muzik.ui.playlist.PlaylistItem
 import hu.mrolcsi.muzik.ui.playlist.PlaylistViewModel
 import hu.mrolcsi.muzik.ui.playlist.PlaylistViewModelImpl
@@ -49,9 +41,6 @@ class PlayerDialogFragment : FullScreenDialogFragment() {
   private val playlistViewModel: PlaylistViewModel by viewModel<PlaylistViewModelImpl>()
 
   private lateinit var binding: FragmentPlayerBinding
-
-  private lateinit var snapHelper: PagerSnapHelperVerbose
-  private var scrollState: Int = RecyclerView.SCROLL_STATE_IDLE
 
   private val queueAdapter = MVVMListAdapter(
     itemIdSelector = { it.queueId },
@@ -110,7 +99,7 @@ class PlayerDialogFragment : FullScreenDialogFragment() {
       queueState.observe(viewLifecycleOwner, Observer { state ->
         Timber.d("onQueueStateChanged($state)")
         queueAdapter.onChanged(state.queue)
-        updatePager("onQueueStateChanged", state.activeQueueId)
+        updatePager(state.activeQueueId)
       })
     }
   }
@@ -150,90 +139,56 @@ class PlayerDialogFragment : FullScreenDialogFragment() {
   }
 
   private fun setupPager() {
-    rvQueue.run {
-      layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-      adapter = queueAdapter
-      setHasFixedSize(true)
-    }
+    playerViewModel.currentTheme.observe(viewLifecycleOwner, Observer {
+      applyTheme(it.primaryBackgroundColor, it.primaryForegroundColor)
+    })
+    queuePager.adapter = queueAdapter
 
-    snapHelper = RVPagerSnapHelperListenable().attachToRecyclerView(rvQueue, object : RVPagerStateListener {
-
-      @Suppress("UNCHECKED_CAST")
-      override fun onPageScroll(pagesState: List<VisiblePageState>) {
-
-        if (scrollState == RecyclerView.SCROLL_STATE_IDLE && pagesState.size == 1) {
-          playerViewModel.currentTheme.value?.let { applyTheme(it.primaryBackgroundColor, it.primaryForegroundColor) }
-        }
-
+    queuePager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+      override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
         // Blend colors while scrolling
-        if (pagesState.size == 2) {  // between 2 pages -> blend colors
-          val leftHolder = rvQueue.findContainingViewHolder(pagesState.first().view) as MVVMViewHolder<QueueItem>
-          val rightHolder = rvQueue.findContainingViewHolder(pagesState.last().view) as MVVMViewHolder<QueueItem>
 
-          val leftTheme = leftHolder.model?.theme
-          val rightTheme = rightHolder.model?.theme
+        val leftTheme = queueAdapter.currentList[position].theme
+        val rightTheme = queueAdapter.currentList.getOrNull(position + 1)?.theme
 
-          if (leftTheme != null && rightTheme != null) {
+        val backgroundColor = ColorUtils.blendARGB(
+          leftTheme.primaryBackgroundColor,
+          rightTheme?.primaryBackgroundColor ?: leftTheme.primaryBackgroundColor,
+          positionOffset
+        )
+        val foregroundColor = ColorUtils.blendARGB(
+          leftTheme.primaryForegroundColor,
+          rightTheme?.primaryForegroundColor ?: leftTheme.primaryForegroundColor,
+          positionOffset
+        )
 
-            val ratio = 1f - pagesState.first().distanceToSettled
-
-            val backgroundColor = ColorUtils.blendARGB(
-              leftTheme.primaryBackgroundColor,
-              rightTheme.primaryBackgroundColor,
-              ratio
-            )
-            val foregroundColor = ColorUtils.blendARGB(
-              leftTheme.primaryForegroundColor,
-              rightTheme.primaryForegroundColor,
-              ratio
-            )
-
-            applyTheme(backgroundColor, foregroundColor)
-          }
-        }
+        applyTheme(backgroundColor, foregroundColor)
       }
 
-      override fun onScrollStateChanged(state: Int) {
-        scrollState = state
-
-        if (state == RecyclerView.SCROLL_STATE_IDLE) {
+      override fun onPageScrollStateChanged(state: Int) {
+        if (state == ViewPager2.SCROLL_STATE_IDLE) {
           // check if item position is different from the now playing position
           val queueId = playerViewModel.queueState.value?.activeQueueId
-          val pagerPosition = snapHelper.findSnapPosition(rvQueue.layoutManager)
-          val visibleId = queueAdapter.getItemId(pagerPosition)
+          val visibleId = queueAdapter.getItemId(queuePager.currentItem)
 
-          Timber.d("onScrollStateChanged($state) queueId=$queueId visibleId=$visibleId")
+          Timber.d("onPageScrollStateChanged($state) queueId=$queueId visibleId=$visibleId")
 
-          // Skip to visible item in queue
-          if (queueId != visibleId) {
-            playerViewModel.skipToQueueItem(visibleId)
-          } else {
-            // Make RecyclerView visible after scrolling
-            showPager()
-          }
+          if (queueId != visibleId) playerViewModel.skipToQueueItem(visibleId)
         }
       }
     })
   }
 
-  private fun updatePager(caller: String, queueId: Long) {
-    Timber.v("updatePager(calledFrom = $caller, queueId = $queueId)")
-
+  private fun updatePager(queueId: Long) {
     if (queueId < 0) {
       Timber.v("updatePager(queueId=$queueId) Update cancelled.")
       return
     }
 
-    // Scroll pager to current item
-    val visiblePosition = snapHelper.findSnapPosition(rvQueue.layoutManager)
+    // Scroll pager to now playing item
+    val visiblePosition = queuePager.currentItem
 
-    // Skip if Pager is not ready yet
-    if (visiblePosition < 0) {
-      rvQueue.postDelayed(300) { updatePager("updatePagerDelayed: visiblePosition < 0", queueId) }
-      return
-    }
-
-    val visibleId = queueAdapter.getItemId(visiblePosition)
+    val visibleId = queueAdapter.currentList[visiblePosition].queueId
     val queuePosition = queueAdapter.currentList.indexOfFirst { it.queueId == queueId }
 
     Timber.v(
@@ -242,42 +197,28 @@ class PlayerDialogFragment : FullScreenDialogFragment() {
           "visibleId=$visibleId, " +
           "queuePosition=$queuePosition, " +
           "queueId=$queueId) " +
-          "ScrollState=$scrollState"
+          "ScrollState=${queuePager.scrollState}"
     )
 
-    if (scrollState == RecyclerView.SCROLL_STATE_IDLE) {
-      when {
-        visibleId == queueId -> {
-          // Make RecyclerView visible (no need to scroll)
-          showPager()
-        }
-        queuePosition == RecyclerView.NO_POSITION ->
-          // Try again after the adapter settles?
-          rvQueue.postDelayed(300) { updatePager("updatePagerDelayed: queuePosition = -1", queueId) }
-        else -> {
-          // Scroll to now playing song
-          showPager()
-          if (abs(queuePosition - visiblePosition) > 1) {
-            Timber.i("Scroll to position: $visiblePosition -> $queuePosition")
-            rvQueue.scrollToPosition(queuePosition)
-          } else {
-            Timber.i("Smooth scroll to position: $visiblePosition -> $queuePosition")
-            rvQueue.smoothScrollToPosition(queuePosition)
-          }
-        }
+    if (queuePager.scrollState == ViewPager2.SCROLL_STATE_IDLE) {
+      if (visiblePosition != queuePosition) {
+        // Scroll to now playing song
+        Timber.i("Scroll to position: $visiblePosition -> $queuePosition")
+        queuePager.setCurrentItem(queuePosition, abs(queuePosition - visiblePosition) == 1)
+      } else {
+        // Pager is in the right position, make it visible
+        showPager()
       }
     }
   }
 
   private fun setupControls() {
     btnPrevious.setOnClickListener {
-      val currentPosition = snapHelper.findSnapPosition(rvQueue.layoutManager)
-      rvQueue.smoothScrollToPosition(currentPosition - 1)
+      queuePager.currentItem = queuePager.currentItem - 1
     }
 
     btnNext.setOnClickListener {
-      val currentPosition = snapHelper.findSnapPosition(rvQueue.layoutManager)
-      rvQueue.smoothScrollToPosition(currentPosition + 1)
+      queuePager.currentItem = queuePager.currentItem + 1
     }
   }
 
@@ -287,8 +228,7 @@ class PlayerDialogFragment : FullScreenDialogFragment() {
   }
 
   private fun showPager() {
-    (view?.parent as? ViewGroup)?.doOnPreDraw { startPostponedEnterTransition() }
-    ViewCompat.animate(rvQueue)
+    ViewCompat.animate(queuePager)
       .alpha(1f)
       .setDuration(context?.resources?.getInteger(R.integer.preferredAnimationDuration)?.toLong() ?: 300L)
       .start()

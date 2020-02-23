@@ -23,18 +23,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <androidx.recyclerview.widget.RecyclerView
-      android:id="@+id/rvQueue"
+    <androidx.viewpager2.widget.ViewPager2
+      android:id="@+id/queuePager"
       android:layout_width="0dp"
       android:layout_height="0dp"
-      android:alpha="0.0"
-      app:hasFixedSize="@{true}"
       app:layout_constraintBottom_toTopOf="@+id/sbSongProgress"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toTopOf="parent"
-      tools:alpha="1.0"
-      tools:listitem="@layout/list_item_queue" />
+      app:layout_constraintTop_toTopOf="parent" />
 
     <!-- Make sure Toolbar is above the Cover Art -->
 
@@ -112,10 +108,10 @@
       android:typeface="monospace"
       android:visibility="@{viewModel.seekProgressVisible}"
       app:elevation="@dimen/bottom_navigation_elevation"
-      app:layout_constraintBottom_toBottomOf="@+id/rvQueue"
-      app:layout_constraintEnd_toEndOf="@+id/rvQueue"
-      app:layout_constraintStart_toStartOf="@+id/rvQueue"
-      app:layout_constraintTop_toTopOf="@+id/rvQueue"
+      app:layout_constraintBottom_toBottomOf="@+id/queuePager"
+      app:layout_constraintEnd_toEndOf="@+id/queuePager"
+      app:layout_constraintStart_toStartOf="@+id/queuePager"
+      app:layout_constraintTop_toTopOf="@+id/queuePager"
       app:layout_constraintVertical_bias="0.33"
       tools:text="01:24"
       tools:visibility="visible" />

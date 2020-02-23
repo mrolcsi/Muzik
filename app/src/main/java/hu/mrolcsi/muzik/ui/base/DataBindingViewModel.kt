@@ -83,7 +83,7 @@ open class DataBindingViewModel(
   fun notifyPropertyChanged(fieldId: Int) = observable.notifyPropertyChanged(this, fieldId)
 
   open fun showError(caller: Any, throwable: Throwable) = sendUiCommand {
-    Timber.e(throwable, "^ happened in ${caller::class.simpleName}")
+    Timber.e(throwable, "${caller::class.qualifiedName}")
     MaterialDialog(this)
       .show {
         positiveButton(android.R.string.ok)

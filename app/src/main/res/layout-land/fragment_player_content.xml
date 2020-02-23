@@ -35,16 +35,14 @@
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toTopOf="parent" />
 
-    <androidx.recyclerview.widget.RecyclerView
-      android:id="@+id/rvQueue"
+    <androidx.viewpager2.widget.ViewPager2
+      android:id="@+id/queuePager"
       android:layout_width="0dp"
       android:layout_height="0dp"
-      android:alpha="0.0"
       app:layout_constraintBottom_toBottomOf="@id/space"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="@id/space"
-      app:layout_constraintTop_toTopOf="@id/space"
-      tools:listitem="@layout/list_item_queue" />
+      app:layout_constraintTop_toTopOf="@id/space" />
 
     <com.google.android.material.appbar.MaterialToolbar
       android:id="@+id/playerToolbar"
