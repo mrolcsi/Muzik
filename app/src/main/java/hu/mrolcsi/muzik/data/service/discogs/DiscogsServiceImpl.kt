@@ -1,12 +1,12 @@
 package hu.mrolcsi.muzik.data.service.discogs
 
 import android.net.Uri
-import com.google.android.exoplayer2.util.Log
 import hu.mrolcsi.muzik.data.remote.discogs.DiscogsApi
 import io.reactivex.Maybe
 import io.reactivex.schedulers.Schedulers
 import org.koin.core.KoinComponent
 import org.koin.core.inject
+import timber.log.Timber
 
 class DiscogsServiceImpl : DiscogsService, KoinComponent {
 
@@ -29,7 +29,7 @@ class DiscogsServiceImpl : DiscogsService, KoinComponent {
     return artistName?.let { artist ->
       discogsApi.searchForArtist(artist = artist)
         .subscribeOn(Schedulers.io())
-        .doOnError { Log.e("DiscogsService", "fetchPictureUrl($artist) Got error: $it") }
+        .doOnError { Timber.e("fetchPictureUrl($artist) Got error: $it") }
         .filter { response -> response.results.isNotEmpty() }
         .map { response -> response.results.first() }
         .map { result -> Uri.parse(result.coverImage) }

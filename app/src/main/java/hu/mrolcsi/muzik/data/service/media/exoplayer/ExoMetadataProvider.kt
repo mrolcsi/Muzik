@@ -6,13 +6,13 @@ import android.provider.MediaStore
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
-import android.util.Log
 import android.util.LruCache
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.Timeline
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
 import hu.mrolcsi.muzik.data.model.media.albumArt
 import hu.mrolcsi.muzik.data.model.media.albumArtUri
+import timber.log.Timber
 
 class ExoMetadataProvider(
   private val context: Context,
@@ -36,17 +36,17 @@ class ExoMetadataProvider(
     val cachedMetadata = mMetadataCache[mediaId]
 
     return if (cachedMetadata != null) {
-      Log.v(LOG_TAG, "Item in cache: {${cachedMetadata.description}, albumArt?=${cachedMetadata.albumArt}}")
+      Timber.v("Item in cache: {${cachedMetadata.description}, albumArt?=${cachedMetadata.albumArt}}")
       cachedMetadata
     } else {
       // Start a load in the background then return default metadata
       val defaultMetadata = mDefaultProvider.getMetadata(player)
       AsyncTask.execute {
         val newMetadata = fetchBitmap(defaultMetadata)
-        Log.v(LOG_TAG, "Updating cache with {${newMetadata.description}}")
+        Timber.v("Updating cache with {${newMetadata.description}}")
         mMetadataCache.put(mediaId, newMetadata)
       }
-      Log.v(LOG_TAG, "Using default metadata: {${defaultMetadata.description}}")
+      Timber.v("Using default metadata: {${defaultMetadata.description}}")
       mMetadataCache.put(mediaId, defaultMetadata)
       defaultMetadata
     }
@@ -77,9 +77,5 @@ class ExoMetadataProvider(
       .currentTimeline
       .getWindow(player.currentWindowIndex, mWindow, true)
       .tag as MediaDescriptionCompat
-  }
-
-  companion object {
-    private const val LOG_TAG = "ExoMetadataProvider"
   }
 }

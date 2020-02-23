@@ -1,7 +1,6 @@
 package hu.mrolcsi.muzik.ui.artistDetails
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -24,6 +23,7 @@ import hu.mrolcsi.muzik.ui.common.ThemedViewHolder
 import hu.mrolcsi.muzik.ui.common.glide.GlideApp
 import hu.mrolcsi.muzik.ui.common.glide.onLoadFailed
 import hu.mrolcsi.muzik.ui.common.glide.onResourceReady
+import hu.mrolcsi.muzik.ui.common.glide.toSingle
 import hu.mrolcsi.muzik.ui.common.observeAndRunNavCommands
 import hu.mrolcsi.muzik.ui.common.observeAndRunUiCommands
 import hu.mrolcsi.muzik.ui.songs.SongItem
@@ -33,6 +33,7 @@ import kotlinx.android.synthetic.main.fragment_artist_details_content.*
 import kotlinx.android.synthetic.main.fragment_artist_details_header.*
 import kotlinx.android.synthetic.main.list_item_album_content.view.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import timber.log.Timber
 
 class ArtistDetailsFragment : RxFragment() {
 
@@ -52,22 +53,21 @@ class ArtistDetailsFragment : RxFragment() {
           },
           onModelChange = { model ->
             // Load album art
-            val imgCoverArt = this.root.findViewById<ImageView>(R.id.imgCoverArt)
-            GlideApp.with(imgCoverArt)
-              .asBitmap()
-              .load(model.albumArtUri)
-              .onResourceReady { albumArt ->
-                viewModel.themeService
-                  .createTheme(albumArt)
-                  .subscribeBy(
-                    onSuccess = {
-                      setVariable(BR.theme, it)
-                      executePendingBindings()
-                    },
-                    onError = { Log.e("ArtistDetailsFragment", Log.getStackTraceString(it)) }
-                  ).disposeOnDestroy()
-              }
-              .into(imgCoverArt)
+            this.root.findViewById<ImageView>(R.id.imgCoverArt)?.let { imgCoverArt ->
+              GlideApp.with(imgCoverArt)
+                .asBitmap()
+                .load(model.albumArtUri)
+                .toSingle()
+                .doOnSuccess { imgCoverArt.setImageBitmap(it) }
+                .flatMap { viewModel.themeService.createTheme(it) }
+                .subscribeBy(
+                  onSuccess = {
+                    setVariable(BR.theme, it)
+                    executePendingBindings()
+                  },
+                  onError = { Timber.e(it) }
+                )
+            }
           }
         )
       }

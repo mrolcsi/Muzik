@@ -9,7 +9,6 @@ import androidx.core.view.ViewCompat
 import androidx.databinding.library.baseAdapters.BR
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.fragment.FragmentNavigatorExtras
-import com.google.android.exoplayer2.util.Log
 import hu.mrolcsi.muzik.data.manager.media.MediaManager
 import hu.mrolcsi.muzik.data.model.media.artist
 import hu.mrolcsi.muzik.data.model.media.mediaId
@@ -32,6 +31,7 @@ import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.subjects.BehaviorSubject
 import org.koin.core.KoinComponent
 import org.koin.core.inject
+import timber.log.Timber
 
 class ArtistDetailsViewModelImpl constructor(
   observable: ObservableImpl,
@@ -92,7 +92,7 @@ class ArtistDetailsViewModelImpl constructor(
       .switchMap { mediaRepo.getArtistById(it) }
       .doOnNext { artistName = it.description.artist }
       .switchMapMaybe { discogsService.getArtistPictureUrl(it.description.artist) }
-      .doOnNext { Log.d("ArtistDetailsVM", "Got uri: $it") }
+      .doOnNext { Timber.d("Got uri: $it") }
       .observeOn(AndroidSchedulers.mainThread())
       .subscribeBy(
         onNext = { artistPicture.value = it },

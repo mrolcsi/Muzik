@@ -1,6 +1,5 @@
 package hu.mrolcsi.muzik.ui.base
 
-import android.util.Log
 import androidx.databinding.Observable
 import com.afollestad.materialdialogs.MaterialDialog
 import hu.mrolcsi.muzik.ui.common.ExecuteOnceNavCommandSource
@@ -8,6 +7,7 @@ import hu.mrolcsi.muzik.ui.common.ExecuteOnceUiCommandSource
 import hu.mrolcsi.muzik.ui.common.NavCommandSource
 import hu.mrolcsi.muzik.ui.common.ObservableImpl
 import hu.mrolcsi.muzik.ui.common.UiCommandSource
+import timber.log.Timber
 import kotlin.properties.ObservableProperty
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
@@ -83,7 +83,7 @@ open class DataBindingViewModel(
   fun notifyPropertyChanged(fieldId: Int) = observable.notifyPropertyChanged(this, fieldId)
 
   open fun showError(caller: Any, throwable: Throwable) = sendUiCommand {
-    Log.e(caller::class.simpleName, android.util.Log.getStackTraceString(throwable))
+    Timber.e(throwable, "^ happened in ${caller::class.simpleName}")
     MaterialDialog(this)
       .show {
         positiveButton(android.R.string.ok)

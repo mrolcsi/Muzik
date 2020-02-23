@@ -2,7 +2,6 @@ package hu.mrolcsi.muzik.ui.player
 
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -41,6 +40,7 @@ import kotlinx.android.synthetic.main.fragment_player.*
 import kotlinx.android.synthetic.main.fragment_player_content.*
 import kotlinx.android.synthetic.main.fragment_playlist.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import timber.log.Timber
 import kotlin.math.abs
 
 class PlayerDialogFragment : FullScreenDialogFragment() {
@@ -108,7 +108,7 @@ class PlayerDialogFragment : FullScreenDialogFragment() {
       findNavController().observeAndRunNavCommands(viewLifecycleOwner, this)
 
       queueState.observe(viewLifecycleOwner, Observer { state ->
-        Log.d(LOG_TAG, "onQueueStateChanged($state)")
+        Timber.d("onQueueStateChanged($state)")
         queueAdapter.onChanged(state.queue)
         updatePager("onQueueStateChanged", state.activeQueueId)
       })
@@ -202,7 +202,7 @@ class PlayerDialogFragment : FullScreenDialogFragment() {
           val pagerPosition = snapHelper.findSnapPosition(rvQueue.layoutManager)
           val visibleId = queueAdapter.getItemId(pagerPosition)
 
-          Log.d(LOG_TAG, "onScrollStateChanged($state) queueId=$queueId visibleId=$visibleId")
+          Timber.d("onScrollStateChanged($state) queueId=$queueId visibleId=$visibleId")
 
           // Skip to visible item in queue
           if (queueId != visibleId) {
@@ -217,10 +217,10 @@ class PlayerDialogFragment : FullScreenDialogFragment() {
   }
 
   private fun updatePager(caller: String, queueId: Long) {
-    Log.v(LOG_TAG, "updatePager(calledFrom = $caller, queueId = $queueId)")
+    Timber.v("updatePager(calledFrom = $caller, queueId = $queueId)")
 
     if (queueId < 0) {
-      Log.v(LOG_TAG, "updatePager(queueId=$queueId) Update cancelled.")
+      Timber.v("updatePager(queueId=$queueId) Update cancelled.")
       return
     }
 
@@ -236,8 +236,7 @@ class PlayerDialogFragment : FullScreenDialogFragment() {
     val visibleId = queueAdapter.getItemId(visiblePosition)
     val queuePosition = queueAdapter.currentList.indexOfFirst { it.queueId == queueId }
 
-    Log.v(
-      LOG_TAG,
+    Timber.v(
       "updatePager(" +
           "visiblePosition=$visiblePosition, " +
           "visibleId=$visibleId, " +
@@ -259,10 +258,10 @@ class PlayerDialogFragment : FullScreenDialogFragment() {
           // Scroll to now playing song
           showPager()
           if (abs(queuePosition - visiblePosition) > 1) {
-            Log.i(LOG_TAG, "Scroll to position: $visiblePosition -> $queuePosition")
+            Timber.i("Scroll to position: $visiblePosition -> $queuePosition")
             rvQueue.scrollToPosition(queuePosition)
           } else {
-            Log.i(LOG_TAG, "Smooth scroll to position: $visiblePosition -> $queuePosition")
+            Timber.i("Smooth scroll to position: $visiblePosition -> $queuePosition")
             rvQueue.smoothScrollToPosition(queuePosition)
           }
         }
@@ -304,9 +303,4 @@ class PlayerDialogFragment : FullScreenDialogFragment() {
     binding.backgroundColor = backgroundColor
     binding.foregroundColor = foregroundColor
   }
-
-  companion object {
-    private const val LOG_TAG = "PlayerDialogFragment"
-  }
-
 }

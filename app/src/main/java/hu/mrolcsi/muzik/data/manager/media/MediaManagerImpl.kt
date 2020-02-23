@@ -20,7 +20,6 @@ import android.support.v4.media.session.PlaybackStateCompat.STATE_PAUSED
 import android.support.v4.media.session.PlaybackStateCompat.STATE_PLAYING
 import android.support.v4.media.session.PlaybackStateCompat.STATE_STOPPED
 import android.support.v4.media.session.PlaybackStateCompat.ShuffleMode
-import android.util.Log
 import androidx.core.os.bundleOf
 import hu.mrolcsi.muzik.data.model.media.addQueueItems
 import hu.mrolcsi.muzik.data.model.media.clearQueue
@@ -34,6 +33,7 @@ import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
 import org.koin.core.KoinComponent
 import org.koin.core.inject
+import timber.log.Timber
 
 class MediaManagerImpl : MediaManager, KoinComponent {
 
@@ -44,7 +44,7 @@ class MediaManagerImpl : MediaManager, KoinComponent {
       override fun onConnected() {
         mediaBrowser.sessionToken.also { token ->
 
-          Log.v("MediaManager", "Connected to session: $token")
+          Timber.v("Connected to session: $token")
 
           // Attach a controller to this MediaSession
           val controller = MediaControllerCompat(app, token).apply {
@@ -52,7 +52,7 @@ class MediaManagerImpl : MediaManager, KoinComponent {
             registerCallback(object : MediaControllerCompat.Callback() {
 
               override fun onSessionReady() {
-                Log.v("MediaManager", "Session ready. ")
+                Timber.v("Session ready. ")
 
                 // Set initial state, and metadata
                 if (!playbackStateSubject.hasValue()) playbackStateSubject.onNext(playbackState)
@@ -65,7 +65,7 @@ class MediaManagerImpl : MediaManager, KoinComponent {
 
               override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
                 metadata?.let {
-                  Log.v("MediaManager", "onMetadataChanged(${metadata.description})")
+                  Timber.v("onMetadataChanged(${metadata.description})")
 
                   // Check if metadata has actually changed
                   // Only post metadata whn it has an albumArt

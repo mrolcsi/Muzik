@@ -5,7 +5,6 @@ import android.os.Handler
 import android.os.ResultReceiver
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.session.MediaControllerCompat
-import android.util.Log
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.ControlDispatcher
 import com.google.android.exoplayer2.Player
@@ -18,6 +17,7 @@ import com.google.android.exoplayer2.source.ConcatenatingMediaSource
 import com.google.android.exoplayer2.util.Util
 import hu.mrolcsi.muzik.BuildConfig
 import hu.mrolcsi.muzik.data.service.media.exoplayer.BulkTimelineQueueEditor.OnQueueChangedCallback
+import timber.log.Timber
 
 /**
  * An extension class to [TimelineQueueEditor] that also supports *onItemAdded* and *onItemRemoved*
@@ -49,7 +49,7 @@ class BulkTimelineQueueEditor(
     extras: Bundle?,
     cb: ResultReceiver?
   ): Boolean {
-    Log.d(LOG_TAG, "Received command: $command,  Params: $extras")
+    Timber.d("Received command: $command,  Params: $extras")
     return when (command) {
       COMMAND_ADD_QUEUE_ITEMS -> {
         val items = extras!!.getParcelableArrayList<MediaDescriptionCompat>(COMMAND_ARGUMENT_MEDIA_DESCRIPTIONS)!!
@@ -214,8 +214,6 @@ class BulkTimelineQueueEditor(
   }
 
   companion object {
-    private const val LOG_TAG = "BulkTimelineQueueEditor"
-
     const val COMMAND_ADD_QUEUE_ITEMS = BuildConfig.APPLICATION_ID + ".ADD_QUEUE_ITEMS"
     const val COMMAND_ADD_QUEUE_ITEMS_AT = BuildConfig.APPLICATION_ID + ".ADD_QUEUE_ITEMS_AT"
     const val COMMAND_REMOVE_QUEUE_ITEMS_RANGE = BuildConfig.APPLICATION_ID + ".REMOVE_QUEUE_ITEMS_RANGE"

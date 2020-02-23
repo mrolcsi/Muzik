@@ -11,7 +11,6 @@ import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
-import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.media.session.MediaButtonReceiver
 import androidx.navigation.NavDeepLinkBuilder
@@ -33,6 +32,7 @@ import hu.mrolcsi.muzik.data.service.theme.ThemeService
 import hu.mrolcsi.muzik.ui.common.glide.GlideApp
 import hu.mrolcsi.muzik.ui.common.glide.onResourceReady
 import org.koin.android.ext.android.inject
+import timber.log.Timber
 
 
 class MuzikPlayerService : MuzikBrowserService() {
@@ -54,10 +54,10 @@ class MuzikPlayerService : MuzikBrowserService() {
   override fun onCreate() {
     super.onCreate()
 
-    Log.i(LOG_TAG, "onCreate()")
+    Timber.i("onCreate()")
 
     // Create a MediaSessionCompat
-    mMediaSession = MediaSessionCompat(this, LOG_TAG).apply {
+    mMediaSession = MediaSessionCompat(this, "MuzikPlayerService").apply {
       // Prepare Pending Intent to Player
       val playerPendingIntent = NavDeepLinkBuilder(this@MuzikPlayerService)
         .setGraph(R.navigation.main_navigation)
@@ -106,7 +106,7 @@ class MuzikPlayerService : MuzikBrowserService() {
 
         exo.getPlayer().addListener(object : Player.EventListener {
           override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
-            Log.v(LOG_TAG, "onPlayerStateChanged(playWhenReady=$playWhenReady, playbackState=$playbackState)")
+            Timber.v("onPlayerStateChanged(playWhenReady=$playWhenReady, playbackState=$playbackState)")
 
             // Make notification dismissible
             if (!playWhenReady && mIsForeground) {
@@ -118,7 +118,7 @@ class MuzikPlayerService : MuzikBrowserService() {
               Player.STATE_READY -> {
                 // Set player to last played settings
                 mLastPlayed?.let { lastPlayed ->
-                  Log.d(LOG_TAG, "Loaded 'Last Played' from database: $lastPlayed")
+                  Timber.d("Loaded 'Last Played' from database: $lastPlayed")
 
                   // Skip to last played song
                   controller.transportControls.skipToQueueItem(lastPlayed.queuePosition.toLong())
@@ -176,7 +176,7 @@ class MuzikPlayerService : MuzikBrowserService() {
             .getQueue()
             .map { it.toDescription() }
 
-          Log.d(LOG_TAG, "Loaded queue from database: $queue")
+          Timber.d("Loaded queue from database: $queue")
 
           if (queue.isNotEmpty()) {
             // Get last played positions from the database
@@ -208,7 +208,7 @@ class MuzikPlayerService : MuzikBrowserService() {
   override fun onDestroy() {
     // Avoid calling stop multiple times.
 
-    Log.i(LOG_TAG, "onDestroy()")
+    Timber.i("onDestroy()")
 
     // Deactivate the session
     mMediaSession.run {
@@ -224,9 +224,5 @@ class MuzikPlayerService : MuzikBrowserService() {
 
     // Close database
     //MuzikDatabase.getInstance(applicationContext).close()
-  }
-
-  companion object {
-    private const val LOG_TAG = "MuzikPlayerService"
   }
 }

@@ -1,7 +1,6 @@
 package hu.mrolcsi.muzik.ui.library
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,6 +17,7 @@ import kotlinx.android.synthetic.main.fragment_library.*
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
+import timber.log.Timber
 
 class LibraryFragment : RxFragment() {
 
@@ -40,7 +40,7 @@ class LibraryFragment : RxFragment() {
             if (permission.granted) viewModel.onPermissionGranted()
             else viewModel.onPermissionDenied(permission.shouldShowRequestPermissionRationale)
           },
-          onError = { Log.e("LibraryFragment", Log.getStackTraceString(it)) }
+          onError = { e -> Timber.e(e) }
         ).disposeOnDestroy()
     })
 

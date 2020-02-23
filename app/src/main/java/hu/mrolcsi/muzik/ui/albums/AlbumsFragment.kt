@@ -1,7 +1,6 @@
 package hu.mrolcsi.muzik.ui.albums
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,14 +14,16 @@ import hu.mrolcsi.muzik.ui.base.RxFragment
 import hu.mrolcsi.muzik.ui.common.BoundMVVMViewHolder
 import hu.mrolcsi.muzik.ui.common.IndexedMVVMListAdapter
 import hu.mrolcsi.muzik.ui.common.glide.GlideApp
-import hu.mrolcsi.muzik.ui.common.glide.onResourceReady
+import hu.mrolcsi.muzik.ui.common.glide.toSingle
 import hu.mrolcsi.muzik.ui.common.observeAndRunNavCommands
 import hu.mrolcsi.muzik.ui.common.observeAndRunUiCommands
 import hu.mrolcsi.muzik.ui.library.SortingMode
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import kotlinx.android.synthetic.main.fragment_albums.*
 import kotlinx.android.synthetic.main.list_item_album_content.view.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import timber.log.Timber
 
 class AlbumsFragment : RxFragment() {
 
@@ -43,18 +44,17 @@ class AlbumsFragment : RxFragment() {
               GlideApp.with(imgCoverArt)
                 .asBitmap()
                 .load(model.albumArtUri)
-                .onResourceReady { albumArt ->
-                  viewModel.themeService
-                    .createTheme(albumArt)
-                    .subscribeBy(
-                      onSuccess = {
-                        setVariable(BR.theme, it)
-                        executePendingBindings()
-                      },
-                      onError = { Log.e("AlbumsFragment", Log.getStackTraceString(it)) }
-                    ).disposeOnDestroy()
-                }
-                .into(imgCoverArt)
+                .toSingle()
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSuccess { imgCoverArt.setImageBitmap(it) }
+                .flatMap { viewModel.themeService.createTheme(it) }
+                .subscribeBy(
+                  onSuccess = {
+                    setVariable(BR.theme, it)
+                    executePendingBindings()
+                  },
+                  onError = { Timber.e(it) }
+                )
             }
 
             this.root.setOnLongClickListener { showSortingMenu(it); true }

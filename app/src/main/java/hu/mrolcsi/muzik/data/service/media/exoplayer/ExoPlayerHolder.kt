@@ -10,7 +10,6 @@ import android.os.ResultReceiver
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
-import android.util.Log
 import android.util.Pair
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.ControlDispatcher
@@ -42,6 +41,7 @@ import hu.mrolcsi.muzik.data.model.media.mediaPath
 import hu.mrolcsi.muzik.data.model.playQueue.LastPlayed
 import hu.mrolcsi.muzik.data.model.playQueue.PlayQueueEntry
 import hu.mrolcsi.muzik.data.service.media.BecomingNoisyReceiver
+import timber.log.Timber
 import java.io.File
 import java.util.concurrent.Executors
 import kotlin.random.Random
@@ -62,14 +62,14 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
   private val mPlaybackController = object : DefaultControlDispatcher() {
     override fun dispatchSetPlayWhenReady(player: Player, playWhenReady: Boolean): Boolean {
       if (playWhenReady) {
-        Log.v(LOG_TAG, "onPlay()")
+        Timber.v("onPlay()")
 
         // Prepare player if needed (like after an error)
         if (player.playbackState == Player.STATE_IDLE || player.playbackState == Player.STATE_ENDED) {
           mPlaybackPreparer.onPrepare(playWhenReady)
         }
       } else {
-        Log.v(LOG_TAG, "onPause()")
+        Timber.v("onPause()")
 
         // Save current position
         mLastPlayed.queuePosition = mPlayer.currentWindowIndex
@@ -87,7 +87,7 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
     }
 
     override fun dispatchStop(player: Player, reset: Boolean): Boolean {
-      Log.v(LOG_TAG, "onStop()")
+      Timber.v("onStop()")
 
       // Save Last Played settings (before stopping)
       mLastPlayed.queuePosition = mPlayer.currentWindowIndex
@@ -109,7 +109,7 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
     }
 
     override fun dispatchSetShuffleModeEnabled(player: Player?, shuffleModeEnabled: Boolean): Boolean {
-      Log.v(LOG_TAG, "setShuffleMode($shuffleModeEnabled, (dataSourceSize=${mQueueDataSource.size}))")
+      Timber.v("setShuffleMode($shuffleModeEnabled, (dataSourceSize=${mQueueDataSource.size}))")
 
       // Use a new ShuffleOrder with a random seed
       mShuffleSeed = Random.nextLong()
@@ -119,7 +119,7 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
     }
 
     fun dispatchSetShuffleModeEnabled(player: Player?, shuffleModeEnabled: Boolean, seed: Long): Boolean {
-      Log.v(LOG_TAG, "setShuffleMode($shuffleModeEnabled, $seed, (dataSourceSize=${mQueueDataSource.size}))")
+      Timber.v("setShuffleMode($shuffleModeEnabled, $seed, (dataSourceSize=${mQueueDataSource.size}))")
 
       // Use a new ShuffleOrder with supplied seed
       mShuffleSeed = seed
@@ -174,7 +174,7 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
       }
 
       override fun onRepeatModeChanged(repeatMode: Int) {
-        Log.v(LOG_TAG, "onRepeatModeChanged($repeatMode)")
+        Timber.v("onRepeatModeChanged($repeatMode)")
 
         mLastPlayed.repeatMode = repeatMode
         mDatabaseWorker.submit {
@@ -185,7 +185,7 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
       }
 
       override fun onShuffleModeEnabledChanged(shuffleModeEnabled: Boolean) {
-        Log.v(LOG_TAG, "onShuffleEnabledChanged($shuffleModeEnabled)")
+        Timber.v("onShuffleEnabledChanged($shuffleModeEnabled)")
 
         mLastPlayed.shuffleMode = if (shuffleModeEnabled) 1 else 0
         mLastPlayed.shuffleSeed = mShuffleSeed
@@ -224,7 +224,7 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
     }
 
     override fun onPrepareFromUri(uri: Uri, playWhenReady: Boolean, extras: Bundle?) {
-      Log.v(LOG_TAG, "onPrepareFromUri($uri, $extras) called from ${Thread.currentThread()}")
+      Timber.v("onPrepareFromUri($uri, $extras) called from ${Thread.currentThread()}")
 
       mBackgroundHandler.post {
         // Get the desired position of the item to be moved to.
@@ -264,7 +264,7 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
     }
 
     override fun onPrepare(playWhenReady: Boolean) {
-      Log.v(LOG_TAG, "onPrepare() called from ${Thread.currentThread()}")
+      Timber.v("onPrepare() called from ${Thread.currentThread()}")
       mPlayer.prepare(mQueueDataSource, false, true)
     }
   }
@@ -330,10 +330,7 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
     private val mWindow = Timeline.Window()
 
     override fun onSkipToQueueItem(player: Player?, controlDispatcher: ControlDispatcher?, id: Long) {
-      Log.v(
-        LOG_TAG,
-        "onSkipToQueueItem($id) [QueueSize=${mQueueDataSource.size}] called from ${Thread.currentThread()}"
-      )
+      Timber.v("onSkipToQueueItem($id) [QueueSize=${mQueueDataSource.size}] called from ${Thread.currentThread()}")
       super.onSkipToQueueItem(player, controlDispatcher, id)
     }
 
@@ -357,7 +354,7 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
   private val mOnQueueChangedCallback: BulkTimelineQueueEditor.OnQueueChangedCallback =
     object : BulkTimelineQueueEditor.OnQueueChangedCallback {
       override fun onItemAdded(position: Int, description: MediaDescriptionCompat) {
-        Log.v(LOG_TAG, "onItemAdded($position, $description) called from ${Thread.currentThread()}")
+        Timber.v("onItemAdded($position, $description) called from ${Thread.currentThread()}")
 
         // Reset Shuffle Order
         mQueueDataSource.setShuffleOrder(
@@ -384,10 +381,7 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
       }
 
       override fun onItemsAdded(position: Int, descriptions: Collection<MediaDescriptionCompat>) {
-        Log.v(
-          LOG_TAG,
-          "onItemsAdded($position, [${descriptions.size} items]) called from ${Thread.currentThread()}"
-        )
+        Timber.v("onItemsAdded($position, [${descriptions.size} items]) called from ${Thread.currentThread()}")
 
         // After all the other songs were added to the queue, move the first song to it's proper position.
         if (mDesiredQueuePosition in 0..mQueueDataSource.size) {
@@ -439,7 +433,7 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
       }
 
       override fun onItemMoved(from: Int, to: Int) {
-        Log.v(LOG_TAG, "onItemsMoved($from -> $to) called from ${Thread.currentThread()}")
+        Timber.v("onItemsMoved($from -> $to) called from ${Thread.currentThread()}")
 
         mDatabaseWorker.submit {
           val queue = emptyList<PlayQueueEntry>().toMutableList()
@@ -459,7 +453,7 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
       }
 
       override fun onQueueCleared() {
-        Log.v(LOG_TAG, "onQueueCleared()")
+        Timber.v("onQueueCleared()")
         mDatabaseWorker.submit {
           MuzikDatabase.getInstance(context)
             .getPlayQueueDao()
@@ -473,7 +467,7 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
   )
 
   private val mQueueMediaSourceFactory = TimelineQueueEditor.MediaSourceFactory { description ->
-    Log.v(LOG_TAG, "createMediaSource($description) called from ${Thread.currentThread()}")
+    Timber.v("createMediaSource($description) called from ${Thread.currentThread()}")
 
     // Create Metadata from Uri
     val uri = description.mediaUri ?: Uri.fromFile(File(description.mediaPath))
@@ -554,7 +548,7 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
   fun getPlayer(): Player = mPlayer
 
   fun release() {
-    Log.d(LOG_TAG, "Releasing ExoPlayer and related...")
+    Timber.d("Releasing ExoPlayer and related...")
 
     mSessionConnector.setPlayer(null)
 
@@ -567,9 +561,6 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
   }
 
   companion object {
-    @SuppressWarnings("unused")
-    private const val LOG_TAG = "PlayerHolder"
-
     const val ACTION_START_UPDATER = "ACTION_START_UPDATER"
     const val ACTION_STOP_UPDATER = "ACTION_STOP_UPDATER"
 

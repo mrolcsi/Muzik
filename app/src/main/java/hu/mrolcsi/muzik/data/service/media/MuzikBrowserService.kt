@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaDescriptionCompat
-import android.util.Log
 import androidx.core.content.ContentResolverCompat
 import androidx.media.MediaBrowserServiceCompat
 import hu.mrolcsi.muzik.BuildConfig
@@ -16,6 +15,7 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
+import timber.log.Timber
 
 @Suppress("ConstantConditionIf")
 abstract class MuzikBrowserService : MediaBrowserServiceCompat() {
@@ -72,7 +72,7 @@ abstract class MuzikBrowserService : MediaBrowserServiceCompat() {
       .subscribeBy(
         onSuccess = { result.sendResult(it) },
         onError = {
-          Log.e("MediaBrowserService", "onLoadChildren($parentId)\n$it")
+          Timber.e("onLoadChildren($parentId)\n$it")
           result.sendResult(null)
         }
       )
@@ -354,7 +354,7 @@ abstract class MuzikBrowserService : MediaBrowserServiceCompat() {
       .subscribeBy(
         onSuccess = { result.sendResult(it) },
         onError = {
-          Log.e("MediaBrowserService", "onLoadChildren($parentId, $options)\n$it")
+          Timber.e("onLoadChildren($parentId, $options)\n$it")
           result.sendResult(null)
         }
       )

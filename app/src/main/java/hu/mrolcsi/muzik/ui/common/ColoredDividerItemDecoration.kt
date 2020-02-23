@@ -4,11 +4,11 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
-import android.util.Log
 import android.view.View
 import android.widget.LinearLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import timber.log.Timber
 
 /**
  * DividerItemDecoration is a [RecyclerView.ItemDecoration] that can be used as a divider
@@ -44,10 +44,7 @@ class ColoredDividerItemDecoration
     val a = context.obtainStyledAttributes(ATTRS)
     mDivider = a.getDrawable(0)
     if (mDivider == null) {
-      Log.w(
-        TAG,
-        "@android:attr/listDivider was not set in the theme used for this " + "DividerItemDecoration. Please set that attribute all call setDrawable()"
-      )
+      Timber.w("@android:attr/listDivider was not set in the theme used for this DividerItemDecoration. Please set that attribute all call setDrawable()")
     }
     a.recycle()
     setOrientation(orientation)

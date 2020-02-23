@@ -3,7 +3,6 @@ package hu.mrolcsi.muzik.injection
 import android.Manifest
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
-import android.util.Log
 import androidx.fragment.app.Fragment
 import androidx.room.Room
 import com.google.gson.Gson
@@ -42,6 +41,7 @@ import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
+import timber.log.Timber
 
 val appModule = module {
   single<MediaManager> { MediaManagerImpl() }
@@ -76,9 +76,7 @@ val networkModule = module {
   single {
     val loggingInterceptor = HttpLoggingInterceptor(
       object : HttpLoggingInterceptor.Logger {
-        override fun log(message: String) {
-          Log.v("HTTP", message)
-        }
+        override fun log(message: String) = Timber.v("HTTP: $message")
       }).apply {
       level = HttpLoggingInterceptor.Level.BODY
     }

@@ -99,7 +99,7 @@ fun MediaControllerCompat.addQueueItems(descriptions: Collection<MediaDescriptio
         ArrayList(descriptions)
       )
     }
-    //Log.d(LOG_TAG, "addQueueItems() Bundle: ${TooLargeTool.bundleBreakdown(params)}")
+    //Timber.d("addQueueItems() Bundle: ${TooLargeTool.bundleBreakdown(params)}")
     this.sendCommand(BulkTimelineQueueEditor.COMMAND_ADD_QUEUE_ITEMS, params, null)
   }
 }
