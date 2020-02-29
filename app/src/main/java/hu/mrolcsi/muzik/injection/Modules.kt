@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import android.preference.PreferenceManager
 import androidx.fragment.app.Fragment
 import androidx.room.Room
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.tbruyelle.rxpermissions2.RxPermissions
@@ -48,6 +49,7 @@ val appModule = module {
   single<DiscogsService> { DiscogsServiceImpl() }
   single<ThemeService> { ThemeServiceImpl() }
   single<SharedPreferences> { PreferenceManager.getDefaultSharedPreferences(get()) }
+  single { FirebaseAnalytics.getInstance(get()) }
 }
 
 val dataModule = module {

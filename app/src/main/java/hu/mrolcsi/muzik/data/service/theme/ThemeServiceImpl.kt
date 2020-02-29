@@ -9,7 +9,9 @@ import androidx.core.content.edit
 import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.get
 import androidx.core.graphics.luminance
+import androidx.core.os.bundleOf
 import androidx.palette.graphics.Palette
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.gson.Gson
 import hu.mrolcsi.muzik.data.model.theme.Theme
 import io.reactivex.Observable
@@ -26,6 +28,7 @@ class ThemeServiceImpl : ThemeService, KoinComponent {
 
   private val sharedPrefs: SharedPreferences by inject()
   private val gson: Gson by inject()
+  private val firebase: FirebaseAnalytics by inject()
 
   private val themeCache = LruCache<Int, Theme>(50)
 
@@ -59,24 +62,29 @@ class ThemeServiceImpl : ThemeService, KoinComponent {
   }
 
   override fun createTheme(bitmap: Bitmap) = Single.fromCallable {
+    val startTime = System.currentTimeMillis()
     require(Looper.myLooper() != Looper.getMainLooper()) { "Theme creation is not allowed on the main thread!" }
 
     // Calculate hash for this bitmap
     val hashCode = bitmap.bitmapHash()
 
-    return@fromCallable themeCache[hashCode] ?: createThemeInternal(bitmap).also { themeCache.put(hashCode, it) }
-
+    (themeCache[hashCode] ?: createThemeInternal(bitmap).also { themeCache.put(hashCode, it) }).also {
+      firebase.logEvent(
+        "theme_creation", bundleOf(
+          "duration" to System.currentTimeMillis() - startTime
+        )
+      )
+    }
   }.subscribeOn(Schedulers.computation())
 
   private fun createThemeInternal(bitmap: Bitmap): Theme {
     val sourcePalette = Palette.from(bitmap)
       .clearFilters()
-      //.addFilter(mPaletteFiler)
       .generate()
 
     // Merge similar colors
-    val source = sourcePalette.swatches.map { it.rgb to it.population }.toMutableList()
-    val swatches = mutableListOf<Pair<Int, Int>>()
+    val source = sourcePalette.swatches.map { it.rgb to it.population * it.weight }.toMutableList()
+    val swatches = mutableListOf<Pair<Int, Double>>()
     while (source.isNotEmpty()) {
       // Pick first color
       var pick = source.first().also { source.remove(it) }
@@ -137,6 +145,9 @@ class ThemeServiceImpl : ThemeService, KoinComponent {
     abs(Color.red(first) - Color.red(second)) <= SIMILARITY_THRESHOLD &&
         abs(Color.green(first) - Color.green(second)) <= SIMILARITY_THRESHOLD &&
         abs(Color.blue(first) - Color.blue(second)) <= SIMILARITY_THRESHOLD
+
+  private val Palette.Swatch.weight
+    get() = 1 - abs(0.5 - hsl[2])
 
   companion object {
     private const val MINIMUM_CONTRAST_RATIO = 4

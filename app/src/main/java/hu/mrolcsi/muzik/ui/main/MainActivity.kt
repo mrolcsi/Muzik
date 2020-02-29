@@ -7,10 +7,10 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.databinding.ActivityMainBinding
-import hu.mrolcsi.muzik.ui.common.extensions.updateNavigationIcons
-import hu.mrolcsi.muzik.ui.common.extensions.updateStatusBarIcons
 import hu.mrolcsi.muzik.ui.base.ThemedViewModel
 import hu.mrolcsi.muzik.ui.base.ThemedViewModelImpl
+import hu.mrolcsi.muzik.ui.common.extensions.updateNavigationIcons
+import hu.mrolcsi.muzik.ui.common.extensions.updateStatusBarIcons
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainActivity : AppCompatActivity() {
