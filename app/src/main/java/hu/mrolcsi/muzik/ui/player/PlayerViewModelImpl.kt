@@ -189,12 +189,12 @@ class PlayerViewModelImpl constructor(
     Observables.combineLatest(
       mediaManager.queue
         .startWith(listOf(emptyQueueItem))
-        .distinctUntilChanged()
+        .distinctUntilChanged { old, new -> old.map { it.queueId } == new.map { it.queueId } }
         .switchMapSingle { queueItems -> queueItems.createThemes() },
       mediaManager.playbackState
         .map { it.activeQueueItemId }
-        .doOnNext { noSongLoadedVisible = it < 0 }
         .distinctUntilChanged()
+        .doOnNext { noSongLoadedVisible = it < 0 }
     )
       .map { (queue, activeQueueId) -> QueueState(queue, activeQueueId) }
       .observeOn(AndroidSchedulers.mainThread())
@@ -254,9 +254,5 @@ class PlayerViewModelImpl constructor(
     super.updateMetadata(metadata)
 
     remainingTimeText = "-${(duration - elapsedTime).secondsToTimeStamp()}"
-  }
-
-  companion object {
-    const val LOG_TAG = "PlayerViewModel"
   }
 }

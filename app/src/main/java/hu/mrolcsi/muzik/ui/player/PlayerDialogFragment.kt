@@ -192,12 +192,7 @@ class PlayerDialogFragment : FullScreenDialogFragment() {
     val queuePosition = queueAdapter.currentList.indexOfFirst { it.queueId == queueId }
 
     Timber.v(
-      "updatePager(" +
-          "visiblePosition=$visiblePosition, " +
-          "visibleId=$visibleId, " +
-          "queuePosition=$queuePosition, " +
-          "queueId=$queueId) " +
-          "ScrollState=${queuePager.scrollState}"
+      "updatePager(visiblePosition=$visiblePosition, visibleId=$visibleId, queuePosition=$queuePosition, queueId=$queueId) ScrollState=${queuePager.scrollState}"
     )
 
     if (queuePager.scrollState == ViewPager2.SCROLL_STATE_IDLE) {
