@@ -9,7 +9,7 @@ open class FullScreenDialogFragment : DialogFragment() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    setStyle(STYLE_NORMAL, R.style.FullScreenDialogTheme)
+    setStyle(STYLE_NORMAL, R.style.FluxTheme_FullScreenDialogTheme)
   }
 
   override fun onStart() {
@@ -19,7 +19,7 @@ open class FullScreenDialogFragment : DialogFragment() {
         ViewGroup.LayoutParams.MATCH_PARENT,
         ViewGroup.LayoutParams.MATCH_PARENT
       )
-      setWindowAnimations(R.style.FullScreenDialogTheme_Transitions)
+      setWindowAnimations(R.style.FluxTheme_FullScreenDialogTheme_Transitions)
     }
   }
 }

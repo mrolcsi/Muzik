@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+  <style name="TextAppearance" parent="TextAppearance.AppCompat" />
+
+  <style name="TextAppearance.Large" parent="TextAppearance.AppCompat.Large">
+    <item name="android:textStyle">bold</item>
+  </style>
+
+  <style name="TextAppearance.ListItem" parent="TextAppearance.AppCompat.Subhead">
+    <item name="android:textStyle">bold</item>
+  </style>
+
+  <style name="TextAppearance.Tab" parent="TextAppearance.MaterialComponents.Button">
+    <item name="android:textStyle">normal</item>
+  </style>
+
+</resources>

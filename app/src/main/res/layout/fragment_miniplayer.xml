@@ -69,6 +69,7 @@
         android:scrollHorizontally="true"
         android:text="@{viewModel.songTitle}"
         android:textColor="@{theme.primaryForegroundColor}"
+        android:textStyle="bold"
         app:enableMarquee="@{true}"
         app:layout_constraintBottom_toTopOf="@+id/tvArtist"
         app:layout_constraintEnd_toStartOf="@+id/btnPrevious"

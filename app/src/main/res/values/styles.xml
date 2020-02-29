@@ -16,14 +16,19 @@
     <item name="android:listDivider">@drawable/list_divider</item>
     <item name="android:selectableItemBackground">@drawable/selectable_item_background</item>
 
+    <item name="android:fontFamily">@font/lato_regular</item>
+    <item name="android:textAppearanceLarge">@style/TextAppearance.Large</item>
+    <item name="textAppearanceListItem">@style/TextAppearance.ListItem</item>
+
     <item name="materialCardViewStyle">@style/CardViewStyle</item>
+    <item name="tabStyle">@style/TabStyle</item>
   </style>
 
   <style name="FluxTheme.Launcher">
     <item name="android:windowBackground">@drawable/launch_screen</item>
   </style>
 
-  <style name="FullScreenDialogTheme" parent="Theme.MaterialComponents.Dialog">
+  <style name="FluxTheme.FullScreenDialogTheme">
     <item name="android:windowIsFloating">false</item>
     <item name="android:windowBackground">@null</item>
     <item name="android:windowDrawsSystemBarBackgrounds">true</item>
@@ -31,13 +36,17 @@
     <item name="android:navigationBarColor">@android:color/transparent</item>
   </style>
 
-  <style name="FullScreenDialogTheme.Transitions">
+  <style name="FluxTheme.FullScreenDialogTheme.Transitions">
     <item name="android:windowEnterAnimation">@anim/slide_in_up</item>
     <item name="android:windowExitAnimation">@anim/slide_out_down</item>
   </style>
 
   <style name="CardViewStyle" parent="Widget.MaterialComponents.CardView">
     <item name="cardCornerRadius">0dp</item>
+  </style>
+
+  <style name="TabStyle" parent="Widget.MaterialComponents.TabLayout">
+    <item name="tabTextAppearance">@style/TextAppearance.Tab</item>
   </style>
 
   <!-- TODO: Light Theme -->
