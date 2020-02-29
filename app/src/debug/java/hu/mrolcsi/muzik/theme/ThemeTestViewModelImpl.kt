@@ -1,12 +1,13 @@
 package hu.mrolcsi.muzik.theme
 
 import androidx.lifecycle.MutableLiveData
+import hu.mrolcsi.muzik.data.model.theme.Theme
+import hu.mrolcsi.muzik.data.service.theme.ThemeService
 import hu.mrolcsi.muzik.ui.base.DataBindingViewModel
 import hu.mrolcsi.muzik.ui.common.ExecuteOnceNavCommandSource
 import hu.mrolcsi.muzik.ui.common.ExecuteOnceUiCommandSource
 import hu.mrolcsi.muzik.ui.common.ObservableImpl
-import hu.mrolcsi.muzik.data.model.theme.Theme
-import hu.mrolcsi.muzik.data.service.theme.ThemeService
+import io.reactivex.rxkotlin.subscribeBy
 
 class ThemeTestViewModelImpl constructor(
   observable: ObservableImpl,
@@ -18,6 +19,9 @@ class ThemeTestViewModelImpl constructor(
   override val theme = MutableLiveData<Theme>()
 
   init {
-    themeService.currentTheme.subscribe { theme.value = it }.disposeOnCleared()
+    themeService.currentTheme.subscribeBy(
+      onNext = { theme.value = it },
+      onError = { showError(this, it) }
+    ).disposeOnCleared()
   }
 }
