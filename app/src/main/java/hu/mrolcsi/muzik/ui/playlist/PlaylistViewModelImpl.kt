@@ -54,12 +54,12 @@ class PlaylistViewModelImpl constructor(
       .map { (entries, state) ->
         entries.map {
           PlaylistItem(
-            it._id,
-            it.mediaId,
-            it.title ?: context.getString(R.string.songs_noTitle),
-            it.artist ?: context.getString(R.string.songs_unknownArtist),
-            it.duration.millisecondsToTimeStamp(),
-            it._id == state.activeQueueItemId
+            id = it._id,
+            mediaId = it.mediaId,
+            titleText = it.title ?: context.getString(R.string.songs_noTitle),
+            artistText = it.artist ?: context.getString(R.string.songs_unknownArtist),
+            durationText = it.duration.millisecondsToTimeStamp(),
+            isPlaying = it._id == state.activeQueueItemId
           )
         }
       }

@@ -18,13 +18,9 @@ import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.databinding.FragmentPlayerBinding
 import hu.mrolcsi.muzik.databinding.ListItemQueueBinding
 import hu.mrolcsi.muzik.ui.base.FullScreenDialogFragment
-import hu.mrolcsi.muzik.ui.common.BoundMVVMViewHolder
-import hu.mrolcsi.muzik.ui.common.MVVMListAdapter
-import hu.mrolcsi.muzik.ui.common.ThemedViewHolder
+import hu.mrolcsi.muzik.ui.common.*
 import hu.mrolcsi.muzik.ui.common.extensions.updateNavigationIcons
 import hu.mrolcsi.muzik.ui.common.extensions.updateStatusBarIcons
-import hu.mrolcsi.muzik.ui.common.observeAndRunNavCommands
-import hu.mrolcsi.muzik.ui.common.observeAndRunUiCommands
 import hu.mrolcsi.muzik.ui.playlist.PlaylistItem
 import hu.mrolcsi.muzik.ui.playlist.PlaylistViewModel
 import hu.mrolcsi.muzik.ui.playlist.PlaylistViewModelImpl
@@ -102,6 +98,15 @@ class PlayerDialogFragment : FullScreenDialogFragment() {
         updatePager(state.activeQueueId)
       })
     }
+
+    playlistViewModel.items.observe(viewLifecycleOwner, Observer { playlist ->
+      playlist
+        .indexOfFirst { it.isPlaying }
+        .takeUnless { it < 0 }
+        ?.let { nowPlayingPosition ->
+          rvPlaylist.scrollToPosition(nowPlayingPosition)
+        }
+    })
   }
 
   override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
