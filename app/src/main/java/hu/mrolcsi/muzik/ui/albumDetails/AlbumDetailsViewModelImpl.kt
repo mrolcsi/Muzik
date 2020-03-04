@@ -8,16 +8,7 @@ import androidx.databinding.library.baseAdapters.BR
 import androidx.lifecycle.MutableLiveData
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.data.manager.media.MediaManager
-import hu.mrolcsi.muzik.data.model.media.album
-import hu.mrolcsi.muzik.data.model.media.albumArtUri
-import hu.mrolcsi.muzik.data.model.media.albumYear
-import hu.mrolcsi.muzik.data.model.media.artist
-import hu.mrolcsi.muzik.data.model.media.discNumber
-import hu.mrolcsi.muzik.data.model.media.id
-import hu.mrolcsi.muzik.data.model.media.mediaId
-import hu.mrolcsi.muzik.data.model.media.numberOfSongs
-import hu.mrolcsi.muzik.data.model.media.titleKey
-import hu.mrolcsi.muzik.data.model.media.trackNumber
+import hu.mrolcsi.muzik.data.model.media.*
 import hu.mrolcsi.muzik.data.model.theme.Theme
 import hu.mrolcsi.muzik.data.repository.media.MediaRepository
 import hu.mrolcsi.muzik.ui.albums.DiscNumberItem
@@ -29,6 +20,7 @@ import hu.mrolcsi.muzik.ui.common.ExecuteOnceUiCommandSource
 import hu.mrolcsi.muzik.ui.common.ObservableImpl
 import hu.mrolcsi.muzik.ui.common.glide.GlideApp
 import hu.mrolcsi.muzik.ui.common.glide.toSingle
+import hu.mrolcsi.muzik.ui.songs.SongItem
 import hu.mrolcsi.muzik.ui.songs.asSongItems
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.Observables
@@ -73,17 +65,20 @@ class AlbumDetailsViewModelImpl constructor(
 
   override val albumTheme = MutableLiveData<Theme>()
 
-  override fun onSongClick(songItem: MediaItem, position: Int) {
-    albumItem.value?.description?.artist?.let { mediaManager.setQueueTitle(it) }
-    songDescriptions?.let { mediaManager.playAll(it, position) }
+  private lateinit var songDescriptions: List<MediaDescriptionCompat>
+
+  override fun onSongClick(songItem: SongItem) {
+    albumItem.value?.description?.album?.let { mediaManager.setQueueTitle(it) }
+    songDescriptions
+      .indexOfFirst { songItem.id == it.id }
+      .takeUnless { it < 0 }
+      ?.let { mediaManager.playAll(songDescriptions, it) }
   }
 
   override fun onShuffleAllClick() {
-    albumItem.value?.description?.artist?.let { mediaManager.setQueueTitle(it) }
-    songDescriptions?.let { mediaManager.playAllShuffled(it) }
+    albumItem.value?.description?.album?.let { mediaManager.setQueueTitle(it) }
+    songDescriptions.let { mediaManager.playAllShuffled(it) }
   }
-
-  private var songDescriptions: List<MediaDescriptionCompat>? = null
 
   init {
     Observables.combineLatest(

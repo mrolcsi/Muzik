@@ -41,17 +41,18 @@ class AlbumDetailsFragment : Fragment() {
       viewHolderFactory = { parent, viewType ->
         if (viewType == VIEW_TYPE_DISC_NUMBER) {
           ThemedViewHolder<DiscNumberItem>(
-            parent,
-            R.layout.list_item_disc_number,
-            viewLifecycleOwner,
-            viewModel.albumTheme
+            parent = parent,
+            layoutId = R.layout.list_item_disc_number,
+            viewLifecycleOwner = viewLifecycleOwner,
+            theme = viewModel.albumTheme
           ) as MVVMViewHolder<AlbumDetailItem>
         } else {
           ThemedViewHolder<SongItem>(
-            parent,
-            R.layout.list_item_song_track_number,
-            viewLifecycleOwner,
-            viewModel.albumTheme
+            parent = parent,
+            layoutId = R.layout.list_item_song_track_number,
+            viewLifecycleOwner = viewLifecycleOwner,
+            theme = viewModel.albumTheme,
+            onItemClickListener = { item, _ -> viewModel.onSongClick(item) }
           ) as MVVMViewHolder<AlbumDetailItem>
         }
       }

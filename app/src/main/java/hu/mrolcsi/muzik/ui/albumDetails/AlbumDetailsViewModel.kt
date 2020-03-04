@@ -8,6 +8,7 @@ import hu.mrolcsi.muzik.ui.base.ListViewModel
 import hu.mrolcsi.muzik.ui.base.ThemedViewModel
 import hu.mrolcsi.muzik.ui.common.NavCommandSource
 import hu.mrolcsi.muzik.ui.common.UiCommandSource
+import hu.mrolcsi.muzik.ui.songs.SongItem
 
 interface AlbumDetailsViewModel :
   ListViewModel<AlbumDetailItem>, ThemedViewModel, UiCommandSource,
@@ -24,7 +25,7 @@ interface AlbumDetailsViewModel :
 
   val albumTheme: LiveData<Theme>
 
-  fun onSongClick(songItem: MediaItem, position: Int)
+  fun onSongClick(songItem: SongItem)
 
   fun onShuffleAllClick()
 }
