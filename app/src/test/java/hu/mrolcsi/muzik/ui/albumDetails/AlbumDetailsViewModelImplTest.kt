@@ -12,14 +12,11 @@ import hu.mrolcsi.muzik.ui.common.ExecuteOnceNavCommandSource
 import hu.mrolcsi.muzik.ui.common.ExecuteOnceUiCommandSource
 import hu.mrolcsi.muzik.ui.common.ObservableImpl
 import hu.mrolcsi.muzik.ui.songs.SongItem
-import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
-import io.mockk.mockk
 import io.reactivex.Observable
 import org.junit.Before
 import org.junit.Test
-import org.koin.core.context.loadKoinModules
 import org.koin.dsl.module
 import kotlin.test.assertEquals
 
@@ -30,7 +27,7 @@ class AlbumDetailsViewModelImplTest : BaseTest() {
   @MockK
   private lateinit var mockMediaRepo: MediaRepository
 
-  private val testModule = module(override = true) {
+  override val testModule = module(override = true) {
     single { mockMediaManager }
     single { mockMediaRepo }
   }
@@ -45,12 +42,9 @@ class AlbumDetailsViewModelImplTest : BaseTest() {
 
   @Before
   fun setUp() {
-    MockKAnnotations.init(this)
-    loadKoinModules(testModule)
-
-    val metadata = mockk<MediaMetadataCompat> {
-      every { getString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID) } returns "MEDIA_ID"
-    }
+    val metadata = MediaMetadataCompat.Builder()
+      .putText(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, "MEDIA_ID")
+      .build()
     every { mockMediaManager.mediaMetadata } returns Observable.just(metadata)
   }
 
@@ -95,12 +89,6 @@ class AlbumDetailsViewModelImplTest : BaseTest() {
 
     every { mockMediaRepo.getAlbumById(albumId) } returns Observable.just(albumItem)
     every { mockMediaRepo.getSongsFromAlbum(albumId) } returns Observable.just(songs)
-
-    val metadata = mockk<MediaMetadataCompat> {
-      every { getString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID) } returns "MEDIA_ID"
-    }
-
-    every { mockMediaManager.mediaMetadata } returns Observable.just(metadata)
 
     withSut {
       setArgument(albumId)

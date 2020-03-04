@@ -4,6 +4,7 @@ import android.content.Context
 import android.support.v4.media.MediaBrowserCompat.MediaItem
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
+import android.util.Log
 import androidx.databinding.library.baseAdapters.BR
 import androidx.lifecycle.MutableLiveData
 import hu.mrolcsi.muzik.R
@@ -67,6 +68,11 @@ class AlbumDetailsViewModelImpl constructor(
 
   private lateinit var songDescriptions: List<MediaDescriptionCompat>
 
+  private val comparator = compareBy<MediaItem>(
+    { it.description.titleKey },
+    { it.description.discNumber * 1000 + it.description.trackNumber }
+  )
+
   override fun onSongClick(songItem: SongItem) {
     albumItem.value?.description?.album?.let { mediaManager.setQueueTitle(it) }
     songDescriptions
@@ -86,17 +92,16 @@ class AlbumDetailsViewModelImpl constructor(
         .switchMap { mediaRepo.getAlbumById(it) }
         .doOnNext { updateHeaderText(it) }
         .switchMap { mediaRepo.getSongsFromAlbum(it.description.id) }
-        .map { songs ->
-          songs
-            .sortedBy { it.description.titleKey }
-            .sortedBy { it.description.discNumber * 1000 + it.description.trackNumber }
-        },
+        .map { songs -> songs.sortedWith(comparator) }
+        .doOnNext { songs -> songDescriptions = songs.filter { it.isPlayable }.map { it.description } }
+        .doOnError { println("albumSubject: ${Log.getStackTraceString(it)}") },
+
       mediaManager.mediaMetadata
         .distinctUntilChanged { t: MediaMetadataCompat -> t.mediaId }
         .filter { it.mediaId != null }
+        .doOnError { println("mediaMetadata: ${Log.getStackTraceString(it)}") }
     )
       .subscribeOn(Schedulers.computation())
-      .doOnNext { (songs, _) -> songDescriptions = songs.filter { it.isPlayable }.map { it.description } }
       .map { (songs, metadata) ->
         songs
           .groupBy { it.description.discNumber }
@@ -114,7 +119,7 @@ class AlbumDetailsViewModelImpl constructor(
   }
 
   private fun updateHeaderText(albumItem: MediaItem) {
-    this.albumItem.value = albumItem
+    this.albumItem.postValue(albumItem)
 
     albumTitleText = albumItem.description.album
     artistText = albumItem.description.artist
