@@ -3,9 +3,11 @@ package hu.mrolcsi.muzik
 import android.provider.MediaStore
 import android.support.v4.media.MediaBrowserCompat
 import androidx.core.os.bundleOf
+import hu.mrolcsi.muzik.data.model.playQueue.PlayQueueEntry
 import hu.mrolcsi.muzik.ui.common.extensions.toKeyString
 import io.mockk.every
 import io.mockk.mockk
+import kotlin.random.Random
 
 object TestData {
 
@@ -59,4 +61,25 @@ object TestData {
     }
   }
 
+  fun createPlayQueueEntry(
+    id: Long = Random.nextLong(),
+    filePath: String = "/path/to/file",
+    mediaId: Long = Random.nextLong(),
+    artist: String? = null,
+    artistId: Long = Random.nextLong(),
+    album: String? = null,
+    albumId: Long = Random.nextLong(),
+    title: String? = null,
+    duration: Long? = null
+  ) = PlayQueueEntry(
+    id,
+    filePath,
+    mediaId,
+    artist,
+    artistId,
+    album,
+    albumId,
+    title,
+    duration
+  )
 }

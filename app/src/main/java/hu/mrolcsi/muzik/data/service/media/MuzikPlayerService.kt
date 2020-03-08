@@ -1,228 +1,146 @@
 package hu.mrolcsi.muzik.data.service.media
 
-import android.Manifest
-import android.annotation.SuppressLint
-import android.app.Notification
 import android.app.Service
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.os.AsyncTask
-import android.support.v4.media.MediaMetadataCompat
-import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.MediaSessionCompat
-import android.support.v4.media.session.PlaybackStateCompat
-import androidx.core.content.ContextCompat
+import androidx.annotation.VisibleForTesting
 import androidx.media.session.MediaButtonReceiver
 import androidx.navigation.NavDeepLinkBuilder
-import com.bumptech.glide.request.target.Target
-import com.google.android.exoplayer2.ExoPlaybackException
-import com.google.android.exoplayer2.Player
-import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import hu.mrolcsi.muzik.R
-import hu.mrolcsi.muzik.data.local.MuzikDatabase
-import hu.mrolcsi.muzik.data.model.media.albumArtUri
-import hu.mrolcsi.muzik.data.model.media.isSkipToNextEnabled
-import hu.mrolcsi.muzik.data.model.media.prepareFromDescriptions
-import hu.mrolcsi.muzik.data.model.media.setQueueTitle
-import hu.mrolcsi.muzik.data.model.media.setShuffleMode
+import hu.mrolcsi.muzik.data.local.playQueue.PlayQueueDao2
 import hu.mrolcsi.muzik.data.model.playQueue.LastPlayed
-import hu.mrolcsi.muzik.data.service.media.exoplayer.ExoPlayerHolder
-import hu.mrolcsi.muzik.data.service.media.exoplayer.notification.ExoNotificationManager
-import hu.mrolcsi.muzik.data.service.theme.ThemeService
-import hu.mrolcsi.muzik.ui.common.glide.GlideApp
-import hu.mrolcsi.muzik.ui.common.glide.onResourceReady
+import hu.mrolcsi.muzik.data.service.media.exoplayer.ExoPlayerAdapter
+import hu.mrolcsi.muzik.data.service.media.exoplayer.NotificationEvent
+import hu.mrolcsi.muzik.data.service.media.exoplayer.PlayerEvent
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.Singles
+import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxkotlin.subscribeBy
+import io.reactivex.schedulers.Schedulers
 import org.koin.android.ext.android.inject
 import timber.log.Timber
 
-
 class MuzikPlayerService : MuzikBrowserService() {
 
-  private val themeService: ThemeService by inject()
+  private val mediaSession: MediaSessionCompat by inject()
+  private val playQueueDao: PlayQueueDao2 by inject()
+  private val exoPlayerAdapter: ExoPlayerAdapter by inject()
 
-  // MediaSession and Player implementations
-  private lateinit var mMediaSession: MediaSessionCompat
-  private lateinit var mPlayerHolder: ExoPlayerHolder
+  private val disposables = CompositeDisposable()
 
-  // Last played position
-  private var mLastPlayed: LastPlayed? = null
+  @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+  internal var isForeground = false
 
-  // ExoPlayer Notification
-  private lateinit var mExoNotificationManager: ExoNotificationManager
-  private var mIsForeground = false
+  override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+    MediaButtonReceiver.handleIntent(mediaSession, intent)
+    return Service.START_STICKY
+  }
 
-  @SuppressLint("WrongConstant")
   override fun onCreate() {
     super.onCreate()
 
     Timber.i("onCreate()")
 
-    // Create a MediaSessionCompat
-    mMediaSession = MediaSessionCompat(this, "MuzikPlayerService").apply {
-      // Prepare Pending Intent to Player
-      val playerPendingIntent = NavDeepLinkBuilder(this@MuzikPlayerService)
-        .setGraph(R.navigation.main_navigation)
-        .setDestination(R.id.navPlayer)
-        .createPendingIntent()
-      setSessionActivity(playerPendingIntent)
-
+    // Set up MediaSession
+    mediaSession.let { session ->
       // Set the session's token so that client activities can communicate with it.
-      setSessionToken(sessionToken)
+      sessionToken = session.sessionToken
 
-      // Enable callbacks from MediaButtons and TransportControls
-      setFlags(MediaSessionCompat.FLAG_HANDLES_QUEUE_COMMANDS)
+      // Enable callbacks from MediaButtons and TransportControls and QueueCommands
+      session.setFlags(MediaSessionCompat.FLAG_HANDLES_QUEUE_COMMANDS)
 
-      // Connect this session with the ExoPlayer
-      mPlayerHolder = ExoPlayerHolder(applicationContext, this).also { exo ->
-        mExoNotificationManager = ExoNotificationManager(
-          applicationContext,
-          this,
-          exo.getPlayer(),
-          object : PlayerNotificationManager.NotificationListener {
+      // Prepare Pending Intent to Player
+      val playerPendingIntent =
+        NavDeepLinkBuilder(this)
+          .setGraph(R.navigation.main_navigation)
+          .setDestination(R.id.navPlayer)
+          .createPendingIntent()
+      session.setSessionActivity(playerPendingIntent)
+    }
 
-            override fun onNotificationPosted(notificationId: Int, notification: Notification?, ongoing: Boolean) {
-              if (exo.getPlayer().playWhenReady && !mIsForeground) {
-                startService(
-                  Intent(
-                    applicationContext,
-                    MuzikPlayerService::class.java
-                  )
-                )
-                startForeground(notificationId, notification)
-                mIsForeground = true
+    // Set up ExoPlayerAdapter
+    exoPlayerAdapter.observePlayerEvents()
+      .doOnNext { Timber.v(it.toString()) }
+      .subscribeBy(
+        onNext = { event ->
+          when (event) {
+            is PlayerEvent.PlayerStateChanged -> {
+              // Remove service from the foreground (makes notification dismissible)
+              if (!event.playWhenReady && isForeground) {
+                stopForeground(false)
+                isForeground = false
               }
 
-              if (!exo.getPlayer().playWhenReady && mIsForeground) {
+              //if (event.playbackState == Player.STATE_READY){
+              //  // Might need to load last played queue here
+              //}
+            }
+            is PlayerEvent.PlayerError -> {
+              Timber.e(event.error)
+            }
+          }
+        },
+        onError = { Timber.e(it, "Error while observing Player Events") }
+      )
+      .addTo(disposables)
+
+    exoPlayerAdapter.observeNotificationEvents()
+      .doOnNext { Timber.v(it.toString()) }
+      .subscribeBy(
+        onNext = { event ->
+          when (event) {
+            is NotificationEvent.NotificationPosted -> {
+              if (exoPlayerAdapter.isPlaying() && !isForeground) {
+                startService(Intent(applicationContext, MuzikPlayerService::class.java))
+                startForeground(event.notificationId, event.notification)
+                isForeground = true
+              }
+
+              if (!exoPlayerAdapter.isPlaying() && isForeground) {
                 stopForeground(false)
-                mIsForeground = false
+                isForeground = false
               }
             }
-
-            override fun onNotificationCancelled(notificationId: Int, dismissedByUser: Boolean) {
+            is NotificationEvent.NotificationCanceled -> {
               stopForeground(true)
               stopSelf()
-              mIsForeground = false
-            }
-          })
-
-        exo.getPlayer().addListener(object : Player.EventListener {
-          override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
-            Timber.v("onPlayerStateChanged(playWhenReady=$playWhenReady, playbackState=$playbackState)")
-
-            // Make notification dismissible
-            if (!playWhenReady && mIsForeground) {
-              stopForeground(false)
-              mIsForeground = false
-            }
-
-            when (playbackState) {
-              Player.STATE_READY -> {
-                // Set player to last played settings
-                mLastPlayed?.let { lastPlayed ->
-                  Timber.d("Loaded 'Last Played' from database: $lastPlayed")
-
-                  // Skip to last played song
-                  controller.transportControls.skipToQueueItem(lastPlayed.queuePosition.toLong())
-
-                  // Seek to saved position
-                  controller.transportControls.seekTo(lastPlayed.trackPosition)
-
-                  // Set mLastPlayed to null, so we won't call this again
-                  mLastPlayed = null
-                }
-              }
+              isForeground = false
             }
           }
+        },
+        onError = { Timber.e(it, "Error while observing Notification Events") }
+      )
+      .addTo(disposables)
 
-          override fun onPlayerError(error: ExoPlaybackException?) {
-            val player = exo.getPlayer()
-
-            if (controller.playbackState.isSkipToNextEnabled && player.playWhenReady) {
-              // Skip to next track
-              controller.transportControls.skipToNext()
-              controller.transportControls.prepare()
-              controller.transportControls.play()
-            } else {
-              // Send error to client
-            }
-          }
-        })
+    // Load last played queue
+    Singles.zip(
+        playQueueDao.getPlayQueue()
+          .map { entries -> entries.map { it.toDescription() } },
+        playQueueDao.getLastPlayed()
+          .onErrorReturnItem(LastPlayed())
+      )
+      .subscribeOn(Schedulers.io())
+      .flatMapCompletable { (queue, lastPlayed) ->
+        exoPlayerAdapter.loadQueue(queue)
+          .andThen(exoPlayerAdapter.loadLastPlayed(lastPlayed))
       }
-
-      // Register basic callbacks
-      controller.registerCallback(object : MediaControllerCompat.Callback() {
-
-        override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {}
-
-        override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
-          GlideApp.with(this@MuzikPlayerService)
-            .asBitmap()
-            .load(metadata?.albumArtUri)
-            .override(Target.SIZE_ORIGINAL)
-            .onResourceReady { themeService.updateTheme(it) }
-            .preload()
-        }
-      })
-
-      // Check permissions before proceeding
-      if (ContextCompat.checkSelfPermission(
-          applicationContext,
-          Manifest.permission.READ_EXTERNAL_STORAGE
-        ) == PackageManager.PERMISSION_GRANTED
-      ) {
-        AsyncTask.execute {
-          // Get last played queue from the database
-          val queue = MuzikDatabase.getInstance(applicationContext)
-            .getPlayQueueDao()
-            .getQueue()
-            .map { it.toDescription() }
-
-          Timber.d("Loaded queue from database: $queue")
-
-          if (queue.isNotEmpty()) {
-            // Get last played positions from the database
-            mLastPlayed = MuzikDatabase.getInstance(applicationContext)
-              .getPlayQueueDao()
-              .getLastPlayed()
-
-            mLastPlayed?.let { lastPlayed ->
-              // Load last played songs (starting with last played position)
-              val queuePosition = if (lastPlayed.queuePosition in queue.indices) lastPlayed.queuePosition else 0
-              controller.prepareFromDescriptions(queue, queuePosition)
-
-              controller.transportControls.setRepeatMode(lastPlayed.repeatMode)
-              controller.transportControls.setShuffleMode(lastPlayed.shuffleMode, lastPlayed.shuffleSeed)
-              controller.setQueueTitle(lastPlayed.queueTitle)
-            }
-          }
-        }
-      }
-
-    }
-  }
-
-  override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-    MediaButtonReceiver.handleIntent(mMediaSession, intent)
-    return Service.START_STICKY
+      .subscribeBy(
+        onError = { Timber.e(it, "Failed to load Last Played Queue") }
+      )
+      .addTo(disposables)
   }
 
   override fun onDestroy() {
-    // Avoid calling stop multiple times.
+    super.onDestroy()
 
     Timber.i("onDestroy()")
 
-    // Deactivate the session
-    mMediaSession.run {
+    mediaSession.run {
       isActive = false
       release()
     }
 
-    // Detach the player from the notification
-    mExoNotificationManager.release()
-
-    // Release player and related resources
-    mPlayerHolder.release()
-
-    // Close database
-    //MuzikDatabase.getInstance(applicationContext).close()
+    exoPlayerAdapter.release()
+    disposables.dispose()
   }
 }

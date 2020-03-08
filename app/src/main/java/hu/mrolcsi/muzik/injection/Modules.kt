@@ -3,6 +3,7 @@ package hu.mrolcsi.muzik.injection
 import android.Manifest
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
+import android.support.v4.media.session.MediaSessionCompat
 import androidx.fragment.app.Fragment
 import androidx.room.Room
 import com.google.firebase.analytics.FirebaseAnalytics
@@ -11,6 +12,7 @@ import com.google.gson.GsonBuilder
 import com.tbruyelle.rxpermissions2.RxPermissions
 import hu.mrolcsi.muzik.data.local.MuzikDatabase
 import hu.mrolcsi.muzik.data.local.MuzikDatabaseMigrations
+import hu.mrolcsi.muzik.data.local.playQueue.PlayQueueDao2
 import hu.mrolcsi.muzik.data.manager.media.MediaManager
 import hu.mrolcsi.muzik.data.manager.media.MediaManagerImpl
 import hu.mrolcsi.muzik.data.remote.AnnotationExclusionStrategy
@@ -49,7 +51,12 @@ val appModule = module {
   single<DiscogsService> { DiscogsServiceImpl() }
   single<ThemeService> { ThemeServiceImpl() }
   single<SharedPreferences> { PreferenceManager.getDefaultSharedPreferences(get()) }
+
   single { FirebaseAnalytics.getInstance(get()) }
+}
+
+val mediaModule = module {
+  single { MediaSessionCompat(get(), "MuzikPlayerSession") }
 }
 
 val dataModule = module {
@@ -63,6 +70,7 @@ val dataModule = module {
   }
 
   single { get<MuzikDatabase>().getPlayQueueDao() }
+  single<PlayQueueDao2> { get<MuzikDatabase>().getPlayQueueDao2() }
 
   single<MediaRepository> { MediaRepositoryImpl() }
 }

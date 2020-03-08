@@ -30,6 +30,7 @@ class MuzikApplication : Application() {
       modules(
         listOf(
           appModule,
+          mediaModule,
           dataModule,
           networkModule,
           viewModule

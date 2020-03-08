@@ -46,6 +46,7 @@ import java.io.File
 import java.util.concurrent.Executors
 import kotlin.random.Random
 
+@Deprecated("Use ExoPlayerAdapter!")
 class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat) {
 
   //region  -- HANDLERS & THREADS --

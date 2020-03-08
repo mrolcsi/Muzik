@@ -4,8 +4,9 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import hu.mrolcsi.muzik.data.model.playQueue.LastPlayed
 import hu.mrolcsi.muzik.data.local.playQueue.PlayQueueDao
+import hu.mrolcsi.muzik.data.local.playQueue.PlayQueueDao2Impl
+import hu.mrolcsi.muzik.data.model.playQueue.LastPlayed
 import hu.mrolcsi.muzik.data.model.playQueue.PlayQueueEntry
 
 @Database(
@@ -14,7 +15,9 @@ import hu.mrolcsi.muzik.data.model.playQueue.PlayQueueEntry
 )
 abstract class MuzikDatabase : RoomDatabase() {
 
+  @Deprecated("Use PlayQueueDao2!")
   abstract fun getPlayQueueDao(): PlayQueueDao
+  abstract fun getPlayQueueDao2(): PlayQueueDao2Impl
 
   companion object {
     @Suppress("unused")
@@ -34,9 +37,10 @@ abstract class MuzikDatabase : RoomDatabase() {
     }
 
     private fun buildDatabase(context: Context): MuzikDatabase {
-      return Room.databaseBuilder(context, MuzikDatabase::class.java,
-        DATABASE_NAME
-      )
+      return Room.databaseBuilder(
+          context, MuzikDatabase::class.java,
+          DATABASE_NAME
+        )
         .addMigrations(
           MuzikDatabaseMigrations.MIGRATION_1_2,
           MuzikDatabaseMigrations.MIGRATION_2_3,

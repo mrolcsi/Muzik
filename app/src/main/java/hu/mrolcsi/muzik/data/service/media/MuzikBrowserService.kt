@@ -380,9 +380,6 @@ abstract class MuzikBrowserService : MediaBrowserServiceCompat() {
   }
 
   companion object {
-    @Suppress("unused")
-    private const val LOG_TAG = "MuzikBrowserService"
-
     const val MEDIA_ROOT_ARTISTS = "media_artists"
     const val MEDIA_ROOT_ARTIST_BY_ID = "media_artist_by_id"
 
