@@ -9,11 +9,11 @@ import io.reactivex.Observable
 
 interface ExoPlayerAdapter {
 
+  val playerEvents: Observable<PlayerEvent>
+  val notificationEvents: Observable<NotificationEvent>
+
   fun loadQueue(descriptions: List<MediaDescriptionCompat>): Completable
   fun loadLastPlayed(lastPlayed: LastPlayed): Completable
-
-  fun observePlayerEvents(): Observable<PlayerEvent>
-  fun observeNotificationEvents(): Observable<NotificationEvent>
 
   fun isPlaying(): Boolean
 

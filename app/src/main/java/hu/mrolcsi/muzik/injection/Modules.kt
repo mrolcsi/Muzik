@@ -3,13 +3,20 @@ package hu.mrolcsi.muzik.injection
 import android.Manifest
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
+import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.MediaSessionCompat
 import androidx.fragment.app.Fragment
 import androidx.room.Room
+import com.google.android.exoplayer2.C
+import com.google.android.exoplayer2.ExoPlayerFactory
+import com.google.android.exoplayer2.audio.AudioAttributes
+import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.tbruyelle.rxpermissions2.RxPermissions
+import hu.mrolcsi.muzik.data.MediaStoreWrapper
 import hu.mrolcsi.muzik.data.local.MuzikDatabase
 import hu.mrolcsi.muzik.data.local.MuzikDatabaseMigrations
 import hu.mrolcsi.muzik.data.local.playQueue.PlayQueueDao2
@@ -21,6 +28,10 @@ import hu.mrolcsi.muzik.data.repository.media.MediaRepository
 import hu.mrolcsi.muzik.data.repository.media.MediaRepositoryImpl
 import hu.mrolcsi.muzik.data.service.discogs.DiscogsService
 import hu.mrolcsi.muzik.data.service.discogs.DiscogsServiceImpl
+import hu.mrolcsi.muzik.data.service.media.exoplayer.AudioOnlyRenderersFactory
+import hu.mrolcsi.muzik.data.service.media.exoplayer.ExoMetadataProvider
+import hu.mrolcsi.muzik.data.service.media.exoplayer.ExoPlayerAdapter
+import hu.mrolcsi.muzik.data.service.media.exoplayer.ExoPlayerAdapterImpl
 import hu.mrolcsi.muzik.data.service.theme.ThemeService
 import hu.mrolcsi.muzik.data.service.theme.ThemeServiceImpl
 import hu.mrolcsi.muzik.ui.albumDetails.AlbumDetailsViewModelImpl
@@ -38,6 +49,7 @@ import hu.mrolcsi.muzik.ui.playlist.PlaylistViewModelImpl
 import hu.mrolcsi.muzik.ui.songs.SongsViewModelImpl
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -56,7 +68,30 @@ val appModule = module {
 }
 
 val mediaModule = module {
+  single { MediaStoreWrapper(androidContext()) }
+
   single { MediaSessionCompat(get(), "MuzikPlayerSession") }
+  single { MediaSessionConnector(get()) }
+  single { MediaControllerCompat(androidContext(), get<MediaSessionCompat>()) }
+
+  single<ExoPlayerAdapter> { ExoPlayerAdapterImpl() }
+  single {
+    ExoPlayerFactory.newSimpleInstance(
+      androidContext(),
+      AudioOnlyRenderersFactory(androidContext()),
+      DefaultTrackSelector()
+    ).apply {
+      setAudioAttributes(
+        AudioAttributes.Builder()
+          .setUsage(C.USAGE_MEDIA)
+          .setContentType(C.CONTENT_TYPE_MUSIC)
+          .build(),
+        true
+      )
+    }
+  }
+
+  single<MediaSessionConnector.MediaMetadataProvider> { ExoMetadataProvider() }
 }
 
 val dataModule = module {

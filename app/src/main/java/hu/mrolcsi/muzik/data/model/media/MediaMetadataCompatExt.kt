@@ -213,11 +213,11 @@ inline var MediaMetadataCompat.Builder.genre: String?
     putString(MediaMetadataCompat.METADATA_KEY_GENRE, value)
   }
 
-inline var MediaMetadataCompat.Builder.mediaUri: String?
+inline var MediaMetadataCompat.Builder.mediaUri: Uri?
   @Deprecated(NO_GET, level = DeprecationLevel.ERROR)
   get() = throw IllegalAccessException("Cannot get from MediaMetadataCompat.Builder")
   set(value) {
-    putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI, value)
+    putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI, value.toString())
   }
 
 inline var MediaMetadataCompat.Builder.albumArtUri: String?
@@ -269,11 +269,18 @@ inline var MediaMetadataCompat.Builder.displayDescription: String?
     putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_DESCRIPTION, value)
   }
 
-inline var MediaMetadataCompat.Builder.displayIconUri: String?
+inline var MediaMetadataCompat.Builder.displayIcon: Bitmap?
   @Deprecated(NO_GET, level = DeprecationLevel.ERROR)
   get() = throw IllegalAccessException("Cannot get from MediaMetadataCompat.Builder")
   set(value) {
-    putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON_URI, value)
+    putBitmap(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON, value)
+  }
+
+inline var MediaMetadataCompat.Builder.displayIconUri: Uri?
+  @Deprecated(NO_GET, level = DeprecationLevel.ERROR)
+  get() = throw IllegalAccessException("Cannot get from MediaMetadataCompat.Builder")
+  set(value) {
+    putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON_URI, value.toString())
   }
 
 inline var MediaMetadataCompat.Builder.downloadStatus: Long
@@ -281,6 +288,13 @@ inline var MediaMetadataCompat.Builder.downloadStatus: Long
   get() = throw IllegalAccessException("Cannot get from MediaMetadataCompat.Builder")
   set(value) {
     putLong(MediaMetadataCompat.METADATA_KEY_DOWNLOAD_STATUS, value)
+  }
+
+inline var MediaMetadataCompat.Builder.isAdvertisement: Boolean
+  @Deprecated(NO_GET, level = DeprecationLevel.ERROR)
+  get() = throw IllegalAccessException("Cannot get from MediaMetadataCompat.Builder")
+  set(value) {
+    putLong(MediaMetadataCompat.METADATA_KEY_ADVERTISEMENT, if (value) 1 else 0)
   }
 
 //endregion

@@ -59,7 +59,7 @@ class MuzikPlayerService : MuzikBrowserService() {
     }
 
     // Set up ExoPlayerAdapter
-    exoPlayerAdapter.observePlayerEvents()
+    exoPlayerAdapter.playerEvents
       .doOnNext { Timber.v(it.toString()) }
       .subscribeBy(
         onNext = { event ->
@@ -84,7 +84,7 @@ class MuzikPlayerService : MuzikBrowserService() {
       )
       .addTo(disposables)
 
-    exoPlayerAdapter.observeNotificationEvents()
+    exoPlayerAdapter.notificationEvents
       .doOnNext { Timber.v(it.toString()) }
       .subscribeBy(
         onNext = { event ->

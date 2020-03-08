@@ -55,8 +55,8 @@ class MediaManagerImpl : MediaManager, KoinComponent {
                 Timber.v("Session ready. ")
 
                 // Set initial state, and metadata
-                if (!playbackStateSubject.hasValue()) playbackStateSubject.onNext(playbackState)
-                if (!metadataSubject.hasValue()) metadataSubject.onNext(metadata)
+                if (!playbackStateSubject.hasValue()) playbackState?.let { playbackStateSubject.onNext(it) }
+                if (!metadataSubject.hasValue()) metadata?.let { metadataSubject.onNext(it) }
                 if (!repeatModeSubject.hasValue()) repeatModeSubject.onNext(repeatMode)
                 if (!shuffleModeSubject.hasValue()) shuffleModeSubject.onNext(shuffleMode)
                 if (!queueSubject.hasValue()) queue?.let { queueSubject.onNext(it) }
@@ -135,34 +135,34 @@ class MediaManagerImpl : MediaManager, KoinComponent {
   ): Observable<List<MediaBrowserCompat.MediaItem>> =
     Observable.create<List<MediaBrowserCompat.MediaItem>> { emitter ->
 
-      mediaBrowser.subscribe(
-        parentId,
-        options ?: bundleOf(),
-        object : MediaBrowserCompat.SubscriptionCallback() {
-          override fun onChildrenLoaded(
-            parentId: String,
-            children: MutableList<MediaBrowserCompat.MediaItem>
-          ) {
-            emitter.onNext(children)
-          }
+        mediaBrowser.subscribe(
+          parentId,
+          options ?: bundleOf(),
+          object : MediaBrowserCompat.SubscriptionCallback() {
+            override fun onChildrenLoaded(
+              parentId: String,
+              children: MutableList<MediaBrowserCompat.MediaItem>
+            ) {
+              emitter.onNext(children)
+            }
 
-          override fun onChildrenLoaded(
-            parentId: String,
-            children: MutableList<MediaBrowserCompat.MediaItem>,
-            options: Bundle
-          ) {
-            emitter.onNext(children)
-          }
+            override fun onChildrenLoaded(
+              parentId: String,
+              children: MutableList<MediaBrowserCompat.MediaItem>,
+              options: Bundle
+            ) {
+              emitter.onNext(children)
+            }
 
-          override fun onError(parentId: String) {
-            emitter.onError(Error("Error while getting items from MediaBrowser! (parentId = $parentId"))
-          }
+            override fun onError(parentId: String) {
+              emitter.onError(Error("Error while getting items from MediaBrowser! (parentId = $parentId"))
+            }
 
-          override fun onError(parentId: String, options: Bundle) {
-            emitter.onError(Error("Error while getting items from MediaBrowser! (parentId = $parentId, options = $options)"))
-          }
-        })
-    }
+            override fun onError(parentId: String, options: Bundle) {
+              emitter.onError(Error("Error while getting items from MediaBrowser! (parentId = $parentId, options = $options)"))
+            }
+          })
+      }
       .subscribeOn(Schedulers.single())
       .takeWhile { mediaBrowser.isConnected }
 

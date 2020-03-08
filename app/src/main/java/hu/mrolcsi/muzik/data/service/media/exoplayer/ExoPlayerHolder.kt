@@ -319,8 +319,7 @@ class ExoPlayerHolder(private val context: Context, session: MediaSessionCompat)
 
   //region -- METADATA PROVIDER --
 
-  private val mMetadataProvider: ExoMetadataProvider =
-    ExoMetadataProvider(context, session.controller)
+  private val mMetadataProvider: ExoMetadataProvider = ExoMetadataProvider()
 
   //endregion
 

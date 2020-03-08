@@ -6,9 +6,9 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import androidx.media.session.MediaButtonReceiver
 import androidx.navigation.NavDeepLinkBuilder
-import hu.mrolcsi.muzik.BaseTest
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.TestData
+import hu.mrolcsi.muzik.base.BaseTest
 import hu.mrolcsi.muzik.data.local.playQueue.PlayQueueDao2
 import hu.mrolcsi.muzik.data.model.playQueue.LastPlayed
 import hu.mrolcsi.muzik.data.service.media.exoplayer.ExoPlayerAdapter
@@ -29,11 +29,12 @@ import org.junit.Test
 import org.koin.dsl.module
 import org.robolectric.Robolectric
 import org.robolectric.Shadows
+import org.robolectric.android.controller.ServiceController
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-class MuzikPlayerServiceTests : BaseTest() {
+class MuzikPlayerServiceTests : BaseTest<MuzikPlayerService>() {
 
   private val mediaSession = spyk(MediaSessionCompat(context(), "MuzikPlayerService"))
 
@@ -49,10 +50,10 @@ class MuzikPlayerServiceTests : BaseTest() {
     single { exoPlayerAdapter }
   }
 
-  private fun withSut(action: MuzikPlayerService.() -> Unit) =
-    Robolectric.buildService(MuzikPlayerService::class.java).apply {
-      create().get().apply(action)
-    }
+  private lateinit var serviceController: ServiceController<MuzikPlayerService>
+
+  override fun createSut(): MuzikPlayerService =
+    Robolectric.buildService(MuzikPlayerService::class.java).also { serviceController = it }.create().get()
 
   private val playerEventSubject = PublishSubject.create<PlayerEvent>()
   private val notificationEventSubject = PublishSubject.create<NotificationEvent>()
@@ -64,8 +65,8 @@ class MuzikPlayerServiceTests : BaseTest() {
 
     every { exoPlayerAdapter.loadQueue(any()) } returns Completable.complete()
     every { exoPlayerAdapter.loadLastPlayed(any()) } returns Completable.complete()
-    every { exoPlayerAdapter.observePlayerEvents() } returns playerEventSubject
-    every { exoPlayerAdapter.observeNotificationEvents() } returns notificationEventSubject
+    every { exoPlayerAdapter.playerEvents } returns playerEventSubject
+    every { exoPlayerAdapter.notificationEvents } returns notificationEventSubject
   }
 
   @Test
@@ -186,7 +187,8 @@ class MuzikPlayerServiceTests : BaseTest() {
 
   @Test
   fun `WHEN the service is destroyed, THEN release player and other resources`() {
-    withSut { }.destroy()
+    createSut()
+    serviceController.destroy()
 
     verify {
       mediaSession.isActive = false

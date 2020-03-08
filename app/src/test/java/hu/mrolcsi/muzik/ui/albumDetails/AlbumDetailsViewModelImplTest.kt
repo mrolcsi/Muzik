@@ -1,8 +1,8 @@
 package hu.mrolcsi.muzik.ui.albumDetails
 
 import android.support.v4.media.MediaMetadataCompat
-import hu.mrolcsi.muzik.BaseTest
 import hu.mrolcsi.muzik.TestData
+import hu.mrolcsi.muzik.base.BaseTest
 import hu.mrolcsi.muzik.data.manager.media.MediaManager
 import hu.mrolcsi.muzik.data.model.media.albumArtUri
 import hu.mrolcsi.muzik.data.repository.media.MediaRepository
@@ -20,10 +20,11 @@ import org.junit.Test
 import org.koin.dsl.module
 import kotlin.test.assertEquals
 
-class AlbumDetailsViewModelImplTest : BaseTest() {
+class AlbumDetailsViewModelImplTest : BaseTest<AlbumDetailsViewModel>() {
 
   @MockK
   private lateinit var mockMediaManager: MediaManager
+
   @MockK
   private lateinit var mockMediaRepo: MediaRepository
 
@@ -32,13 +33,12 @@ class AlbumDetailsViewModelImplTest : BaseTest() {
     single { mockMediaRepo }
   }
 
-  private fun withSut(action: AlbumDetailsViewModelImpl.() -> Unit) =
-    AlbumDetailsViewModelImpl(
-      ObservableImpl(),
-      ExecuteOnceUiCommandSource(),
-      ExecuteOnceNavCommandSource(),
-      ThemedViewModelImpl()
-    ).apply(action)
+  override fun createSut() = AlbumDetailsViewModelImpl(
+    ObservableImpl(),
+    ExecuteOnceUiCommandSource(),
+    ExecuteOnceNavCommandSource(),
+    ThemedViewModelImpl()
+  )
 
   @Before
   fun setUp() {
