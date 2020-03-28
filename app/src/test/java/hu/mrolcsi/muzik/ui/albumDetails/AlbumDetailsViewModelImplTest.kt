@@ -4,7 +4,7 @@ import android.support.v4.media.MediaMetadataCompat
 import hu.mrolcsi.muzik.BaseTest
 import hu.mrolcsi.muzik.TestData
 import hu.mrolcsi.muzik.data.manager.media.MediaManager
-import hu.mrolcsi.muzik.data.model.media.coverArtUri
+import hu.mrolcsi.muzik.data.model.media.albumArtUri
 import hu.mrolcsi.muzik.data.repository.media.MediaRepository
 import hu.mrolcsi.muzik.ui.albums.DiscNumberItem
 import hu.mrolcsi.muzik.ui.base.ThemedViewModelImpl
@@ -66,8 +66,8 @@ class AlbumDetailsViewModelImplTest : BaseTest() {
       setArgument(albumId)
 
       val expected = listOf(
-        SongItem(1001, songs[0].description.coverArtUri, "1", false, "Artist", "Disc 1 Song 1", "00:11", 100 * 1000),
-        SongItem(1002, songs[1].description.coverArtUri, "2", false, "Artist", "Disc 1 Song 2", "00:12", 200 * 1000)
+        SongItem(1001, songs[0].description.albumArtUri, "1", false, "Artist", "Disc 1 Song 1", "00:11", 100 * 1000),
+        SongItem(1002, songs[1].description.albumArtUri, "2", false, "Artist", "Disc 1 Song 2", "00:12", 200 * 1000)
       )
 
       assertEquals(expected, items.value)
@@ -95,11 +95,11 @@ class AlbumDetailsViewModelImplTest : BaseTest() {
 
       val expected = listOf(
         DiscNumberItem(1, "1"),
-        SongItem(1001, songs[0].description.coverArtUri, "1", false, "Artist", "Disc 1 Song 1", "00:11", 100 * 1000),
-        SongItem(1002, songs[1].description.coverArtUri, "2", false, "Artist", "Disc 1 Song 2", "00:12", 200 * 1000),
+        SongItem(1001, songs[0].description.albumArtUri, "1", false, "Artist", "Disc 1 Song 1", "00:11", 100 * 1000),
+        SongItem(1002, songs[1].description.albumArtUri, "2", false, "Artist", "Disc 1 Song 2", "00:12", 200 * 1000),
         DiscNumberItem(2, "2"),
-        SongItem(2001, songs[2].description.coverArtUri, "1", false, "Artist", "Disc 2 Song 1", "00:21", 300 * 1000),
-        SongItem(2002, songs[3].description.coverArtUri, "2", false, "Artist", "Disc 2 Song 2", "00:22", 400 * 1000)
+        SongItem(2001, songs[2].description.albumArtUri, "1", false, "Artist", "Disc 2 Song 1", "00:21", 300 * 1000),
+        SongItem(2002, songs[3].description.albumArtUri, "2", false, "Artist", "Disc 2 Song 2", "00:22", 400 * 1000)
       )
 
       assertEquals(expected, items.value)

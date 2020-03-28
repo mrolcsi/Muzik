@@ -1,6 +1,7 @@
 package hu.mrolcsi.muzik.ui.playlist
 
 import android.content.Context
+import android.net.Uri
 import android.support.v4.media.session.PlaybackStateCompat
 import androidx.databinding.library.baseAdapters.BR
 import androidx.lifecycle.MutableLiveData
@@ -59,6 +60,7 @@ class PlaylistViewModelImpl constructor(
             titleText = it.title ?: context.getString(R.string.songs_noTitle),
             artistText = it.artist ?: context.getString(R.string.songs_unknownArtist),
             durationText = it.duration.millisecondsToTimeStamp(),
+            albumArtUri = Uri.parse("content://media/external/audio/albumart/${it.albumId}"),
             isPlaying = it._id == state.activeQueueItemId
           )
         }
@@ -74,5 +76,4 @@ class PlaylistViewModelImpl constructor(
         onError = { showError(this, it) }
       ).disposeOnCleared()
   }
-
 }

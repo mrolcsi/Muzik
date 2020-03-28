@@ -18,10 +18,10 @@ import com.bumptech.glide.request.target.Target
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.data.manager.media.MediaManager
 import hu.mrolcsi.muzik.data.model.media.album
+import hu.mrolcsi.muzik.data.model.media.albumArtUri
 import hu.mrolcsi.muzik.data.model.media.albumId
 import hu.mrolcsi.muzik.data.model.media.artist
 import hu.mrolcsi.muzik.data.model.media.artistId
-import hu.mrolcsi.muzik.data.model.media.coverArtUri
 import hu.mrolcsi.muzik.data.model.media.isPauseEnabled
 import hu.mrolcsi.muzik.data.model.media.isPlayEnabled
 import hu.mrolcsi.muzik.data.model.media.isPlaying
@@ -211,7 +211,7 @@ class PlayerViewModelImpl constructor(
         // Get coverArt
         GlideApp.with(context)
           .asBitmap()
-          .load(item.description.coverArtUri)
+          .load(item.description.albumArtUri)
           .override(Target.SIZE_ORIGINAL)
           .toSingle()
           .onErrorReturn { BitmapFactory.decodeResource(context.resources, R.drawable.placeholder_cover_art) }
@@ -229,7 +229,7 @@ class PlayerViewModelImpl constructor(
               item.description.title ?: context.getString(R.string.songs_noTitle),
               item.description.artist ?: context.getString(R.string.songs_unknownArtist),
               item.description.album ?: context.getString(R.string.songs_unknownAlbum),
-              item.description.coverArtUri,
+              item.description.albumArtUri,
               theme
             )
           }

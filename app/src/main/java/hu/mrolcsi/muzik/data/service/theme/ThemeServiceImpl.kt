@@ -49,6 +49,7 @@ class ThemeServiceImpl : ThemeService, KoinComponent {
       .replay(1)
       .apply { connect() }
       .hide()
+      .startWith(lastUsedTheme ?: Theme.DEFAULT_THEME)
 
   override fun updateTheme(bitmap: Bitmap) {
     createTheme(bitmap)
@@ -143,8 +144,8 @@ class ThemeServiceImpl : ThemeService, KoinComponent {
 
   private fun areColorsSimilar(first: Int, second: Int): Boolean =
     abs(Color.red(first) - Color.red(second)) <= SIMILARITY_THRESHOLD &&
-        abs(Color.green(first) - Color.green(second)) <= SIMILARITY_THRESHOLD &&
-        abs(Color.blue(first) - Color.blue(second)) <= SIMILARITY_THRESHOLD
+      abs(Color.green(first) - Color.green(second)) <= SIMILARITY_THRESHOLD &&
+      abs(Color.blue(first) - Color.blue(second)) <= SIMILARITY_THRESHOLD
 
   private val Palette.Swatch.weight
     get() = 1 - abs(0.5 - hsl[2])
@@ -156,5 +157,4 @@ class ThemeServiceImpl : ThemeService, KoinComponent {
 
     private const val SIMILARITY_THRESHOLD = 16
   }
-
 }

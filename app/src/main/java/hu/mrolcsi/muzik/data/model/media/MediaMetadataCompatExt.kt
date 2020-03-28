@@ -30,7 +30,7 @@ import com.google.android.exoplayer2.source.ConcatenatingMediaSource
 import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.upstream.DataSource
-import java.util.*
+import java.util.Collections
 
 //region -- GETTERS --
 
@@ -125,7 +125,6 @@ inline val MediaMetadataCompat.albumArt: Bitmap?
 
 inline val MediaMetadataCompat.albumArtUri: Uri?
   get() = this.getString(MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI)?.let { Uri.parse(it) }
-    ?: Uri.parse("content://media/external/audio/media/$id/albumart")
 
 inline val MediaMetadataCompat.userRating: RatingCompat?
   get() = getRating(MediaMetadataCompat.METADATA_KEY_USER_RATING)

@@ -48,31 +48,29 @@ abstract class MuzikBrowserService : MediaBrowserServiceCompat() {
       return
     }
 
-    Single.fromCallable<MutableList<MediaBrowserCompat.MediaItem>> {
-      val mediaItems = emptyList<MediaBrowserCompat.MediaItem>().toMutableList()
-
-      when (parentId) {
-        MEDIA_ROOT_ARTISTS -> {
-          if (useInternal) mediaItems.addAll(gatherArtists(MediaStore.Audio.Artists.INTERNAL_CONTENT_URI))
-          if (useExternal) mediaItems.addAll(gatherArtists(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI))
-        }
-        MEDIA_ROOT_ALBUMS -> {
-          if (useInternal) mediaItems.addAll(gatherAlbums(MediaStore.Audio.Albums.INTERNAL_CONTENT_URI))
-          if (useExternal) mediaItems.addAll(gatherAlbums(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI))
-        }
-        MEDIA_ROOT_SONGS -> {
-          if (useInternal) mediaItems.addAll(gatherSongs(MediaStore.Audio.Media.INTERNAL_CONTENT_URI))
-          if (useExternal) mediaItems.addAll(gatherSongs(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI))
+    Single.fromCallable {
+      mutableListOf<MediaBrowserCompat.MediaItem>().apply {
+        when (parentId) {
+          MEDIA_ROOT_ARTISTS -> {
+            if (useInternal) addAll(gatherArtists(MediaStore.Audio.Artists.INTERNAL_CONTENT_URI))
+            if (useExternal) addAll(gatherArtists(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI))
+          }
+          MEDIA_ROOT_ALBUMS -> {
+            if (useInternal) addAll(gatherAlbums(MediaStore.Audio.Albums.INTERNAL_CONTENT_URI))
+            if (useExternal) addAll(gatherAlbums(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI))
+          }
+          MEDIA_ROOT_SONGS -> {
+            if (useInternal) addAll(gatherSongs(MediaStore.Audio.Media.INTERNAL_CONTENT_URI))
+            if (useExternal) addAll(gatherSongs(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI))
+          }
         }
       }
-
-      mediaItems
     }
       .subscribeOn(Schedulers.io())
       .subscribeBy(
         onSuccess = { result.sendResult(it) },
         onError = {
-          Timber.e("onLoadChildren($parentId)\n$it")
+          Timber.e(it)
           result.sendResult(null)
         }
       )
@@ -97,34 +95,32 @@ abstract class MuzikBrowserService : MediaBrowserServiceCompat() {
       null
     )
 
-    val mediaItems = emptyList<MediaBrowserCompat.MediaItem>().toMutableList()
-
     val indexArtistKey = cursorWithArtists.getColumnIndex(MediaStore.Audio.ArtistColumns.ARTIST_KEY)
     val indexArtistName = cursorWithArtists.getColumnIndex(MediaStore.Audio.ArtistColumns.ARTIST)
 
-    cursorWithArtists.use {
-      while (it.moveToNext()) {
-        // Skip Unknown artists (system sounds and such).
-        if (cursorWithArtists.getString(indexArtistName) == MediaStore.UNKNOWN_STRING) continue
+    return mutableListOf<MediaBrowserCompat.MediaItem>().apply {
+      cursorWithArtists.use {
+        while (it.moveToNext()) {
+          // Skip Unknown artists (system sounds and such).
+          if (cursorWithArtists.getString(indexArtistName) == MediaStore.UNKNOWN_STRING) continue
 
-        val description = MediaDescriptionCompat.Builder()
-          .setMediaId(it.getString(indexArtistKey))      // Artist Key
-          .setTitle(it.getString(indexArtistName))        // Artist Name
-          .setExtras(createExtras(cursorWithArtists).apply {
-            putInt(MediaType.MEDIA_TYPE_KEY, MediaType.MEDIA_ARTIST)
-          })
-          .build()
+          val description = MediaDescriptionCompat.Builder()
+            .setMediaId(it.getString(indexArtistKey))      // Artist Key
+            .setTitle(it.getString(indexArtistName))        // Artist Name
+            .setExtras(createExtras(cursorWithArtists).apply {
+              putInt(MediaType.MEDIA_TYPE_KEY, MediaType.MEDIA_ARTIST)
+            })
+            .build()
 
-        mediaItems.add(
-          MediaBrowserCompat.MediaItem(
-            description,
-            MediaBrowserCompat.MediaItem.FLAG_BROWSABLE
+          add(
+            MediaBrowserCompat.MediaItem(
+              description,
+              MediaBrowserCompat.MediaItem.FLAG_BROWSABLE
+            )
           )
-        )
+        }
       }
     }
-
-    return mediaItems
   }
 
   private fun gatherAlbums(
@@ -141,34 +137,32 @@ abstract class MuzikBrowserService : MediaBrowserServiceCompat() {
       null
     )
 
-    val mediaItems = emptyList<MediaBrowserCompat.MediaItem>().toMutableList()
-
     val indexAlbumKey = cursorWithAlbums.getColumnIndex(MediaStore.Audio.AlbumColumns.ALBUM_KEY)
     val indexAlbumTitle = cursorWithAlbums.getColumnIndex(MediaStore.Audio.AlbumColumns.ALBUM)
     val indexAlbumArtist = cursorWithAlbums.getColumnIndex(MediaStore.Audio.AlbumColumns.ARTIST)
 
-    cursorWithAlbums.use {
-      while (it.moveToNext()) {
+    return mutableListOf<MediaBrowserCompat.MediaItem>().apply {
+      cursorWithAlbums.use {
+        while (it.moveToNext()) {
 
-        val description = MediaDescriptionCompat.Builder()
-          .setMediaId(it.getString(indexAlbumKey))    // Album key
-          .setTitle(it.getString(indexAlbumTitle))      // Album title
-          .setSubtitle(it.getString(indexAlbumArtist))   // Album artist
-          .setExtras(createExtras(cursorWithAlbums).apply {
-            putInt(MediaType.MEDIA_TYPE_KEY, MediaType.MEDIA_ALBUM)
-          })
-          .build()
+          val description = MediaDescriptionCompat.Builder()
+            .setMediaId(it.getString(indexAlbumKey))    // Album key
+            .setTitle(it.getString(indexAlbumTitle))      // Album title
+            .setSubtitle(it.getString(indexAlbumArtist))   // Album artist
+            .setExtras(createExtras(cursorWithAlbums).apply {
+              putInt(MediaType.MEDIA_TYPE_KEY, MediaType.MEDIA_ALBUM)
+            })
+            .build()
 
-        mediaItems.add(
-          MediaBrowserCompat.MediaItem(
-            description,
-            MediaBrowserCompat.MediaItem.FLAG_BROWSABLE
+          add(
+            MediaBrowserCompat.MediaItem(
+              description,
+              MediaBrowserCompat.MediaItem.FLAG_BROWSABLE
+            )
           )
-        )
+        }
       }
     }
-
-    return mediaItems
   }
 
   private fun gatherSongs(
@@ -179,47 +173,46 @@ abstract class MuzikBrowserService : MediaBrowserServiceCompat() {
       contentResolver,
       uri,
       null,
-      selection?.let { "${MediaStore.Audio.Media.IS_MUSIC} = ? AND $it" } ?: "${MediaStore.Audio.Media.IS_MUSIC} = ?",
+      selection?.let { "${MediaStore.Audio.Media.IS_MUSIC} = ? AND $it" }
+        ?: "${MediaStore.Audio.Media.IS_MUSIC} = ?",
       selectionArgs?.let { arrayOf("1").plus(it) } ?: arrayOf("1"),
       null,
       null
     )
-
-    val mediaItems = emptyList<MediaBrowserCompat.MediaItem>().toMutableList()
 
     val indexPath = cursorWithSongs.getColumnIndex(MediaStore.Audio.Media.DATA)
     val indexTitle = cursorWithSongs.getColumnIndex(MediaStore.Audio.Media.TITLE)
     val indexArtist = cursorWithSongs.getColumnIndex(MediaStore.Audio.Media.ARTIST)
     val indexAlbum = cursorWithSongs.getColumnIndex(MediaStore.Audio.Media.ALBUM)
 
-    cursorWithSongs.use {
-      while (it.moveToNext()) {
+    return mutableListOf<MediaBrowserCompat.MediaItem>().apply {
+      cursorWithSongs.use {
+        while (it.moveToNext()) {
 
-        // Skip system sounds
-        if (it.getString(1).startsWith("/system")) {
-          continue
-        }
+          // Skip system sounds
+          if (it.getString(indexPath).startsWith("/system")) {
+            continue
+          }
 
-        val description = MediaDescriptionCompat.Builder()
-          .setMediaId(it.getString(indexPath))    // Song path
-          .setTitle(it.getString(indexTitle))      // Song title
-          .setSubtitle(it.getString(indexArtist))   // Song artist
-          .setDescription(it.getString(indexAlbum))   // Song album
-          .setExtras(createExtras(cursorWithSongs).apply {
-            putInt(MediaType.MEDIA_TYPE_KEY, MediaType.MEDIA_SONG)
-          })
-          .build()
+          val description = MediaDescriptionCompat.Builder()
+            .setMediaId(it.getString(indexPath))    // Song path
+            .setTitle(it.getString(indexTitle))      // Song title
+            .setSubtitle(it.getString(indexArtist))   // Song artist
+            .setDescription(it.getString(indexAlbum))   // Song album
+            .setExtras(createExtras(cursorWithSongs).apply {
+              putInt(MediaType.MEDIA_TYPE_KEY, MediaType.MEDIA_SONG)
+            })
+            .build()
 
-        mediaItems.add(
-          MediaBrowserCompat.MediaItem(
-            description,
-            MediaBrowserCompat.MediaItem.FLAG_PLAYABLE
+          add(
+            MediaBrowserCompat.MediaItem(
+              description,
+              MediaBrowserCompat.MediaItem.FLAG_PLAYABLE
+            )
           )
-        )
+        }
       }
     }
-
-    return mediaItems
   }
 
   //endregion
@@ -237,124 +230,122 @@ abstract class MuzikBrowserService : MediaBrowserServiceCompat() {
       return
     }
 
-    Single.fromCallable<MutableList<MediaBrowserCompat.MediaItem>> {
-      val mediaItems = emptyList<MediaBrowserCompat.MediaItem>().toMutableList()
-
-      when (parentId) {
-        MEDIA_ROOT_ARTIST_BY_ID -> {
-          // Load artist by an id
-          options.getLong(OPTION_ARTIST_ID).takeIf { it > 0 }?.let { artistId ->
-            val selection = "${MediaStore.Audio.AudioColumns._ID} = ?"
-            val selectionArgs = arrayOf(artistId.toString())
-            if (useInternal) mediaItems.addAll(
-              gatherArtists(
-                MediaStore.Audio.Artists.INTERNAL_CONTENT_URI,
-                selection,
-                selectionArgs
+    Single.fromCallable {
+      mutableListOf<MediaBrowserCompat.MediaItem>().apply {
+        when (parentId) {
+          MEDIA_ROOT_ARTIST_BY_ID -> {
+            // Load artist by an id
+            options.getLong(OPTION_ARTIST_ID).takeIf { it > 0 }?.let { artistId ->
+              val selection = "${MediaStore.Audio.AudioColumns._ID} = ?"
+              val selectionArgs = arrayOf(artistId.toString())
+              if (useInternal) addAll(
+                gatherArtists(
+                  MediaStore.Audio.Artists.INTERNAL_CONTENT_URI,
+                  selection,
+                  selectionArgs
+                )
               )
-            )
-            if (useExternal) mediaItems.addAll(
-              gatherArtists(
-                MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI,
-                selection,
-                selectionArgs
+              if (useExternal) addAll(
+                gatherArtists(
+                  MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI,
+                  selection,
+                  selectionArgs
+                )
               )
-            )
+            }
           }
-        }
-        MEDIA_ROOT_ALBUM_BY_ID -> {
-          // Load album by an id
-          options.getLong(OPTION_ALBUM_ID).takeIf { it > 0 }?.let { albumId ->
-            val selection = "${MediaStore.Audio.AudioColumns._ID} = ?"
-            val selectionArgs = arrayOf(albumId.toString())
-            if (useInternal) mediaItems.addAll(
-              gatherAlbums(
-                MediaStore.Audio.Albums.INTERNAL_CONTENT_URI,
-                selection,
-                selectionArgs
+          MEDIA_ROOT_ALBUM_BY_ID -> {
+            // Load album by an id
+            options.getLong(OPTION_ALBUM_ID).takeIf { it > 0 }?.let { albumId ->
+              val selection = "${MediaStore.Audio.AudioColumns._ID} = ?"
+              val selectionArgs = arrayOf(albumId.toString())
+              if (useInternal) addAll(
+                gatherAlbums(
+                  MediaStore.Audio.Albums.INTERNAL_CONTENT_URI,
+                  selection,
+                  selectionArgs
+                )
               )
-            )
-            if (useExternal) mediaItems.addAll(
-              gatherAlbums(
-                MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
-                selection,
-                selectionArgs
+              if (useExternal) addAll(
+                gatherAlbums(
+                  MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
+                  selection,
+                  selectionArgs
+                )
               )
-            )
+            }
           }
-        }
-        MEDIA_ROOT_ALBUMS_BY_ARTIST -> {
-          // Load albums by an artist
-          options.getLong(OPTION_ARTIST_ID).takeIf { it > 0 }?.let { artistId ->
-            val selection = "${MediaStore.Audio.AudioColumns.ARTIST_ID} = ?"
-            val selectionArgs = arrayOf(artistId.toString())
-            if (useInternal) mediaItems.addAll(
-              gatherAlbums(
-                MediaStore.Audio.Albums.INTERNAL_CONTENT_URI,
-                selection,
-                selectionArgs
+          MEDIA_ROOT_ALBUMS_BY_ARTIST -> {
+            // Load albums by an artist
+            options.getLong(OPTION_ARTIST_ID).takeIf { it > 0 }?.let { artistId ->
+              val selection = "${MediaStore.Audio.AudioColumns.ARTIST_ID} = ?"
+              val selectionArgs = arrayOf(artistId.toString())
+              if (useInternal) addAll(
+                gatherAlbums(
+                  MediaStore.Audio.Albums.INTERNAL_CONTENT_URI,
+                  selection,
+                  selectionArgs
+                )
               )
-            )
-            if (useExternal) mediaItems.addAll(
-              gatherAlbums(
-                MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
-                selection,
-                selectionArgs
+              if (useExternal) addAll(
+                gatherAlbums(
+                  MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
+                  selection,
+                  selectionArgs
+                )
               )
-            )
+            }
           }
-        }
-        MEDIA_ROOT_SONGS_BY_ARTIST -> {
-          // Load songs by an artist
-          options.getLong(OPTION_ARTIST_ID).takeIf { it > 0 }?.let { artistId ->
-            val selection = "${MediaStore.Audio.AudioColumns.ARTIST_ID} = ?"
-            val selectionArgs = arrayOf(artistId.toString())
-            if (useInternal) mediaItems.addAll(
-              gatherSongs(
-                MediaStore.Audio.Media.INTERNAL_CONTENT_URI,
-                selection,
-                selectionArgs
+          MEDIA_ROOT_SONGS_BY_ARTIST -> {
+            // Load songs by an artist
+            options.getLong(OPTION_ARTIST_ID).takeIf { it > 0 }?.let { artistId ->
+              val selection = "${MediaStore.Audio.AudioColumns.ARTIST_ID} = ?"
+              val selectionArgs = arrayOf(artistId.toString())
+              if (useInternal) addAll(
+                gatherSongs(
+                  MediaStore.Audio.Media.INTERNAL_CONTENT_URI,
+                  selection,
+                  selectionArgs
+                )
               )
-            )
-            if (useExternal) mediaItems.addAll(
-              gatherSongs(
-                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                selection,
-                selectionArgs
+              if (useExternal) addAll(
+                gatherSongs(
+                  MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                  selection,
+                  selectionArgs
+                )
               )
-            )
+            }
           }
-        }
-        MEDIA_ROOT_SONGS_FROM_ALBUM -> {
-          // Load songs from an album
-          options.getLong(OPTION_ALBUM_ID).takeIf { it > 0 }?.let { albumId ->
-            val selection = "${MediaStore.Audio.AudioColumns.ALBUM_ID} = ?"
-            val selectionArgs = arrayOf(albumId.toString())
-            if (useInternal) mediaItems.addAll(
-              gatherSongs(
-                MediaStore.Audio.Media.INTERNAL_CONTENT_URI,
-                selection,
-                selectionArgs
+          MEDIA_ROOT_SONGS_FROM_ALBUM -> {
+            // Load songs from an album
+            options.getLong(OPTION_ALBUM_ID).takeIf { it > 0 }?.let { albumId ->
+              val selection = "${MediaStore.Audio.AudioColumns.ALBUM_ID} = ?"
+              val selectionArgs = arrayOf(albumId.toString())
+              if (useInternal) addAll(
+                gatherSongs(
+                  MediaStore.Audio.Media.INTERNAL_CONTENT_URI,
+                  selection,
+                  selectionArgs
+                )
               )
-            )
-            if (useExternal) mediaItems.addAll(
-              gatherSongs(
-                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                selection,
-                selectionArgs
+              if (useExternal) addAll(
+                gatherSongs(
+                  MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                  selection,
+                  selectionArgs
+                )
               )
-            )
+            }
           }
         }
       }
-
-      mediaItems
     }
       .subscribeOn(Schedulers.io())
       .subscribeBy(
         onSuccess = { result.sendResult(it) },
         onError = {
-          Timber.e("onLoadChildren($parentId, $options)\n$it")
+          Timber.e(it)
           result.sendResult(null)
         }
       )

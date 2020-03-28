@@ -58,7 +58,7 @@ fun <R> GlideRequest<R>.onResourceReady(callback: (resource: R) -> Unit): GlideR
   return addListener(object : RequestListener<R> {
     override fun onLoadFailed(
       e: GlideException?,
-      model: Any,
+      model: Any?,
       target: Target<R>,
       isFirstResource: Boolean
     ): Boolean = false

@@ -12,6 +12,7 @@ import com.google.android.exoplayer2.Timeline
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
 import hu.mrolcsi.muzik.data.model.media.albumArt
 import hu.mrolcsi.muzik.data.model.media.albumArtUri
+import hu.mrolcsi.muzik.data.model.media.albumId
 import timber.log.Timber
 
 class ExoMetadataProvider(
@@ -40,7 +41,9 @@ class ExoMetadataProvider(
       cachedMetadata
     } else {
       // Start a load in the background then return default metadata
-      val defaultMetadata = mDefaultProvider.getMetadata(player)
+      val defaultMetadata = MediaMetadataCompat.Builder(mDefaultProvider.getMetadata(player)).apply {
+        albumArtUri = "content://media/external/audio/albumart/${description.albumId}"
+      }.build()
       AsyncTask.execute {
         val newMetadata = fetchBitmap(defaultMetadata)
         Timber.v("Updating cache with {${newMetadata.description}}")

@@ -7,8 +7,8 @@ import android.support.v4.media.MediaMetadataCompat
 import androidx.lifecycle.MutableLiveData
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.data.manager.media.MediaManager
+import hu.mrolcsi.muzik.data.model.media.albumArtUri
 import hu.mrolcsi.muzik.data.model.media.artistKey
-import hu.mrolcsi.muzik.data.model.media.coverArtUri
 import hu.mrolcsi.muzik.data.model.media.dateAdded
 import hu.mrolcsi.muzik.data.model.media.duration
 import hu.mrolcsi.muzik.data.model.media.id
@@ -32,7 +32,7 @@ import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
 import org.koin.core.KoinComponent
 import org.koin.core.inject
-import java.util.*
+import java.util.Calendar
 import kotlin.properties.Delegates
 
 private const val WEEK_IN_MILLISECONDS = 7 * 24 * 60 * 60 * 1000L
@@ -118,7 +118,7 @@ class SongsViewModelImpl constructor(
 fun List<MediaItem>.asSongItems(context: Context, nowPlayingId: String?) = map { item ->
   SongItem(
     item.description.id,
-    item.description.coverArtUri,
+    item.description.albumArtUri,
     item.description.trackNumber.takeIf { it > -1 }?.toString(),
     item.mediaId == nowPlayingId,
     item.description.subtitle ?: context.getText(R.string.songs_unknownArtist),

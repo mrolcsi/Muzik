@@ -27,7 +27,7 @@ inline val MediaDescriptionCompat.albumArt: Bitmap?
   get() = this.extras?.getParcelable(MediaMetadataCompat.METADATA_KEY_ALBUM_ART)
 
 inline val MediaDescriptionCompat.albumArtUri: Uri
-  get() = Uri.parse("content://media/external/audio/albumart/$id")
+  get() = Uri.parse("content://media/external/audio/albumart/$albumId")
 
 inline val MediaDescriptionCompat.albumArtist: String?
   get() = this.extras?.getString("album_artist")  // MediaStore.Audio.AudioColumns.ALBUM_ARTIST
@@ -63,6 +63,10 @@ inline val MediaDescriptionCompat.composer: String?
   get() = this.extras?.getString(MediaStore.Audio.Media.COMPOSER)
     ?: this.extras?.getString(MediaMetadataCompat.METADATA_KEY_COMPOSER)
 
+@Deprecated(
+  "Invalid on Android 10",
+  ReplaceWith("albumArtUri", "hu.mrolcsi.muzik.data.model.media.MediaDescriptionCompatExtKt")
+)
 inline val MediaDescriptionCompat.coverArtUri: Uri
   get() = Uri.parse("content://media/external/audio/media/$id/albumart")
 

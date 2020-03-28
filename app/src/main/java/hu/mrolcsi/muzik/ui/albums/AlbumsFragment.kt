@@ -51,7 +51,7 @@ class AlbumsFragment : RxFragment() {
                 .subscribeBy(
                   onSuccess = {
                     setVariable(BR.theme, it)
-                    executePendingBindings()
+                    requireView().post { executePendingBindings() }
                   },
                   onError = { Timber.e(it) }
                 )
