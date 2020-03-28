@@ -54,10 +54,7 @@ data class QueueItem(
   val albumText: CharSequence,
   val coverArtUri: Uri?,
   val theme: Theme
-) {
-
-  val transitionName = "coverArt$queueId"
-}
+)
 
 data class QueueState(
   val queue: List<QueueItem>,

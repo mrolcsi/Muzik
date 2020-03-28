@@ -7,7 +7,4 @@ data class AlbumItem(
   val albumText: CharSequence,
   val artistText: CharSequence,
   val albumArtUri: Uri
-) {
-
-  val transitionName = "coverArt$id"
-}
+)

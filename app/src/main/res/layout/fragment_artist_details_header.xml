@@ -17,7 +17,9 @@
   <androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:fitsSystemWindows="true">
+    android:background="@{theme.secondaryBackgroundColor}"
+    android:fitsSystemWindows="true"
+    tools:background="?attr/colorPrimary">
 
     <ImageView
       android:id="@+id/imgArtist"
@@ -26,7 +28,6 @@
       android:adjustViewBounds="true"
       android:contentDescription="@string/contentDescription_artistPicture"
       android:scaleType="fitCenter"
-      app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toTopOf="parent"
@@ -34,27 +35,13 @@
       tools:srcCompat="@tools:sample/avatars" />
 
     <ImageView
-      android:id="@+id/imgProtectionScrimTop"
-      android:layout_width="0dp"
-      android:layout_height="48dp"
-      android:rotation="180"
-      android:tint="@{theme.primaryBackgroundColor}"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toTopOf="parent"
-      app:srcCompat="@drawable/protection_scrim"
-      tools:ignore="ContentDescription"
-      tools:tint="?attr/colorPrimary" />
-
-    <ImageView
       android:id="@+id/imgProtectionScrimBottom"
-      android:layout_width="match_parent"
-      android:layout_height="0dp"
+      android:layout_width="0dp"
+      android:layout_height="24dp"
       android:tint="@{theme.secondaryBackgroundColor}"
-      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintBottom_toBottomOf="@id/imgArtist"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toTopOf="@+id/tvTitle"
       app:srcCompat="@drawable/protection_scrim"
       tools:ignore="ContentDescription"
       tools:tint="?attr/colorPrimary" />
@@ -63,12 +50,11 @@
       android:id="@+id/tvTitle"
       android:layout_width="0dp"
       android:layout_height="wrap_content"
+      android:layout_marginStart="16dp"
+      android:layout_marginTop="8dp"
+      android:layout_marginEnd="16dp"
       android:ellipsize="end"
       android:gravity="center"
-      android:paddingStart="16dp"
-      android:paddingTop="24dp"
-      android:paddingEnd="16dp"
-      android:paddingBottom="24dp"
       android:text="@{viewModel.artistName}"
       android:textAppearance="?android:attr/textAppearanceLarge"
       android:textColor="@{theme.secondaryForegroundColor}"
@@ -77,6 +63,7 @@
       app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@+id/imgArtist"
       tools:text="@tools:sample/lorem[9]" />
 
   </androidx.constraintlayout.widget.ConstraintLayout>

@@ -17,7 +17,9 @@
   <androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:fitsSystemWindows="true">
+    android:background="@{theme.secondaryBackgroundColor}"
+    android:fitsSystemWindows="true"
+    tools:background="?attr/colorPrimary">
 
     <ImageView
       android:id="@+id/imgCoverArt"
@@ -26,39 +28,11 @@
       android:adjustViewBounds="true"
       android:contentDescription="@string/contentDescription_coverArt"
       android:scaleType="centerCrop"
-      android:transitionName="coverArt"
-      app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintDimensionRatio="1:1"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toTopOf="parent"
       tools:srcCompat="@tools:sample/avatars" />
-
-    <ImageView
-      android:id="@+id/imgProtectionScrimTop"
-      android:layout_width="0dp"
-      android:layout_height="64dp"
-      android:rotation="180"
-      android:tint="@{theme.primaryBackgroundColor}"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toTopOf="parent"
-      app:srcCompat="@drawable/protection_scrim"
-      tools:ignore="ContentDescription"
-      tools:tint="?attr/colorPrimary" />
-
-    <ImageView
-      android:id="@+id/imgProtectionScrimBottom"
-      android:layout_width="0dp"
-      android:layout_height="0dp"
-      android:tint="@{theme.secondaryBackgroundColor}"
-      app:layout_constraintBottom_toBottomOf="parent"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@+id/barrier"
-      app:srcCompat="@drawable/protection_scrim"
-      tools:ignore="ContentDescription"
-      tools:tint="?attr/colorPrimary" />
 
     <TextView
       android:id="@+id/tvNumberOfSongs"
@@ -79,17 +53,15 @@
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_marginStart="8dp"
+      android:layout_marginTop="16dp"
       android:layout_marginEnd="8dp"
-      android:layout_marginBottom="4dp"
       android:text="●"
       android:textAppearance="?android:attr/textAppearanceMedium"
       android:textColor="@{theme.secondaryForegroundColor}"
-      app:layout_constraintBottom_toTopOf="@+id/tvArtist"
+      app:layout_constraintBottom_toTopOf="@id/tvArtist"
       app:layout_constraintEnd_toStartOf="@+id/tvNumberOfSongs"
       app:layout_constraintStart_toEndOf="@+id/tvYear"
-      app:layout_constraintTop_toTopOf="parent"
-      app:layout_constraintVertical_bias="1.0"
-      app:layout_constraintVertical_chainStyle="packed"
+      app:layout_constraintTop_toBottomOf="@id/imgCoverArt"
       tools:ignore="HardcodedText" />
 
     <TextView
@@ -113,8 +85,8 @@
       android:layout_width="0dp"
       android:layout_height="wrap_content"
       android:layout_marginStart="24dp"
+      android:layout_marginTop="4dp"
       android:layout_marginEnd="24dp"
-      android:layout_marginBottom="4dp"
       android:ellipsize="end"
       android:gravity="center"
       android:text="@{viewModel.artistText}"
@@ -122,7 +94,7 @@
       android:textColor="@{theme.secondaryForegroundColor}"
       android:textStyle="bold"
       app:layout_constrainedHeight="true"
-      app:layout_constraintBottom_toTopOf="@+id/tvTitle"
+      app:layout_constraintBottom_toTopOf="@id/tvTitle"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toBottomOf="@+id/lblDivider"
@@ -133,8 +105,9 @@
       android:layout_width="0dp"
       android:layout_height="wrap_content"
       android:layout_marginStart="16dp"
+      android:layout_marginTop="4dp"
       android:layout_marginEnd="16dp"
-      android:layout_marginBottom="24dp"
+      android:layout_marginBottom="16dp"
       android:ellipsize="end"
       android:gravity="center"
       android:text="@{viewModel.albumTitleText}"
@@ -147,15 +120,6 @@
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toBottomOf="@+id/tvArtist"
       tools:text="@tools:sample/lorem[9]" />
-
-    <androidx.constraintlayout.widget.Barrier
-      android:id="@+id/barrier"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      app:barrierDirection="top"
-      app:constraint_referenced_ids="tvNumberOfSongs,lblDivider,tvYear"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent" />
 
   </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

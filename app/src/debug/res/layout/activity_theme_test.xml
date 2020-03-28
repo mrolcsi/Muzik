@@ -58,7 +58,6 @@
       android:layout_marginTop="8dp"
       android:layout_marginEnd="16dp"
       android:contentDescription="@string/contentDescription_coverArt"
-      android:transitionName="coverArt"
       app:layout_constraintDimensionRatio="1:1"
       app:layout_constraintEnd_toStartOf="@+id/btnNext"
       app:layout_constraintHorizontal_bias="0.5"

@@ -5,10 +5,8 @@ import android.net.Uri
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.view.View
-import androidx.core.view.ViewCompat
 import androidx.databinding.library.baseAdapters.BR
 import androidx.lifecycle.MutableLiveData
-import androidx.navigation.fragment.FragmentNavigatorExtras
 import hu.mrolcsi.muzik.data.manager.media.MediaManager
 import hu.mrolcsi.muzik.data.model.media.artist
 import hu.mrolcsi.muzik.data.model.media.mediaId
@@ -67,12 +65,8 @@ class ArtistDetailsViewModelImpl constructor(
   }
 
   override fun onAlbumClick(albumItem: AlbumItem, transitionedView: View) {
-    val transitionName = ViewCompat.getTransitionName(transitionedView)!!
     sendNavCommand {
-      navigate(
-        ArtistDetailsFragmentDirections.actionToAlbumDetails(albumItem.id, transitionName),
-        FragmentNavigatorExtras(transitionedView to transitionName)
-      )
+      navigate(ArtistDetailsFragmentDirections.actionToAlbumDetails(albumItem.id))
     }
   }
 

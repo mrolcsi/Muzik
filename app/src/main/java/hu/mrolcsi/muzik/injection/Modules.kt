@@ -78,7 +78,7 @@ val networkModule = module {
   single {
     val loggingInterceptor = HttpLoggingInterceptor(
       object : HttpLoggingInterceptor.Logger {
-        override fun log(message: String) = Timber.v("HTTP: $message")
+        override fun log(message: String) = Timber.tag("HTTP").v(message)
       }).apply {
       level = HttpLoggingInterceptor.Level.BODY
     }

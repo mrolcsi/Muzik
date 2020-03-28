@@ -66,7 +66,7 @@ class ArtistDetailsFragment : RxFragment() {
                     requireView().post { executePendingBindings() }
                   },
                   onError = { Timber.e(it) }
-                )
+                ).disposeOnDestroy()
             }
           }
         )

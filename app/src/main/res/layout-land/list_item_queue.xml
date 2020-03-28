@@ -25,7 +25,6 @@
       android:paddingEnd="4dp"
       android:paddingBottom="4dp"
       android:scaleType="centerCrop"
-      android:transitionName="@{model.transitionName}"
       app:elevation="@dimen/action_bar_elevation"
       app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintDimensionRatio="1:1"

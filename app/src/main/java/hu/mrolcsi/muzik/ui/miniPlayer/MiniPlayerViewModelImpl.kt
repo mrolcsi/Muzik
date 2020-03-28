@@ -5,10 +5,8 @@ import android.net.Uri
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.view.View
-import androidx.core.view.ViewCompat
 import androidx.databinding.library.baseAdapters.BR
 import androidx.lifecycle.MutableLiveData
-import androidx.navigation.fragment.FragmentNavigatorExtras
 import hu.mrolcsi.muzik.MainNavigationDirections
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.data.manager.media.MediaManager
@@ -63,11 +61,7 @@ open class MiniPlayerViewModelImpl constructor(
 
   override fun openPlayer(transitionedView: View) {
     sendNavCommand {
-      val transitionName = ViewCompat.getTransitionName(transitionedView)!!
-      navigate(
-        MainNavigationDirections.actionShowPlayer(),
-        FragmentNavigatorExtras(transitionedView to transitionName)
-      )
+      navigate(MainNavigationDirections.actionShowPlayer())
     }
   }
 

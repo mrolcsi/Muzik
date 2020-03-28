@@ -62,11 +62,6 @@
       android:name="albumId"
       app:argType="long" />
 
-    <argument
-      android:name="transitionName"
-      android:defaultValue="coverArt"
-      app:argType="string" />
-
   </fragment>
 
   <dialog

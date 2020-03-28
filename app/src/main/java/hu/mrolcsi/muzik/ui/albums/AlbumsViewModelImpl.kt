@@ -3,9 +3,7 @@ package hu.mrolcsi.muzik.ui.albums
 import android.content.Context
 import android.support.v4.media.MediaBrowserCompat.MediaItem
 import android.view.View
-import androidx.core.view.ViewCompat
 import androidx.lifecycle.MutableLiveData
-import androidx.navigation.fragment.FragmentNavigatorExtras
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.data.model.media.albumArtUri
 import hu.mrolcsi.muzik.data.model.media.albumKey
@@ -55,12 +53,8 @@ class AlbumsViewModelImpl constructor(
   private val sortingModeSubject = BehaviorSubject.createDefault(SortingMode.SORT_BY_TITLE)
 
   override fun onAlbumClick(item: AlbumItem, transitionedView: View) {
-    val transitionName = ViewCompat.getTransitionName(transitionedView)!!
     sendNavCommand {
-      navigate(
-        LibraryFragmentDirections.actionToAlbumDetails(item.id, transitionName),
-        FragmentNavigatorExtras(transitionedView to transitionName)
-      )
+      navigate(LibraryFragmentDirections.actionToAlbumDetails(item.id))
     }
   }
 

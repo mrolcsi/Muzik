@@ -103,8 +103,6 @@ class AlbumDetailsFragment : Fragment() {
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     rvSongs.adapter = songsAdapter
 
-    ViewCompat.setTransitionName(imgCoverArt, args.transitionName)
-
     albumDetailsToolbar.setupWithNavController(findNavController())
 
     // Fix height of AppBarLayout with fitsSystemWindows="true"
