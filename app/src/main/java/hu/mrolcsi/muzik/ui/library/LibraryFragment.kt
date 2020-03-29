@@ -25,6 +25,10 @@ class LibraryFragment : RxFragment() {
 
   private val viewModel: LibraryViewModel by viewModel<LibraryViewModelImpl> { parametersOf(this) }
 
+  private val pagerAdapter by lazy {
+    ConfigurableFragmentPagerAdapter(childFragmentManager)
+  }
+
   override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) =
     FragmentLibraryBinding.inflate(inflater).also {
       it.viewModel = viewModel
@@ -33,6 +37,7 @@ class LibraryFragment : RxFragment() {
     }.root
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    // TODO: Move to ViewModel
     viewModel.requestPermissionEvent.observe(viewLifecycleOwner, Observer {
       rxPermissions.requestEachCombined(*it)
         .subscribeBy(
@@ -44,15 +49,11 @@ class LibraryFragment : RxFragment() {
         ).disposeOnDestroy()
     })
 
-    val adapter = ConfigurableFragmentPagerAdapter(childFragmentManager).also {
-      libraryPager.adapter = it
-    }
-
     viewModel.pages.observe(viewLifecycleOwner, Observer {
-      adapter.onChanged(it)
-      libraryTabs.setupIcons(adapter)
+      pagerAdapter.onChanged(it)
+      libraryTabs.setupIcons(pagerAdapter)
     })
-
+    libraryPager.adapter = pagerAdapter
     libraryTabs.setupWithViewPager(libraryPager)
 
     findNavController().observeAndRunNavCommands(viewLifecycleOwner, viewModel)
