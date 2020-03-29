@@ -28,9 +28,9 @@ class MainActivity : AppCompatActivity() {
 
     viewModel.currentTheme.observe(this, Observer { theme ->
       window.apply {
-        setBackgroundDrawable(ColorDrawable(theme.primaryBackgroundColor))
-        updateStatusBarIcons(theme.primaryBackgroundColor)
-        updateNavigationIcons(theme.primaryBackgroundColor)
+        setBackgroundDrawable(ColorDrawable(theme.backgroundColor))
+        updateStatusBarIcons(theme.backgroundColor)
+        updateNavigationIcons(theme.backgroundColor)
       }
     })
   }

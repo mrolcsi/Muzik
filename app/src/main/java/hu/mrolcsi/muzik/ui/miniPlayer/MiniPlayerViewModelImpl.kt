@@ -4,7 +4,6 @@ import android.content.Context
 import android.net.Uri
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.PlaybackStateCompat
-import android.view.View
 import androidx.databinding.library.baseAdapters.BR
 import androidx.lifecycle.MutableLiveData
 import hu.mrolcsi.muzik.MainNavigationDirections
@@ -59,7 +58,7 @@ open class MiniPlayerViewModelImpl constructor(
   override var isPlayPauseEnabled: Boolean by boundBoolean(BR.playPauseEnabled, false)
   override var isNextEnabled: Boolean by boundBoolean(BR.nextEnabled, false)
 
-  override fun openPlayer(transitionedView: View) {
+  override fun openPlayer() {
     sendNavCommand {
       navigate(MainNavigationDirections.actionShowPlayer())
     }

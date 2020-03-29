@@ -17,12 +17,12 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="4dp"
-    app:rippleColor="@{theme.primaryForegroundColor}">
+    app:rippleColor="@{theme.foregroundColor}">
 
     <androidx.constraintlayout.widget.ConstraintLayout
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:background="@{theme.primaryBackgroundColor}">
+      android:background="@{theme.backgroundColor}">
 
       <include
         layout="@layout/list_item_album_content"

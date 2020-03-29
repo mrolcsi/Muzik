@@ -1,13 +1,12 @@
 package hu.mrolcsi.muzik.ui.miniPlayer
 
 import android.net.Uri
-import android.view.View
 import androidx.databinding.Bindable
 import androidx.databinding.Observable
 import androidx.lifecycle.LiveData
+import hu.mrolcsi.muzik.ui.base.ThemedViewModel
 import hu.mrolcsi.muzik.ui.common.NavCommandSource
 import hu.mrolcsi.muzik.ui.common.UiCommandSource
-import hu.mrolcsi.muzik.ui.base.ThemedViewModel
 
 interface MiniPlayerViewModel : ThemedViewModel, Observable, UiCommandSource,
   NavCommandSource {
@@ -36,7 +35,7 @@ interface MiniPlayerViewModel : ThemedViewModel, Observable, UiCommandSource,
   @get:Bindable
   val isNextEnabled: Boolean
 
-  fun openPlayer(transitionedView: View)
+  fun openPlayer()
   fun onPreviousClick()
   fun onPlayPauseClick()
   fun onNextClick()

@@ -16,26 +16,29 @@
 
   <androidx.coordinatorlayout.widget.CoordinatorLayout
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
 
     <com.google.android.material.appbar.AppBarLayout
       android:id="@+id/appBar"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:background="@{theme.primaryBackgroundColor}"
+      android:background="@{theme.backgroundColor}"
+      android:fitsSystemWindows="true"
       android:visibility="@{!viewModel.isPermissionRationaleVisible}"
-      app:expanded="true">
+      app:expanded="true"
+      app:liftOnScroll="true">
 
       <hu.mrolcsi.muzik.ui.base.BoldTabLayout
         android:id="@+id/libraryTabs"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@{theme.primaryBackgroundColor}"
+        android:background="@{theme.backgroundColor}"
         android:visibility="@{!viewModel.isPermissionRationaleVisible}"
-        app:tabIconTint="@{theme.primaryForegroundColor}"
-        app:tabIndicatorColor="@{theme.primaryForegroundColor}"
+        app:tabIconTint="@{theme.foregroundColor}"
+        app:tabIndicatorColor="@{theme.foregroundColor}"
         app:tabInlineLabel="true"
-        app:tabTextColor="@{theme.primaryForegroundColor}" />
+        app:tabTextColor="@{theme.foregroundColor}" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -54,12 +57,12 @@
       android:layout_gravity="bottom|end"
       android:layout_marginEnd="16dp"
       android:layout_marginBottom="16dp"
-      android:backgroundTint="@{theme.secondaryForegroundColor}"
+      android:backgroundTint="@{theme.foregroundColor}"
       android:contentDescription="@string/mediaControl_shuffleAll"
       android:onClick="@{() -> viewModel.onShuffleAllClicked()}"
-      android:tint="@{theme.secondaryBackgroundColor}"
+      android:tint="@{theme.backgroundColor}"
       android:visibility="@{!viewModel.isPermissionRationaleVisible}"
-      app:rippleColor="@{theme.secondaryBackgroundColor}"
+      app:rippleColor="@{theme.backgroundColor}"
       app:srcCompat="@drawable/ic_shuffle_all" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -77,7 +80,7 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:contentDescription="@string/contentDescription_missingPermission"
-        android:tint="@{theme.secondaryForegroundColor}"
+        android:tint="@{theme.foregroundColor}"
 
         app:layout_constraintBottom_toTopOf="@+id/lblPermissionHint"
         app:layout_constraintEnd_toEndOf="parent"
@@ -98,7 +101,7 @@
         android:text="@string/library_readExternalStorage_rationale"
         android:textAlignment="center"
         android:textAppearance="?attr/textAppearanceBody1"
-        android:textColor="@{theme.secondaryForegroundColor}"
+        android:textColor="@{theme.foregroundColor}"
         android:textSize="18sp"
         app:layout_constraintBottom_toTopOf="@+id/btnRequestPermission"
         app:layout_constraintEnd_toEndOf="parent"
@@ -115,10 +118,10 @@
         android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
-        android:backgroundTint="@{theme.secondaryForegroundColor}"
+        android:backgroundTint="@{theme.foregroundColor}"
         android:onClick="@{() -> viewModel.requestPermission()}"
         android:text="@string/library_grantAccessToSdCard"
-        android:textColor="@{theme.secondaryBackgroundColor}"
+        android:textColor="@{theme.backgroundColor}"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

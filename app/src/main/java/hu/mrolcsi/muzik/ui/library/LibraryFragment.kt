@@ -6,10 +6,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
+import androidx.viewpager.widget.ViewPager
 import com.tbruyelle.rxpermissions2.RxPermissions
+import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.databinding.FragmentLibraryBinding
 import hu.mrolcsi.muzik.ui.base.RxFragment
 import hu.mrolcsi.muzik.ui.common.ConfigurableFragmentPagerAdapter
+import hu.mrolcsi.muzik.ui.common.extensions.updateStatusBarIcons
 import hu.mrolcsi.muzik.ui.common.observeAndRunNavCommands
 import hu.mrolcsi.muzik.ui.common.setupIcons
 import io.reactivex.rxkotlin.subscribeBy
@@ -56,6 +59,26 @@ class LibraryFragment : RxFragment() {
     libraryPager.adapter = pagerAdapter
     libraryTabs.setupWithViewPager(libraryPager)
 
-    findNavController().observeAndRunNavCommands(viewLifecycleOwner, viewModel)
+    libraryPager.addOnPageChangeListener(object : ViewPager.SimpleOnPageChangeListener() {
+      override fun onPageSelected(position: Int) {
+        appBar.liftOnScrollTargetViewId = when (position) {
+          0 -> R.id.rvArtists
+          1 -> R.id.rvAlbums
+          2 -> R.id.rvSongs
+          else -> -1
+        }
+      }
+    })
+
+    findNavController().apply {
+      observeAndRunNavCommands(viewLifecycleOwner, viewModel)
+      addOnDestinationChangedListener { _, _, _ ->
+        activity?.window?.apply {
+          viewModel.currentTheme.value?.backgroundColor?.let {
+            updateStatusBarIcons(it)
+          }
+        }
+      }
+    }
   }
 }

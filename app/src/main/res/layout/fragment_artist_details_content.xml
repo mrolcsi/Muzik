@@ -17,7 +17,6 @@
   <androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingTop="8dp"
     tools:layout_height="match_parent">
 
     <ImageView
@@ -26,7 +25,7 @@
       android:layout_height="wrap_content"
       android:layout_marginStart="20dp"
       android:layout_marginTop="8dp"
-      android:tint="@{theme.secondaryForegroundColor}"
+      android:tint="@{theme.foregroundColor}"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toTopOf="parent"
       app:srcCompat="@drawable/ic_album"
@@ -40,7 +39,7 @@
       android:layout_marginStart="8dp"
       android:text="@string/albums_title"
       android:textAppearance="?android:attr/textAppearanceSmall"
-      android:textColor="@{theme.secondaryForegroundColor}"
+      android:textColor="@{theme.foregroundColor}"
       android:textStyle="bold"
       app:layout_constraintBottom_toBottomOf="@+id/imgAlbums"
       app:layout_constraintStart_toEndOf="@+id/imgAlbums"
@@ -52,7 +51,7 @@
       android:layout_height="1dp"
       android:layout_marginTop="8dp"
       android:background="?android:attr/listDivider"
-      android:backgroundTint="@{theme.secondaryForegroundColor}"
+      android:backgroundTint="@{theme.foregroundColor}"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toBottomOf="@+id/imgAlbums" />
@@ -83,7 +82,7 @@
       android:layout_height="wrap_content"
       android:layout_marginStart="20dp"
       android:layout_marginTop="16dp"
-      android:tint="@{theme.secondaryForegroundColor}"
+      android:tint="@{theme.foregroundColor}"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toBottomOf="@+id/rvAlbums"
       app:srcCompat="@drawable/ic_song"
@@ -97,7 +96,7 @@
       android:layout_marginStart="8dp"
       android:text="@string/songs_title"
       android:textAppearance="?android:attr/textAppearanceSmall"
-      android:textColor="@{theme.secondaryForegroundColor}"
+      android:textColor="@{theme.foregroundColor}"
       android:textStyle="bold"
       app:layout_constraintBottom_toBottomOf="@+id/imgSongs"
       app:layout_constraintStart_toEndOf="@+id/imgSongs"
@@ -109,7 +108,7 @@
       android:layout_height="1dp"
       android:layout_marginTop="8dp"
       android:background="?android:attr/listDivider"
-      android:backgroundTint="@{theme.secondaryForegroundColor}"
+      android:backgroundTint="@{theme.foregroundColor}"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toBottomOf="@+id/imgSongs" />
@@ -120,7 +119,7 @@
       android:layout_height="wrap_content"
       android:nestedScrollingEnabled="true"
       android:orientation="vertical"
-      app:dividerColor="@{theme.secondaryForegroundColor}"
+      app:dividerColor="@{theme.foregroundColor}"
       app:dividerDrawable="@{@drawable/list_divider_inset}"
       app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
       app:layout_constraintBottom_toBottomOf="parent"

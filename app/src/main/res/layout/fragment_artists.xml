@@ -19,16 +19,16 @@
       android:layout_width="match_parent"
       android:layout_height="match_parent"
       android:orientation="vertical"
-      app:bubbleColor="@{theme.secondaryForegroundColor}"
+      app:bubbleColor="@{theme.foregroundColor}"
       app:bubbleSize="small"
-      app:bubbleTextColor="@{theme.secondaryBackgroundColor}"
-      app:dividerColor="@{theme.secondaryForegroundColor}"
-      app:handleColor="@{theme.secondaryForegroundColor}"
+      app:bubbleTextColor="@{theme.backgroundColor}"
+      app:dividerColor="@{theme.foregroundColor}"
+      app:handleColor="@{theme.foregroundColor}"
       app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
       app:showBubble="true"
       app:showColoredDivider="@{true}"
       app:showTrack="true"
-      app:trackColor="@{theme.secondaryForegroundColor}"
+      app:trackColor="@{theme.foregroundColor}"
       tools:listitem="@layout/list_item_artist" />
 
   </FrameLayout>

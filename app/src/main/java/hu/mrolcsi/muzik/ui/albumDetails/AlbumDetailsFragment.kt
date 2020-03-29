@@ -19,6 +19,7 @@ import hu.mrolcsi.muzik.ui.common.MVVMListAdapter
 import hu.mrolcsi.muzik.ui.common.MVVMViewHolder
 import hu.mrolcsi.muzik.ui.common.ThemedViewHolder
 import hu.mrolcsi.muzik.ui.common.extensions.applySharedElementTransition
+import hu.mrolcsi.muzik.ui.common.extensions.updateStatusBarIcons
 import hu.mrolcsi.muzik.ui.common.glide.GlideApp
 import hu.mrolcsi.muzik.ui.songs.SongItem
 import kotlinx.android.synthetic.main.fragment_album_details.*
@@ -112,5 +113,9 @@ class AlbumDetailsFragment : Fragment() {
     }
 
     appBar.addOnOffsetChangedListener(HideViewOnOffsetChangedListener(tvAlbumTitle))
+
+    viewModel.albumTheme.observe(viewLifecycleOwner, Observer {
+      activity?.window?.updateStatusBarIcons(it.backgroundColor)
+    })
   }
 }

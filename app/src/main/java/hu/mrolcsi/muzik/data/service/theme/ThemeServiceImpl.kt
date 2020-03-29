@@ -109,15 +109,10 @@ class ThemeServiceImpl : ThemeService, KoinComponent {
     val primaryBackground = colors.first().also { colors.remove(it) }
     val primaryForeground = findForegroundColor(primaryBackground, colors).also { colors.remove(it) }
 
-    val secondaryBackground = colors.firstOrNull()?.also { colors.remove(it) } ?: primaryBackground
-    val secondaryForeground = findForegroundColor(secondaryBackground, colors).also { colors.remove(it) }
-
     return Theme(
       sourcePalette,
       primaryBackground,
-      primaryForeground,
-      secondaryBackground,
-      secondaryForeground
+      primaryForeground
     )
   }
 

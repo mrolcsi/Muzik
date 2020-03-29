@@ -17,26 +17,26 @@
   <androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@{theme.primaryBackgroundColor}">
+    android:background="@{theme.backgroundColor}">
 
     <com.google.android.material.appbar.MaterialToolbar
       android:id="@+id/playlistToolbar"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:background="@{theme.primaryBackgroundColor}"
+      android:background="@{theme.backgroundColor}"
       android:minHeight="?attr/actionBarSize"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toTopOf="parent"
       app:title="@{viewModel.queueTitle}"
-      app:titleTextColor="@{theme.primaryForegroundColor}" />
+      app:titleTextColor="@{theme.foregroundColor}" />
 
     <androidx.recyclerview.widget.RecyclerView
       android:id="@+id/rvPlaylist"
       android:layout_width="match_parent"
       android:layout_height="0dp"
       android:orientation="vertical"
-      app:dividerColor="@{theme.primaryForegroundColor}"
+      app:dividerColor="@{theme.foregroundColor}"
       app:dividerDrawable="@{@drawable/list_divider_inset}"
       app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
       app:layout_constraintBottom_toBottomOf="parent"

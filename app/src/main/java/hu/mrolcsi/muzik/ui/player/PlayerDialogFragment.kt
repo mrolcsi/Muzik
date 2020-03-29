@@ -18,9 +18,13 @@ import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.databinding.FragmentPlayerBinding
 import hu.mrolcsi.muzik.databinding.ListItemQueueBinding
 import hu.mrolcsi.muzik.ui.base.FullScreenDialogFragment
-import hu.mrolcsi.muzik.ui.common.*
+import hu.mrolcsi.muzik.ui.common.BoundMVVMViewHolder
+import hu.mrolcsi.muzik.ui.common.MVVMListAdapter
+import hu.mrolcsi.muzik.ui.common.ThemedViewHolder
 import hu.mrolcsi.muzik.ui.common.extensions.updateNavigationIcons
 import hu.mrolcsi.muzik.ui.common.extensions.updateStatusBarIcons
+import hu.mrolcsi.muzik.ui.common.observeAndRunNavCommands
+import hu.mrolcsi.muzik.ui.common.observeAndRunUiCommands
 import hu.mrolcsi.muzik.ui.playlist.PlaylistItem
 import hu.mrolcsi.muzik.ui.playlist.PlaylistViewModel
 import hu.mrolcsi.muzik.ui.playlist.PlaylistViewModelImpl
@@ -145,7 +149,7 @@ class PlayerDialogFragment : FullScreenDialogFragment() {
 
   private fun setupPager() {
     playerViewModel.currentTheme.observe(viewLifecycleOwner, Observer {
-      applyTheme(it.primaryBackgroundColor, it.primaryForegroundColor)
+      applyTheme(it.backgroundColor, it.foregroundColor)
     })
     queuePager.adapter = queueAdapter
 
@@ -157,13 +161,13 @@ class PlayerDialogFragment : FullScreenDialogFragment() {
         val rightTheme = queueAdapter.currentList.getOrNull(position + 1)?.theme
 
         val backgroundColor = ColorUtils.blendARGB(
-          leftTheme.primaryBackgroundColor,
-          rightTheme?.primaryBackgroundColor ?: leftTheme.primaryBackgroundColor,
+          leftTheme.backgroundColor,
+          rightTheme?.backgroundColor ?: leftTheme.backgroundColor,
           positionOffset
         )
         val foregroundColor = ColorUtils.blendARGB(
-          leftTheme.primaryForegroundColor,
-          rightTheme?.primaryForegroundColor ?: leftTheme.primaryForegroundColor,
+          leftTheme.foregroundColor,
+          rightTheme?.foregroundColor ?: leftTheme.foregroundColor,
           positionOffset
         )
 

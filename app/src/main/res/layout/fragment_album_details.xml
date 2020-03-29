@@ -17,21 +17,23 @@
   <androidx.coordinatorlayout.widget.CoordinatorLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@{theme.secondaryBackgroundColor}"
+    android:background="@{theme.backgroundColor}"
     android:fitsSystemWindows="true">
 
     <com.google.android.material.appbar.AppBarLayout
       android:id="@+id/appBar"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:background="@{theme.primaryBackgroundColor}"
-      android:fitsSystemWindows="true">
+      android:background="@{theme.backgroundColor}"
+      android:fitsSystemWindows="true"
+      app:liftOnScroll="true"
+      app:liftOnScrollTargetViewId="@id/rvSongs">
 
       <com.google.android.material.appbar.CollapsingToolbarLayout
         android:id="@+id/collapsingToolbar"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:contentScrim="@{theme.primaryBackgroundColor}"
+        app:contentScrim="@{theme.backgroundColor}"
         app:layout_scrollFlags="scroll|exitUntilCollapsed"
         app:scrimAnimationDuration="@integer/preferredAnimationDuration"
         app:titleEnabled="false">
@@ -50,7 +52,7 @@
           android:id="@+id/albumDetailsToolbar"
           android:layout_width="match_parent"
           android:layout_height="?attr/actionBarSize"
-          app:iconTint="@{theme.primaryForegroundColor}"
+          app:iconTint="@{theme.foregroundColor}"
           app:layout_collapseMode="pin">
 
           <TextView
@@ -62,7 +64,7 @@
             android:maxLines="1"
             android:text="@{viewModel.albumTitleText}"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textColor="@{theme.primaryForegroundColor}"
+            android:textColor="@{theme.foregroundColor}"
             android:textStyle="bold" />
 
         </com.google.android.material.appbar.MaterialToolbar>
@@ -77,28 +79,12 @@
       android:layout_height="match_parent"
       android:clipToPadding="false"
       android:orientation="vertical"
-      android:paddingTop="8dp"
-      app:dividerColor="@{theme.secondaryForegroundColor}"
+      app:dividerColor="@{theme.foregroundColor}"
       app:dividerDrawable="@{@drawable/list_divider_inset}"
       app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
       app:layout_behavior=".ui.common.FabAwareScrollingViewBehavior"
       app:showColoredDivider="@{true}"
       tools:listitem="@layout/list_item_song_cover_art" />
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-      android:id="@+id/fabShuffleAll"
-      style="@style/Widget.MaterialComponents.FloatingActionButton"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_marginEnd="16dp"
-      android:backgroundTint="@{theme.secondaryForegroundColor}"
-      android:contentDescription="@string/mediaControl_shuffleAll"
-      android:onClick="@{() -> viewModel.onShuffleAllClick()}"
-      android:tint="@{theme.secondaryBackgroundColor}"
-      app:layout_anchor="@id/appBar"
-      app:layout_anchorGravity="end|bottom"
-      app:rippleColor="@{theme.secondaryBackgroundColor}"
-      app:srcCompat="@drawable/ic_shuffle_all" />
 
   </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>

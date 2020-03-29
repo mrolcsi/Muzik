@@ -8,12 +8,12 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.navigation.findNavController
 import hu.mrolcsi.muzik.R
+import hu.mrolcsi.muzik.databinding.FragmentMiniplayerBinding
+import hu.mrolcsi.muzik.ui.common.OnSwipeTouchListener
 import hu.mrolcsi.muzik.ui.common.glide.GlideApp
 import hu.mrolcsi.muzik.ui.common.glide.onResourceReady
-import hu.mrolcsi.muzik.ui.common.OnSwipeTouchListener
 import hu.mrolcsi.muzik.ui.common.observeAndRunNavCommands
 import hu.mrolcsi.muzik.ui.common.observeAndRunUiCommands
-import hu.mrolcsi.muzik.databinding.FragmentMiniplayerBinding
 import kotlinx.android.synthetic.main.fragment_miniplayer.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -52,11 +52,11 @@ class MiniPlayerFragment : Fragment() {
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     view.setOnClickListener {
-      viewModel.openPlayer(imgCoverArt)
+      viewModel.openPlayer()
     }
     view.setOnTouchListener(object : OnSwipeTouchListener(requireContext()) {
       override fun onSwipeUp() {
-        viewModel.openPlayer(imgCoverArt)
+        viewModel.openPlayer()
       }
     })
   }

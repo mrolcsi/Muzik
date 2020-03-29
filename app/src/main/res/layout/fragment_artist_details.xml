@@ -23,16 +23,18 @@
       android:id="@+id/appBar"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:background="@{theme.primaryBackgroundColor}"
+      android:background="@{theme.backgroundColor}"
       android:fitsSystemWindows="true"
       app:expanded="false"
+      app:liftOnScroll="true"
+      app:liftOnScrollTargetViewId="@id/nestedScrollView"
       tools:expanded="true">
 
       <com.google.android.material.appbar.CollapsingToolbarLayout
         android:id="@+id/collapsingToolbar"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:contentScrim="@{theme.primaryBackgroundColor}"
+        app:contentScrim="@{theme.backgroundColor}"
         app:layout_scrollFlags="scroll|exitUntilCollapsed"
         app:scrimAnimationDuration="@integer/preferredAnimationDuration"
         app:titleEnabled="false">
@@ -43,7 +45,7 @@
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
           app:layout_collapseMode="parallax"
-          app:layout_collapseParallaxMultiplier="0.5"
+          app:layout_collapseParallaxMultiplier="1"
           app:theme="@{theme}"
           app:viewModel="@{viewModel}" />
 
@@ -51,7 +53,7 @@
           android:id="@+id/artistDetailsToolbar"
           android:layout_width="match_parent"
           android:layout_height="?attr/actionBarSize"
-          app:iconTint="@{theme.primaryForegroundColor}"
+          app:iconTint="@{theme.foregroundColor}"
           app:layout_collapseMode="pin">
 
           <TextView
@@ -63,7 +65,7 @@
             android:maxLines="1"
             android:text="@{viewModel.artistName}"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textColor="@{theme.primaryForegroundColor}"
+            android:textColor="@{theme.foregroundColor}"
             android:textStyle="bold" />
 
         </com.google.android.material.appbar.MaterialToolbar>
@@ -84,21 +86,6 @@
         app:viewModel="@{viewModel}" />
 
     </androidx.core.widget.NestedScrollView>
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-      android:id="@+id/fabShuffleAll"
-      style="@style/Widget.MaterialComponents.FloatingActionButton"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_marginEnd="16dp"
-      android:backgroundTint="@{theme.secondaryForegroundColor}"
-      android:contentDescription="@string/mediaControl_shuffleAll"
-      android:onClick="@{() -> viewModel.onShuffleAllClick()}"
-      android:tint="@{theme.secondaryBackgroundColor}"
-      app:layout_anchor="@id/appBar"
-      app:layout_anchorGravity="bottom|end"
-      app:rippleColor="@{theme.secondaryBackgroundColor}"
-      app:srcCompat="@drawable/ic_shuffle_all" />
 
   </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>

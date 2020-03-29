@@ -64,10 +64,8 @@ class ThemeTestActivity : AppCompatActivity() {
       }
 
       // Generated Theme
-      tvPrimary.setBackgroundColor(theme.primaryBackgroundColor)
-      tvPrimary.setTextColor(theme.primaryForegroundColor)
-      tvSecondary.setBackgroundColor(theme.secondaryBackgroundColor)
-      tvSecondary.setTextColor(theme.secondaryForegroundColor)
+      tvPrimary.setBackgroundColor(theme.backgroundColor)
+      tvPrimary.setTextColor(theme.foregroundColor)
     })
 
     rvAllColors.apply {

@@ -12,27 +12,20 @@ data class Theme(
   @Exclude var sourcePalette: Palette? = null,
 
   // Basic colors
-  @SerializedName("primaryBackgroundColor") val primaryBackgroundColor: Int,
-  @SerializedName("primaryForegroundColor") val primaryForegroundColor: Int,
-  @SerializedName("secondaryBackgroundColor") val secondaryBackgroundColor: Int,
-  @SerializedName("secondaryForegroundColor") val secondaryForegroundColor: Int
+  @SerializedName("primaryBackgroundColor") val backgroundColor: Int,
+  @SerializedName("primaryForegroundColor") val foregroundColor: Int
 ) {
 
-  override fun toString(): String {
-    return "Theme(primaryBackgroundColor=${primaryBackgroundColor.toColorHex()}, " +
-        "primaryForegroundColor=${primaryForegroundColor.toColorHex()})"
-  }
+  override fun toString(): String =
+    "Theme(backgroundColor=${backgroundColor.toColorHex()}, foregroundColor=${foregroundColor.toColorHex()})"
 
   companion object {
     val DISABLED_OPACITY = (255 * 0.6).roundToInt()
 
     val DEFAULT_THEME = Theme(
       sourcePalette = null,
-      primaryBackgroundColor = Color.rgb(39, 115, 231),
-      primaryForegroundColor = Color.WHITE,
-      secondaryBackgroundColor = Color.BLACK,
-      secondaryForegroundColor = Color.WHITE
+      backgroundColor = Color.rgb(39, 115, 231),
+      foregroundColor = Color.WHITE
     )
   }
-
 }

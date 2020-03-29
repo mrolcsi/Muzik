@@ -19,7 +19,7 @@
     android:layout_height="wrap_content"
     android:background="?android:attr/selectableItemBackground"
     android:minHeight="?attr/listPreferredItemHeight"
-    app:rippleColor="@{theme.secondaryForegroundColor}">
+    app:rippleColor="@{theme.foregroundColor}">
 
     <TextView
       android:id="@+id/tvArtist"
@@ -32,7 +32,7 @@
       android:maxLines="1"
       android:text="@{model.artistText}"
       android:textAppearance="?attr/textAppearanceListItem"
-      android:textColor="@{theme.secondaryForegroundColor}"
+      android:textColor="@{theme.foregroundColor}"
       app:layout_constraintEnd_toStartOf="@+id/imgChevronRight"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toTopOf="parent"
@@ -48,7 +48,7 @@
       android:alpha="0.8"
       android:text="@{model.numberOfSongsText}"
       android:textAppearance="?attr/textAppearanceListItemSecondary"
-      android:textColor="@{theme.secondaryForegroundColor}"
+      android:textColor="@{theme.foregroundColor}"
       app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintEnd_toStartOf="@+id/imgChevronRight"
       app:layout_constraintStart_toStartOf="parent"
@@ -64,7 +64,7 @@
       android:layout_marginEnd="16dp"
       android:layout_marginBottom="8dp"
       android:alpha="0.8"
-      android:tint="@{theme.secondaryForegroundColor}"
+      android:tint="@{theme.foregroundColor}"
       app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintTop_toTopOf="parent"
