@@ -7,6 +7,7 @@ import android.net.Uri
 import android.provider.MediaStore
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
+import androidx.core.text.isDigitsOnly
 import hu.mrolcsi.muzik.data.model.media.MediaType.Companion.MEDIA_TYPE_KEY
 import hu.mrolcsi.muzik.data.model.media.MediaType.Companion.MEDIA_UNKNOWN
 
@@ -63,22 +64,16 @@ inline val MediaDescriptionCompat.composer: String?
   get() = this.extras?.getString(MediaStore.Audio.Media.COMPOSER)
     ?: this.extras?.getString(MediaMetadataCompat.METADATA_KEY_COMPOSER)
 
-@Deprecated(
-  "Invalid on Android 10",
-  ReplaceWith("albumArtUri", "hu.mrolcsi.muzik.data.model.media.MediaDescriptionCompatExtKt")
-)
-inline val MediaDescriptionCompat.coverArtUri: Uri
-  get() = Uri.parse("content://media/external/audio/media/$id/albumart")
-
 inline val MediaDescriptionCompat.dateAdded: Long
   get() = this.extras?.getString(MediaStore.Audio.Media.DATE_ADDED)?.toLong()?.times(1000)
     ?: -1
 
 inline val MediaDescriptionCompat.discNumber: Long
   get() {
-    val trackNumberExtra =
-      this.extras?.getString(MediaStore.Audio.Media.TRACK)?.toLong()
-        ?: this.extras?.getLong(MediaMetadataCompat.METADATA_KEY_TRACK_NUMBER)
+    val trackNumberExtra = this.extras?.getString(MediaStore.Audio.Media.TRACK)?.let { trackNumberString ->
+      if (trackNumberString.isDigitsOnly()) trackNumberString.toLong()
+      else trackNumberString.split("/").first().toLong()
+    } ?: this.extras?.getLong(MediaMetadataCompat.METADATA_KEY_TRACK_NUMBER)
 
     return trackNumberExtra?.let { trackNumber -> (trackNumber / 1000).takeIf { it > 0 } } ?: -1
   }
@@ -116,11 +111,13 @@ inline val MediaDescriptionCompat.songTitle: String?
 inline val MediaDescriptionCompat.titleKey: String?
   get() = this.extras?.getString(MediaStore.Audio.Media.TITLE_KEY)
 
+// TODO: Maybe just treat it as a string?
 inline val MediaDescriptionCompat.trackNumber: Long
   get() {
-    val trackNumberExtra =
-      this.extras?.getString(MediaStore.Audio.Media.TRACK)?.toLong()
-        ?: this.extras?.getLong(MediaMetadataCompat.METADATA_KEY_TRACK_NUMBER)
+    val trackNumberExtra = this.extras?.getString(MediaStore.Audio.Media.TRACK)?.let { trackNumberString ->
+      if (trackNumberString.isDigitsOnly()) trackNumberString.toLong()
+      else trackNumberString.split("/").first().toLong()
+    } ?: this.extras?.getLong(MediaMetadataCompat.METADATA_KEY_TRACK_NUMBER)
 
     return trackNumberExtra?.let { trackNumber -> (trackNumber.rem(1000)) } ?: -1
   }

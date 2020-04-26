@@ -18,6 +18,7 @@ import hu.mrolcsi.muzik.data.model.media.artist
 import hu.mrolcsi.muzik.data.model.media.id
 import hu.mrolcsi.muzik.data.model.media.mediaId
 import hu.mrolcsi.muzik.data.model.media.title
+import java.io.FileNotFoundException
 
 class ExoNotificationManager(
   context: Context,
@@ -60,6 +61,8 @@ class ExoNotificationManager(
                 callback?.onBitmap(bitmap)
               } catch (e: NullPointerException) {
                 // MediaStore throws a NullPointerException when the image doesn't exist
+              } catch (e: FileNotFoundException) {
+                // ... or a FileNotFoundException on newer versions.
               }
             }
           }

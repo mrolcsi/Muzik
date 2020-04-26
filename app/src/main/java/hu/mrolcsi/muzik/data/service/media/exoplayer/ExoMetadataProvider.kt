@@ -14,6 +14,7 @@ import hu.mrolcsi.muzik.data.model.media.albumArt
 import hu.mrolcsi.muzik.data.model.media.albumArtUri
 import hu.mrolcsi.muzik.data.model.media.albumId
 import timber.log.Timber
+import java.io.FileNotFoundException
 
 class ExoMetadataProvider(
   private val context: Context,
@@ -64,6 +65,9 @@ class ExoMetadataProvider(
         .build()
     } catch (e: NullPointerException) {
       // MediaStore throws a NullPointerException when the image doesn't exist
+      source
+    } catch (e: FileNotFoundException) {
+      // ... or a FileNotFoundException on newer versions.
       source
     }
   }
