@@ -4,13 +4,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import androidx.appcompat.widget.PopupMenu
 import androidx.databinding.library.baseAdapters.BR
+import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.uber.autodispose.android.lifecycle.autoDispose
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.databinding.FragmentAlbumsBinding
-import hu.mrolcsi.muzik.ui.base.RxFragment
+import hu.mrolcsi.muzik.databinding.ListItemAlbumVerticalBinding
 import hu.mrolcsi.muzik.ui.common.BoundMVVMViewHolder
 import hu.mrolcsi.muzik.ui.common.IndexedMVVMListAdapter
 import hu.mrolcsi.muzik.ui.common.glide.GlideApp
@@ -19,19 +20,18 @@ import hu.mrolcsi.muzik.ui.common.observeAndRunNavCommands
 import hu.mrolcsi.muzik.ui.common.observeAndRunUiCommands
 import hu.mrolcsi.muzik.ui.library.SortingMode
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.rxkotlin.subscribeBy
 import kotlinx.android.synthetic.main.fragment_albums.*
 import kotlinx.android.synthetic.main.list_item_album_content.view.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
 
-class AlbumsFragment : RxFragment() {
+class AlbumsFragment : Fragment() {
 
   private val viewModel: AlbumsViewModel by viewModel<AlbumsViewModelImpl>()
 
   private val albumsAdapter by lazy {
     IndexedMVVMListAdapter(
-      itemIdSelector = { it.id },
+      itemIdSelector = AlbumItem::id,
       viewHolderFactory = { parent, _ ->
         BoundMVVMViewHolder<AlbumItem>(
           parent = parent,
@@ -40,20 +40,21 @@ class AlbumsFragment : RxFragment() {
             viewModel.onAlbumClick(model, holder.itemView.imgCoverArt)
           },
           onModelChange = { model ->
-            this.root.findViewById<ImageView>(R.id.imgCoverArt)?.let { imgCoverArt ->
+            (this as ListItemAlbumVerticalBinding).incAlbumContent.imgCoverArt.let { imgCoverArt ->
               GlideApp.with(imgCoverArt)
                 .asBitmap()
                 .load(model.albumArtUri)
                 .toSingle()
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnSuccess { imgCoverArt.setImageBitmap(it) }
-                .flatMap { viewModel.themeService.createTheme(it) }
-                .subscribeBy(
-                  onSuccess = {
+                .doOnSuccess(imgCoverArt::setImageBitmap)
+                .flatMap(viewModel.themeService::createTheme)
+                .autoDispose(viewLifecycleOwner)
+                .subscribe(
+                  {
                     setVariable(BR.theme, it)
-                    requireView().post { executePendingBindings() }
+                    requireView().post(this::executePendingBindings)
                   },
-                  onError = { Timber.e(it) }
+                  { Timber.e(it) }
                 )
             }
 

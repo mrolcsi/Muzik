@@ -4,25 +4,25 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.viewpager.widget.ViewPager
 import com.tbruyelle.rxpermissions2.RxPermissions
+import com.uber.autodispose.android.lifecycle.autoDispose
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.databinding.FragmentLibraryBinding
-import hu.mrolcsi.muzik.ui.base.RxFragment
 import hu.mrolcsi.muzik.ui.common.ConfigurableFragmentPagerAdapter
 import hu.mrolcsi.muzik.ui.common.extensions.updateStatusBarIcons
 import hu.mrolcsi.muzik.ui.common.observeAndRunNavCommands
 import hu.mrolcsi.muzik.ui.common.setupIcons
-import io.reactivex.rxkotlin.subscribeBy
 import kotlinx.android.synthetic.main.fragment_library.*
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import timber.log.Timber
 
-class LibraryFragment : RxFragment() {
+class LibraryFragment : Fragment() {
 
   private val rxPermissions: RxPermissions by inject { parametersOf(this) }
 
@@ -43,13 +43,14 @@ class LibraryFragment : RxFragment() {
     // TODO: Move to ViewModel
     viewModel.requestPermissionEvent.observe(viewLifecycleOwner, Observer {
       rxPermissions.requestEachCombined(*it)
-        .subscribeBy(
-          onNext = { permission ->
+        .autoDispose(viewLifecycleOwner)
+        .subscribe(
+          { permission ->
             if (permission.granted) viewModel.onPermissionGranted()
             else viewModel.onPermissionDenied(permission.shouldShowRequestPermissionRationale)
           },
-          onError = { e -> Timber.e(e) }
-        ).disposeOnDestroy()
+          { e -> Timber.e(e) }
+        )
     })
 
     viewModel.pages.observe(viewLifecycleOwner, Observer {

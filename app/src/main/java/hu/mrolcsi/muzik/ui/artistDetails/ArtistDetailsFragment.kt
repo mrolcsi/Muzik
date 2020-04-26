@@ -4,18 +4,19 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import androidx.core.view.ViewCompat
 import androidx.databinding.library.baseAdapters.BR
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.ui.setupWithNavController
 import com.bumptech.glide.request.target.Target
+import com.uber.autodispose.android.lifecycle.autoDispose
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.databinding.FragmentArtistDetailsBinding
+import hu.mrolcsi.muzik.databinding.ListItemAlbumHorizontalBinding
 import hu.mrolcsi.muzik.ui.albums.AlbumItem
-import hu.mrolcsi.muzik.ui.base.RxFragment
 import hu.mrolcsi.muzik.ui.common.BoundMVVMViewHolder
 import hu.mrolcsi.muzik.ui.common.HideViewOnOffsetChangedListener
 import hu.mrolcsi.muzik.ui.common.MVVMListAdapter
@@ -27,7 +28,6 @@ import hu.mrolcsi.muzik.ui.common.glide.toSingle
 import hu.mrolcsi.muzik.ui.common.observeAndRunNavCommands
 import hu.mrolcsi.muzik.ui.common.observeAndRunUiCommands
 import hu.mrolcsi.muzik.ui.songs.SongItem
-import io.reactivex.rxkotlin.subscribeBy
 import kotlinx.android.synthetic.main.fragment_artist_details.*
 import kotlinx.android.synthetic.main.fragment_artist_details_content.*
 import kotlinx.android.synthetic.main.fragment_artist_details_header.*
@@ -35,7 +35,7 @@ import kotlinx.android.synthetic.main.list_item_album_content.view.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
 
-class ArtistDetailsFragment : RxFragment() {
+class ArtistDetailsFragment : Fragment() {
 
   private val args: ArtistDetailsFragmentArgs by navArgs()
 
@@ -43,7 +43,7 @@ class ArtistDetailsFragment : RxFragment() {
 
   private val albumsAdapter by lazy {
     MVVMListAdapter(
-      itemIdSelector = { it.id },
+      itemIdSelector = AlbumItem::id,
       viewHolderFactory = { parent, _ ->
         BoundMVVMViewHolder<AlbumItem>(
           parent = parent,
@@ -53,20 +53,21 @@ class ArtistDetailsFragment : RxFragment() {
           },
           onModelChange = { model ->
             // Load album art
-            this.root.findViewById<ImageView>(R.id.imgCoverArt)?.let { imgCoverArt ->
+            (this as ListItemAlbumHorizontalBinding).incAlbumContent.imgCoverArt.let { imgCoverArt ->
               GlideApp.with(imgCoverArt)
                 .asBitmap()
                 .load(model.albumArtUri)
                 .toSingle()
-                .doOnSuccess { imgCoverArt.setImageBitmap(it) }
-                .flatMap { viewModel.themeService.createTheme(it) }
-                .subscribeBy(
-                  onSuccess = {
+                .doOnSuccess(imgCoverArt::setImageBitmap)
+                .flatMap(viewModel.themeService::createTheme)
+                .autoDispose(viewLifecycleOwner)
+                .subscribe(
+                  {
                     setVariable(BR.theme, it)
-                    requireView().post { executePendingBindings() }
+                    requireView().post(this::executePendingBindings)
                   },
-                  onError = { Timber.e(it) }
-                ).disposeOnDestroy()
+                  { Timber.e(it) }
+                )
             }
           }
         )
@@ -76,7 +77,7 @@ class ArtistDetailsFragment : RxFragment() {
 
   private val songsAdapter by lazy {
     MVVMListAdapter(
-      itemIdSelector = { it.id },
+      itemIdSelector = SongItem::id,
       viewHolderFactory = { parent, _ ->
         ThemedViewHolder<SongItem>(
           parent = parent,
@@ -84,7 +85,7 @@ class ArtistDetailsFragment : RxFragment() {
           viewLifecycleOwner = viewLifecycleOwner,
           theme = viewModel.currentTheme
         ) { model, holder ->
-          viewModel.onSongClick(model, holder.adapterPosition)
+          viewModel.onSongClick(model, holder.bindingAdapterPosition)
         }
       }
     )

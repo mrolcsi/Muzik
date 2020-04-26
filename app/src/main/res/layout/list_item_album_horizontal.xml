@@ -25,6 +25,7 @@
       android:background="@{theme.backgroundColor}">
 
       <include
+        android:id="@+id/incAlbumContent"
         layout="@layout/list_item_album_content"
         app:model="@{model}"
         app:theme="@{theme}" />
