@@ -16,7 +16,7 @@ import androidx.databinding.library.baseAdapters.BR
 import androidx.lifecycle.MutableLiveData
 import com.bumptech.glide.request.target.Target
 import hu.mrolcsi.muzik.R
-import hu.mrolcsi.muzik.data.manager.media.MediaManager
+import hu.mrolcsi.muzik.data.manager.media.MediaBrowserClient
 import hu.mrolcsi.muzik.data.model.media.album
 import hu.mrolcsi.muzik.data.model.media.albumArtUri
 import hu.mrolcsi.muzik.data.model.media.albumId
@@ -52,7 +52,7 @@ class PlayerViewModelImpl constructor(
   PlayerViewModel {
 
   private val context: Context by inject()
-  private val mediaManager: MediaManager by inject()
+  private val mediaBrowserClient: MediaBrowserClient by inject()
 
   override var noSongLoadedVisible: Boolean by boundBoolean(BR.noSongLoadedVisible)
 
@@ -73,12 +73,12 @@ class PlayerViewModelImpl constructor(
 
   override fun onShuffleClick() {
     userInitiatedChange = true
-    mediaManager.toggleShuffle()
+    mediaBrowserClient.toggleShuffle()
   }
 
   override fun onRepeatClick() {
     userInitiatedChange = true
-    mediaManager.toggleRepeat()
+    mediaBrowserClient.toggleRepeat()
   }
 
   override var isSeekProgressVisible: Boolean by boundBoolean(BR.seekProgressVisible, false)
@@ -100,26 +100,26 @@ class PlayerViewModelImpl constructor(
   override fun onStopTrackingTouch() {
     isSeekProgressVisible = false
     userInitiatedChange = false
-    mediaManager.seekTo(seekProgress * 1000L)
+    mediaBrowserClient.seekTo(seekProgress * 1000L)
   }
 
   override val queueState = MutableLiveData<QueueState>()
 
   override fun skipToQueueItem(itemId: Long) {
-    mediaManager.skipToQueueItem(itemId)
+    mediaBrowserClient.skipToQueueItem(itemId)
   }
 
   override val previousTouchListener = OnRepeatTouchListener(
     initialInterval = 500,
     normalInterval = 500,
-    onRepeat = { mediaManager.rewind(); seekProgressText = elapsedTimeText },
+    onRepeat = { mediaBrowserClient.rewind(); seekProgressText = elapsedTimeText },
     onDown = { isSeekProgressVisible = true },
     onUp = { isSeekProgressVisible = false }
   )
   override val nextTouchListener = OnRepeatTouchListener(
     initialInterval = 500,
     normalInterval = 500,
-    onRepeat = { mediaManager.fastForward(); seekProgressText = elapsedTimeText },
+    onRepeat = { mediaBrowserClient.fastForward(); seekProgressText = elapsedTimeText },
     onDown = { isSeekProgressVisible = true },
     onUp = { isSeekProgressVisible = false }
   )
@@ -137,7 +137,7 @@ class PlayerViewModelImpl constructor(
   }
 
   init {
-    mediaManager.shuffleMode
+    mediaBrowserClient.shuffleMode
       .observeOn(AndroidSchedulers.mainThread())
       .subscribeBy(
         onNext = {
@@ -160,7 +160,7 @@ class PlayerViewModelImpl constructor(
         onError = { showError(this, it) }
       ).disposeOnCleared()
 
-    mediaManager.repeatMode
+    mediaBrowserClient.repeatMode
       .observeOn(AndroidSchedulers.mainThread())
       .subscribeBy(
         onNext = {
@@ -187,11 +187,11 @@ class PlayerViewModelImpl constructor(
       ).disposeOnCleared()
 
     Observables.combineLatest(
-      mediaManager.queue
+      mediaBrowserClient.queue
         .startWith(listOf(emptyQueueItem))
         .distinctUntilChanged { old, new -> old.map { it.queueId } == new.map { it.queueId } }
         .switchMapSingle { queueItems -> queueItems.createThemes() },
-      mediaManager.playbackState
+      mediaBrowserClient.playbackState
         .map { it.activeQueueItemId }
         .distinctUntilChanged()
         .doOnNext { noSongLoadedVisible = it < 0 }

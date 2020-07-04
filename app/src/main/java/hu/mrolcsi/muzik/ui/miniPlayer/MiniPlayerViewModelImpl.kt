@@ -8,7 +8,7 @@ import androidx.databinding.library.baseAdapters.BR
 import androidx.lifecycle.MutableLiveData
 import hu.mrolcsi.muzik.MainNavigationDirections
 import hu.mrolcsi.muzik.R
-import hu.mrolcsi.muzik.data.manager.media.MediaManager
+import hu.mrolcsi.muzik.data.manager.media.MediaBrowserClient
 import hu.mrolcsi.muzik.data.model.media.albumArtUri
 import hu.mrolcsi.muzik.data.model.media.artist
 import hu.mrolcsi.muzik.data.model.media.duration
@@ -43,7 +43,7 @@ open class MiniPlayerViewModelImpl constructor(
   KoinComponent {
 
   private val context: Context by inject()
-  private val mediaManager: MediaManager by inject()
+  private val mediaBrowserClient: MediaBrowserClient by inject()
 
   override var songTitle: String? by boundStringOrNull(BR.songTitle)
   override var songArtist: String? by boundStringOrNull(BR.songArtist)
@@ -67,29 +67,29 @@ open class MiniPlayerViewModelImpl constructor(
   override fun onPreviousClick() {
     if (elapsedTime > 5) {
       // restart the song
-      mediaManager.seekTo(0)
+      mediaBrowserClient.seekTo(0)
     } else {
-      mediaManager.skipToPrevious()
+      mediaBrowserClient.skipToPrevious()
     }
   }
 
   override fun onPlayPauseClick() {
-    mediaManager.playPause()
+    mediaBrowserClient.playPause()
   }
 
   override fun onNextClick() {
-    mediaManager.skipToNext()
+    mediaBrowserClient.skipToNext()
   }
 
   init {
-    mediaManager.playbackState
+    mediaBrowserClient.playbackState
       .observeOn(AndroidSchedulers.mainThread())
       .subscribeBy(
         onNext = { updateState(it) },
         onError = { showError(this, it) }
       ).disposeOnCleared()
 
-    mediaManager.mediaMetadata
+    mediaBrowserClient.mediaMetadata
       .observeOn(AndroidSchedulers.mainThread())
       .subscribeBy(
         onNext = { updateMetadata(it) },
@@ -97,8 +97,8 @@ open class MiniPlayerViewModelImpl constructor(
       ).disposeOnCleared()
 
     Observable.interval(500, TimeUnit.MILLISECONDS, Schedulers.single())
-      .filter { mediaManager.getCurrentPlaybackState() != null }
-      .map { mediaManager.getCurrentPlaybackState()!! }
+      .filter { mediaBrowserClient.getCurrentPlaybackState() != null }
+      .map { mediaBrowserClient.getCurrentPlaybackState()!! }
       .observeOn(AndroidSchedulers.mainThread())
       .subscribeBy(
         onNext = { updateState(it) },

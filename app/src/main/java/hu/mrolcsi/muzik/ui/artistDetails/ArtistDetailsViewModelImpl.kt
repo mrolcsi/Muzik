@@ -7,7 +7,7 @@ import android.support.v4.media.MediaMetadataCompat
 import android.view.View
 import androidx.databinding.library.baseAdapters.BR
 import androidx.lifecycle.MutableLiveData
-import hu.mrolcsi.muzik.data.manager.media.MediaManager
+import hu.mrolcsi.muzik.data.manager.media.MediaBrowserClient
 import hu.mrolcsi.muzik.data.model.media.artist
 import hu.mrolcsi.muzik.data.model.media.mediaId
 import hu.mrolcsi.muzik.data.model.media.titleKey
@@ -44,7 +44,7 @@ class ArtistDetailsViewModelImpl constructor(
   private val context: Context by inject()
   private val mediaRepo: MediaRepository by inject()
   private val discogsService: DiscogsService by inject()
-  private val mediaManager: MediaManager by inject()
+  private val mediaBrowserClient: MediaBrowserClient by inject()
 
   private val artistSubject = BehaviorSubject.create<Long>()
 
@@ -71,13 +71,13 @@ class ArtistDetailsViewModelImpl constructor(
   }
 
   override fun onSongClick(songItem: SongItem, position: Int) {
-    artistName?.let { mediaManager.setQueueTitle(it) }
-    songDescriptions?.let { mediaManager.playAll(it, position) }
+    artistName?.let { mediaBrowserClient.setQueueTitle(it) }
+    songDescriptions?.let { mediaBrowserClient.playAll(it, position) }
   }
 
   override fun onShuffleAllClick() {
-    artistName?.let { mediaManager.setQueueTitle(it) }
-    songDescriptions?.let { mediaManager.playAllShuffled(it) }
+    artistName?.let { mediaBrowserClient.setQueueTitle(it) }
+    songDescriptions?.let { mediaBrowserClient.playAllShuffled(it) }
   }
 
   init {
@@ -108,7 +108,7 @@ class ArtistDetailsViewModelImpl constructor(
       artistSubject
         .switchMap { mediaRepo.getSongsByArtist(it) }
         .map { songs -> songs.sortedBy { it.description.titleKey } },
-      mediaManager.mediaMetadata
+      mediaBrowserClient.mediaMetadata
         .distinctUntilChanged { t: MediaMetadataCompat -> t.mediaId }
         .filter { it.mediaId != null }
     )

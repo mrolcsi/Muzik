@@ -11,8 +11,8 @@ import com.google.gson.GsonBuilder
 import com.tbruyelle.rxpermissions2.RxPermissions
 import hu.mrolcsi.muzik.data.local.MuzikDatabase
 import hu.mrolcsi.muzik.data.local.MuzikDatabaseMigrations
-import hu.mrolcsi.muzik.data.manager.media.MediaManager
-import hu.mrolcsi.muzik.data.manager.media.MediaManagerImpl
+import hu.mrolcsi.muzik.data.manager.media.MediaBrowserClient
+import hu.mrolcsi.muzik.data.manager.media.MediaBrowserClientImpl
 import hu.mrolcsi.muzik.data.remote.AnnotationExclusionStrategy
 import hu.mrolcsi.muzik.data.remote.discogs.DiscogsApi
 import hu.mrolcsi.muzik.data.repository.media.MediaRepository
@@ -45,7 +45,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import timber.log.Timber
 
 val appModule = module {
-  single<MediaManager> { MediaManagerImpl() }
+  single<MediaBrowserClient> { MediaBrowserClientImpl() }
   single<DiscogsService> { DiscogsServiceImpl() }
   single<ThemeService> { ThemeServiceImpl() }
   single<SharedPreferences> { PreferenceManager.getDefaultSharedPreferences(get()) }

@@ -7,7 +7,7 @@ import androidx.core.content.ContextCompat
 import androidx.databinding.library.baseAdapters.BR
 import androidx.lifecycle.MutableLiveData
 import hu.mrolcsi.muzik.R
-import hu.mrolcsi.muzik.data.manager.media.MediaManager
+import hu.mrolcsi.muzik.data.manager.media.MediaBrowserClient
 import hu.mrolcsi.muzik.data.repository.media.MediaRepository
 import hu.mrolcsi.muzik.ui.albums.AlbumsFragment
 import hu.mrolcsi.muzik.ui.artists.ArtistsFragment
@@ -36,7 +36,7 @@ class LibraryViewModelImpl constructor(
 
   private val context: Context by inject()
   private val mediaRepo: MediaRepository by inject()
-  private val mediaService: MediaManager by inject()
+  private val mediaService: MediaBrowserClient by inject()
 
   override val pages = MutableLiveData<List<Page>>()
 

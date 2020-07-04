@@ -7,7 +7,7 @@ import androidx.databinding.library.baseAdapters.BR
 import androidx.lifecycle.MutableLiveData
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.data.local.playQueue.PlayQueueDao
-import hu.mrolcsi.muzik.data.manager.media.MediaManager
+import hu.mrolcsi.muzik.data.manager.media.MediaBrowserClient
 import hu.mrolcsi.muzik.ui.base.DataBindingViewModel
 import hu.mrolcsi.muzik.ui.base.ThemedViewModel
 import hu.mrolcsi.muzik.ui.base.ThemedViewModelImpl
@@ -33,7 +33,7 @@ class PlaylistViewModelImpl constructor(
   KoinComponent {
 
   private val playQueueDao: PlayQueueDao by inject()
-  private val mediaManager: MediaManager by inject()
+  private val mediaBrowserClient: MediaBrowserClient by inject()
 
   override val progressVisible: Boolean = false
   override val listViewVisible: Boolean = true
@@ -43,13 +43,13 @@ class PlaylistViewModelImpl constructor(
   override var queueTitle: CharSequence by boundProperty(BR.queueTitle, context.getString(R.string.playlist_title))
 
   override fun onSelect(item: PlaylistItem) {
-    mediaManager.skipToQueueItem(item.id)
+    mediaBrowserClient.skipToQueueItem(item.id)
   }
 
   init {
     Observables.combineLatest(
       playQueueDao.fetchQueue(),
-      mediaManager.playbackState.distinctUntilChanged { t: PlaybackStateCompat -> t.activeQueueItemId }
+      mediaBrowserClient.playbackState.distinctUntilChanged { t: PlaybackStateCompat -> t.activeQueueItemId }
     )
       .observeOn(AndroidSchedulers.mainThread())
       .map { (entries, state) ->
@@ -70,7 +70,7 @@ class PlaylistViewModelImpl constructor(
         onError = { showError(this, it) }
       ).disposeOnCleared()
 
-    mediaManager.queueTitle
+    mediaBrowserClient.queueTitle
       .subscribeBy(
         onNext = { queueTitle = it },
         onError = { showError(this, it) }

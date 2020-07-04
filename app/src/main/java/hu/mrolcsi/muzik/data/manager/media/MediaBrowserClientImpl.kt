@@ -35,7 +35,7 @@ import org.koin.core.KoinComponent
 import org.koin.core.inject
 import timber.log.Timber
 
-class MediaManagerImpl : MediaManager, KoinComponent {
+class MediaBrowserClientImpl : MediaBrowserClient, KoinComponent {
 
   private val app: Application by inject()
 
@@ -99,7 +99,7 @@ class MediaManagerImpl : MediaManager, KoinComponent {
             })
           }
 
-          this@MediaManagerImpl.controller = controller
+          this@MediaBrowserClientImpl.controller = controller
         }
       }
     }
@@ -135,33 +135,34 @@ class MediaManagerImpl : MediaManager, KoinComponent {
   ): Observable<List<MediaBrowserCompat.MediaItem>> =
     Observable.create<List<MediaBrowserCompat.MediaItem>> { emitter ->
 
-      mediaBrowser.subscribe(
-        parentId,
-        options ?: bundleOf(),
-        object : MediaBrowserCompat.SubscriptionCallback() {
-          override fun onChildrenLoaded(
-            parentId: String,
-            children: MutableList<MediaBrowserCompat.MediaItem>
-          ) {
-            emitter.onNext(children)
-          }
+      val callback = object : MediaBrowserCompat.SubscriptionCallback() {
+        override fun onChildrenLoaded(
+          parentId: String,
+          children: MutableList<MediaBrowserCompat.MediaItem>
+        ) {
+          emitter.onNext(children)
+        }
 
-          override fun onChildrenLoaded(
-            parentId: String,
-            children: MutableList<MediaBrowserCompat.MediaItem>,
-            options: Bundle
-          ) {
-            emitter.onNext(children)
-          }
+        override fun onChildrenLoaded(
+          parentId: String,
+          children: MutableList<MediaBrowserCompat.MediaItem>,
+          options: Bundle
+        ) {
+          emitter.onNext(children)
+        }
 
-          override fun onError(parentId: String) {
-            emitter.onError(Error("Error while getting items from MediaBrowser! (parentId = $parentId"))
-          }
+        override fun onError(parentId: String) {
+          emitter.onError(Error("Error while getting items from MediaBrowser! (parentId = $parentId"))
+        }
 
-          override fun onError(parentId: String, options: Bundle) {
-            emitter.onError(Error("Error while getting items from MediaBrowser! (parentId = $parentId, options = $options)"))
-          }
-        })
+        override fun onError(parentId: String, options: Bundle) {
+          emitter.onError(Error("Error while getting items from MediaBrowser! (parentId = $parentId, options = $options)"))
+        }
+      }
+
+      mediaBrowser.subscribe(parentId, options ?: bundleOf(), callback)
+
+      emitter.setCancellable { mediaBrowser.unsubscribe(parentId, callback) }
     }
       .subscribeOn(Schedulers.single())
       .takeWhile { mediaBrowser.isConnected }

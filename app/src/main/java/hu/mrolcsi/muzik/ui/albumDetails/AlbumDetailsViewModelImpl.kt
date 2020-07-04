@@ -8,8 +8,17 @@ import android.util.Log
 import androidx.databinding.library.baseAdapters.BR
 import androidx.lifecycle.MutableLiveData
 import hu.mrolcsi.muzik.R
-import hu.mrolcsi.muzik.data.manager.media.MediaManager
-import hu.mrolcsi.muzik.data.model.media.*
+import hu.mrolcsi.muzik.data.manager.media.MediaBrowserClient
+import hu.mrolcsi.muzik.data.model.media.album
+import hu.mrolcsi.muzik.data.model.media.albumArtUri
+import hu.mrolcsi.muzik.data.model.media.albumYear
+import hu.mrolcsi.muzik.data.model.media.artist
+import hu.mrolcsi.muzik.data.model.media.discNumber
+import hu.mrolcsi.muzik.data.model.media.id
+import hu.mrolcsi.muzik.data.model.media.mediaId
+import hu.mrolcsi.muzik.data.model.media.numberOfSongs
+import hu.mrolcsi.muzik.data.model.media.titleKey
+import hu.mrolcsi.muzik.data.model.media.trackNumber
 import hu.mrolcsi.muzik.data.model.theme.Theme
 import hu.mrolcsi.muzik.data.repository.media.MediaRepository
 import hu.mrolcsi.muzik.ui.albums.DiscNumberItem
@@ -42,7 +51,7 @@ class AlbumDetailsViewModelImpl constructor(
   KoinComponent {
 
   private val context: Context by inject()
-  private val mediaManager: MediaManager by inject()
+  private val mediaBrowserClient: MediaBrowserClient by inject()
   private val mediaRepo: MediaRepository by inject()
 
   override val progressVisible: Boolean = false
@@ -74,16 +83,16 @@ class AlbumDetailsViewModelImpl constructor(
   )
 
   override fun onSongClick(songItem: SongItem) {
-    albumItem.value?.description?.album?.let { mediaManager.setQueueTitle(it) }
+    albumItem.value?.description?.album?.let { mediaBrowserClient.setQueueTitle(it) }
     songDescriptions
       .indexOfFirst { songItem.id == it.id }
       .takeUnless { it < 0 }
-      ?.let { mediaManager.playAll(songDescriptions, it) }
+      ?.let { mediaBrowserClient.playAll(songDescriptions, it) }
   }
 
   override fun onShuffleAllClick() {
-    albumItem.value?.description?.album?.let { mediaManager.setQueueTitle(it) }
-    songDescriptions.let { mediaManager.playAllShuffled(it) }
+    albumItem.value?.description?.album?.let { mediaBrowserClient.setQueueTitle(it) }
+    songDescriptions.let { mediaBrowserClient.playAllShuffled(it) }
   }
 
   init {
@@ -96,7 +105,7 @@ class AlbumDetailsViewModelImpl constructor(
         .doOnNext { songs -> songDescriptions = songs.filter { it.isPlayable }.map { it.description } }
         .doOnError { println("albumSubject: ${Log.getStackTraceString(it)}") },
 
-      mediaManager.mediaMetadata
+      mediaBrowserClient.mediaMetadata
         .distinctUntilChanged { t: MediaMetadataCompat -> t.mediaId }
         .filter { it.mediaId != null }
         .doOnError { println("mediaMetadata: ${Log.getStackTraceString(it)}") }

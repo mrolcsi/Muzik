@@ -3,7 +3,7 @@ package hu.mrolcsi.muzik.ui.albumDetails
 import android.support.v4.media.MediaMetadataCompat
 import hu.mrolcsi.muzik.BaseTest
 import hu.mrolcsi.muzik.TestData
-import hu.mrolcsi.muzik.data.manager.media.MediaManager
+import hu.mrolcsi.muzik.data.manager.media.MediaBrowserClient
 import hu.mrolcsi.muzik.data.model.media.albumArtUri
 import hu.mrolcsi.muzik.data.repository.media.MediaRepository
 import hu.mrolcsi.muzik.ui.albums.DiscNumberItem
@@ -23,12 +23,13 @@ import kotlin.test.assertEquals
 class AlbumDetailsViewModelImplTest : BaseTest() {
 
   @MockK
-  private lateinit var mockMediaManager: MediaManager
+  private lateinit var mockMediaBrowserClient: MediaBrowserClient
+
   @MockK
   private lateinit var mockMediaRepo: MediaRepository
 
   override val testModule = module(override = true) {
-    single { mockMediaManager }
+    single { mockMediaBrowserClient }
     single { mockMediaRepo }
   }
 
@@ -45,7 +46,7 @@ class AlbumDetailsViewModelImplTest : BaseTest() {
     val metadata = MediaMetadataCompat.Builder()
       .putText(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, "MEDIA_ID")
       .build()
-    every { mockMediaManager.mediaMetadata } returns Observable.just(metadata)
+    every { mockMediaBrowserClient.mediaMetadata } returns Observable.just(metadata)
   }
 
   @Test

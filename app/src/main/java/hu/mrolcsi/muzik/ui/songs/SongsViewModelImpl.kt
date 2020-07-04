@@ -6,7 +6,7 @@ import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
 import androidx.lifecycle.MutableLiveData
 import hu.mrolcsi.muzik.R
-import hu.mrolcsi.muzik.data.manager.media.MediaManager
+import hu.mrolcsi.muzik.data.manager.media.MediaBrowserClient
 import hu.mrolcsi.muzik.data.model.media.albumArtUri
 import hu.mrolcsi.muzik.data.model.media.artistKey
 import hu.mrolcsi.muzik.data.model.media.dateAdded
@@ -50,7 +50,7 @@ class SongsViewModelImpl constructor(
 
   private val context: Context by inject()
   private val mediaRepo: MediaRepository by inject()
-  private val mediaManager: MediaManager by inject()
+  private val mediaBrowserClient: MediaBrowserClient by inject()
 
   override val progressVisible: Boolean = false
   override val listViewVisible: Boolean = true
@@ -66,8 +66,8 @@ class SongsViewModelImpl constructor(
   private var songDescriptions: List<MediaDescriptionCompat>? = null
 
   override fun onSongClick(songItem: SongItem, position: Int) {
-    mediaManager.setQueueTitle(context.getString(R.string.playlist_allSongs))
-    songDescriptions?.let { mediaManager.playAll(it, position) }
+    mediaBrowserClient.setQueueTitle(context.getString(R.string.playlist_allSongs))
+    songDescriptions?.let { mediaBrowserClient.playAll(it, position) }
   }
 
   init {
@@ -76,7 +76,7 @@ class SongsViewModelImpl constructor(
         sortingModeSubject,
         mediaRepo.getSongs()
       ).map { (sorting, songs) -> songs.applySorting(sorting) },
-      mediaManager.mediaMetadata
+      mediaBrowserClient.mediaMetadata
         .distinctUntilChanged { t: MediaMetadataCompat -> t.mediaId }
         .filter { it.mediaId != null }
     )

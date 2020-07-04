@@ -10,7 +10,7 @@ import android.support.v4.media.session.PlaybackStateCompat.RepeatMode
 import android.support.v4.media.session.PlaybackStateCompat.ShuffleMode
 import io.reactivex.Observable
 
-interface MediaManager {
+interface MediaBrowserClient {
 
   val mediaMetadata: Observable<MediaMetadataCompat>
   val playbackState: Observable<PlaybackStateCompat>
