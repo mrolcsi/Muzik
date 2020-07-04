@@ -6,31 +6,41 @@
   <data>
 
     <variable
+      name="viewModel"
+      type="hu.mrolcsi.muzik.ui.artists.ArtistsViewModel" />
+
+    <variable
       name="theme"
       type="androidx.lifecycle.LiveData&lt;hu.mrolcsi.muzik.data.model.theme.Theme&gt;" />
   </data>
 
-  <FrameLayout
+  <androidx.coordinatorlayout.widget.CoordinatorLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.l4digital.fastscroll.FastScrollRecyclerView
+    <androidx.recyclerview.widget.RecyclerView
       android:id="@+id/rvArtists"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
       android:orientation="vertical"
+      app:dividerColor="@{theme.foregroundColor}"
+      app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+      app:showColoredDivider="@{true}"
+      tools:listitem="@layout/list_item_artist" />
+
+    <com.l4digital.fastscroll.FastScroller
+      android:id="@+id/fastScroller"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
       app:bubbleColor="@{theme.foregroundColor}"
       app:bubbleSize="small"
       app:bubbleTextColor="@{theme.backgroundColor}"
-      app:dividerColor="@{theme.foregroundColor}"
       app:handleColor="@{theme.foregroundColor}"
-      app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+      app:sectionIndexer="@{viewModel}"
       app:showBubble="true"
-      app:showColoredDivider="@{true}"
       app:showTrack="true"
-      app:trackColor="@{theme.foregroundColor}"
-      tools:listitem="@layout/list_item_artist" />
+      app:trackColor="@{theme.foregroundColor}" />
 
-  </FrameLayout>
+  </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
 </layout>

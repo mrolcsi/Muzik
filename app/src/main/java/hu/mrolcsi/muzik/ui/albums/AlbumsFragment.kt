@@ -13,7 +13,7 @@ import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.databinding.FragmentAlbumsBinding
 import hu.mrolcsi.muzik.databinding.ListItemAlbumVerticalBinding
 import hu.mrolcsi.muzik.ui.common.BoundMVVMViewHolder
-import hu.mrolcsi.muzik.ui.common.IndexedMVVMListAdapter
+import hu.mrolcsi.muzik.ui.common.MVVMListAdapter
 import hu.mrolcsi.muzik.ui.common.glide.GlideApp
 import hu.mrolcsi.muzik.ui.common.glide.toSingle
 import hu.mrolcsi.muzik.ui.common.observeAndRunNavCommands
@@ -30,7 +30,7 @@ class AlbumsFragment : Fragment() {
   private val viewModel: AlbumsViewModel by viewModel<AlbumsViewModelImpl>()
 
   private val albumsAdapter by lazy {
-    IndexedMVVMListAdapter(
+    MVVMListAdapter(
       itemIdSelector = AlbumItem::id,
       viewHolderFactory = { parent, _ ->
         BoundMVVMViewHolder<AlbumItem>(
@@ -61,31 +61,34 @@ class AlbumsFragment : Fragment() {
             this.root.setOnLongClickListener { showSortingMenu(it); true }
           }
         )
-      },
-      sectionTextSelector = { viewModel.getSectionText(it) }
+      }
     )
   }
 
-  override fun onActivityCreated(savedInstanceState: Bundle?) {
-    super.onActivityCreated(savedInstanceState)
+  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) =
+    FragmentAlbumsBinding.inflate(inflater, container, false).also {
+      it.viewModel = viewModel
+      it.theme = viewModel.currentTheme
+      it.lifecycleOwner = viewLifecycleOwner
+    }.root
 
+  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     viewModel.apply {
-
       requireContext().observeAndRunUiCommands(viewLifecycleOwner, this)
       findNavController().observeAndRunNavCommands(viewLifecycleOwner, this)
 
       items.observe(viewLifecycleOwner, albumsAdapter)
     }
+
+    rvAlbums.adapter = albumsAdapter
+    fastScroller.attachRecyclerView(rvAlbums)
   }
 
-  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) =
-    FragmentAlbumsBinding.inflate(inflater, container, false).apply {
-      theme = viewModel.currentTheme
-      lifecycleOwner = viewLifecycleOwner
-    }.root
+  override fun onDestroyView() {
+    super.onDestroyView()
 
-  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-    rvAlbums.adapter = albumsAdapter
+    rvAlbums.adapter = null
+    fastScroller.detachRecyclerView()
   }
 
   private fun showSortingMenu(anchor: View) {

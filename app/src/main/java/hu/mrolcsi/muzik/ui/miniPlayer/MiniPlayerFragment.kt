@@ -27,9 +27,14 @@ class MiniPlayerFragment : Fragment() {
     postponeEnterTransition()
   }
 
-  override fun onActivityCreated(savedInstanceState: Bundle?) {
-    super.onActivityCreated(savedInstanceState)
+  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
+    FragmentMiniplayerBinding.inflate(inflater, container, false).also {
+      it.viewModel = viewModel
+      it.theme = viewModel.currentTheme
+      it.lifecycleOwner = viewLifecycleOwner
+    }.root
 
+  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     viewModel.apply {
       requireContext().observeAndRunUiCommands(viewLifecycleOwner, this)
       requireActivity().findNavController(R.id.mainNavHost).observeAndRunNavCommands(viewLifecycleOwner, this)
@@ -41,16 +46,7 @@ class MiniPlayerFragment : Fragment() {
           .into(imgCoverArt)
       })
     }
-  }
 
-  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
-    FragmentMiniplayerBinding.inflate(inflater, container, false).also {
-      it.viewModel = viewModel
-      it.theme = viewModel.currentTheme
-      it.lifecycleOwner = viewLifecycleOwner
-    }.root
-
-  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     view.setOnClickListener {
       viewModel.openPlayer()
     }

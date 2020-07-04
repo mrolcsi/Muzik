@@ -42,48 +42,52 @@ class PlayerDialogFragment : FullScreenDialogFragment() {
 
   private lateinit var binding: FragmentPlayerBinding
 
-  private val queueAdapter = MVVMListAdapter(
-    itemIdSelector = { it.queueId },
-    viewHolderFactory = { parent, _ ->
-      BoundMVVMViewHolder<QueueItem>(
-        parent = parent,
-        layoutId = R.layout.list_item_queue,
-        onModelChange = { model ->
-          (this as? ListItemQueueBinding)?.let { binding ->
-            binding.tvArtist.setOnClickListener(
-              View.OnClickListener {
-                playerViewModel.onArtistClick(model.artistId!!)
-              }.takeIf { model.artistId != null }
-            )
-            binding.tvAlbum.setOnClickListener(
-              View.OnClickListener {
-                playerViewModel.onAlbumClick(model.albumId!!)
-              }.takeIf { model.albumId != null }
-            )
+  private val queueAdapter by lazy {
+    MVVMListAdapter(
+      itemIdSelector = { it.queueId },
+      viewHolderFactory = { parent, _ ->
+        BoundMVVMViewHolder<QueueItem>(
+          parent = parent,
+          layoutId = R.layout.list_item_queue,
+          onModelChange = { model ->
+            (this as? ListItemQueueBinding)?.let { binding ->
+              binding.tvArtist.setOnClickListener(
+                View.OnClickListener {
+                  playerViewModel.onArtistClick(model.artistId!!)
+                }.takeIf { model.artistId != null }
+              )
+              binding.tvAlbum.setOnClickListener(
+                View.OnClickListener {
+                  playerViewModel.onAlbumClick(model.albumId!!)
+                }.takeIf { model.albumId != null }
+              )
+            }
           }
-        }
-      )
-    }
-  )
-
-  private val playlistAdapter = MVVMListAdapter(
-    itemIdSelector = { it.id },
-    viewHolderFactory = { parent, _ ->
-      ThemedViewHolder<PlaylistItem>(
-        parent,
-        R.layout.list_item_playlist,
-        viewLifecycleOwner,
-        playlistViewModel.currentTheme
-      ) { model, _ ->
-        playlistViewModel.onSelect(model)
+        )
       }
-    }
-  )
+    )
+  }
+
+  private val playlistAdapter by lazy {
+    MVVMListAdapter(
+      itemIdSelector = { it.id },
+      viewHolderFactory = { parent, _ ->
+        ThemedViewHolder<PlaylistItem>(
+          parent,
+          R.layout.list_item_playlist,
+          viewLifecycleOwner,
+          playlistViewModel.currentTheme
+        ) { model, _ ->
+          playlistViewModel.onSelect(model)
+        }
+      }
+    )
+  }
 
   //region LIFECYCLE
 
-  override fun onActivityCreated(savedInstanceState: Bundle?) {
-    super.onActivityCreated(savedInstanceState)
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
 
     activity?.onBackPressedDispatcher?.addCallback(this) {
       if (drawerLayout.isDrawerOpen(GravityCompat.END))
@@ -91,7 +95,17 @@ class PlayerDialogFragment : FullScreenDialogFragment() {
       else
         findNavController().navigateUp()
     }
+  }
 
+  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
+    FragmentPlayerBinding.inflate(inflater, container, false).also {
+      binding = it
+      it.playerViewModel = playerViewModel
+      it.playlistViewModel = playlistViewModel
+      it.lifecycleOwner = viewLifecycleOwner
+    }.root
+
+  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     playerViewModel.apply {
       requireContext().observeAndRunUiCommands(viewLifecycleOwner, this)
       findNavController().observeAndRunNavCommands(viewLifecycleOwner, this)
@@ -111,21 +125,18 @@ class PlayerDialogFragment : FullScreenDialogFragment() {
           rvPlaylist.scrollToPosition(nowPlayingPosition)
         }
     })
-  }
 
-  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
-    FragmentPlayerBinding.inflate(inflater, container, false).also {
-      binding = it
-      it.playerViewModel = playerViewModel
-      it.playlistViewModel = playlistViewModel
-      it.lifecycleOwner = viewLifecycleOwner
-    }.root
-
-  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     setupToolbar()
     setupPager()
     setupControls()
     setupPlaylist()
+  }
+
+  override fun onDestroyView() {
+    super.onDestroyView()
+
+    queuePager.adapter = null
+    rvPlaylist.adapter = null
   }
 
   //endregion

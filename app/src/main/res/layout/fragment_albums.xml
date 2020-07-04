@@ -6,30 +6,40 @@
   <data>
 
     <variable
+      name="viewModel"
+      type="hu.mrolcsi.muzik.ui.albums.AlbumsViewModel" />
+
+    <variable
       name="theme"
       type="androidx.lifecycle.LiveData&lt;hu.mrolcsi.muzik.data.model.theme.Theme&gt;" />
   </data>
 
-  <FrameLayout
+  <androidx.coordinatorlayout.widget.CoordinatorLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.l4digital.fastscroll.FastScrollRecyclerView
+    <androidx.recyclerview.widget.RecyclerView
       android:id="@+id/rvAlbums"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      app:dividerColor="@{theme.foregroundColor}"
+      app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+      app:spanCount="@integer/albumsColumnCount"
+      tools:listitem="@layout/list_item_album_vertical" />
+
+    <com.l4digital.fastscroll.FastScroller
+      android:id="@+id/fastScroller"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
       app:bubbleColor="@{theme.foregroundColor}"
       app:bubbleSize="small"
       app:bubbleTextColor="@{theme.backgroundColor}"
-      app:dividerColor="@{theme.foregroundColor}"
       app:handleColor="@{theme.foregroundColor}"
-      app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+      app:sectionIndexer="@{viewModel}"
       app:showBubble="true"
       app:showTrack="true"
-      app:spanCount="@integer/albumsColumnCount"
-      app:trackColor="@{theme.foregroundColor}"
-      tools:listitem="@layout/list_item_album_vertical" />
+      app:trackColor="@{theme.foregroundColor}" />
 
-  </FrameLayout>
+  </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
 </layout>

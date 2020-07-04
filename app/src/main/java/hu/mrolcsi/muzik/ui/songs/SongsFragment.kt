@@ -9,7 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.databinding.FragmentSongsBinding
-import hu.mrolcsi.muzik.ui.common.IndexedMVVMListAdapter
+import hu.mrolcsi.muzik.ui.common.MVVMListAdapter
 import hu.mrolcsi.muzik.ui.common.ThemedViewHolder
 import hu.mrolcsi.muzik.ui.common.observeAndRunNavCommands
 import hu.mrolcsi.muzik.ui.common.observeAndRunUiCommands
@@ -22,7 +22,7 @@ class SongsFragment : Fragment() {
   private val viewModel: SongsViewModel by viewModel<SongsViewModelImpl>()
 
   private val songsAdapter by lazy {
-    IndexedMVVMListAdapter(
+    MVVMListAdapter(
       itemIdSelector = { it.id },
       viewHolderFactory = { parent, _ ->
         ThemedViewHolder<SongItem>(
@@ -31,37 +31,40 @@ class SongsFragment : Fragment() {
           viewLifecycleOwner = viewLifecycleOwner,
           theme = viewModel.currentTheme,
           onItemClickListener = { model, holder ->
-            viewModel.onSongClick(model, holder.adapterPosition)
+            viewModel.onSongClick(model, holder.bindingAdapterPosition)
           },
           onModelChange = {
             this.root.setOnLongClickListener { showSortingMenu(it); true }
           }
         )
-      },
-      sectionTextSelector = { viewModel.getSectionText(it) }
+      }
     )
   }
 
-  override fun onActivityCreated(savedInstanceState: Bundle?) {
-    super.onActivityCreated(savedInstanceState)
+  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) =
+    FragmentSongsBinding.inflate(inflater, container, false).also {
+      it.viewModel = viewModel
+      it.theme = viewModel.currentTheme
+      it.lifecycleOwner = viewLifecycleOwner
+    }.root
 
+  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     viewModel.apply {
-
       requireContext().observeAndRunUiCommands(viewLifecycleOwner, this)
       findNavController().observeAndRunNavCommands(viewLifecycleOwner, this)
 
       items.observe(viewLifecycleOwner, songsAdapter)
     }
+
+    rvSongs.adapter = songsAdapter
+    fastScroller.attachRecyclerView(rvSongs)
   }
 
-  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) =
-    FragmentSongsBinding.inflate(inflater, container, false).apply {
-      theme = viewModel.currentTheme
-      lifecycleOwner = viewLifecycleOwner
-    }.root
+  override fun onDestroyView() {
+    super.onDestroyView()
 
-  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-    rvSongs.adapter = songsAdapter
+    rvSongs.adapter = null
+    fastScroller.detachRecyclerView()
   }
 
   private fun showSortingMenu(anchor: View) {

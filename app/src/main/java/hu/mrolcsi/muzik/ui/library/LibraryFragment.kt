@@ -82,4 +82,10 @@ class LibraryFragment : Fragment() {
       }
     }
   }
+
+  override fun onDestroyView() {
+    super.onDestroyView()
+
+    libraryPager.adapter = null
+  }
 }

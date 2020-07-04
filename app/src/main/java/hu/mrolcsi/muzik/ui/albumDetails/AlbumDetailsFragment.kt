@@ -26,9 +26,6 @@ import kotlinx.android.synthetic.main.fragment_album_details.*
 import kotlinx.android.synthetic.main.fragment_album_details_header.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-const val VIEW_TYPE_DISC_NUMBER = 3482
-const val VIEW_TYPE_SONG = 8664
-
 class AlbumDetailsFragment : Fragment() {
 
   private val args by navArgs<AlbumDetailsFragmentArgs>()
@@ -37,61 +34,49 @@ class AlbumDetailsFragment : Fragment() {
 
   @Suppress("UNCHECKED_CAST")
   private val songsAdapter by lazy {
-    object : MVVMListAdapter<AlbumDetailItem, MVVMViewHolder<AlbumDetailItem>>(
+    MVVMListAdapter(
       itemIdSelector = { it.id },
-      viewHolderFactory = { parent, viewType ->
-        if (viewType == VIEW_TYPE_DISC_NUMBER) {
-          ThemedViewHolder<DiscNumberItem>(
-            parent = parent,
-            layoutId = R.layout.list_item_disc_number,
-            viewLifecycleOwner = viewLifecycleOwner,
-            theme = viewModel.albumTheme
-          ) as MVVMViewHolder<AlbumDetailItem>
-        } else {
-          ThemedViewHolder<SongItem>(
-            parent = parent,
-            layoutId = R.layout.list_item_song_track_number,
-            viewLifecycleOwner = viewLifecycleOwner,
-            theme = viewModel.albumTheme,
-            onItemClickListener = { item, _ -> viewModel.onSongClick(item) }
-          ) as MVVMViewHolder<AlbumDetailItem>
-        }
-      }
-    ) {
-      override fun getItemViewType(position: Int) =
-        when (getItem(position)) {
-          is DiscNumberItem -> VIEW_TYPE_DISC_NUMBER
-          is SongItem -> VIEW_TYPE_SONG
+      viewTypeSelector = { model ->
+        when (model) {
+          is DiscNumberItem -> R.layout.list_item_disc_number
+          is SongItem -> R.layout.list_item_song_track_number
           else -> -1
         }
-    }
+      },
+      viewHolderFactory = { parent, viewType ->
+        when (viewType) {
+          R.layout.list_item_disc_number -> {
+            ThemedViewHolder<DiscNumberItem>(
+              parent = parent,
+              layoutId = R.layout.list_item_disc_number,
+              viewLifecycleOwner = viewLifecycleOwner,
+              theme = viewModel.albumTheme
+            ) as MVVMViewHolder<AlbumDetailItem>
+          }
+          R.layout.list_item_song_track_number -> {
+            ThemedViewHolder<SongItem>(
+              parent = parent,
+              layoutId = R.layout.list_item_song_track_number,
+              viewLifecycleOwner = viewLifecycleOwner,
+              theme = viewModel.albumTheme,
+              onItemClickListener = { item, _ -> viewModel.onSongClick(item) }
+            ) as MVVMViewHolder<AlbumDetailItem>
+          }
+          else -> throw IllegalArgumentException("Unknown viewType: $viewType")
+        }
+      }
+    )
   }
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
+    viewModel.setArgument(args.albumId)
+
     applySharedElementTransition(
       R.transition.cover_art_transition,
       requireContext().resources.getInteger(R.integer.preferredAnimationDuration).toLong()
     )
-  }
-
-  override fun onActivityCreated(savedInstanceState: Bundle?) {
-    super.onActivityCreated(savedInstanceState)
-
-    viewModel.apply {
-
-      setArgument(args.albumId)
-
-      items.observe(viewLifecycleOwner, songsAdapter)
-
-      albumItem.observe(viewLifecycleOwner, Observer {
-        GlideApp.with(imgCoverArt)
-          .asBitmap()
-          .load(it.description.albumArtUri)
-          .into(imgCoverArt)
-      })
-    }
   }
 
   override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) =
@@ -102,6 +87,21 @@ class AlbumDetailsFragment : Fragment() {
     }.root
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    viewModel.apply {
+      items.observe(viewLifecycleOwner, songsAdapter)
+
+      albumItem.observe(viewLifecycleOwner, Observer {
+        GlideApp.with(imgCoverArt)
+          .asBitmap()
+          .load(it.description.albumArtUri)
+          .into(imgCoverArt)
+      })
+
+      albumTheme.observe(viewLifecycleOwner, Observer {
+        activity?.window?.updateStatusBarIcons(it.backgroundColor)
+      })
+    }
+
     rvSongs.adapter = songsAdapter
 
     albumDetailsToolbar.setupWithNavController(findNavController())
@@ -113,9 +113,11 @@ class AlbumDetailsFragment : Fragment() {
     }
 
     appBar.addOnOffsetChangedListener(HideViewOnOffsetChangedListener(tvAlbumTitle))
+  }
 
-    viewModel.albumTheme.observe(viewLifecycleOwner, Observer {
-      activity?.window?.updateStatusBarIcons(it.backgroundColor)
-    })
+  override fun onDestroyView() {
+    super.onDestroyView()
+
+    rvSongs.adapter = null
   }
 }

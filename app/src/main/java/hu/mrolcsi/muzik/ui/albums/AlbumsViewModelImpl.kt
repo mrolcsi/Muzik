@@ -80,11 +80,13 @@ class AlbumsViewModelImpl constructor(
     }
   }
 
-  override fun getSectionText(item: AlbumItem): CharSequence =
-    when (sortingMode) {
-      SortingMode.SORT_BY_ARTIST -> item.artistText.toKeyString().first().toUpperCase().toString()
-      SortingMode.SORT_BY_TITLE -> item.albumText.toString().toKeyString().first().toUpperCase().toString()
-      else -> throw IllegalArgumentException("Invalid sorting mode!")
+  override fun getSectionText(position: Int): CharSequence? =
+    items.value?.get(position)?.let { item ->
+      when (sortingMode) {
+        SortingMode.SORT_BY_ARTIST -> item.artistText.toKeyString().first().toUpperCase().toString()
+        SortingMode.SORT_BY_TITLE -> item.albumText.toString().toKeyString().first().toUpperCase().toString()
+        else -> throw IllegalArgumentException("Invalid sorting mode!")
+      }
     }
 }
 

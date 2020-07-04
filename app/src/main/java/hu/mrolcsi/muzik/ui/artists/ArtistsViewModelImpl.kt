@@ -79,7 +79,6 @@ class ArtistsViewModelImpl constructor(
     )
   }
 
-  override fun getSectionText(artistItem: ArtistItem): CharSequence =
-    artistItem.artistText.toKeyString().first().toUpperCase().toString()
-
+  override fun getSectionText(position: Int): CharSequence? =
+    items.value?.get(position)?.artistText?.toKeyString()?.first()?.toUpperCase()?.toString()
 }

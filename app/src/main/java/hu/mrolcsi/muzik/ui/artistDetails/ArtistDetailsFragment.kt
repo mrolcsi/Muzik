@@ -91,15 +91,24 @@ class ArtistDetailsFragment : Fragment() {
     )
   }
 
-  override fun onActivityCreated(savedInstanceState: Bundle?) {
-    super.onActivityCreated(savedInstanceState)
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
 
+    viewModel.setArgument(args.artistId)
+  }
+
+  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) =
+    FragmentArtistDetailsBinding.inflate(inflater, container, false).also {
+      it.viewModel = viewModel
+      it.theme = viewModel.currentTheme
+      it.lifecycleOwner = viewLifecycleOwner
+    }.root
+
+  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     viewModel.apply {
 
       requireContext().observeAndRunUiCommands(viewLifecycleOwner, this)
       findNavController().observeAndRunNavCommands(viewLifecycleOwner, this)
-
-      setArgument(args.artistId)
 
       artistAlbums.observe(viewLifecycleOwner, albumsAdapter)
       artistSongs.observe(viewLifecycleOwner, songsAdapter)
@@ -114,16 +123,7 @@ class ArtistDetailsFragment : Fragment() {
           .into(imgArtist)
       })
     }
-  }
 
-  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) =
-    FragmentArtistDetailsBinding.inflate(inflater, container, false).also {
-      it.viewModel = viewModel
-      it.theme = viewModel.currentTheme
-      it.lifecycleOwner = viewLifecycleOwner
-    }.root
-
-  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     rvAlbums.adapter = albumsAdapter
     rvSongs.adapter = songsAdapter
     collapsingToolbar.setupWithNavController(artistDetailsToolbar, findNavController())
@@ -135,5 +135,12 @@ class ArtistDetailsFragment : Fragment() {
     }
 
     appBar.addOnOffsetChangedListener(HideViewOnOffsetChangedListener(tvArtistName))
+  }
+
+  override fun onDestroyView() {
+    super.onDestroyView()
+
+    rvAlbums.adapter = null
+    rvSongs.adapter = null
   }
 }

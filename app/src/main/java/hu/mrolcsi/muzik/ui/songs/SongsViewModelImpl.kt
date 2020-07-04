@@ -98,21 +98,22 @@ class SongsViewModelImpl constructor(
     }
   }
 
-  override fun getSectionText(item: SongItem): CharSequence {
-    return when (sortingMode) {
-      SortingMode.SORT_BY_ARTIST -> item.artistText.toKeyString().first().toUpperCase().toString()
-      SortingMode.SORT_BY_TITLE -> item.titleText.toString().toKeyString().first().toUpperCase().toString()
-      SortingMode.SORT_BY_DATE -> {
-        val newThreshold = Calendar.getInstance().timeInMillis - WEEK_IN_MILLISECONDS
-        val recentThreshold = Calendar.getInstance().timeInMillis - MONTH_IN_MILLISECONDS
-        when {
-          item.dateAdded > newThreshold -> context.getString(R.string.dateAdded_new)
-          item.dateAdded > recentThreshold -> context.getString(R.string.dateAdded_recent)
-          else -> context.getString(R.string.dateAdded_old)
+  override fun getSectionText(position: Int): CharSequence? =
+    items.value?.get(position)?.let { item ->
+      when (sortingMode) {
+        SortingMode.SORT_BY_ARTIST -> item.artistText.toKeyString().first().toUpperCase().toString()
+        SortingMode.SORT_BY_TITLE -> item.titleText.toString().toKeyString().first().toUpperCase().toString()
+        SortingMode.SORT_BY_DATE -> {
+          val newThreshold = Calendar.getInstance().timeInMillis - WEEK_IN_MILLISECONDS
+          val recentThreshold = Calendar.getInstance().timeInMillis - MONTH_IN_MILLISECONDS
+          when {
+            item.dateAdded > newThreshold -> context.getString(R.string.dateAdded_new)
+            item.dateAdded > recentThreshold -> context.getString(R.string.dateAdded_recent)
+            else -> context.getString(R.string.dateAdded_old)
+          }
         }
       }
     }
-  }
 }
 
 fun List<MediaItem>.asSongItems(context: Context, nowPlayingId: String?) = map { item ->
