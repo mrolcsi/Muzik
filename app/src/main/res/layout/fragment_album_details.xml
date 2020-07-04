@@ -48,6 +48,17 @@
           app:theme="@{theme}"
           app:viewModel="@{viewModel}" />
 
+        <ImageView
+          android:id="@+id/imgProtectionScrim"
+          android:layout_width="match_parent"
+          android:layout_height="24dp"
+          android:layout_gravity="bottom"
+          android:tint="@{theme.backgroundColor}"
+          app:layout_collapseMode="none"
+          app:srcCompat="@drawable/protection_scrim"
+          tools:ignore="ContentDescription"
+          tools:tint="?attr/colorPrimary" />
+
         <com.google.android.material.appbar.MaterialToolbar
           android:id="@+id/albumDetailsToolbar"
           android:layout_width="match_parent"
