@@ -64,11 +64,11 @@
       android:layout_marginEnd="16dp"
       android:layout_marginBottom="8dp"
       android:alpha="0.8"
-      android:tint="@{theme.foregroundColor}"
       app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintTop_toTopOf="parent"
       app:srcCompat="@drawable/ic_chevron_right"
+      app:tint="@{theme.foregroundColor}"
       tools:ignore="ContentDescription" />
 
   </androidx.constraintlayout.widget.ConstraintLayout>

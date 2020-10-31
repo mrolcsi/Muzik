@@ -85,6 +85,7 @@ class ExoNotificationManager(
     context,
     NOTIFICATION_CHANNEL,
     R.string.notification_nowPlaying,
+    R.string.notification_nowPlaying_description,
     NOTIFICATION_ID,
     mDescriptionAdapter,
     notificationListener

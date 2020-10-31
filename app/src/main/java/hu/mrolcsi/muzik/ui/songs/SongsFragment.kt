@@ -31,7 +31,7 @@ class SongsFragment : Fragment() {
           viewLifecycleOwner = viewLifecycleOwner,
           theme = viewModel.currentTheme,
           onItemClickListener = { model, holder ->
-            viewModel.onSongClick(model, holder.bindingAdapterPosition)
+            viewModel.onSongClick(model, holder.adapterPosition)
           },
           onModelChange = {
             this.root.setOnLongClickListener { showSortingMenu(it); true }

@@ -25,10 +25,10 @@
       android:layout_height="wrap_content"
       android:layout_marginStart="20dp"
       android:layout_marginTop="8dp"
-      android:tint="@{theme.foregroundColor}"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toTopOf="parent"
       app:srcCompat="@drawable/ic_album"
+      app:tint="@{theme.foregroundColor}"
       tools:ignore="ContentDescription"
       tools:tint="@android:color/white" />
 
@@ -82,10 +82,10 @@
       android:layout_height="wrap_content"
       android:layout_marginStart="20dp"
       android:layout_marginTop="16dp"
-      android:tint="@{theme.foregroundColor}"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toBottomOf="@+id/rvAlbums"
       app:srcCompat="@drawable/ic_song"
+      app:tint="@{theme.foregroundColor}"
       tools:ignore="ContentDescription"
       tools:tint="@android:color/white" />
 

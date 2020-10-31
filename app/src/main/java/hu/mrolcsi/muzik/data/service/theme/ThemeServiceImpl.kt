@@ -120,7 +120,7 @@ class ThemeServiceImpl : ThemeService, KoinComponent {
     colors
       .firstOrNull { ColorUtils.calculateContrast(it, backgroundColor) > MINIMUM_CONTRAST_RATIO }
       ?: colors.firstOrNull { ColorUtils.calculateContrast(it, backgroundColor) > MINIMUM_CONTRAST_RATIO }
-      ?: colors.maxBy { ColorUtils.calculateContrast(it, backgroundColor) }
+      ?: colors.maxByOrNull { ColorUtils.calculateContrast(it, backgroundColor) }
       ?: run {
         if (backgroundColor.luminance < 0.5) Color.WHITE
         else Color.BLACK

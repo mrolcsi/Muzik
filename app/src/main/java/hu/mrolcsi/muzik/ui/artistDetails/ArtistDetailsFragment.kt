@@ -85,7 +85,7 @@ class ArtistDetailsFragment : Fragment() {
           viewLifecycleOwner = viewLifecycleOwner,
           theme = viewModel.currentTheme
         ) { model, holder ->
-          viewModel.onSongClick(model, holder.bindingAdapterPosition)
+          viewModel.onSongClick(model, holder.adapterPosition)
         }
       }
     )

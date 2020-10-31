@@ -17,17 +17,14 @@ class MuzikApplication : Application() {
     if (BuildConfig.DEBUG) Timber.plant(Timber.DebugTree())
 
     startKoin {
-      // use AndroidLogger as Koin Logger - default Level.INFO
       androidLogger()
-
-      // use the Android context given there
       androidContext(this@MuzikApplication)
-
-      // load properties from assets/koin.properties file
       androidFileProperties()
 
-      // module list
-      modules(
+      // TODO Await fix for Koin and replace the explicit invocations
+      //  of loadModules() and createRootScope() with a single call to modules()
+      //  (https://github.com/InsertKoinIO/koin/issues/847)
+      koin.loadModules(
         listOf(
           appModule,
           dataModule,
@@ -35,6 +32,7 @@ class MuzikApplication : Application() {
           viewModule
         )
       )
+      koin.createRootScope()
     }
   }
 }

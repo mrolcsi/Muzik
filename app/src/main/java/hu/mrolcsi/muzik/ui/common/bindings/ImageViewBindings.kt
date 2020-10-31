@@ -5,8 +5,13 @@ import android.net.Uri
 import android.widget.ImageView
 import androidx.annotation.DrawableRes
 import androidx.databinding.BindingAdapter
+import androidx.databinding.BindingMethod
+import androidx.databinding.BindingMethods
 import hu.mrolcsi.muzik.ui.common.glide.GlideApp
 
+@BindingMethods(
+  BindingMethod(type = ImageView::class, attribute = "tint", method = "setImageTintList"),
+)
 object ImageViewBindings {
 
   @JvmStatic
@@ -28,5 +33,4 @@ object ImageViewBindings {
   fun setImageResource(view: ImageView, @DrawableRes drawableRes: Int) {
     view.setImageResource(drawableRes)
   }
-
 }

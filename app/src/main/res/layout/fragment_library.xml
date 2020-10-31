@@ -80,14 +80,14 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:contentDescription="@string/contentDescription_missingPermission"
-        android:tint="@{theme.foregroundColor}"
-
         app:layout_constraintBottom_toTopOf="@+id/lblPermissionHint"
+
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="packed"
         app:srcCompat="@drawable/ic_sd_card"
+        app:tint="@{theme.foregroundColor}"
         tools:visibility="visible" />
 
       <TextView

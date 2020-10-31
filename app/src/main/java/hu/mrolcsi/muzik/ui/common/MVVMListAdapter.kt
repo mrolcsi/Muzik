@@ -23,7 +23,6 @@ class MVVMListAdapter<ItemViewModel, ViewHolder : MVVMViewHolder<in ItemViewMode
 
   init {
     this.setHasStableIds(true)
-    this.stateRestorationPolicy = StateRestorationPolicy.PREVENT_WHEN_EMPTY
   }
 
   override fun onChanged(items: List<ItemViewModel>?) {

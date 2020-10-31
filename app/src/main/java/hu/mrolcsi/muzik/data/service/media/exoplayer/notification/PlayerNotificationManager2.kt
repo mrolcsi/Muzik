@@ -53,12 +53,13 @@ class PlayerNotificationManager2(
       context: Context,
       channelId: String,
       @StringRes channelName: Int,
+      @StringRes channelDescription: Int,
       notificationId: Int,
       mediaDescriptionAdapter: MediaDescriptionAdapter,
       notificationListener: NotificationListener?
     ): PlayerNotificationManager2 {
       NotificationUtil.createNotificationChannel(
-        context, channelId, channelName, NotificationUtil.IMPORTANCE_LOW
+        context, channelId, channelName, channelDescription, NotificationUtil.IMPORTANCE_LOW
       )
       return PlayerNotificationManager2(
         context, channelId, notificationId, mediaDescriptionAdapter, notificationListener
