@@ -4,7 +4,7 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'androidx.navigation.safeargs.kotlin'
 apply plugin: 'com.google.gms.google-services'
-apply plugin: 'io.fabric'
+apply plugin: 'com.google.firebase.crashlytics'
 
 apply from: "https://gist.githubusercontent.com/mrolcsi/588d5dd7a309fab501fc/raw/30b88f5217596c425c43d101dd29708a785b05f1/Version%2520code%2520and%2520name%2520generation%2520using%2520Gradle"
 
@@ -25,12 +25,12 @@ android {
     }
     buildTypes {
         debug {
-            resValue("bool", "FIREBASE_ANALYTICS_DEACTIVATED", "true")
+            resValue("bool", "FIREBASE_CRASHLYTICS_ENABLED", "false")
         }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            resValue("bool", "FIREBASE_ANALYTICS_DEACTIVATED", "false")
+            resValue("bool", "FIREBASE_CRASHLYTICS_ENABLED", "true")
         }
     }
     compileOptions {
@@ -139,9 +139,9 @@ dependencies {
     implementation 'com.squareup.okhttp3:logging-interceptor:4.7.2'
 
     // Firebase & Crashlytics
-    implementation 'com.google.firebase:firebase-core:17.4.3'
-    implementation 'com.google.firebase:firebase-analytics:17.4.3'
-    implementation 'com.crashlytics.sdk.android:crashlytics:2.10.1'
+    implementation 'com.google.firebase:firebase-core:17.5.1'
+    implementation 'com.google.firebase:firebase-analytics:18.0.0'
+    implementation 'com.google.firebase:firebase-crashlytics:17.2.2'
 
     // LeakCanary
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.2'
