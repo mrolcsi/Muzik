@@ -17,7 +17,6 @@ import hu.mrolcsi.muzik.ui.common.ExecuteOnceNavCommandSource
 import hu.mrolcsi.muzik.ui.common.ExecuteOnceUiCommandSource
 import hu.mrolcsi.muzik.ui.common.ObservableImpl
 import hu.mrolcsi.muzik.ui.common.extensions.toKeyString
-import hu.mrolcsi.muzik.ui.library.LibraryFragmentDirections
 import hu.mrolcsi.muzik.ui.library.SortingMode
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.Observables
@@ -54,7 +53,7 @@ class AlbumsViewModelImpl constructor(
 
   override fun onAlbumClick(item: AlbumItem, transitionedView: View) {
     sendNavCommand {
-      navigate(LibraryFragmentDirections.actionToAlbumDetails(item.id))
+      navigate(AlbumsFragmentDirections.actionToAlbumDetails(item.id))
     }
   }
 

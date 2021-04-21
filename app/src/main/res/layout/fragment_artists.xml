@@ -16,7 +16,24 @@
 
   <androidx.coordinatorlayout.widget.CoordinatorLayout
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
+
+    <com.google.android.material.appbar.AppBarLayout
+      android:id="@+id/appBar"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:background="@{theme.backgroundColor}"
+      android:fitsSystemWindows="true"
+      app:liftOnScroll="true">
+
+      <com.google.android.material.appbar.MaterialToolbar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:title="@string/artists_title"
+        app:titleTextColor="@{theme.foregroundColor}" />
+
+    </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.recyclerview.widget.RecyclerView
       android:id="@+id/rvArtists"
@@ -25,6 +42,7 @@
       android:orientation="vertical"
       app:dividerColor="@{theme.foregroundColor}"
       app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+      app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
       app:showColoredDivider="@{true}"
       tools:listitem="@layout/list_item_artist" />
 
@@ -36,6 +54,7 @@
       app:bubbleSize="small"
       app:bubbleTextColor="@{theme.backgroundColor}"
       app:handleColor="@{theme.foregroundColor}"
+      app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
       app:sectionIndexer="@{viewModel}"
       app:showBubble="true"
       app:showTrack="true"

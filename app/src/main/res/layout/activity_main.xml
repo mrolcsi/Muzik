@@ -34,10 +34,23 @@
       android:name="hu.mrolcsi.muzik.ui.miniPlayer.MiniPlayerFragment"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
+      app:layout_constraintBottom_toTopOf="@id/bottomNavigation"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      tools:layout="@layout/fragment_miniplayer"
+      tools:layout_height="56dp" />
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+      android:id="@+id/bottomNavigation"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:background="@{theme.backgroundColor}"
+      app:itemIconTintList="@{theme.foregroundColor}"
+      app:itemTextColor="@{theme.foregroundColor}"
       app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
-      tools:layout="@layout/fragment_miniplayer" />
+      app:menu="@menu/bottom_navigation" />
 
   </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

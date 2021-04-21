@@ -16,7 +16,6 @@ import hu.mrolcsi.muzik.ui.common.ExecuteOnceNavCommandSource
 import hu.mrolcsi.muzik.ui.common.ExecuteOnceUiCommandSource
 import hu.mrolcsi.muzik.ui.common.ObservableImpl
 import hu.mrolcsi.muzik.ui.common.extensions.toKeyString
-import hu.mrolcsi.muzik.ui.library.LibraryFragmentDirections
 import io.reactivex.rxkotlin.subscribeBy
 import org.koin.core.KoinComponent
 import org.koin.core.inject
@@ -53,7 +52,7 @@ class ArtistsViewModelImpl constructor(
 
   override fun onSelect(item: ArtistItem) {
     sendNavCommand {
-      navigate(LibraryFragmentDirections.actionToArtistDetails(item.id))
+      navigate(ArtistsFragmentDirections.actionToArtistDetails(item.id))
     }
   }
 

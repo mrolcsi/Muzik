@@ -16,6 +16,7 @@
   <string name="contentDescription_coverArt">Cover Art</string>
   <string name="contentDescription_discNumber">Disc Number</string>
   <string name="contentDescription_missingPermission">Permission to access storage</string>
+  <string name="dashboard_title">Dashboard</string>
   <string name="dateAdded_new">New</string>
   <string name="dateAdded_old">Old</string>
   <string name="dateAdded_recent">Recent</string>
@@ -45,6 +46,7 @@
   <string name="player_toggleShuffle">Toggle Shuffle</string>
   <string name="playlist_allSongs">All Songs</string>
   <string name="playlist_title">Playlist</string>
+  <string name="search_title">Search</string>
   <string name="songs_fromAlbum_subtitle">from %s</string>
   <string name="songs_noTitle">No Title</string>
   <string name="songs_title">Songs</string>

@@ -3,7 +3,7 @@
   xmlns:app="http://schemas.android.com/apk/res-auto"
   xmlns:tools="http://schemas.android.com/tools"
   android:id="@+id/main_navigation"
-  app:startDestination="@id/navLibrary">
+  app:startDestination="@id/navDashboard">
 
   <action
     android:id="@+id/action_show_player"
@@ -12,9 +12,16 @@
     app:popExitAnim="@anim/slide_out_down" />
 
   <fragment
-    android:id="@+id/navLibrary"
-    android:name="hu.mrolcsi.muzik.ui.library.LibraryFragment"
-    tools:layout="@layout/fragment_library">
+    android:id="@+id/navDashboard"
+    android:name="hu.mrolcsi.muzik.ui.dashboard.DashboardFragment" />
+
+  <fragment
+    android:id="@+id/navSearch"
+    android:name="hu.mrolcsi.muzik.ui.search.SearchFragment" />
+
+  <fragment
+    android:id="@+id/navArtists"
+    android:name="hu.mrolcsi.muzik.ui.artists.ArtistsFragment">
 
     <action
       android:id="@+id/action_toArtistDetails"
@@ -23,6 +30,12 @@
       app:exitAnim="@anim/fragment_open_exit"
       app:popEnterAnim="@anim/fragment_close_enter"
       app:popExitAnim="@anim/fragment_close_exit" />
+
+  </fragment>
+
+  <fragment
+    android:id="@+id/navAlbums"
+    android:name="hu.mrolcsi.muzik.ui.albums.AlbumsFragment">
 
     <action
       android:id="@+id/action_toAlbumDetails"
@@ -33,6 +46,10 @@
       app:popExitAnim="@anim/fragment_close_exit" />
 
   </fragment>
+
+  <fragment
+    android:id="@+id/navSongs"
+    android:name="hu.mrolcsi.muzik.ui.songs.SongsFragment" />
 
   <fragment
     android:id="@+id/navArtistDetails"
