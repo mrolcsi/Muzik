@@ -174,7 +174,7 @@
       android:id="@+id/btnPlayPause"
       android:layout_width="72dp"
       android:layout_height="72dp"
-      android:layout_marginBottom="32dp"
+      android:layout_marginBottom="64dp"
       android:background="@drawable/media_button_background"
       android:backgroundTint="@{foregroundColor}"
       android:contentDescription="@string/mediaControl_playPause"
