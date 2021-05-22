@@ -14,7 +14,7 @@ import android.support.v4.media.session.PlaybackStateCompat.SHUFFLE_MODE_NONE
 import android.widget.Toast
 import androidx.databinding.library.baseAdapters.BR
 import androidx.lifecycle.MutableLiveData
-import com.bumptech.glide.request.target.Target
+import com.squareup.picasso.Picasso
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.data.manager.media.MediaBrowserClient
 import hu.mrolcsi.muzik.data.model.media.album
@@ -33,8 +33,7 @@ import hu.mrolcsi.muzik.ui.common.ExecuteOnceUiCommandSource
 import hu.mrolcsi.muzik.ui.common.ObservableImpl
 import hu.mrolcsi.muzik.ui.common.OnRepeatTouchListener
 import hu.mrolcsi.muzik.ui.common.extensions.secondsToTimeStamp
-import hu.mrolcsi.muzik.ui.common.glide.GlideApp
-import hu.mrolcsi.muzik.ui.common.glide.toSingle
+import hu.mrolcsi.muzik.ui.common.toSingle
 import hu.mrolcsi.muzik.ui.miniPlayer.MiniPlayerViewModelImpl
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -206,13 +205,10 @@ class PlayerViewModelImpl constructor(
 
   private fun List<MediaSessionCompat.QueueItem>.createThemes() =
     Observable.fromIterable(this)
-      .subscribeOn(Schedulers.computation())
       .concatMapSingle { item ->
         // Get coverArt
-        GlideApp.with(context)
-          .asBitmap()
+        Picasso.get()
           .load(item.description.albumArtUri)
-          .override(Target.SIZE_ORIGINAL)
           .toSingle()
           .onErrorReturn { BitmapFactory.decodeResource(context.resources, R.drawable.placeholder_cover_art) }
           .map { item to it }
@@ -221,6 +217,7 @@ class PlayerViewModelImpl constructor(
         // Generate theme from coverArt
         themeService
           .createTheme(coverArt)
+          .subscribeOn(Schedulers.computation())
           .map { theme ->
             QueueItem(
               item.queueId,

@@ -117,9 +117,8 @@ dependencies {
     // Palette
     implementation "androidx.palette:palette-ktx:1.0.0"
 
-    // Glide
-    implementation 'com.github.bumptech.glide:glide:4.11.0'
-    kapt 'com.github.bumptech.glide:compiler:4.11.0'
+    // Picasso
+    implementation 'com.squareup.picasso:picasso:2.8'
 
     // Checkerboard Drawable
     debugImplementation 'com.github.duanhong169:checkerboarddrawable:1.0.2'

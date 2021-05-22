@@ -7,6 +7,7 @@ import android.support.v4.media.MediaMetadataCompat
 import android.util.Log
 import androidx.databinding.library.baseAdapters.BR
 import androidx.lifecycle.MutableLiveData
+import com.squareup.picasso.Picasso
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.data.manager.media.MediaBrowserClient
 import hu.mrolcsi.muzik.data.model.media.album
@@ -28,8 +29,7 @@ import hu.mrolcsi.muzik.ui.base.ThemedViewModelImpl
 import hu.mrolcsi.muzik.ui.common.ExecuteOnceNavCommandSource
 import hu.mrolcsi.muzik.ui.common.ExecuteOnceUiCommandSource
 import hu.mrolcsi.muzik.ui.common.ObservableImpl
-import hu.mrolcsi.muzik.ui.common.glide.GlideApp
-import hu.mrolcsi.muzik.ui.common.glide.toSingle
+import hu.mrolcsi.muzik.ui.common.toSingle
 import hu.mrolcsi.muzik.ui.songs.SongItem
 import hu.mrolcsi.muzik.ui.songs.asSongItems
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -137,8 +137,7 @@ class AlbumDetailsViewModelImpl constructor(
     val numberOfSong = albumItem.description.numberOfSongs
     numberOfSongsText = context.resources.getQuantityString(R.plurals.artists_numberOfSongs, numberOfSong, numberOfSong)
 
-    GlideApp.with(context)
-      .asBitmap()
+    Picasso.get()
       .load(albumItem.description.albumArtUri)
       .toSingle()
       .flatMap { themeService.createTheme(it) }

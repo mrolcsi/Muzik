@@ -8,16 +8,16 @@ import androidx.appcompat.widget.PopupMenu
 import androidx.databinding.library.baseAdapters.BR
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.squareup.picasso.Picasso
 import com.uber.autodispose.android.lifecycle.autoDispose
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.databinding.FragmentAlbumsBinding
 import hu.mrolcsi.muzik.databinding.ListItemAlbumVerticalBinding
 import hu.mrolcsi.muzik.ui.common.BoundMVVMViewHolder
 import hu.mrolcsi.muzik.ui.common.MVVMListAdapter
-import hu.mrolcsi.muzik.ui.common.glide.GlideApp
-import hu.mrolcsi.muzik.ui.common.glide.toSingle
 import hu.mrolcsi.muzik.ui.common.observeAndRunNavCommands
 import hu.mrolcsi.muzik.ui.common.observeAndRunUiCommands
+import hu.mrolcsi.muzik.ui.common.toSingle
 import hu.mrolcsi.muzik.ui.library.SortingMode
 import io.reactivex.android.schedulers.AndroidSchedulers
 import kotlinx.android.synthetic.main.fragment_albums.*
@@ -33,7 +33,7 @@ class AlbumsFragment : Fragment() {
     MVVMListAdapter(
       itemIdSelector = AlbumItem::id,
       viewHolderFactory = { parent, _ ->
-        BoundMVVMViewHolder<AlbumItem>(
+        BoundMVVMViewHolder(
           parent = parent,
           layoutId = R.layout.list_item_album_vertical,
           onItemClickListener = { model, holder ->
@@ -41,8 +41,7 @@ class AlbumsFragment : Fragment() {
           },
           onModelChange = { model ->
             (this as ListItemAlbumVerticalBinding).incAlbumContent.imgCoverArt.let { imgCoverArt ->
-              GlideApp.with(imgCoverArt)
-                .asBitmap()
+              Picasso.get()
                 .load(model.albumArtUri)
                 .toSingle()
                 .observeOn(AndroidSchedulers.mainThread())

@@ -7,11 +7,11 @@ import android.view.ViewGroup
 import androidx.core.view.ViewCompat
 import androidx.databinding.library.baseAdapters.BR
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.ui.setupWithNavController
-import com.bumptech.glide.request.target.Target
+import com.squareup.picasso.Callback
+import com.squareup.picasso.Picasso
 import com.uber.autodispose.android.lifecycle.autoDispose
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.databinding.FragmentArtistDetailsBinding
@@ -21,12 +21,9 @@ import hu.mrolcsi.muzik.ui.common.BoundMVVMViewHolder
 import hu.mrolcsi.muzik.ui.common.HideViewOnOffsetChangedListener
 import hu.mrolcsi.muzik.ui.common.MVVMListAdapter
 import hu.mrolcsi.muzik.ui.common.ThemedViewHolder
-import hu.mrolcsi.muzik.ui.common.glide.GlideApp
-import hu.mrolcsi.muzik.ui.common.glide.onLoadFailed
-import hu.mrolcsi.muzik.ui.common.glide.onResourceReady
-import hu.mrolcsi.muzik.ui.common.glide.toSingle
 import hu.mrolcsi.muzik.ui.common.observeAndRunNavCommands
 import hu.mrolcsi.muzik.ui.common.observeAndRunUiCommands
+import hu.mrolcsi.muzik.ui.common.toSingle
 import hu.mrolcsi.muzik.ui.songs.SongItem
 import kotlinx.android.synthetic.main.fragment_artist_details.*
 import kotlinx.android.synthetic.main.fragment_artist_details_content.*
@@ -45,7 +42,7 @@ class ArtistDetailsFragment : Fragment() {
     MVVMListAdapter(
       itemIdSelector = AlbumItem::id,
       viewHolderFactory = { parent, _ ->
-        BoundMVVMViewHolder<AlbumItem>(
+        BoundMVVMViewHolder(
           parent = parent,
           layoutId = R.layout.list_item_album_horizontal,
           onItemClickListener = { model, holder ->
@@ -54,8 +51,7 @@ class ArtistDetailsFragment : Fragment() {
           onModelChange = { model ->
             // Load album art
             (this as ListItemAlbumHorizontalBinding).incAlbumContent.imgCoverArt.let { imgCoverArt ->
-              GlideApp.with(imgCoverArt)
-                .asBitmap()
+              Picasso.get()
                 .load(model.albumArtUri)
                 .toSingle()
                 .doOnSuccess(imgCoverArt::setImageBitmap)
@@ -79,7 +75,7 @@ class ArtistDetailsFragment : Fragment() {
     MVVMListAdapter(
       itemIdSelector = SongItem::id,
       viewHolderFactory = { parent, _ ->
-        ThemedViewHolder<SongItem>(
+        ThemedViewHolder(
           parent = parent,
           layoutId = R.layout.list_item_song_cover_art,
           viewLifecycleOwner = viewLifecycleOwner,
@@ -113,14 +109,18 @@ class ArtistDetailsFragment : Fragment() {
       artistAlbums.observe(viewLifecycleOwner, albumsAdapter)
       artistSongs.observe(viewLifecycleOwner, songsAdapter)
 
-      artistPicture.observe(viewLifecycleOwner, Observer { uri ->
-        GlideApp.with(this@ArtistDetailsFragment)
-          .asBitmap()
+      artistPicture.observe(viewLifecycleOwner, { uri ->
+        Picasso.get()
           .load(uri)
-          .override(Target.SIZE_ORIGINAL)
-          .onLoadFailed { appBar.setExpanded(false); false }
-          .onResourceReady { appBar.setExpanded(true, true) }
-          .into(imgArtist)
+          .into(imgArtist, object : Callback {
+            override fun onSuccess() {
+              appBar.setExpanded(true, true)
+            }
+
+            override fun onError(e: Exception?) {
+              appBar.setExpanded(false)
+            }
+          })
       })
     }
 
@@ -142,5 +142,7 @@ class ArtistDetailsFragment : Fragment() {
 
     rvAlbums.adapter = null
     rvSongs.adapter = null
+
+    Picasso.get().cancelRequest(imgArtist)
   }
 }

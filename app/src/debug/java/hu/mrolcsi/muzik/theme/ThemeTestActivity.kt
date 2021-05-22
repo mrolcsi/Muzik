@@ -13,9 +13,9 @@ import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.squareup.picasso.Picasso
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.databinding.ActivityThemeTestBinding
-import hu.mrolcsi.muzik.ui.common.glide.GlideApp
 import hu.mrolcsi.muzik.ui.miniPlayer.MiniPlayerViewModel
 import hu.mrolcsi.muzik.ui.miniPlayer.MiniPlayerViewModelImpl
 import kotlinx.android.extensions.LayoutContainer
@@ -41,8 +41,7 @@ class ThemeTestActivity : AppCompatActivity() {
     root.background = CheckerboardDrawable.create()
 
     viewModel.coverArtUri.observe(this, Observer { uri ->
-      GlideApp.with(this)
-        .asBitmap()
+      Picasso.get()
         .load(uri)
         .into(imgInput)
     })

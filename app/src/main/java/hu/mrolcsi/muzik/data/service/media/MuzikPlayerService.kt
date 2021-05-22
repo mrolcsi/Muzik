@@ -14,10 +14,10 @@ import android.support.v4.media.session.PlaybackStateCompat
 import androidx.core.content.ContextCompat
 import androidx.media.session.MediaButtonReceiver
 import androidx.navigation.NavDeepLinkBuilder
-import com.bumptech.glide.request.target.Target
 import com.google.android.exoplayer2.ExoPlaybackException
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
+import com.squareup.picasso.Picasso
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.data.local.MuzikDatabase
 import hu.mrolcsi.muzik.data.model.media.albumArtUri
@@ -29,11 +29,9 @@ import hu.mrolcsi.muzik.data.model.playQueue.LastPlayed
 import hu.mrolcsi.muzik.data.service.media.exoplayer.ExoPlayerHolder
 import hu.mrolcsi.muzik.data.service.media.exoplayer.notification.ExoNotificationManager
 import hu.mrolcsi.muzik.data.service.theme.ThemeService
-import hu.mrolcsi.muzik.ui.common.glide.GlideApp
-import hu.mrolcsi.muzik.ui.common.glide.onResourceReady
+import hu.mrolcsi.muzik.ui.common.into
 import org.koin.android.ext.android.inject
 import timber.log.Timber
-
 
 class MuzikPlayerService : MuzikBrowserService() {
 
@@ -154,12 +152,11 @@ class MuzikPlayerService : MuzikBrowserService() {
         override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {}
 
         override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
-          GlideApp.with(this@MuzikPlayerService)
-            .asBitmap()
+          Picasso.get()
             .load(metadata?.albumArtUri)
-            .override(Target.SIZE_ORIGINAL)
-            .onResourceReady { themeService.updateTheme(it) }
-            .preload()
+            .into { bitmap, _ ->
+              themeService.updateTheme(bitmap)
+            }
         }
       })
 

@@ -6,10 +6,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.ui.setupWithNavController
+import com.squareup.picasso.Picasso
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.data.model.media.albumArtUri
 import hu.mrolcsi.muzik.databinding.FragmentAlbumDetailsBinding
@@ -20,7 +20,6 @@ import hu.mrolcsi.muzik.ui.common.MVVMViewHolder
 import hu.mrolcsi.muzik.ui.common.ThemedViewHolder
 import hu.mrolcsi.muzik.ui.common.extensions.applySharedElementTransition
 import hu.mrolcsi.muzik.ui.common.extensions.updateStatusBarIcons
-import hu.mrolcsi.muzik.ui.common.glide.GlideApp
 import hu.mrolcsi.muzik.ui.songs.SongItem
 import kotlinx.android.synthetic.main.fragment_album_details.*
 import kotlinx.android.synthetic.main.fragment_album_details_header.*
@@ -90,14 +89,13 @@ class AlbumDetailsFragment : Fragment() {
     viewModel.apply {
       items.observe(viewLifecycleOwner, songsAdapter)
 
-      albumItem.observe(viewLifecycleOwner, Observer {
-        GlideApp.with(imgCoverArt)
-          .asBitmap()
+      albumItem.observe(viewLifecycleOwner, {
+        Picasso.get()
           .load(it.description.albumArtUri)
           .into(imgCoverArt)
       })
 
-      albumTheme.observe(viewLifecycleOwner, Observer {
+      albumTheme.observe(viewLifecycleOwner, {
         activity?.window?.updateStatusBarIcons(it.backgroundColor)
       })
     }

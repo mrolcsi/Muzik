@@ -5,13 +5,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.navigation.fragment.NavHostFragment
+import com.squareup.picasso.Callback
+import com.squareup.picasso.Picasso
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.databinding.FragmentMiniplayerBinding
 import hu.mrolcsi.muzik.ui.common.OnSwipeTouchListener
-import hu.mrolcsi.muzik.ui.common.glide.GlideApp
-import hu.mrolcsi.muzik.ui.common.glide.onResourceReady
 import hu.mrolcsi.muzik.ui.common.observeAndRunNavCommands
 import hu.mrolcsi.muzik.ui.common.observeAndRunUiCommands
 import kotlinx.android.synthetic.main.fragment_miniplayer.*
@@ -43,11 +42,16 @@ class MiniPlayerFragment : Fragment() {
         .navController
         .observeAndRunNavCommands(viewLifecycleOwner, this)
 
-      coverArtUri.observe(viewLifecycleOwner, Observer {
-        GlideApp.with(imgCoverArt)
+      coverArtUri.observe(viewLifecycleOwner, {
+        Picasso.get()
           .load(it)
-          .onResourceReady { startPostponedEnterTransition() }
-          .into(imgCoverArt)
+          .into(imgCoverArt, object : Callback {
+            override fun onSuccess() {
+              startPostponedEnterTransition()
+            }
+
+            override fun onError(e: Exception?) {}
+          })
       })
     }
 
@@ -59,5 +63,10 @@ class MiniPlayerFragment : Fragment() {
         viewModel.openPlayer()
       }
     })
+  }
+
+  override fun onDestroyView() {
+    super.onDestroyView()
+    Picasso.get().cancelRequest(imgCoverArt)
   }
 }
