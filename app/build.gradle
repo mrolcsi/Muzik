@@ -144,7 +144,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-crashlytics:17.2.2'
 
     // LeakCanary
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.2'
+    //debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.2'
 
     // Testing
     //noinspection FragmentGradleConfiguration

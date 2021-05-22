@@ -68,7 +68,7 @@ class PlayerViewModelImpl constructor(
     MediaDescriptionCompat.Builder()
       .setTitle(context.getString(R.string.player_noSongLoaded))
       .build(),
-    0
+    Long.MIN_VALUE
   )
 
   override fun onShuffleClick() {

@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import androidx.navigation.findNavController
+import androidx.navigation.fragment.NavHostFragment
 import hu.mrolcsi.muzik.R
 import hu.mrolcsi.muzik.databinding.FragmentMiniplayerBinding
 import hu.mrolcsi.muzik.ui.common.OnSwipeTouchListener
@@ -37,7 +37,11 @@ class MiniPlayerFragment : Fragment() {
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     viewModel.apply {
       requireContext().observeAndRunUiCommands(viewLifecycleOwner, this)
-      requireActivity().findNavController(R.id.mainNavHost).observeAndRunNavCommands(viewLifecycleOwner, this)
+      (requireActivity()
+        .supportFragmentManager
+        .findFragmentById(R.id.mainNavHost) as NavHostFragment)
+        .navController
+        .observeAndRunNavCommands(viewLifecycleOwner, this)
 
       coverArtUri.observe(viewLifecycleOwner, Observer {
         GlideApp.with(imgCoverArt)
