@@ -78,8 +78,8 @@ class AlbumDetailsViewModelImpl constructor(
   private lateinit var songDescriptions: List<MediaDescriptionCompat>
 
   private val comparator = compareBy<MediaItem>(
-    { it.description.titleKey },
-    { it.description.discNumber * 1000 + it.description.trackNumber }
+    { it.description.discNumber * 1000 + it.description.trackNumber },
+    { it.description.titleKey }
   )
 
   override fun onSongClick(songItem: SongItem) {
