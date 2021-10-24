@@ -1,9 +1,9 @@
 package hu.mrolcsi.muzik.database.playqueue.daos
 
-import hu.mrolcsi.muzik.database.BaseDaoTest
-import hu.mrolcsi.muzik.data.model.playQueue.LastPlayed
 import hu.mrolcsi.muzik.data.local.playQueue.PlayQueueDao
+import hu.mrolcsi.muzik.data.model.playQueue.LastPlayed
 import hu.mrolcsi.muzik.data.model.playQueue.PlayQueueEntry
+import hu.mrolcsi.muzik.database.BaseDaoTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -14,7 +14,7 @@ class PlayQueueDaoTest : BaseDaoTest() {
   @Test
   fun playQueue_test() {
     withSut {
-      val testObserver = fetchQueue().test()
+      val testObserver = observeQueue().test()
       testObserver.awaitAndAssertValuesOnly(emptyList())
 
       // Insert test data into db

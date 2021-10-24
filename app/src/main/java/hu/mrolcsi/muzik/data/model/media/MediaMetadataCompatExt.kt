@@ -26,10 +26,6 @@ import android.provider.MediaStore
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.RatingCompat
-import com.google.android.exoplayer2.source.ConcatenatingMediaSource
-import com.google.android.exoplayer2.source.MediaSource
-import com.google.android.exoplayer2.source.ProgressiveMediaSource
-import com.google.android.exoplayer2.upstream.DataSource
 import java.util.Collections
 
 //region -- GETTERS --
@@ -296,28 +292,3 @@ inline val MediaMetadataCompat.fullDescription: MediaDescriptionCompat
     description.also {
       it.extras?.putAll(bundle)
     }
-
-/**
- * Extension method for building an [ProgressiveMediaSource] from a [MediaMetadataCompat] object.
- *
- * For convenience, place the [MediaDescriptionCompat] into the tag so it can be retrieved later.
- */
-fun MediaMetadataCompat.toMediaSource(dataSourceFactory: DataSource.Factory): MediaSource =
-  ProgressiveMediaSource.Factory(dataSourceFactory)
-    .setTag(fullDescription)
-    .createMediaSource(mediaUri)
-
-/**
- * Extension method for building a [ConcatenatingMediaSource] given a [List]
- * of [MediaMetadataCompat] objects.
- */
-fun List<MediaMetadataCompat>.toMediaSource(
-  dataSourceFactory: DataSource.Factory
-): ConcatenatingMediaSource {
-
-  val concatenatingMediaSource = ConcatenatingMediaSource()
-  forEach {
-    concatenatingMediaSource.addMediaSource(it.toMediaSource(dataSourceFactory))
-  }
-  return concatenatingMediaSource
-}

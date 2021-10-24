@@ -1,6 +1,5 @@
 package hu.mrolcsi.muzik.data.local.playQueue
 
-import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
@@ -40,7 +39,7 @@ interface PlayQueueDao {
   // QUERIES
 
   @Query("SELECT * FROM play_queue ORDER BY _id")
-  fun fetchQueue(): Observable<List<PlayQueueEntry>>
+  fun observeQueue(): Observable<List<PlayQueueEntry>>
 
   @Deprecated("Use Observables!")
   @Query("SELECT * FROM play_queue ORDER BY _id")
@@ -54,7 +53,7 @@ interface PlayQueueDao {
   fun saveLastPlayed(lastPlayed: LastPlayed)
 
   @Query("SELECT * FROM last_played LIMIT 1")
-  fun fetchLastPlayed(): LiveData<LastPlayed>
+  fun observeLastPlayed(): Observable<LastPlayed>
 
   @Query("SELECT * FROM last_played LIMIT 1")
   fun getLastPlayed(): LastPlayed?

@@ -41,7 +41,7 @@ class LiveEvent<T> : MediatorLiveData<T>() {
 
   @MainThread
   override fun removeObserver(observer: Observer<in T>) {
-    if (observers.remove(observer)) {
+    if (observers.remove(observer as ObserverWrapper<in T>)) {
       super.removeObserver(observer)
       return
     }

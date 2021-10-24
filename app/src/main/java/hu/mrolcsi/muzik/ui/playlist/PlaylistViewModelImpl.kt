@@ -48,7 +48,7 @@ class PlaylistViewModelImpl constructor(
 
   init {
     Observables.combineLatest(
-      playQueueDao.fetchQueue(),
+      playQueueDao.observeQueue(),
       mediaBrowserClient.playbackState.distinctUntilChanged { t: PlaybackStateCompat -> t.activeQueueItemId }
     )
       .observeOn(AndroidSchedulers.mainThread())
